@@ -1,0 +1,135 @@
+variables:
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  BUILD_TYPE: Release # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
+  BINARY_NAME: EXECUTABLE_NAME
+
+stages:
+  - build
+  - test
+
+
+build_native:
+  stage: build
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  tags:
+    - ubuntu
+    - build
+  script:
+    - echo "Building"
+    - make re
+
+build_target:
+  stage: build
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  tags:
+    - fedora
+    - build
+  script:
+    - echo "Building"
+    - make re
+
+build_sonarqube_wrapper:
+  stage: build
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  script:
+    # run the build inside the build wrapper
+    - ~/build-wrapper/build-wrapper-linux-x86-64 --out-dir "${BUILD_WRAPPER_OUT_DIR}" make re
+  artifacts:
+    paths:
+      - "${BINARY_NAME}"
+  cache:
+    policy: pull-push
+    key: "${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - "${BUILD_WRAPPER_OUT_DIR}"
+  tags:
+    - ubuntu
+    - build
+    - SAST
+
+check_coding_style:
+  stage: test
+  cache: []
+  dependencies: []
+  script:
+    - plum
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  tags:
+    - epitech-coding-style
+
+run_tests:
+  stage: test
+  script:
+    - make tests_run
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  tags:
+    - tests
+
+sonarqube-check:
+  stage: test
+  cache:
+    policy: pull
+    key: "${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - "${BUILD_WRAPPER_OUT_DIR}"
+  script:
+    - ~/sonar-scanner/bin/sonar-scanner --define sonar.host.url="${SONAR_HOST_URL}" --define sonar.cfamily.build-wrapper-output="${BUILD_WRAPPER_OUT_DIR}"
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  needs:
+    - build_sonarqube_wrapper
+  tags:
+    - ubuntu
+    - SAST
+
+sonarqube-vulnerability-report:
+  stage: test
+  script:
+    - 'curl -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/issues/gitlab_sast_export?projectKey=${PROJECT_KEY}&branch=${CI_COMMIT_BRANCH}&pullRequest=${CI_MERGE_REQUEST_IID}" -o gl-sast-sonar-report.json'
+  allow_failure: true
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  artifacts:
+    expire_in: 1 day
+    reports:
+      sast: gl-sast-sonar-report.json
+  dependencies:
+    - sonarqube-check
+  tags:
+    - ubuntu
+    - SAST
+
