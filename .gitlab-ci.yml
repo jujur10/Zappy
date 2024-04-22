@@ -48,11 +48,13 @@ build_sonarqube_wrapper:
     - develop
     - dev
   script:
+    - make fclean
+    - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" .
     # run the build inside the build wrapper
-    - ~/build-wrapper/build-wrapper-linux-x86-64 --out-dir "${BUILD_WRAPPER_OUT_DIR}" make re
+    - ~/build-wrapper/build-wrapper-linux-x86-64 --out-dir "${BUILD_WRAPPER_OUT_DIR}" cmake --build build --config "${BUILD_TYPE}" -j
   artifacts:
     paths:
-      - "${BINARY_NAME}"
+      - "build/${BINARY_NAME}"
   cache:
     policy: pull-push
     key: "${CI_COMMIT_SHORT_SHA}"

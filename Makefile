@@ -5,24 +5,23 @@
 ## Makefile
 ##
 
-NAME = EXECUTABLE_NAME
+EXECUTABLE_NAME := template
 
-MAIN = src/main.c
+CMAKE_GEN_FLAGS :=
+CMAKE_BUILD_FLAGS :=
 
-SRCS =
+BUILD_DIR := build
+DEBUG_DIR := debug
 
-TESTS_SRC = tests/test_main.c \
+all: build
 
-CFLAGS = -Ofast -march=native -flto=auto -Wall -Wextra -std=gnu2x -I./include
-
-CDEBUGFLAGS = -Og -g3 -std=gnu2x -I./include
-
-
-all:
-	@gcc -o $(NAME) $(MAIN) $(SRCS) $(CFLAGS)
+build:
+	@cmake -B $(BUILD_DIR) . $(CMAKE_GEN_FLAGS) -DCMAKE_BUILD_TYPE=Release
+	@cmake --build $(BUILD_DIR) --config Release $(CMAKE_BUILD_FLAGS)
 
 debug:
-	@gcc -o $(NAME) $(MAIN) $(SRCS) $(CDEBUGFLAGS)
+	@cmake -B $(DEBUG_DIR) . $(CMAKE_GEN_FLAGS) -DCMAKE_BUILD_TYPE=Debug
+	@cmake --build $(DEBUG_DIR) --config Debug $(CMAKE_BUILD_FLAGS)
 
 clean:
 	@rm -rf *.o .idea/
@@ -30,12 +29,12 @@ clean:
 	@find . -type f,d -name "vgcore*" -delete
 	@find . -type f,d -name "*.gcno" -delete
 	@find . -type f,d -name "*.gcda" -delete
+	@find . -type f,d -name "*.gcov" -delete
+	@rm -rf $(BUILD_DIR) $(DEBUG_DIR)
 
 fclean: clean
-	@find . -name $(NAME) -delete
+	@find . -name $(EXECUTABLE_NAME) -delete
 	@find . -name test_bin -delete
-
-re:	fclean all
 
 tests_run: fclean
 	@gcc -o test_bin $(TESTS_SRC) $(SRCS) --coverage -lcriterion $(CDEBUGFLAGS)
