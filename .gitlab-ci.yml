@@ -22,7 +22,8 @@ build_native:
     - build
   script:
     - echo "Building"
-    - make re
+    - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" .
+    - cmake --build build --config "${BUILD_TYPE}" -j
 
 build_target:
   stage: build
@@ -37,7 +38,8 @@ build_target:
     - build
   script:
     - echo "Building"
-    - make re
+    - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" .
+    - cmake --build build --config "${BUILD_TYPE}" -j
 
 build_sonarqube_wrapper:
   stage: build
@@ -48,7 +50,6 @@ build_sonarqube_wrapper:
     - develop
     - dev
   script:
-    - make fclean
     - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" .
     # run the build inside the build wrapper
     - ~/build-wrapper/build-wrapper-linux-x86-64 --out-dir "${BUILD_WRAPPER_OUT_DIR}" cmake --build build --config "${BUILD_TYPE}" -j
@@ -64,34 +65,6 @@ build_sonarqube_wrapper:
     - ubuntu
     - build
     - SAST
-
-check_coding_style:
-  stage: test
-  cache: []
-  dependencies: []
-  script:
-    - plum
-  only:
-    - merge_requests
-    - master
-    - main
-    - develop
-    - dev
-  tags:
-    - epitech-coding-style
-
-run_tests:
-  stage: test
-  script:
-    - make tests_run
-  only:
-    - merge_requests
-    - master
-    - main
-    - develop
-    - dev
-  tags:
-    - tests
 
 sonarqube-check:
   stage: test

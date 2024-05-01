@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.26)
-project(CMake_Template C)
+project(CMake_Template CXX)
 
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_C_FLAGS "-Wall -Wextra")
 
 set(EXECUTABLE_NAME template)
@@ -22,7 +23,7 @@ target_compile_definitions(build_configs INTERFACE
     $<$<CONFIG:RELEASE>:NDEBUG>
     BRACKET_O={
     BRACKET_C=}
-    SEMICOLON=\;
+    "SEMICOLON=\;"
 )
 
 target_link_options(build_configs INTERFACE
@@ -31,7 +32,7 @@ target_link_options(build_configs INTERFACE
 
 
 add_executable(template
-    src/main.c
+    src/main.cpp
 )
 
 target_include_directories(template PRIVATE
