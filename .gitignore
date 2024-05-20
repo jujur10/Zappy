@@ -60,6 +60,8 @@ dkms.conf
 /.vscode
 *.sublime-project
 *.sublime-workspace
-/EXECUTABLE_NAME
+/zappy_ai
+/zappy_server
+/zappy_gui
 cmake-build-*/
 build*/

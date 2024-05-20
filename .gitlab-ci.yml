@@ -7,6 +7,7 @@ variables:
 stages:
   - build
   - test
+  - deploy
 
 
 build_native:
@@ -19,22 +20,6 @@ build_native:
     - dev
   tags:
     - ubuntu
-    - build
-  script:
-    - echo "Building"
-    - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" .
-    - cmake --build build --config "${BUILD_TYPE}" -j
-
-build_target:
-  stage: build
-  only:
-    - merge_requests
-    - master
-    - main
-    - develop
-    - dev
-  tags:
-    - fedora
     - build
   script:
     - echo "Building"
@@ -55,7 +40,7 @@ build_sonarqube_wrapper:
     - ~/build-wrapper/build-wrapper-linux-x86-64 --out-dir "${BUILD_WRAPPER_OUT_DIR}" cmake --build build --config "${BUILD_TYPE}" -j
   artifacts:
     paths:
-      - "build/${BINARY_NAME}"
+      - "build/"
   cache:
     policy: pull-push
     key: "${CI_COMMIT_SHORT_SHA}"
@@ -74,6 +59,8 @@ sonarqube-check:
     paths:
       - "${BUILD_WRAPPER_OUT_DIR}"
   script:
+    - pwd
+    - ls -lR
     - ~/sonar-scanner/bin/sonar-scanner --define sonar.host.url="${SONAR_HOST_URL}" --define sonar.cfamily.build-wrapper-output="${BUILD_WRAPPER_OUT_DIR}"
   only:
     - merge_requests
@@ -107,4 +94,54 @@ sonarqube-vulnerability-report:
   tags:
     - ubuntu
     - SAST
+
+deploy-to-package-registry-main:
+  stage: deploy
+  allow_failure: false
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DBUILD_PACKAGE=1 .
+    - cmake --build build --config "${BUILD_TYPE}" -j
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_ai "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/1.0.0/zappy_ai"'
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_server "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/1.0.0/zappy_server"'
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_gui "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/1.0.0/zappy_gui"'
+  needs:
+    - build_sonarqube_wrapper
+  only:
+    - master
+    - main
+  tags:
+    - ubuntu
+
+deploy-to-package-registry-dev:
+  stage: deploy
+  allow_failure: false
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DBUILD_PACKAGE=1 .
+    - cmake --build build --config "${BUILD_TYPE}" -j
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_ai "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.1.0/zappy_ai"'
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_server "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.1.0/zappy_server"'
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_gui "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.1.0/zappy_gui"'
+  needs:
+    - build_sonarqube_wrapper
+  only:
+    - dev
+    - develop
+  tags:
+    - ubuntu
+
+deploy-to-package-registry-mr:
+  stage: deploy
+  allow_failure: false
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DBUILD_PACKAGE=1 .
+    - cmake --build build --config "${BUILD_TYPE}" -j
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_ai "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.0.1/zappy_ai"'
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_server "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.0.1/zappy_server"'
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_gui "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.0.1/zappy_gui"'
+  needs:
+    - build_sonarqube_wrapper
+  only:
+    - merge_requests
+  tags:
+    - ubuntu
 
