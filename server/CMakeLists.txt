@@ -9,6 +9,7 @@ set(EXECUTABLE_NAME zappy_server)
 
 add_executable(zappy_server
     src/main.c
+    src/arguments.c
 )
 
 target_include_directories(zappy_server PRIVATE
@@ -39,5 +40,31 @@ if (DEFINED BUILD_PACKAGE)
 else ()
     target_compile_options(zappy_server PRIVATE
             -march=native
+    )
+endif ()
+
+if (DEFINED RUN_TESTS)
+    add_executable(test_zappy_server
+        tests/tests_parsing.c
+        src/arguments.c
+    )
+
+    target_include_directories(test_zappy_server PRIVATE
+        include
+    )
+
+    target_link_libraries(test_zappy_server PRIVATE
+        build_configs
+        criterion
+        gcov
+    )
+
+    target_compile_options(test_zappy_server PRIVATE
+        --coverage
+    )
+
+    add_custom_command(TARGET test_zappy_server
+        POST_BUILD COMMAND cp test_zappy_server ../
+        POST_BUILD COMMAND cp test_zappy_server ../../
     )
 endif ()

@@ -24,6 +24,8 @@ target_compile_definitions(build_configs INTERFACE
     BRACKET_O={
     BRACKET_C=}
     "SEMICOLON=\;"
+    PTR=*
+    ARRAY=*
 )
 
 target_link_options(build_configs INTERFACE
