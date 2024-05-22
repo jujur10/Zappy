@@ -9,6 +9,7 @@ set(EXECUTABLE_NAME zappy_server)
 
 add_executable(zappy_server
     src/main.c
+    src/server.c
     src/arguments.c
 )
 
