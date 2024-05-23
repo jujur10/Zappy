@@ -102,9 +102,13 @@ fclean: clean
 	@find . -name $(SERVER_NAME) -delete
 	@find . -name test_bin -delete
 
-tests_run: fclean
-	@gcc -o test_bin $(TESTS_SRC) $(SRCS) --coverage -lcriterion $(CDEBUGFLAGS)
-	@./test_bin
+tests_run: fclean test_server
+
+test_server:
+	@cmake -B build_test . $(CMAKE_GEN_FLAGS) -DCMAKE_BUILD_TYPE=Release \
+-DRUN_TESTS=1
+	@cmake --build build_test --config Release $(DCMAKE_BUILD_FLAGS) \
+--target test_zappy_server && ./test_zappy_server
 
 .PHONY: all clean fclean re tests_run debug
 .PHONY: build zappy_ai zappy_server zappy_gui
