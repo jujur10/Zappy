@@ -9,8 +9,11 @@
 
 #include <stdint.h>
 
-// 12 Arguments + execution path.
-#define MIN_NB_OF_ARGS (12 + 1)
+// 10 Arguments + execution path.
+#define MIN_NB_OF_ARGS (10 + 1)
+
+// Definition of the default frequency value.
+#define FREQUENCY_DEFAULT_VALUE 100
 
 /// @brief Structure representing arguments.
 ///
