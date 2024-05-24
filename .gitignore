@@ -60,6 +60,7 @@ dkms.conf
 /.vscode
 *.sublime-project
 *.sublime-workspace
+/ai/zappy_ai
 /zappy_ai
 /zappy_server
 /zappy_gui
