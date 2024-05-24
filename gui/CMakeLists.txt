@@ -3,7 +3,7 @@ project(Zappy_GUI CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
-
+set(CMAKE_C_FLAGS "-Ofast -march=native -flto=auto" CACHE STRING "" FORCE)
 set(EXECUTABLE_NAME zappy_gui)
 
 set(RAYLIB_VERSION 5.0)
@@ -20,12 +20,6 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
         set(FETCHCONTENT_QUIET NO)
         FetchContent_Populate(raylib)
         set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
-
-        # Add the flags to the raylib target
-        set(RAYLIB_COMPILE_FLAGS "-Ofast -march=native -flto=auto")
-        string(APPEND RAYLIB_COMPILE_FLAGS " ${CMAKE_C_FLAGS}")
-        set(CMAKE_C_FLAGS "${RAYLIB_COMPILE_FLAGS}" CACHE STRING "" FORCE)
-
         add_subdirectory(${raylib_SOURCE_DIR} ${raylib_BINARY_DIR})
     endif()
 endif()
@@ -46,6 +40,25 @@ if (NOT raylib_cpp_FOUND)
 endif()
 
 
+set(FLECS_VERSION v3.2.11)
+find_package(flecs QUIET) # QUIET or REQUIRED
+if (NOT flecs_FOUND) # If there's none, fetch and build flecs
+    include(FetchContent)
+    FetchContent_Declare(
+            flecs
+            DOWNLOAD_EXTRACT_TIMESTAMP OFF
+            URL https://github.com/SanderMertens/flecs/archive/refs/tags/${FLECS_VERSION}.tar.gz
+    )
+    FetchContent_GetProperties(flecs)
+    if (NOT flecs_POPULATED) # Have we downloaded flecs yet?
+        set(FETCHCONTENT_QUIET NO)
+        FetchContent_Populate(flecs)
+        set(FLECS_SHARED OFF CACHE BOOL "" FORCE) # don't build flecs in shared
+        add_subdirectory(${flecs_SOURCE_DIR} ${flecs_BINARY_DIR})
+    endif()
+endif()
+
+
 add_executable(zappy_gui
         src/main.cpp
 )
@@ -58,6 +71,7 @@ target_link_libraries(zappy_gui PRIVATE
         build_configs
         raylib
         raylib_cpp
+        flecs::flecs_static
 )
 
 set_target_properties(zappy_gui PROPERTIES
