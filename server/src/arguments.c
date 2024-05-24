@@ -108,7 +108,9 @@ uint8_t get_arguments(uint32_t argc, const char ARRAY ARRAY argv,
         if (1 == set_argument(argc, &i, argv, args))
             return 1;
     if (0 == args->port || 0 == args->width || 0 == args->height ||
-    0 == args->clients_nb || 0 == args->frequency || 0 == args->nb_of_teams)
+    0 == args->clients_nb || 0 == args->nb_of_teams)
         return 1;
+    if (0 == args->frequency)
+        args->frequency = FREQUENCY_DEFAULT_VALUE;
     return 0;
 }
