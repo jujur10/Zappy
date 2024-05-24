@@ -50,7 +50,11 @@ func parseArguments() (string, string) {
 }
 
 func main() {
-	_, _ = parseArguments()
+	teamName, fullAddress := parseArguments()
+	_, connErr := network.InitServerConnection(fullAddress, teamName)
+	if connErr != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Error initializing server connection, aborting\n")
+		os.Exit(84)
+	}
 	ai.AI()
-	network.Network()
 }
