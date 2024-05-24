@@ -3,11 +3,13 @@ package network
 import (
 	"bufio"
 	"fmt"
-	"golang.org/x/sys/unix"
 	"net"
 	"os"
 	"syscall"
 )
+
+const SOL_SOCKET = 0x1
+const TCP_QUICKACK = 0xc
 
 func CreateConnectionContext() *net.Dialer {
 	dialer := &net.Dialer{
@@ -15,7 +17,7 @@ func CreateConnectionContext() *net.Dialer {
 			var syscallError error
 			err := conn.Control(
 				func(fd uintptr) {
-					syscallError = syscall.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.TCP_QUICKACK, 1)
+					syscallError = syscall.SetsockoptInt(int(fd), SOL_SOCKET, TCP_QUICKACK, 1)
 				})
 			if err != nil {
 				return err
