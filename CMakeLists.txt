@@ -10,24 +10,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 add_library(build_configs INTERFACE)
 
 target_compile_options(build_configs INTERFACE
-        $<$<CONFIG:DEBUG>:-ggdb3>
-        $<$<CONFIG:RELEASE>:-Ofast>
-        -Wall
-        -Wextra
-        -flto=auto
-        -ffunction-sections
+    $<$<CONFIG:DEBUG>:-ggdb3>
+    $<$<CONFIG:RELEASE>:-Ofast>
+    -Wall
+    -Wextra
+    -flto=auto
+    $<$<CONFIG:DEBUG>:-ffat-lto-objects>
+    -ffunction-sections
 )
 
 target_compile_definitions(build_configs INTERFACE
-        $<$<CONFIG:DEBUG>:DEBUG>
-        $<$<CONFIG:RELEASE>:NDEBUG>
-        PTR=*
-        ARRAY=*
+    $<$<CONFIG:DEBUG>:DEBUG>
+    $<$<CONFIG:RELEASE>:NDEBUG>
+    PTR=*
+    ARRAY=*
 )
 
 target_link_options(build_configs INTERFACE
-        -flto=auto
-        -Wl,--gc-sections
+    -flto=auto
+    $<$<CONFIG:DEBUG>:-ffat-lto-objects>
+    -Wl,--gc-sections
 )
 
 add_subdirectory(gui)
