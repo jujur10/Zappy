@@ -88,11 +88,7 @@ add_custom_command(TARGET zappy_gui
 
 if (DEFINED BUILD_PACKAGE)
     target_compile_options(zappy_gui PRIVATE
-        -static
         -march=x86-64
-    )
-    target_link_options(zappy_gui PRIVATE
-        -static
     )
 else ()
     target_compile_options(zappy_gui PRIVATE
