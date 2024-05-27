@@ -22,6 +22,9 @@ target_compile_options(build_configs INTERFACE
 target_compile_definitions(build_configs INTERFACE
     $<$<CONFIG:DEBUG>:DEBUG>
     $<$<CONFIG:RELEASE>:NDEBUG>
+    BRACKET_O={
+    BRACKET_C=}
+    "SEMICOLON=\;"
     PTR=*
     ARRAY=*
 )

@@ -15,6 +15,7 @@
 #include "gui.h"
 #include "team.h"
 #include "map.h"
+#include "arguments.h"
 
 // Macro used to put enum on 1 byte.
 #define PACKED __attribute__ ((packed))
@@ -42,3 +43,8 @@ typedef struct server_s {
     team_t teams[MAX_CLIENTS];
     map_t map;
 } server_t;
+
+/// @brief Function which initialize preliminaries, run the main loop and exit.
+/// @param args The parsed program parameters.
+/// @return 0 on success, 1 on failure.
+uint8_t run_server(const argument_t *args);

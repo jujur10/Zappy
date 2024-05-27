@@ -11,6 +11,7 @@ add_executable(zappy_server
     src/main.c
     src/server.c
     src/arguments.c
+    src/socket/create_socket.c
 )
 
 target_include_directories(zappy_server PRIVATE

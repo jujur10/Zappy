@@ -22,13 +22,13 @@
 /// @var phiras The Phiras counter.
 /// @var thystame The Thystame counter.
 typedef struct inventory_attr_s {
-    uint32_t food;
-    uint32_t linemate;
-    uint32_t deraumere;
-    uint32_t sibur;
-    uint32_t mendiane;
-    uint32_t phiras;
-    uint32_t thystame;
+    uint16_t food;
+    uint16_t linemate;
+    uint16_t deraumere;
+    uint16_t sibur;
+    uint16_t mendiane;
+    uint16_t phiras;
+    uint16_t thystame;
 } inventory_attr_t;
 
 /// @brief Enumeration representing the inventory element's indexes.
@@ -57,5 +57,5 @@ typedef enum inventory_index_s {
 /// @var arr In order to access the inventory by array (in order to iterate).
 typedef union inventory_s {
     inventory_attr_t attr;
-    uint32_t arr[INVENTORY_SIZE];
+    uint16_t arr[INVENTORY_SIZE];
 } inventory_t;

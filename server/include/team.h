@@ -21,9 +21,9 @@
 /// @var nb_of_eggs The number of eggs.
 typedef struct team_s {
     const char ARRAY name;
-    uint32_t ARRAY players_idx;
-    uint32_t nb_of_players;
-    uint32_t max_nb_of_players;
-    coordinates_t ARRAY eggs_coordinates;
+    uint16_t ARRAY players_idx;
+    uint16_t nb_of_players;
+    uint16_t max_nb_of_players;
     uint32_t nb_of_eggs;
+    coordinates_t ARRAY eggs_coordinates;
 } team_t;

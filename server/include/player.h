@@ -38,13 +38,13 @@ typedef enum status_s {
 /// @var status The current player's status.
 /// @var queue The player's receiving message queue.
 typedef struct player_s {
-    int sock;
+    uint16_t sock;
     uint8_t level;
+    status_t status;
     orientation_t orientation;
     coordinates_t coordinates;
     inventory_t inventory;
     uint32_t time_to_live;
     uint32_t blocking_time;
-    status_t status;
     shared_message_queue_head_t queue;
 } player_t;

@@ -17,8 +17,8 @@
 /// @var x The vertical position.
 /// @var y The horizontal position.
 typedef struct coordinates_s {
-    uint32_t x;
-    uint32_t y;
+    uint16_t x;
+    uint16_t y;
 } coordinates_t;
 
 /// @brief Enumeration representing orientation.
