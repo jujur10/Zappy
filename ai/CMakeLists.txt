@@ -9,7 +9,7 @@ if(NOT GO_COMPILER)
 endif()
 
 add_custom_target(zappy_ai ALL
-    COMMAND ${GO_COMPILER} build -buildvcs=false
+    COMMAND ${GO_COMPILER} build
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 add_custom_command(TARGET zappy_ai
