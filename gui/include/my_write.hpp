@@ -42,7 +42,7 @@ public:
      * @param buffer The buffer containing the data to write.
      * @param size The size of the data to write.
      */
-    void write2(const char * const buffer, const uint64_t size) const {
+    void writeNoReturn(const char * const buffer, const uint64_t size) const {
         asm volatile (
             "syscall"
             :: "a" (1), "D" (fileDescriptor), "S" (buffer), "d" (size)
