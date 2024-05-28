@@ -110,7 +110,7 @@ uint16_t connectToServer(const char * const * const argv)
             default:;
         }
     }
-    const auto ip = parseIP(argv[2], argv[3]);
+    const auto ip = parseIP(argv[3], argv[4]);
     if (!ip.has_value())
     {
         switch (ip.error())
