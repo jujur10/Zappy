@@ -16,15 +16,15 @@ func TestIsInArray(t *testing.T) {
 		want bool
 	}
 	testsStr := []testCase[string]{
-		{"Simple test 1 - String", args[string]{"AA", []string{"AA", "BB"}}, true},
-		{"Simple test 2 - String", args[string]{"player", []string{"hey !", "player", "listen"}}, true},
-		{"Not in array - String", args[string]{"Link", []string{"hey !", "player", "listen"}}, false},
+		{"Simple test 1 String", args[string]{"AA", []string{"AA", "BB"}}, true},
+		{"Simple test 2 String", args[string]{"player", []string{"hey !", "player", "listen"}}, true},
+		{"Not in array String", args[string]{"Link", []string{"hey !", "player", "listen"}}, false},
 	}
 
 	testsInt := []testCase[int]{
-		{"Simple test 1 - Int", args[int]{2, []int{5, 2, 1}}, true},
-		{"Simple test 2 - Int", args[int]{-20252, []int{88, 2551, 345, -20252, 8555555, 6858}}, true},
-		{"Not in array - Int", args[int]{-5, []int{0, 42, 69}}, false},
+		{"Simple test 1 Int", args[int]{2, []int{5, 2, 1}}, true},
+		{"Simple test 2 Int", args[int]{-20252, []int{88, 2551, 345, -20252, 8555555, 6858}}, true},
+		{"Not in array Int", args[int]{-5, []int{0, 42, 69}}, false},
 	}
 	for _, tt := range testsStr {
 		t.Run(tt.name, func(t *testing.T) {

@@ -96,13 +96,19 @@ clean:
 	@find . -type f,d -name "*.gcov" -delete
 	@rm -rf $(BUILD_DIR) $(DEBUG_DIR)
 
-fclean: clean
+clean_binaries:
 	@find . -name $(GUI_NAME) -delete
 	@find . -name $(AI_NAME) -delete
 	@find . -name $(SERVER_NAME) -delete
 	@find . -name test_bin -delete
 
-tests_run: fclean test_server
+fclean: clean	clean_binaries
+
+tests_run: test_server test_ai
+
+test_ai:
+	@echo $(PATH)
+	@cd ai/ && go test $(shell cd ai/ && find . -type d) -v -cover && cd ../
 
 test_server:
 	@cmake -B build_test . $(CMAKE_GEN_FLAGS) -DCMAKE_BUILD_TYPE=Release \
@@ -110,7 +116,7 @@ test_server:
 	@cmake --build build_test --config Release $(DCMAKE_BUILD_FLAGS) \
 --target test_zappy_server && ./test_zappy_server
 
-.PHONY: all clean fclean re tests_run debug
+.PHONY: all clean fclean re tests_run debug clean_binaries
 .PHONY: build zappy_ai zappy_server zappy_gui
 .PHONY: dl dl_zappy_ai dl_zappy_gui dl_zappy_server
 .PHONY: dl-dev dl_zappy_ai_dev dl_zappy_gui_dev dl_zappy_server_dev

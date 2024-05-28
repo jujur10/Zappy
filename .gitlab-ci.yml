@@ -1,5 +1,5 @@
 variables:
-  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  # PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   BUILD_TYPE: Release # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
   BINARY_NAME: EXECUTABLE_NAME
@@ -50,6 +50,36 @@ build_sonarqube_wrapper:
     - ubuntu
     - build
     - SAST
+
+
+check_coding_style:
+  stage: test
+  cache: []
+  dependencies: []
+  script:
+    - plum
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  tags:
+    - epitech-coding-style
+
+run_tests:
+  stage: test
+  script:
+    - make tests_run
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  tags:
+    - tests
+    - ubuntu
 
 sonarqube-check:
   stage: test
