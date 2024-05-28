@@ -131,7 +131,7 @@ uint16_t connectToServer(const char * const * const argv)
         }
     }
     const auto server_sock = createSocket((SO_CONNECT) | (SO_NODELAY), ip.value(), port.value());
-    if ((!server_sock.has_value()) && (server_sock.error() == CmdParsingErrors::HOST_ERROR))
+    if (!server_sock.has_value())
     {
         const char * const msg = "Can't reach host\n";
         ::write(2, msg, 17);

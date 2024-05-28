@@ -43,5 +43,13 @@ typedef uint8_t sockopt_t;
 /// Enable the no-delay socket parameter.
 #define SO_NODELAY 1 << 4
 
+/**
+ * Function that parse the command line arguments and create a connection to the server.
+ * If there is an error print the coresponding message to stderr and call _exit(1)
+ *
+ * @param argv the argv parameter from main.
+ *
+ * @return Return the file descriptor corresponding to the server socket
+ */
 uint16_t connectToServer(const char * const * argv);
 }
