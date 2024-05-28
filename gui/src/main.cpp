@@ -1,5 +1,6 @@
 #include "Window.hpp"
 #include "sockets.h"
+#include "my_write.hpp"
 
 #include <cstring>
 namespace zappy_gui
@@ -7,8 +8,7 @@ namespace zappy_gui
 //----------------------------------------------------------------------------------
 // Global Variables Definition
 //----------------------------------------------------------------------------------
-constexpr size_t help_len = 39;
-constexpr char help[help_len] = "USAGE: ./zappy_gui -p port -h machine\n";
+constexpr char const * const help = "USAGE: ./zappy_gui -p port -h machine\n";
 constexpr int32_t screenWidth = 800;
 constexpr int32_t screenHeight = 450;
 
@@ -44,7 +44,8 @@ int main(int argc, char *argv[])
     //--------------------------------------------------------------------------------------
     if ((2 == argc) && (0 == ::strcmp(argv[1], "-help")))
     {
-        ::write(2, zappy_gui::help, zappy_gui::help_len);
+        zappy_gui::FileWriter writer(2);
+        writer.write2(zappy_gui::help, sizeof(zappy_gui::help));
         return 0;
     }
     if (5 != argc)

@@ -2,6 +2,8 @@
 // Created by quentinf on 27/05/24.
 //
 
+#include "my_write.hpp"
+#include "my_exit.hpp"
 #include "sockets.h"
 
 #include <cmath>
@@ -14,9 +16,10 @@
 namespace zappy_gui
 {
 enum class CmdParsingErrors{ WRONG_ARG_POSITION, PORT_ERROR, IP_ERROR, HOST_ERROR };
-constexpr uint32_t ignoreLastByte = 0x00'FF'FF'FF;
-constexpr uint32_t portFlagValue = 28'717;
-constexpr uint32_t hostFlagValue = 26'669;
+static constexpr uint32_t ignoreLastByte = 0x00'FF'FF'FF;
+static constexpr uint32_t portFlagValue = 28'717;
+static constexpr uint32_t hostFlagValue = 26'669;
+static constexpr uint16_t maxUint16Value = 65'535;
 
 static std::expected<uint16_t, CmdParsingErrors> createSocket(const sockopt_t opts, const in_addr ip, const uint16_t port)
 {
@@ -32,31 +35,29 @@ static std::expected<uint16_t, CmdParsingErrors> createSocket(const sockopt_t op
     if ((1 == (opts & SO_REUSE)) &&
         (0 != (::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &socketOptVal , sizeof(int32_t)))))
     {
-        ::close(sock);
-        return std::unexpected(CmdParsingErrors::HOST_ERROR);
+        goto NOIRE;
     }
     if ((opts & SO_NODELAY) &&
         (0 != ::setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &socketOptVal , sizeof(int32_t))))
     {
-        ::close(sock);
-        return std::unexpected(CmdParsingErrors::HOST_ERROR);
+        goto NOIRE;
     }
     if ((opts & SO_BIND) && (0 != ::bind(sock, std::bit_cast<sockaddr_t *>(&addr), ADDR_LEN)))
     {
-        ::close(sock);
-        return std::unexpected(CmdParsingErrors::HOST_ERROR);
+        goto NOIRE;
     }
     if ((opts & (SO_BIND | SO_LISTEN)) && (0 != ::listen(sock, 50)))
     {
-        ::close(sock);
-        return std::unexpected(CmdParsingErrors::HOST_ERROR);
+        goto NOIRE;
     }
     if ((opts & SO_CONNECT) && (0 != ::connect(sock, std::bit_cast<sockaddr_t *>(&addr), ADDR_LEN)))
     {
-        ::close(sock);
-        return std::unexpected(CmdParsingErrors::HOST_ERROR);
+        goto NOIRE;
     }
     return sock;
+    NOIRE:
+        ::close(sock);
+        return std::unexpected(CmdParsingErrors::HOST_ERROR);
 }
 
 static std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const portFlag, const char * const portValue)
@@ -67,7 +68,7 @@ static std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const po
     }
     char* end = nullptr;
     const uint64_t port = std::strtoul(portValue, &end, 10);
-    if ((portValue == end) || (std::isinf(port)))
+    if ((portValue == end) || (std::isinf(port)) || (port < maxUint16Value))
     {
         return std::unexpected(CmdParsingErrors::PORT_ERROR);
     }
@@ -90,6 +91,7 @@ static std::expected<in_addr, CmdParsingErrors> parseIP(const char * const hostF
 
 uint16_t connectToServer(const char * const * const argv)
 {
+    const FileWriter errorWriter(2);
     const auto port = parsePort(argv[1], argv[2]);
     if (!port.has_value())
     {
@@ -97,17 +99,16 @@ uint16_t connectToServer(const char * const * const argv)
         {
             case CmdParsingErrors::WRONG_ARG_POSITION:
             {
-                const char * const msg = "Wrong position, expected -p\n";
-                ::write(2, msg, 28);
-                ::_exit(1);
+                errorWriter.write2("Wrong position, expected -p\n", 28);
+                SystemExit::exit(1);
             }
             case CmdParsingErrors::PORT_ERROR:
             {
-                const char *const msg = "Invalid port\n";
-                ::write(2, msg, 13);
-                ::_exit(1);
+                errorWriter.write2("Invalid port\n", 13);
+                SystemExit::exit(1);
             }
-            default:;
+            default:
+                SystemExit::exit(1);
         }
     }
     const auto ip = parseIP(argv[3], argv[4]);
@@ -117,25 +118,23 @@ uint16_t connectToServer(const char * const * const argv)
         {
             case CmdParsingErrors::WRONG_ARG_POSITION:
             {
-                const char * const msg = "Wrong position, expected -h\n";
-                ::write(2, msg, 28);
-                ::_exit(1);
+                errorWriter.write2("Wrong position, expected -h\n", 28);
+                SystemExit::exit(1);
             }
             case CmdParsingErrors::IP_ERROR:
             {
-                const char *const msg = "Invalid IP\n";
-                ::write(2, msg, 11);
-                ::_exit(1);
+                errorWriter.write2("Invalid IP\n", 11);
+
             }
-            default:;
+            default:
+                SystemExit::exit(1);
         }
     }
     const auto server_sock = createSocket((SO_CONNECT) | (SO_NODELAY), ip.value(), port.value());
     if (!server_sock.has_value())
     {
-        const char * const msg = "Can't reach host\n";
-        ::write(2, msg, 17);
-        ::_exit(1);
+        errorWriter.write2("Can't reach host\n", 17);
+        SystemExit::exit(1);
     }
     return server_sock.value();
 }
