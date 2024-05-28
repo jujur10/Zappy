@@ -18,7 +18,7 @@ constexpr uint32_t ignoreLastByte = 0x00'FF'FF'FF;
 constexpr uint32_t portFlagValue = 28'717;
 constexpr uint32_t hostFlagValue = 26'669;
 
-std::expected<uint16_t, CmdParsingErrors> create_socket(const sockopt_t opts, const in_addr ip, const uint16_t port)
+static std::expected<uint16_t, CmdParsingErrors> createSocket(const sockopt_t opts, const in_addr ip, const uint16_t port)
 {
     const int32_t sock = ::socket(AF_INET, SOCK_STREAM, 0);
     constexpr int32_t socketOptVal = 1;
@@ -59,7 +59,7 @@ std::expected<uint16_t, CmdParsingErrors> create_socket(const sockopt_t opts, co
     return sock;
 }
 
-std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const portFlag, const char * const portValue)
+static std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const portFlag, const char * const portValue)
 {
     if ((*std::bit_cast<const uint32_t*>(portFlag) & ignoreLastByte) != portFlagValue)
     {
@@ -74,7 +74,7 @@ std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const portFlag,
     return port;
 }
 
-std::expected<in_addr, CmdParsingErrors> parseIP(const char * const hostFlag, const char * const hostValue)
+static std::expected<in_addr, CmdParsingErrors> parseIP(const char * const hostFlag, const char * const hostValue)
 {
     if ((*std::bit_cast<const uint32_t*>(hostFlag) & ignoreLastByte) != hostFlagValue)
     {
@@ -95,13 +95,13 @@ uint16_t connectToServer(const char * const * const argv)
     {
         switch (port.error())
         {
-            case (CmdParsingErrors::WRONG_ARG_POSITION):
+            case CmdParsingErrors::WRONG_ARG_POSITION:
             {
                 const char * const msg = "Wrong position, expected -p\n";
                 ::write(2, msg, 28);
                 ::_exit(1);
             }
-            case (CmdParsingErrors::PORT_ERROR):
+            case CmdParsingErrors::PORT_ERROR:
             {
                 const char *const msg = "Invalid port\n";
                 ::write(2, msg, 13);
@@ -115,13 +115,13 @@ uint16_t connectToServer(const char * const * const argv)
     {
         switch (ip.error())
         {
-            case (CmdParsingErrors::WRONG_ARG_POSITION):
+            case CmdParsingErrors::WRONG_ARG_POSITION:
             {
                 const char * const msg = "Wrong position, expected -h\n";
                 ::write(2, msg, 28);
                 ::_exit(1);
             }
-            case (CmdParsingErrors::IP_ERROR):
+            case CmdParsingErrors::IP_ERROR:
             {
                 const char *const msg = "Invalid IP\n";
                 ::write(2, msg, 11);
@@ -130,7 +130,7 @@ uint16_t connectToServer(const char * const * const argv)
             default:;
         }
     }
-    const auto server_sock = create_socket((SO_CONNECT) | (SO_NODELAY), ip.value(), port.value());
+    const auto server_sock = createSocket((SO_CONNECT) | (SO_NODELAY), ip.value(), port.value());
     if ((!server_sock.has_value()) && (server_sock.error() == CmdParsingErrors::HOST_ERROR))
     {
         const char * const msg = "Can't reach host\n";

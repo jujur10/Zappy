@@ -1,16 +1,11 @@
-/*
-** EPITECH PROJECT, 2024
-** socks.h
-** File description:
-** Socks libs
-*/
-
 #pragma once
 
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+namespace zappy_gui
+{
 #define A_FAM .sin_family = AF_INET,
 #define A_ADDR .sin_addr = {INADDR_ANY},
 #define A_PORT(p) .sin_port = htons(p)
@@ -48,9 +43,5 @@ typedef uint8_t sockopt_t;
 /// Enable the no-delay socket parameter.
 #define SO_NODELAY 1 << 4
 
-/// Creates a new socket with the given options.
-/// @param opts A bitmask of the options to apply to the socket.
-/// @param ip The ip to bind the socket to / connect to (0 if is a server).
-/// @param port The port to bind the socket to / connect to.
-/// @return The file descriptor of the created socket, -1 on error.
-int create_socket(sockopt_t opts, ipv4_t ip, uint16_t port);
+uint16_t connectToServer(const char * const * argv);
+}

@@ -1,4 +1,5 @@
 #include "Window.hpp"
+#include "sockets.h"
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
@@ -18,6 +19,11 @@ int main(int argc, char *argv[])
 {
     // Initialization
     //--------------------------------------------------------------------------------------
+    if (argc != 5)
+    {
+        ::_exit(1);
+    }
+    const uint16_t server_fd = zappy_gui::connectToServer(argv);
     raylib::Window window(screenWidth, screenHeight, "raylib-cpp - basic window");
 
     SetTargetFPS(60);   // Set game to run at 60 frames-per-second
