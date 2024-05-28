@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"zappy_ai/ai"
@@ -52,10 +53,16 @@ func parseArguments() (string, string) {
 func main() {
 	teamName, fullAddress := parseArguments()
 	connectionContext := network.CreateConnectionContext()
-	_, connErr := network.InitServerConnection(fullAddress, teamName, connectionContext)
-	if connErr != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error initializing server connection, aborting\n")
-		os.Exit(84)
+	conn, err := network.InitServerConnection(fullAddress, teamName, connectionContext)
+	if err != nil {
+		log.Fatal("Init server connection\n", err)
 	}
+	serverConn := network.GetTextReader(conn)
+	clientID, dimX, dimY, err := network.GetIdAndDims(serverConn.Reader)
+	if err != nil {
+		log.Fatal("Get id and dims\n", err)
+	}
+	fmt.Printf("Client ID: %d\ndimX %d\ndimY %d\n", clientID, dimX, dimY)
+
 	ai.AI()
 }
