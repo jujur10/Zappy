@@ -27,7 +27,7 @@ func (conn ServerConn) getServerResponse() (string, error) {
 	return line, nil
 }
 
-// T est une "template" contrainte par le keyword 'comparable'.
+// IsInArray T is a type template constrained by 'comparable'
 func IsInArray[T comparable](value T, array []T) bool {
 	for _, v := range array {
 		if v == value {
@@ -38,6 +38,18 @@ func IsInArray[T comparable](value T, array []T) bool {
 }
 
 func checkValues(values [][]string) bool {
+	if !IsInArray("player", values[0]) {
+		return false
+	}
+	size := 0
+	counter := 1
+	for len(values) > size {
+		size += counter
+		counter += 2
+	}
+	if len(values) != size {
+		return false
+	}
 	for _, tile := range values {
 		for _, val := range tile {
 			if !IsInArray(val, validObjects) {
@@ -46,6 +58,25 @@ func checkValues(values [][]string) bool {
 		}
 	}
 	return true
+}
+
+func parseInventory(values [][]string) (any, error) {
+	if len(values) != len(inventoryIndexes) {
+		return nil, fmt.Errorf("invalid number of inventory indexes: %d", len(values))
+	}
+	inventory := make(map[string]int)
+
+	for _, pair := range values {
+		if len(pair) != 2 {
+			return nil, fmt.Errorf("invalid inventory format")
+		}
+		val, err := strconv.Atoi(pair[1])
+		if !IsInArray(pair[0], inventoryIndexes) || err != nil {
+			return nil, fmt.Errorf("invalid inventory format")
+		}
+		inventory[pair[0]] = val
+	}
+	return inventory, nil
 }
 
 func ParseArray(line string) (MessageType, any, error) {
@@ -61,18 +92,8 @@ func ParseArray(line string) (MessageType, any, error) {
 	}
 
 	if len(individualValues) == len(inventoryIndexes) && len(individualValues[0]) == 2 {
-		inventory := make(map[string]int)
-		valid := true
-
-		for _, pair := range individualValues {
-			val, err := strconv.Atoi(pair[1])
-			if !IsInArray(pair[0], inventoryIndexes) || err != nil {
-				valid = false
-				break
-			}
-			inventory[pair[0]] = val
-		}
-		if valid {
+		inventory, inventoryErr := parseInventory(individualValues)
+		if inventoryErr == nil {
 			return Inventory, inventory, nil
 		}
 	}
@@ -81,7 +102,7 @@ func ParseArray(line string) (MessageType, any, error) {
 		return Nil, nil, fmt.Errorf("Invalid values\n")
 	}
 
-	return View, values, nil
+	return View, individualValues, nil
 }
 
 func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {

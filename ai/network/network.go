@@ -12,6 +12,7 @@ import (
 )
 
 const SOL_SOCKET = 0x1
+const TCP_NODELAY = 0x1
 const TCP_QUICKACK = 0xc
 
 type ServerConn struct {

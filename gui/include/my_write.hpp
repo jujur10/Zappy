@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <unistd.h>
 
 namespace zappy_gui
 {
@@ -27,14 +28,7 @@ public:
      * @return The number of bytes written, or -1 if an error occurred.
      */
     int64_t write(const char * const buffer, const uint64_t size) const {
-        int64_t bytesWritten;
-        asm volatile (
-            "syscall"
-            : "=a" (bytesWritten)
-            : "a" (1), "D" (fileDescriptor), "S" (buffer), "d" (size)
-            : "rcx", "r11", "memory"
-        );
-        return bytesWritten;
+        return ::write(fileDescriptor, buffer, size);
     }
 
     /**
@@ -43,11 +37,7 @@ public:
      * @param size The size of the data to write.
      */
     void writeNoReturn(const char * const buffer, const uint64_t size) const {
-        asm volatile (
-            "syscall"
-            :: "a" (1), "D" (fileDescriptor), "S" (buffer), "d" (size)
-            : "rcx", "r11", "memory"
-        );
+        ::write(fileDescriptor, buffer, size);
     }
     private:
         uint16_t fileDescriptor; /**< The file descriptor to write to. */
