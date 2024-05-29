@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <unistd.h>
 
 namespace zappy_gui::SystemExit
 {
@@ -14,13 +15,7 @@ namespace zappy_gui::SystemExit
  * @note This function does not return.
  */
 [[noreturn]] static void exit(const uint8_t status) {
-    asm volatile (
-        "movzbl %0, %%edi\n\t"
-        "movl $60, %%eax\n\t"
-        "syscall"
-        :: "r" (status)
-        : "%edi", "%eax"
-    );
+    ::_exit(status);
     __builtin_unreachable();
 }
 }
