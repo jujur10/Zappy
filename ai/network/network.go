@@ -16,8 +16,9 @@ const TCP_NODELAY = 0x1
 const TCP_QUICKACK = 0xc
 
 type ServerConn struct {
-	Connection net.Conn
-	Reader     *textproto.Reader
+	Connection      net.Conn
+	Reader          *textproto.Reader
+	LastCommandType CommandType
 }
 
 func CreateConnectionContext() *net.Dialer {
@@ -38,7 +39,7 @@ func CreateConnectionContext() *net.Dialer {
 }
 
 func GetTextReader(conn net.Conn) ServerConn {
-	return ServerConn{conn, textproto.NewReader(bufio.NewReader(conn))}
+	return ServerConn{conn, textproto.NewReader(bufio.NewReader(conn)), None}
 }
 
 func GetIdAndDims(reader *textproto.Reader) (int, int, int, error) {

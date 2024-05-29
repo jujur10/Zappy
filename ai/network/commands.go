@@ -20,6 +20,7 @@ const (
 	TakeObject
 	SetObject
 	LevelUp
+	None
 )
 
 func (conn ServerConn) rotateRight() {
@@ -111,4 +112,5 @@ func (conn ServerConn) SendCommand(cmdType CommandType, body string) {
 	default:
 		break
 	}
+	conn.LastCommandType = cmdType
 }

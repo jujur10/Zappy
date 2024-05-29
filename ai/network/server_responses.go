@@ -6,11 +6,20 @@ import (
 	"strings"
 )
 
+type EventDirection int
+
+type BroadcastData struct {
+	direction EventDirection
+	text      string
+}
+
 const (
 	Boolean MessageType = iota
 	Inventory
 	View
 	Int
+	Broadcast
+	Direction
 	Elevation
 	Death
 	Nil
@@ -18,6 +27,22 @@ const (
 
 var inventoryIndexes = []string{"food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"}
 var validObjects = []string{"food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame", "player"}
+
+var validResponsesTypes = map[CommandType][]MessageType{
+	RotateRight:    {Boolean},
+	RotateLeft:     {Boolean},
+	GoForward:      {Boolean},
+	LookAround:     {View},
+	GetInventory:   {Inventory},
+	BroadcastText:  {Boolean},
+	GetUnusedSlots: {Int},
+	Fork:           {Boolean},
+	EjectPlayers:   {Boolean},
+	TakeObject:     {Boolean},
+	SetObject:      {Boolean},
+	LevelUp:        {Elevation, Boolean},
+	None:           {},
+}
 
 func (conn ServerConn) getServerResponse() (string, error) {
 	line, err := conn.Reader.ReadLine()
@@ -105,6 +130,30 @@ func ParseArray(line string) (MessageType, any, error) {
 	return View, individualValues, nil
 }
 
+func parseUnexpectedMessage(line string) (MessageType, any, error) {
+	if line == "dead" {
+		return Death, nil, nil
+	}
+	if strings.HasPrefix(line, "eject: ") {
+		line = strings.TrimPrefix(line, "eject: ")
+		val, err := strconv.Atoi(line)
+		if err == nil && val > 0 && val < 9 {
+			return Direction, EventDirection(val), nil
+		}
+	}
+	if strings.HasPrefix(line, "message ") {
+		line = strings.TrimPrefix(line, "message ")
+		rest := strings.SplitN(line, ",", 2)
+		rest[1] = strings.TrimSpace(rest[1])
+		val, err := strconv.Atoi(rest[0])
+		if err == nil && val > 0 && val < 9 {
+			return Broadcast, BroadcastData{direction: EventDirection(val), text: rest[1]}, nil
+		}
+	}
+	return Nil, nil, fmt.Errorf("Invalid command\n")
+}
+
+// GetAndParseResponse reads a response from the server connection and parses it
 func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	line, err := conn.getServerResponse()
 	if err != nil {
@@ -116,15 +165,16 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	if line == "ko" {
 		return Boolean, false, nil
 	}
-	if line == "dead" {
-		return Death, nil, nil
-	}
 	if line[0] == '[' && line[len(line)-1] == ']' {
 		return ParseArray(line)
 	}
 	val, err := strconv.Atoi(line)
 	if err == nil {
 		return Int, val, nil
+	}
+	unexpectedType, unexpectedValue, err := parseUnexpectedMessage(line)
+	if err == nil {
+		return unexpectedType, unexpectedValue, nil
 	}
 	if line == "Elevation underway" {
 		secondLine, sndErr := conn.getServerResponse()
@@ -143,4 +193,13 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 		return Elevation, level, nil
 	}
 	return Nil, nil, fmt.Errorf("Invalid line\n")
+}
+
+func (conn ServerConn) isResponseTypeValid(msgType MessageType) bool {
+	for _, validType := range validResponsesTypes[conn.LastCommandType] {
+		if validType == msgType {
+			return true
+		}
+	}
+	return false
 }

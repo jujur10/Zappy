@@ -50,6 +50,7 @@ func parseArguments() (string, string) {
 	return name, fullAddr
 }
 
+// main is the main function DUH
 func main() {
 	teamName, fullAddress := parseArguments()
 	connectionContext := network.CreateConnectionContext()
@@ -63,6 +64,7 @@ func main() {
 		log.Fatal("Get id and dims\n", err)
 	}
 	fmt.Printf("Client ID: %d\ndimX %d\ndimY %d\n", clientID, dimX, dimY)
-
+	_ = ai.Game{View: make(ai.ViewMap, 0), Inventory: make(ai.Inventory),
+		TimeStep: 1, TeamName: teamName, Socket: serverConn}
 	ai.AI()
 }
