@@ -21,13 +21,30 @@ const (
 
 type ViewMap [][]TileItem
 type Inventory map[string]int
+type RelativeCoordinates [2]int
+
+type PlayerDirection int
+
+const (
+	Up PlayerDirection = iota
+	Left
+	Down
+	Right
+)
+
+type WorldCoords struct {
+	CoordsFromOrigin RelativeCoordinates
+	Direction        PlayerDirection
+}
 
 type Game struct {
-	View      ViewMap
-	Inventory Inventory
-	TimeStep  int
-	TeamName  string
-	Socket    network.ServerConn
+	View          ViewMap
+	Inventory     Inventory
+	TimeStep      int
+	TeamName      string
+	Socket        network.ServerConn
+	Coordinates   WorldCoords
+	MovementQueue PriorityQueue
 }
 
 func CreateViewMap(parsedList [][]string) (ViewMap, error) {

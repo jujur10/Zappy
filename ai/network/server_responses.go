@@ -137,7 +137,7 @@ func parseUnexpectedMessage(line string) (MessageType, any, error) {
 	if strings.HasPrefix(line, "eject: ") {
 		line = strings.TrimPrefix(line, "eject: ")
 		val, err := strconv.Atoi(line)
-		if err == nil && val > 0 && val < 9 {
+		if err == nil && val >= 0 && val < 9 {
 			return Direction, EventDirection(val), nil
 		}
 	}
@@ -146,7 +146,7 @@ func parseUnexpectedMessage(line string) (MessageType, any, error) {
 		rest := strings.SplitN(line, ",", 2)
 		rest[1] = strings.TrimSpace(rest[1])
 		val, err := strconv.Atoi(rest[0])
-		if err == nil && val > 0 && val < 9 {
+		if err == nil && val >= 0 && val < 9 {
 			return Broadcast, BroadcastData{direction: EventDirection(val), text: rest[1]}, nil
 		}
 	}
