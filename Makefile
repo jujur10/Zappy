@@ -107,7 +107,6 @@ fclean: clean	clean_binaries
 tests_run: test_server test_ai
 
 test_ai:
-	@echo $(PATH)
 	@cd ai/ && go test $(shell cd ai/ && find . -type d) -v -cover && cd ../
 
 test_server:

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/heap"
 	"flag"
 	"fmt"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"zappy_ai/network"
 )
 
+// parseArguments parses the CLI arguments and returns them in a useful form
 func parseArguments() (string, string) {
 	if len(os.Args) == 2 && (os.Args[1] == "-help" || os.Args[1] == "--help") {
 		fmt.Println("USAGE: ./zappy_ai -p port -n name -h machine")
@@ -50,6 +52,7 @@ func parseArguments() (string, string) {
 	return name, fullAddr
 }
 
+// main is the main function DUH
 func main() {
 	teamName, fullAddress := parseArguments()
 	connectionContext := network.CreateConnectionContext()
@@ -63,6 +66,13 @@ func main() {
 		log.Fatal("Get id and dims\n", err)
 	}
 	fmt.Printf("Client ID: %d\ndimX %d\ndimY %d\n", clientID, dimX, dimY)
-
+	game := ai.Game{View: make(ai.ViewMap, 0),
+		Inventory:     make(ai.Inventory),
+		TimeStep:      1,
+		TeamName:      teamName,
+		Socket:        serverConn,
+		Coordinates:   ai.WorldCoords{CoordsFromOrigin: ai.RelativeCoordinates{0, 0}, Direction: 0},
+		MovementQueue: make(ai.PriorityQueue, 10)}
+	heap.Init(&game.MovementQueue)
 	ai.AI()
 }

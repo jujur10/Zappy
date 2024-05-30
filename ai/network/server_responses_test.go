@@ -65,7 +65,7 @@ func Test_checkValues(t *testing.T) {
 	}
 }
 
-func TestParseArray(t *testing.T) {
+func Test_parseArray(t *testing.T) {
 	type args struct {
 		line string
 	}
@@ -86,16 +86,16 @@ func TestParseArray(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ParseArray(tt.args.line)
+			got, got1, err := parseArray(tt.args.line)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseArray() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("parseArray() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("ParseArray() got = %v, want %v", got, tt.want)
+				t.Errorf("parseArray() got = %v, want %v", got, tt.want)
 			}
 			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("ParseArray() got1 = %v, want %v", got1, tt.want1)
+				t.Errorf("parseArray() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}
@@ -125,6 +125,46 @@ func Test_parseInventory(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("parseInventory() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_parseUnexpectedMessage(t *testing.T) {
+	type args struct {
+		line string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    MessageType
+		want1   any
+		wantErr bool
+	}{
+		{"Valid 'dead'", args{"dead"}, Death, nil, false},
+		{"Invalid 'dead'", args{"deadd"}, Nil, nil, true},
+		{"Valid eject", args{"eject: 4"}, Direction, EventDirection(4), false},
+		{"Invalid eject bad prefix", args{"ejekt: 4"}, Nil, nil, true},
+		{"Invalid eject invalid direction", args{"eject: 9"}, Nil, nil, true},
+		{"Valid message", args{"message 6, hello world"}, Broadcast, BroadcastData{text: "hello world", direction: EventDirection(6)}, false},
+		{"Invalid message bad direction", args{"message 15, hello world"}, Nil, nil, true},
+		{"Invalid message no direction", args{"message , hello world"}, Nil, nil, true},
+		{"Invalid message bad prefix", args{"mesage 15, hello world"}, Nil, nil, true},
+		{"Invalid message no separator", args{"mesage 15 hello world"}, Nil, nil, true},
+		{"Invalid message no message", args{"mesage 15, "}, Nil, nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := parseUnexpectedMessage(tt.args.line)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseUnexpectedMessage() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("parseUnexpectedMessage() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("parseUnexpectedMessage() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

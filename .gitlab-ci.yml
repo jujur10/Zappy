@@ -40,7 +40,9 @@ build_sonarqube_wrapper:
     - ~/build-wrapper/build-wrapper-linux-x86-64 --out-dir "${BUILD_WRAPPER_OUT_DIR}" cmake --build build --config "${BUILD_TYPE}" -j
   artifacts:
     paths:
-      - "build/"
+      - "build/server/zappy_server"
+      - "build/ai/zappy_ai"
+      - "build/gui/zappy_gui"
   cache:
     policy: pull-push
     key: "${CI_COMMIT_SHORT_SHA}"
@@ -89,8 +91,6 @@ sonarqube-check:
     paths:
       - "${BUILD_WRAPPER_OUT_DIR}"
   script:
-    - pwd
-    - ls -lR
     - ~/sonar-scanner/bin/sonar-scanner --define sonar.host.url="${SONAR_HOST_URL}" --define sonar.cfamily.build-wrapper-output="${BUILD_WRAPPER_OUT_DIR}"
   only:
     - merge_requests

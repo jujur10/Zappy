@@ -16,10 +16,12 @@ const TCP_NODELAY = 0x1
 const TCP_QUICKACK = 0xc
 
 type ServerConn struct {
-	Connection net.Conn
-	Reader     *textproto.Reader
+	Connection      net.Conn
+	Reader          *textproto.Reader
+	LastCommandType CommandType
 }
 
+// CreateConnectionContext creates a new dialer context with specified options
 func CreateConnectionContext() *net.Dialer {
 	dialer := &net.Dialer{
 		Control: func(network, address string, conn syscall.RawConn) error {
@@ -37,10 +39,12 @@ func CreateConnectionContext() *net.Dialer {
 	return dialer
 }
 
+// GetTextReader returns a complete server connection with a text protocol reader
 func GetTextReader(conn net.Conn) ServerConn {
-	return ServerConn{conn, textproto.NewReader(bufio.NewReader(conn))}
+	return ServerConn{conn, textproto.NewReader(bufio.NewReader(conn)), None}
 }
 
+// GetIdAndDims parses and returns the information sent by the server during the handshake
 func GetIdAndDims(reader *textproto.Reader) (int, int, int, error) {
 	idLine, err := reader.ReadLine()
 	if err != nil {
@@ -75,6 +79,7 @@ func GetIdAndDims(reader *textproto.Reader) (int, int, int, error) {
 	return id, xDim, yDim, nil
 }
 
+// InitServerConnection opens a TCP socket to the server and does the handshake
 func InitServerConnection(fullAddress string, teamName string, context *net.Dialer) (net.Conn, error) {
 	conn, connErr := context.Dial("tcp4", fullAddress)
 	if connErr != nil {
