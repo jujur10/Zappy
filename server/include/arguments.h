@@ -29,7 +29,7 @@ typedef struct argument_s {
     uint16_t port;
     uint32_t width;
     uint32_t height;
-    uint32_t clients_nb;
+    uint16_t clients_nb;
     uint32_t frequency;
     uint32_t nb_of_teams;
     const char ARRAY ARRAY team_names;

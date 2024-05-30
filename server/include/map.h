@@ -26,3 +26,9 @@ typedef struct map_s {
     resources_t ARRAY tiles;
     bool has_been_modified;
 } map_t;
+
+/// @brief Function which initializes map.
+/// @param args The parsed program parameters.
+/// @param map The map to initialize.
+/// @return 0 on success, 1 on failure.
+uint8_t init_map(const argument_t *args, map_t *map);

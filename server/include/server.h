@@ -40,11 +40,11 @@ typedef struct server_s {
     new_client_t clients[MAX_CLIENTS];
     player_t players[MAX_CLIENTS];
     gui_t guis[MAX_CLIENTS];
-    team_t teams[MAX_CLIENTS];
+    team_t ARRAY teams;
     map_t map;
 } server_t;
 
 /// @brief Function which initialize preliminaries, run the main loop and exit.
 /// @param args The parsed program parameters.
 /// @return 0 on success, 1 on failure.
-uint8_t run_server(const argument_t *args);
+uint8_t run_server(const argument_t PTR args);

@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 
+#include "arguments.h"
 #include "coordinates.h"
 
 /// @brief Structure representing teams.
@@ -27,3 +28,14 @@ typedef struct team_s {
     uint32_t nb_of_eggs;
     coordinates_t ARRAY eggs_coordinates;
 } team_t;
+
+/// @brief Function which initializes teams.
+/// @param args The parsed program parameters.
+/// @param teams The teams to initialize.
+/// @return 0 on success, 1 on failure.
+uint8_t init_teams(const argument_t *args, team_t **teams);
+
+/// @brief Function which destroys teams.
+/// @param args The parsed program parameters.
+/// @param teams The teams to destroys.
+void destroy_teams(const argument_t PTR args, team_t ARRAY teams);

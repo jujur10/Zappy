@@ -90,7 +90,7 @@ static uint8_t set_argument(uint32_t argc, uint32_t PTR argument_index,
         case ARG_Y:
             return set_uint32_argument(argument_index, argv, &args->height);
         case ARG_CLIENTS_NB:
-            return set_uint32_argument(argument_index, argv,
+            return set_uint16_argument(argument_index, argv,
             &args->clients_nb);
         case ARG_FREQ:
             return set_uint32_argument(argument_index, argv, &args->frequency);
