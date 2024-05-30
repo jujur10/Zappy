@@ -33,8 +33,8 @@ typedef enum status_s {
 /// @var coordinates The coordinates of the player on the map.
 /// @var inventory The inventory of the player.
 /// @var time_to_live The remaining time to live for the player.
-/// @var blocking_time Representing the timestamp at which the player can
-/// execute an action again.
+/// @var blocking_time Representing the time at which the player can execute
+/// an action again.
 /// @var status The current player's status.
 /// @var queue The player's receiving message queue.
 typedef struct player_s {
@@ -45,6 +45,6 @@ typedef struct player_s {
     coordinates_t coordinates;
     inventory_t inventory;
     uint32_t time_to_live;
-    uint32_t blocking_time;
+    struct timespec blocking_time;
     shared_message_queue_head_t queue;
 } player_t;

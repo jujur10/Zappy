@@ -14,11 +14,11 @@
 /// @brief Structure representing GUI.
 ///
 /// @var sock The GUI's socket.
-/// @var blocking_time Representing the timestamp at which the GUI can
-/// execute an action again.
+/// @var blocking_time Representing the time at which the GUI can execute an
+///  action again.
 /// @var queue The GUI's receiving message queue.
 typedef struct gui_s {
     int sock;
-    uint32_t blocking_time;
+    struct timespec blocking_time;
     shared_message_queue_head_t queue;
 } gui_t;
