@@ -15,7 +15,6 @@ add_executable(zappy_server
     src/team.c
     src/map.c
     src/signal_handler.c
-    src/server_events.c
     src/clock.c
 )
 

@@ -16,7 +16,6 @@
 #include "team.h"
 #include "map.h"
 #include "signal_handler.h"
-#include "events.h"
 
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
@@ -112,11 +111,10 @@ static uint8_t select_error(void)
 }
 
 /// @brief Function which runs the server main's loop.
-/// @param args The parsed program parameters.
 /// @param server The server structure.
 /// @return Returns 0 when the server quited properly, 84 if not (undefined
 ///  behavior).
-static uint8_t server_main_loop(const argument_t *args, server_t *server)
+static uint8_t server_main_loop(server_t *server)
 {
     fd_set rfds;
     fd_set wfds;
@@ -128,8 +126,6 @@ static uint8_t server_main_loop(const argument_t *args, server_t *server)
             return select_error();
         if (FD_ISSET(pipe_signals[0], &rfds))
             return close(pipe_signals[0]), 0;
-        if (FD_ISSET(server->sock, &rfds))
-            on_connection(server);
     }
 }
 
@@ -141,6 +137,6 @@ uint8_t run_server(const argument_t *args)
     if (1 == init_server(args, &server))
         return 84;
     register_signals();
-    ret_val = server_main_loop(args, &server);
+    ret_val = server_main_loop(&server);
     return destroy_server(args, &server), ret_val;
 }
