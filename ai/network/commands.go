@@ -5,21 +5,33 @@ import (
 )
 
 type CommandType int
-type MessageType int
 
 const (
+	// RotateRight command
 	RotateRight CommandType = iota
+	// RotateLeft command
 	RotateLeft
+	// GoForward command
 	GoForward
+	// LookAround command
 	LookAround
+	// GetInventory command
 	GetInventory
+	// BroadcastText command
 	BroadcastText
+	// GetUnusedSlots command
 	GetUnusedSlots
+	// Fork command
 	Fork
+	// EjectPlayers command
 	EjectPlayers
+	// TakeObject command
 	TakeObject
+	// SetObject command
 	SetObject
+	// LevelUp command
 	LevelUp
+	// None means no command
 	None
 )
 
@@ -71,6 +83,7 @@ func (conn ServerConn) levelUp() {
 	_, _ = fmt.Fprintln(conn.Connection, "Incantation")
 }
 
+// SendCommand sends the specified command to the serv, using the body string if needed
 func (conn ServerConn) SendCommand(cmdType CommandType, body string) {
 	switch cmdType {
 	case RotateRight:

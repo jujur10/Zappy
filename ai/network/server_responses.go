@@ -6,22 +6,34 @@ import (
 	"strings"
 )
 
+type MessageType int
 type EventDirection int
 
 type BroadcastData struct {
+	// The direction from which the message is comming, (from 1 to 8, 0 is the current tile)
 	direction EventDirection
-	text      string
+	// The text of the message
+	text string
 }
 
 const (
+	// A Boolean type response
 	Boolean MessageType = iota
+	// An Inventory
 	Inventory
+	// A player View list
 	View
+	// An Int type response
 	Int
+	// A Broadcast message
 	Broadcast
+	// A Direction
 	Direction
+	// An Elevation message
 	Elevation
+	// A message signifying the Death of a player
 	Death
+	// Nil means an error / nothing
 	Nil
 )
 
@@ -44,6 +56,7 @@ var validResponsesTypes = map[CommandType][]MessageType{
 	None:           {},
 }
 
+// getServerResponse reads a line from the server socket, or returns an error if a line is not available
 func (conn ServerConn) getServerResponse() (string, error) {
 	line, err := conn.Reader.ReadLine()
 	if err != nil {
@@ -62,6 +75,7 @@ func IsInArray[T comparable](value T, array []T) bool {
 	return false
 }
 
+// checkValues verifies the validity of the view (length, player at current pos and all elems are valid)
 func checkValues(values [][]string) bool {
 	if !IsInArray("player", values[0]) {
 		return false
@@ -85,6 +99,7 @@ func checkValues(values [][]string) bool {
 	return true
 }
 
+// parseInventory parses the inventory content and returns it, or an error if the parsing failed
 func parseInventory(values [][]string) (any, error) {
 	if len(values) != len(inventoryIndexes) {
 		return nil, fmt.Errorf("invalid number of inventory indexes: %d", len(values))
@@ -104,7 +119,8 @@ func parseInventory(values [][]string) (any, error) {
 	return inventory, nil
 }
 
-func ParseArray(line string) (MessageType, any, error) {
+// parseArray parses an array sent by the server and returns its parsed form or an error on failure
+func parseArray(line string) (MessageType, any, error) {
 	line = strings.Trim(line, "[]")
 	values := strings.Split(line, ",")
 	individualValues := make([][]string, len(values))
@@ -130,6 +146,7 @@ func ParseArray(line string) (MessageType, any, error) {
 	return View, individualValues, nil
 }
 
+// parseUnexpectedMessage parses a message which is NOT a response to a client command, then returns it or an error
 func parseUnexpectedMessage(line string) (MessageType, any, error) {
 	if line == "dead" {
 		return Death, nil, nil
@@ -166,7 +183,7 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 		return Boolean, false, nil
 	}
 	if line[0] == '[' && line[len(line)-1] == ']' {
-		return ParseArray(line)
+		return parseArray(line)
 	}
 	val, err := strconv.Atoi(line)
 	if err == nil {
@@ -195,6 +212,7 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	return Nil, nil, fmt.Errorf("Invalid line\n")
 }
 
+// isResponseTypeValid checks if the type of the obtained response is expected for the last command sent
 func (conn ServerConn) isResponseTypeValid(msgType MessageType) bool {
 	for _, validType := range validResponsesTypes[conn.LastCommandType] {
 		if validType == msgType {

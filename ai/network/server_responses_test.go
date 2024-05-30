@@ -65,7 +65,7 @@ func Test_checkValues(t *testing.T) {
 	}
 }
 
-func TestParseArray(t *testing.T) {
+func Test_parseArray(t *testing.T) {
 	type args struct {
 		line string
 	}
@@ -86,16 +86,16 @@ func TestParseArray(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ParseArray(tt.args.line)
+			got, got1, err := parseArray(tt.args.line)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseArray() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("parseArray() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("ParseArray() got = %v, want %v", got, tt.want)
+				t.Errorf("parseArray() got = %v, want %v", got, tt.want)
 			}
 			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("ParseArray() got1 = %v, want %v", got1, tt.want1)
+				t.Errorf("parseArray() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

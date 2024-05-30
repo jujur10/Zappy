@@ -11,6 +11,7 @@ import (
 	"zappy_ai/network"
 )
 
+// parseArguments parses the CLI arguments and returns them in a useful form
 func parseArguments() (string, string) {
 	if len(os.Args) == 2 && (os.Args[1] == "-help" || os.Args[1] == "--help") {
 		fmt.Println("USAGE: ./zappy_ai -p port -n name -h machine")

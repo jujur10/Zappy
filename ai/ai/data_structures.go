@@ -9,20 +9,34 @@ import (
 type TileItem int
 
 const (
+	// A Player on the tile
 	Player TileItem = iota
+	// Food on the tile
 	Food
+	// Linemate on the tile
 	Linemate
+	// Deraumere on the tile
 	Deraumere
+	// Sibur on the tile
 	Sibur
+	// Mendiane on the tile
 	Mendiane
+	// Phiras on the tile
 	Phiras
+	// Thystame on the tile
 	Thystame
 )
 
+// A ViewMap is a double array of TileItem
 type ViewMap [][]TileItem
+
+// An Inventory is just a map of element, indexed via strings
 type Inventory map[string]int
+
+// RelativeCoordinates from the origin / spawn point
 type RelativeCoordinates [2]int
 
+// The Direction in which the Player is going
 type PlayerDirection int
 
 const (
@@ -32,21 +46,33 @@ const (
 	Right
 )
 
+// The WorldCoords of the player
 type WorldCoords struct {
+	// The CoordsFromOrigin, modulo map dimensions
 	CoordsFromOrigin RelativeCoordinates
-	Direction        PlayerDirection
+	// The Direction in which the player is going
+	Direction PlayerDirection
 }
 
+// The main struct containing the Game data
 type Game struct {
-	View          ViewMap
-	Inventory     Inventory
-	TimeStep      int
-	TeamName      string
-	Socket        network.ServerConn
-	Coordinates   WorldCoords
+	// The player View
+	View ViewMap
+	// The player Inventory
+	Inventory Inventory
+	// The TimeStep of the game
+	TimeStep int
+	// TeamName is the name of the player's team
+	TeamName string
+	// The server Socket
+	Socket network.ServerConn
+	// The world Coordinates of the player
+	Coordinates WorldCoords
+	// MovementQueue is a PriorityQueue containing the future movements of the player
 	MovementQueue PriorityQueue
 }
 
+// CreateViewMap creates a ViewMap from a parsed double array of strings
 func CreateViewMap(parsedList [][]string) (ViewMap, error) {
 	size := 0
 	counter := 1
