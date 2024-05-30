@@ -16,6 +16,7 @@
 #include "team.h"
 #include "map.h"
 #include "signal_handler.h"
+#include "events.h"
 
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
@@ -29,7 +30,7 @@ static uint8_t init_sig_pipe(const argument_t *args, server_t *server)
     if (-1 == pipe(pipe_signals)) {
         ERROR("Signal pipe initialization failed")
         return free(server->map.tiles), destroy_teams(args, server->teams),
-        close(server->sock), 1;
+                close(server->sock), 1;
     }
     FD_SET(pipe_signals[0], &server->current_socks);
     fcntl(pipe_signals[0], F_SETFL, O_NONBLOCK);
@@ -126,6 +127,8 @@ static uint8_t server_main_loop(server_t *server)
             return select_error();
         if (FD_ISSET(pipe_signals[0], &rfds))
             return close(pipe_signals[0]), 0;
+        if (FD_ISSET(server->sock, &rfds))
+            on_connection(server);
     }
 }
 
