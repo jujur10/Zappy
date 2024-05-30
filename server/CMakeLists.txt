@@ -9,7 +9,11 @@ set(EXECUTABLE_NAME zappy_server)
 
 add_executable(zappy_server
     src/main.c
+    src/server.c
     src/arguments.c
+    src/socket/create_socket.c
+    src/team.c
+    src/map.c
 )
 
 target_include_directories(zappy_server PRIVATE

@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "arguments.h"
+#include "server.h"
 
 static uint8_t print_help(void)
 {
@@ -21,6 +22,7 @@ static uint8_t print_help(void)
 int main(int argc, char *argv[])
 {
     argument_t args = {};
+    uint8_t ret_val;
 
     if (argc < MIN_NB_OF_ARGS) {
         if (2 == argc && 0 == memcmp(argv[1], "-help", 6))
@@ -29,6 +31,7 @@ int main(int argc, char *argv[])
     }
     if (1 == get_arguments(argc, (const char **)argv, &args))
         return 84;
+    ret_val = run_server(&args);
     free(args.team_names);
-    return 0;
+    return ret_val;
 }
