@@ -170,6 +170,27 @@ func parseUnexpectedMessage(line string) (MessageType, any, error) {
 	return Nil, nil, fmt.Errorf("Invalid command\n")
 }
 
+// parseElevationMessage parses the elevation message sent by the server and return the level or an error
+func parseElevationMessage(line string, conn ServerConn) (MessageType, any, error) {
+	if line != "Elevation underway" {
+		return Nil, nil, fmt.Errorf("Invalid command\n")
+	}
+	secondLine, sndErr := conn.getServerResponse()
+	if sndErr != nil {
+		return Nil, nil, sndErr
+	}
+	splitLine := strings.Split(secondLine, ":")
+	if len(splitLine) != 2 || splitLine[0] != "Current level" {
+		return Nil, nil, fmt.Errorf("Invalid level\n")
+	}
+	levelStr := strings.TrimSpace(splitLine[1])
+	level, sndErr := strconv.Atoi(levelStr)
+	if sndErr != nil {
+		return Nil, nil, fmt.Errorf("Invalid level\n")
+	}
+	return Elevation, level, nil
+}
+
 // GetAndParseResponse reads a response from the server connection and parses it
 func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	line, err := conn.getServerResponse()
@@ -193,21 +214,9 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	if err == nil {
 		return unexpectedType, unexpectedValue, nil
 	}
-	if line == "Elevation underway" {
-		secondLine, sndErr := conn.getServerResponse()
-		if sndErr != nil {
-			return Nil, nil, err
-		}
-		splitLine := strings.Split(secondLine, ":")
-		if len(splitLine) != 2 || splitLine[0] != "Current level" {
-			return Nil, nil, fmt.Errorf("Invalid level\n")
-		}
-		levelStr := strings.TrimSpace(splitLine[1])
-		level, sndErr := strconv.Atoi(levelStr)
-		if sndErr != nil {
-			return Nil, nil, fmt.Errorf("Invalid level\n")
-		}
-		return Elevation, level, nil
+	elevationType, elevationLevel, err := parseElevationMessage(line, conn)
+	if err == nil {
+		return elevationType, elevationLevel, nil
 	}
 	return Nil, nil, fmt.Errorf("Invalid line\n")
 }

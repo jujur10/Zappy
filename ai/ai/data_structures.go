@@ -70,6 +70,8 @@ type Game struct {
 	Coordinates WorldCoords
 	// MovementQueue is a PriorityQueue containing the future movements of the player
 	MovementQueue PriorityQueue
+	// The Level of the player
+	Level int
 }
 
 // CreateViewMap creates a ViewMap from a parsed double array of strings
