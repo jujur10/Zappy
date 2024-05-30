@@ -17,6 +17,10 @@
 #include "map.h"
 #include "arguments.h"
 
+// Authentication timeout in seconds and nanoseconds.
+#define AUTH_TIMEOUT_SEC 0
+#define AUTH_TIMEOUT_NS 200000000
+
 // Macro used to put enum on 1 byte.
 #define PACKED __attribute__ ((packed))
 
@@ -26,6 +30,7 @@
 /// @brief Structure representing server.
 ///
 /// @var sock The server's socket.
+/// @var clock The server's clock.
 /// @var current_socks The server's file descriptor set.
 /// @var max_client The maximal fd to watch.
 /// @var clients The new clients.
@@ -35,8 +40,9 @@
 /// @var map The map.
 typedef struct server_s {
     int sock;
+    struct timespec clock;
     fd_set current_socks;
-    uint32_t max_client;
+    int max_client;
     new_client_t clients[MAX_CLIENTS];
     player_t players[MAX_CLIENTS];
     gui_t guis[MAX_CLIENTS];
@@ -46,5 +52,5 @@ typedef struct server_s {
 
 /// @brief Function which initialize preliminaries, run the main loop and exit.
 /// @param args The parsed program parameters.
-/// @return 0 on success, 1 on failure.
+/// @return 0 on success, 84 on failure.
 uint8_t run_server(const argument_t PTR args);

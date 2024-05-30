@@ -14,6 +14,9 @@ add_executable(zappy_server
     src/socket/create_socket.c
     src/team.c
     src/map.c
+    src/signal_handler.c
+    src/server_events.c
+    src/clock.c
 )
 
 target_include_directories(zappy_server PRIVATE

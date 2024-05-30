@@ -16,5 +16,5 @@
 /// @var expiration The client socket expiration.
 typedef struct new_client_s {
     int sock;
-    time_t expiration;
+    struct timespec expiration;
 } new_client_t;
