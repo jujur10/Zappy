@@ -17,6 +17,7 @@ add_executable(zappy_server
     src/signal_handler.c
     src/clock.c
     src/server_events.c
+    src/new_clients_handling.c
 )
 
 target_include_directories(zappy_server PRIVATE

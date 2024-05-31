@@ -39,3 +39,11 @@ uint8_t init_teams(const argument_t *args, team_t **teams);
 /// @param args The parsed program parameters.
 /// @param teams The teams to destroys.
 void destroy_teams(const argument_t PTR args, team_t ARRAY teams);
+
+/// @brief Function which returns the team index of the name's team.
+/// @param teams The array of teams.
+/// @param nb_of_teams The array's lenght.
+/// @param searched_name The team name we are searching.
+/// @param len The searched name length.
+int32_t get_team_index_by_name(const team_t ARRAY teams, uint32_t nb_of_teams,
+    const char ARRAY searched_name, uint32_t len);

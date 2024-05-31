@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 #include "server.h"
-#include "clock.h"
+#include "new_clients_handling.h"
 
 /// @brief Function which is used to get index of a free slot in order to
 ///  stock the temporary client (new_client_t).
@@ -40,7 +40,5 @@ void on_connection(server_t *server)
     : server->max_client;
     FD_SET(client_sock, &server->current_socks);
     server->clients[free_slot].sock = client_sock;
-    clock_gettime(CLOCK_MONOTONIC, &server->clients[free_slot].expiration);
-    add_to_clock(&server->clients[free_slot].expiration, AUTH_TIMEOUT_SEC,
-    AUTH_TIMEOUT_NS);
+    init_new_client(server, &server->clients[free_slot]);
 }

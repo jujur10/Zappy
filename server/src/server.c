@@ -17,6 +17,7 @@
 #include "map.h"
 #include "signal_handler.h"
 #include "events.h"
+#include "new_clients_handling.h"
 
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
@@ -119,16 +120,20 @@ static uint8_t server_main_loop(server_t *server)
 {
     fd_set rfds;
     fd_set wfds;
+    int32_t select_ret;
 
     clock_gettime(CLOCK_MONOTONIC, &server->clock);
     while (true) {
         init_fdset(&server->current_socks, &rfds, &wfds);
-        if (select(server->max_client + 1, &rfds, &wfds, NULL, NULL) == -1)
+        select_ret = select(server->max_client + 1, &rfds, &wfds, NULL, NULL);
+        if (-1 == select_ret)
             return select_error();
         if (FD_ISSET(pipe_signals[0], &rfds))
             return close(pipe_signals[0]), 0;
         if (FD_ISSET(server->sock, &rfds))
             on_connection(server);
+        else
+            handle_new_clients(server, &rfds, &wfds, &select_ret);
     }
 }
 
@@ -139,6 +144,7 @@ uint8_t run_server(const argument_t *args)
 
     if (1 == init_server(args, &server))
         return 84;
+    server.args = args;
     register_signals();
     ret_val = server_main_loop(&server);
     return destroy_server(args, &server), ret_val;
