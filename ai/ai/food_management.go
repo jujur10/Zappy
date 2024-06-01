@@ -6,6 +6,8 @@ import (
 
 const foodLifeTimeIncrement = 126
 const playerOutOfFood = -1
+const foodMaxPriority = 10
+const foodMinPriority = 1
 
 func FoodManagementRoutine(food chan int, timeStep time.Duration) {
 	lifeTime := 1260
@@ -24,7 +26,7 @@ func FoodManagementRoutine(food chan int, timeStep time.Duration) {
 		lifeTime--
 		consumptionCounter++
 		if lifeTime <= 0 {
-			food <- -1
+			food <- playerOutOfFood
 		}
 		if consumptionCounter >= foodLifeTimeIncrement {
 			consumptionCounter = 0
@@ -35,5 +37,11 @@ func FoodManagementRoutine(food chan int, timeStep time.Duration) {
 }
 
 func computeFoodPriority(lifeTime int) int {
-	return 0
+	if lifeTime >= 12*foodLifeTimeIncrement {
+		return foodMinPriority
+	}
+	if lifeTime <= 3*foodLifeTimeIncrement {
+		return foodMaxPriority
+	}
+	return 13 - (lifeTime / foodLifeTimeIncrement)
 }

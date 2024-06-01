@@ -59,3 +59,14 @@ func (game Game) isResourceRequired(item TileItem) bool {
 	}
 	return game.TotalResourcesRequired[item] > 0
 }
+
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates) int {
+	return Abs(pos2[0]-pos1[0]) + Abs(pos2[1]-pos1[1])
+}
