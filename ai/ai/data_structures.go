@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"container/heap"
 	"fmt"
 	"strings"
 	"zappy_ai/network"
@@ -30,13 +31,13 @@ const (
 // A ViewMap is a double array of TileItem
 type ViewMap [][]TileItem
 
-// An Inventory is just a map of element, indexed via strings
-type Inventory map[string]int
+// An Inventory is just a map of element, indexed via TileItem
+type Inventory map[TileItem]int
 
 // RelativeCoordinates from the origin / spawn point
 type RelativeCoordinates [2]int
 
-// The Direction in which the Player is going
+// PlayerDirection The Direction in which the Player is going
 type PlayerDirection int
 
 const (
@@ -72,6 +73,28 @@ type Game struct {
 	MovementQueue PriorityQueue
 	// The Level of the player
 	Level int
+	// LevelUpResources is a map of TileItem -> Inventory containing the necessary resources for level ups
+	LevelUpResources map[int]Inventory
+	// TotalResourcesRequired is an Inventory containing the total resources left to collect to reach level 8
+	TotalResourcesRequired Inventory
+	//
+	FoodChannel chan int
+}
+
+// InitGame creates a new Game struct
+func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game {
+	game := Game{View: make(ViewMap, 0),
+		Inventory:              make(Inventory),
+		TimeStep:               timeStep,
+		TeamName:               teamName,
+		Socket:                 serverConn,
+		Coordinates:            WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: 0},
+		MovementQueue:          make(PriorityQueue, 10),
+		LevelUpResources:       levelUpResources,
+		TotalResourcesRequired: totalResourcesRequired,
+	}
+	heap.Init(&game.MovementQueue)
+	return game
 }
 
 // CreateViewMap creates a ViewMap from a parsed double array of strings

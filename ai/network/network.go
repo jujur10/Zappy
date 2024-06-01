@@ -46,14 +46,14 @@ func GetTextReader(conn net.Conn) ServerConn {
 
 // GetIdAndDims parses and returns the information sent by the server during the handshake
 func GetIdAndDims(reader *textproto.Reader) (int, int, int, error) {
-	idLine, err := reader.ReadLine()
+	slotsLine, err := reader.ReadLine()
 	if err != nil {
 		return 0, 0, 0, err
 	}
-	if idLine == "ko" {
-		return 0, 0, 0, fmt.Errorf("Invalid team name\n")
+	if slotsLine == "ko" {
+		return 0, 0, 0, fmt.Errorf("Invalid number of slots\n")
 	}
-	id, err := strconv.Atoi(idLine)
+	slotsLeft, err := strconv.Atoi(slotsLine)
 	if err != nil {
 		return 0, 0, 0, err
 	}
@@ -76,7 +76,7 @@ func GetIdAndDims(reader *textproto.Reader) (int, int, int, error) {
 		return 0, 0, 0, err
 	}
 
-	return id, xDim, yDim, nil
+	return slotsLeft, xDim, yDim, nil
 }
 
 // InitServerConnection opens a TCP socket to the server and does the handshake
