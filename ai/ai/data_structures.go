@@ -4,6 +4,7 @@ import (
 	"container/heap"
 	"fmt"
 	"strings"
+	"time"
 	"zappy_ai/network"
 )
 
@@ -62,7 +63,7 @@ type Game struct {
 	// The player Inventory
 	Inventory Inventory
 	// The TimeStep of the game
-	TimeStep int
+	TimeStep time.Duration
 	// TeamName is the name of the player's team
 	TeamName string
 	// The server Socket
@@ -77,7 +78,9 @@ type Game struct {
 	LevelUpResources map[int]Inventory
 	// TotalResourcesRequired is an Inventory containing the total resources left to collect to reach level 8
 	TotalResourcesRequired Inventory
-	//
+	// Channel to communicate with the food management goroutine.
+	// New food comes in, and food priority comes out
+	// In case of death by starvation, priority is -1
 	FoodChannel chan int
 }
 
@@ -85,15 +88,17 @@ type Game struct {
 func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game {
 	game := Game{View: make(ViewMap, 0),
 		Inventory:              make(Inventory),
-		TimeStep:               timeStep,
+		TimeStep:               time.Second / time.Duration(timeStep),
 		TeamName:               teamName,
 		Socket:                 serverConn,
 		Coordinates:            WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: 0},
 		MovementQueue:          make(PriorityQueue, 10),
 		LevelUpResources:       levelUpResources,
 		TotalResourcesRequired: totalResourcesRequired,
+		FoodChannel:            make(chan int),
 	}
 	heap.Init(&game.MovementQueue)
+	go FoodManagementRoutine(game.FoodChannel, game.TimeStep)
 	return game
 }
 

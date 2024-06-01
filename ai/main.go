@@ -1,7 +1,6 @@
 package main
 
 import (
-	"container/heap"
 	"flag"
 	"fmt"
 	"log"
@@ -68,5 +67,6 @@ func main() {
 	fmt.Printf("Slots left: %d\ndimX %d\ndimY %d\n", slotsLeft, dimX, dimY)
 
 	_ = ai.InitGame(serverConn, teamName, 1) // Timestep: récup la timestep du serveur
+
 	ai.AI()
 }
