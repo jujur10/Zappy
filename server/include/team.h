@@ -40,9 +40,9 @@ uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams);
 /// @param teams The teams to destroys.
 void destroy_teams(const argument_t PTR args, team_t ARRAY teams);
 
-/// @brief Function which returns the team index of the name's team.
+/// @brief Function that returns the index of the searched team.
 /// @param teams The array of teams.
-/// @param nb_of_teams The array's lenght.
+/// @param nb_of_teams The array's length.
 /// @param searched_name The team name we are searching.
 /// @param len The searched name length.
 int32_t get_team_index_by_name(const team_t ARRAY teams, uint32_t nb_of_teams,
