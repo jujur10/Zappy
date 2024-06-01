@@ -18,6 +18,7 @@
 #include "signal_handler.h"
 #include "events.h"
 #include "new_clients_handling.h"
+#include "clock.h"
 
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
@@ -31,7 +32,7 @@ static uint8_t init_sig_pipe(const argument_t *args, server_t *server)
     if (-1 == pipe(pipe_signals)) {
         ERROR("Signal pipe initialization failed")
         return free(server->map.tiles), destroy_teams(args, server->teams),
-                close(server->sock), 1;
+        close(server->sock), 1;
     }
     FD_SET(pipe_signals[0], &server->current_socks);
     fcntl(pipe_signals[0], F_SETFL, O_NONBLOCK);
@@ -122,12 +123,12 @@ static uint8_t server_main_loop(server_t *server)
     fd_set wfds;
     int32_t select_ret;
 
-    clock_gettime(CLOCK_MONOTONIC, &server->clock);
     while (true) {
         init_fdset(&server->current_socks, &rfds, &wfds);
         select_ret = select(server->max_client + 1, &rfds, &wfds, NULL, NULL);
         if (-1 == select_ret)
             return select_error();
+        clock_gettime(CLOCK_MONOTONIC, &server->clock);
         if (FD_ISSET(pipe_signals[0], &rfds))
             return close(pipe_signals[0]), 0;
         if (FD_ISSET(server->sock, &rfds))

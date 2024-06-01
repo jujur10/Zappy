@@ -60,4 +60,5 @@ enum Arguments {
 /// @param argv The raw arguments.
 /// @param args The argument structure to fill.
 /// @return 0 on success, 1 on failure.
-uint8_t get_arguments(uint32_t argc, const char **argv, argument_t *args);
+uint8_t get_arguments(uint32_t argc, const char ARRAY ARRAY argv,
+    argument_t PTR args);

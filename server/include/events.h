@@ -13,4 +13,4 @@
 
 /// @brief Function which is used to handle new connections.
 /// @param server The server structure.
-void on_connection(server_t *server);
+void on_connection(server_t PTR server);

@@ -33,7 +33,7 @@ typedef struct team_s {
 /// @param args The parsed program parameters.
 /// @param teams The teams to initialize.
 /// @return 0 on success, 1 on failure.
-uint8_t init_teams(const argument_t *args, team_t **teams);
+uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams);
 
 /// @brief Function which destroys teams.
 /// @param args The parsed program parameters.

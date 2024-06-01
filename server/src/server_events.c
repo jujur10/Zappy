@@ -24,7 +24,7 @@ static int32_t get_free_slot_client(const new_client_t ARRAY clients)
     return -1;
 }
 
-void on_connection(server_t *server)
+void on_connection(server_t PTR server)
 {
     struct sockaddr_in client_address;
     socklen_t client_size = sizeof(client_address);

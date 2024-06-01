@@ -22,10 +22,10 @@ void destroy_new_client(server_t PTR server, new_client_t PTR client);
 /// @brief Function called when a new client received something.
 /// @param server The server pointer.
 /// @param client The pointer to the client who sent the message.
-void on_new_client_rcv(server_t *server, new_client_t *client);
+void on_new_client_rcv(server_t PTR server, new_client_t PTR client);
 
 /// @brief Function called when for the new client handling.
 /// @param server The server pointer.
 /// @param client The pointer to the client who sent the message.
-void handle_new_clients(server_t *server, const fd_set *rfds,
-    const fd_set *wfds, int32_t *select_ret);
+void handle_new_clients(server_t PTR server, const fd_set PTR rfds,
+    const fd_set PTR wfds, int32_t PTR select_ret);
