@@ -17,7 +17,7 @@
 void init_new_client(server_t PTR server, new_client_t PTR client)
 {
     server->nb_clients++;
-    send(client->sock, "WELCOME\n", 8, 0);
+    write(client->sock, "WELCOME\n", 8);
     client->expiration = server->clock;
     add_to_clock(&client->expiration, AUTH_TIMEOUT_SEC,
     AUTH_TIMEOUT_NS);
@@ -49,7 +49,7 @@ static uint8_t new_client_is_a_gui(server_t PTR server,
     0 == strncmp(buffer, GUI_TEAM, sizeof(GUI_TEAM) - 1)) {
         msg_length = fast_itoa_u32(MAX_CLIENTS - server->nb_guis, buffer);
         memcpy(buffer + msg_length, "\n\0", 2);
-        send(server->clients[client_idx].sock, buffer, msg_length + 2, 0);
+        write(server->clients[client_idx].sock, buffer, msg_length + 2);
         return 0;
     }
     return 1;
@@ -73,14 +73,14 @@ static void new_client_is_an_ai(server_t PTR server,
     msg_length = fast_itoa_u32(server->teams[team_index].max_nb_of_players -
     server->teams[team_index].nb_of_players, buffer);
     memcpy(buffer + msg_length, "\n\0", 2);
-    send(server->clients[client_idx].sock, buffer, msg_length + 2, 0);
+    write(server->clients[client_idx].sock, buffer, msg_length + 2);
 }
 
 void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
 {
     static char buffer[64];
-    int64_t bytes_received = recv(server->clients[client_idx].sock, buffer,
-    sizeof(buffer), 0);
+    int64_t bytes_received = read(server->clients[client_idx].sock, buffer,
+    sizeof(buffer));
     uint64_t team_name_length;
 
     if (bytes_received < 1)
