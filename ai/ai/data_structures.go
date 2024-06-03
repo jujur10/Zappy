@@ -56,6 +56,15 @@ type WorldCoords struct {
 	Direction PlayerDirection
 }
 
+// FoodManagement is a struct containing values for managing food
+type FoodManagement struct {
+	// Channel to communicate with the food management goroutine.
+	// New food comes in, and food priority comes out
+	// In case of death by starvation, priority is -1
+	FoodChannel  chan int
+	FoodPriority int
+}
+
 // The main struct containing the Game data
 type Game struct {
 	// The player View
@@ -78,10 +87,8 @@ type Game struct {
 	LevelUpResources map[int]Inventory
 	// TotalResourcesRequired is an Inventory containing the total resources left to collect to reach level 8
 	TotalResourcesRequired Inventory
-	// Channel to communicate with the food management goroutine.
-	// New food comes in, and food priority comes out
-	// In case of death by starvation, priority is -1
-	FoodChannel chan int
+	// FoodManager is a struct containing values for managing food
+	FoodManager FoodManagement
 }
 
 // InitGame creates a new Game struct
@@ -95,10 +102,10 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game
 		MovementQueue:          make(PriorityQueue, 10),
 		LevelUpResources:       levelUpResources,
 		TotalResourcesRequired: totalResourcesRequired,
-		FoodChannel:            make(chan int),
+		FoodManager:            FoodManagement{FoodChannel: make(chan int), FoodPriority: 1},
 	}
 	heap.Init(&game.MovementQueue)
-	go FoodManagementRoutine(game.FoodChannel, game.TimeStep)
+	go FoodManagementRoutine(game.FoodManager.FoodChannel, game.TimeStep)
 	return game
 }
 

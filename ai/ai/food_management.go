@@ -12,7 +12,7 @@ const foodMinPriority = 1
 func FoodManagementRoutine(food chan int, timeStep time.Duration) {
 	lifeTime := 1260
 	consumptionCounter := 0
-	for true {
+	for { // While true
 		select {
 		case newFood, ok := <-food:
 			if !ok {
@@ -27,6 +27,7 @@ func FoodManagementRoutine(food chan int, timeStep time.Duration) {
 		consumptionCounter++
 		if lifeTime <= 0 {
 			food <- playerOutOfFood
+			return
 		}
 		if consumptionCounter >= foodLifeTimeIncrement {
 			consumptionCounter = 0
