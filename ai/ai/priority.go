@@ -25,6 +25,7 @@ const leechLevelUpPriority = 8
 // Todo: update when inter-AI messages are implemented
 const levelUpLeechingAvailable = false
 
+// resourceCollected update the resource tables or the food goroutine when the player collects a resource
 func (game Game) resourceCollected(item TileItem) {
 	if item == Player {
 		return
@@ -118,6 +119,7 @@ func (game Game) getLevelUpPriority() int {
 	return levelUpPriority
 }
 
+// Abs returns the absolute value of an integer
 func Abs(x int) int {
 	if x < 0 {
 		return -x
@@ -125,6 +127,7 @@ func Abs(x int) int {
 	return x
 }
 
+// ManhattanDistance returns the Manhattan / taxicab distance between two points
 func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates) int {
 	return Abs(pos2[0]-pos1[0]) + Abs(pos2[1]-pos1[1])
 }
