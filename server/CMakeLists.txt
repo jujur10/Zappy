@@ -56,10 +56,9 @@ endif ()
 if (DEFINED RUN_TESTS)
     add_executable(test_zappy_server
         tests/tests_parsing.c
+        tests/tests_itoa.c
         src/arguments.c
         src/utils/itoa/fast_itoa_u32.c
-        src/utils/itoa/fast_itoa_u32.c
-        src/utils/pre_generate/pre_generate.c
     )
 
     target_include_directories(test_zappy_server PRIVATE
@@ -67,13 +66,17 @@ if (DEFINED RUN_TESTS)
     )
 
     target_link_libraries(test_zappy_server PRIVATE
-        build_configs
         criterion
         gcov
     )
 
     target_compile_options(test_zappy_server PRIVATE
         --coverage
+    )
+
+    target_compile_definitions(test_zappy_server PRIVATE
+        PTR=*
+        ARRAY=*
     )
 
     add_custom_command(TARGET test_zappy_server
