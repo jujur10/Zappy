@@ -169,3 +169,39 @@ func Test_parseUnexpectedMessage(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseElevationMessage(t *testing.T) {
+	type args struct {
+		line string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    MessageType
+		want1   any
+		wantErr bool
+	}{
+		{"Valid elevation start message", args{line: "Elevation underway"}, Elevation, 0, false},
+		{"Valid elevation end message 1", args{line: "Current level: 5"}, Elevation, 5, false},
+		{"Valid elevation end message 2", args{line: "Current level: 8"}, Elevation, 8, false},
+		{"Invalid elevation end message", args{line: "Current lavel: 2"}, Nil, nil, true},
+		{"Invalid elevation end level 1", args{line: "Current level: 1"}, Nil, nil, true},
+		{"Invalid elevation end level 2", args{line: "Current level: 25"}, Nil, nil, true},
+		{"Invalid elevation end level 3", args{line: "Current level: z"}, Nil, nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := parseElevationMessage(tt.args.line)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseElevationMessage() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("parseElevationMessage() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("parseElevationMessage() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}

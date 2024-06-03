@@ -1,7 +1,6 @@
 package main
 
 import (
-	"container/heap"
 	"flag"
 	"fmt"
 	"log"
@@ -61,18 +60,13 @@ func main() {
 		log.Fatal("Init server connection\n", err)
 	}
 	serverConn := network.GetTextReader(conn)
-	clientID, dimX, dimY, err := network.GetIdAndDims(serverConn.Reader)
+	slotsLeft, dimX, dimY, err := network.GetIdAndDims(serverConn.Reader)
 	if err != nil {
 		log.Fatal("Get id and dims\n", err)
 	}
-	fmt.Printf("Client ID: %d\ndimX %d\ndimY %d\n", clientID, dimX, dimY)
-	game := ai.Game{View: make(ai.ViewMap, 0),
-		Inventory:     make(ai.Inventory),
-		TimeStep:      1,
-		TeamName:      teamName,
-		Socket:        serverConn,
-		Coordinates:   ai.WorldCoords{CoordsFromOrigin: ai.RelativeCoordinates{0, 0}, Direction: 0},
-		MovementQueue: make(ai.PriorityQueue, 10)}
-	heap.Init(&game.MovementQueue)
+	fmt.Printf("Slots left: %d\ndimX %d\ndimY %d\n", slotsLeft, dimX, dimY)
+
+	_ = ai.InitGame(serverConn, teamName, 1) // Timestep: récup la timestep du serveur
+
 	ai.AI()
 }
