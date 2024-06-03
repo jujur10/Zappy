@@ -12,6 +12,7 @@
 #include "server.h"
 #include "clock.h"
 #include "new_clients_handling.h"
+#include "utils/itoa/fast_itoa.h"
 
 void init_new_client(server_t PTR server, new_client_t PTR client)
 {
@@ -26,10 +27,53 @@ void destroy_new_client(server_t PTR server, uint32_t client_idx)
 {
     FD_CLR(server->clients[client_idx].sock, &server->current_socks);
     close(server->clients[client_idx].sock);
-    memmove(&server->clients[client_idx],
-    &server->clients[server->nb_clients - 1], sizeof(new_client_t));
-    memset(&server->clients[server->nb_clients - 1], 0, sizeof(new_client_t));
     server->nb_clients--;
+    memmove(&server->clients[client_idx], &server->clients[server->nb_clients],
+    sizeof(new_client_t));
+    memset(&server->clients[server->nb_clients], 0, sizeof(new_client_t));
+}
+
+/// @brief Function executed in case of the new client is a GUI.
+/// @param server The server pointer.
+/// @param team_name_length The team name length.
+/// @param client_idx The client index of the new client array.
+/// @param buffer The buffer containing the original message (and overwrite
+/// by the response).
+/// @return 0 : If the client is a GUI, 1 If not.
+static uint8_t new_client_is_a_gui(server_t PTR server,
+    uint64_t team_name_length, uint32_t client_idx, char ARRAY buffer)
+{
+    uint64_t msg_length;
+
+    if (team_name_length + 1 == sizeof(GUI_TEAM) - 1 &&
+    0 == strncmp(buffer, GUI_TEAM, sizeof(GUI_TEAM) - 1)) {
+        msg_length = fast_itoa_u32(MAX_CLIENTS - server->nb_guis, buffer);
+        memcpy(buffer + msg_length, "\n\0", 2);
+        send(server->clients[client_idx].sock, buffer, msg_length + 2, 0);
+        return 0;
+    }
+    return 1;
+}
+
+/// @brief Function executed in case of the new client is a AI.
+/// @param server The server pointer.
+/// @param team_name_length The team name length.
+/// @param client_idx The client index of the new client array.
+/// @param buffer The buffer containing the original message (and overwrite
+/// by the response).
+static void new_client_is_a_ai(server_t PTR server,
+    uint64_t team_name_length, uint32_t client_idx, char ARRAY buffer)
+{
+    uint64_t msg_length;
+    int32_t team_index = get_team_index_by_name(server->teams,
+    server->args->nb_of_teams, buffer, (uint32_t)team_name_length);
+
+    if (-1 == team_index)
+        destroy_new_client(server, client_idx);
+    msg_length = fast_itoa_u32(server->teams[team_index].max_nb_of_players -
+    server->teams[team_index].nb_of_players, buffer);
+    memcpy(buffer + msg_length, "\n\0", 2);
+    send(server->clients[client_idx].sock, buffer, msg_length + 2, 0);
 }
 
 void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
@@ -37,17 +81,14 @@ void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
     static char buffer[64];
     int64_t bytes_received = recv(server->clients[client_idx].sock, buffer,
     sizeof(buffer), 0);
-    uint64_t client_name_length;
-    int32_t team_index;
+    uint64_t team_name_length;
 
     if (bytes_received < 1)
         destroy_new_client(server, client_idx);
-    client_name_length = strcspn(buffer, "\n");
-    team_index = get_team_index_by_name(server->teams,
-    server->args->nb_of_teams, buffer, (uint32_t)client_name_length);
-    if (-1 == team_index)
-        destroy_new_client(server, client_idx);
-    send(server->clients[client_idx].sock, "ok\n", 3, 0);
+    team_name_length = strcspn(buffer, "\n");
+    if (0 == new_client_is_a_gui(server, team_name_length, client_idx, buffer))
+        return;
+    new_client_is_a_ai(server, team_name_length, client_idx, buffer);
 }
 
 /// @brief Check the status of the client.

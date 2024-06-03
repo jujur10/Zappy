@@ -19,6 +19,7 @@
 #include "events.h"
 #include "new_clients_handling.h"
 #include "clock.h"
+#include "utils/pre_generate/pre_generate.h"
 
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
@@ -83,7 +84,8 @@ static uint8_t init_server(const argument_t *args, server_t *server)
 static uint8_t destroy_server(const argument_t PTR args, const server_t
     *server)
 {
-    LOG("Server is closing");
+    LOG("Server is closing")
+    destroy_pre_generated_responses();
     for (int i = 2; i < server->max_client; i++)
         if (FD_ISSET(i, &server->current_socks))
             close(i);
@@ -146,6 +148,9 @@ uint8_t run_server(const argument_t *args)
     if (1 == init_server(args, &server))
         return 84;
     server.args = args;
+    if (1 == pre_generate_responses(&server))
+        return 84;
+    LOG("Server responses were pre-generated")
     register_signals();
     ret_val = server_main_loop(&server);
     return destroy_server(args, &server), ret_val;

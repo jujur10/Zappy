@@ -18,6 +18,8 @@ add_executable(zappy_server
     src/clock.c
     src/server_events.c
     src/new_clients_handling.c
+    src/utils/itoa/fast_itoa_u32.c
+    src/utils/pre_generate/pre_generate.c
 )
 
 target_include_directories(zappy_server PRIVATE
@@ -55,6 +57,9 @@ if (DEFINED RUN_TESTS)
     add_executable(test_zappy_server
         tests/tests_parsing.c
         src/arguments.c
+        src/utils/itoa/fast_itoa_u32.c
+        src/utils/itoa/fast_itoa_u32.c
+        src/utils/pre_generate/pre_generate.c
     )
 
     target_include_directories(test_zappy_server PRIVATE

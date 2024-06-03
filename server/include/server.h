@@ -21,6 +21,9 @@
 #define AUTH_TIMEOUT_SEC 0
 #define AUTH_TIMEOUT_NS 200000000
 
+// GUI team name.
+#define GUI_TEAM "GRAPHIC\n"
+
 // Macro used to put enum on 1 byte.
 #define PACKED __attribute__ ((packed))
 
