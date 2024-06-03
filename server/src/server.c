@@ -84,7 +84,7 @@ static uint8_t init_server(const argument_t *args, server_t *server)
 static uint8_t destroy_server(const argument_t PTR args, const server_t
     *server)
 {
-    LOG("Server is closing")
+    LOG("Server closing")
     destroy_pre_generated_responses();
     for (int i = 2; i < server->max_client; i++)
         if (FD_ISSET(i, &server->current_socks))
@@ -150,7 +150,7 @@ uint8_t run_server(const argument_t *args)
     server.args = args;
     if (1 == pre_generate_responses(&server))
         return 84;
-    LOG("Server responses were pre-generated")
+    LOG("Server responses pre-generated")
     register_signals();
     ret_val = server_main_loop(&server);
     return destroy_server(args, &server), ret_val;

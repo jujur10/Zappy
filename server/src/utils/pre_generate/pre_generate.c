@@ -11,6 +11,7 @@
 #include "utils/pre_generate/pre_generate.h"
 #include "utils/itoa/fast_itoa.h"
 #include "server.h"
+#include "logging.h"
 
 /// @brief The pre-generated response array.
 char PTR pre_generated_responses;
