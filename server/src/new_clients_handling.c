@@ -145,7 +145,7 @@ static uint8_t handle_client_rfds(server_t PTR server, uint32_t client_idx,
 
 /// @brief Function which pop message from the queue and send it.
 /// @param client The current client.
-static void send_next_message_from_queue(new_client_t *client)
+static void send_next_message_from_queue(new_client_t PTR client)
 {
     msg_t msg;
 

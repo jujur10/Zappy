@@ -10,7 +10,7 @@
 #include "arguments.h"
 #include "map.h"
 
-uint8_t init_map(const argument_t *args, map_t *map)
+uint8_t init_map(const argument_t ARRAY args, map_t ARRAY map)
 {
     map->tiles = malloc(sizeof(resources_t) * (args->height * args->width));
     if (NULL == map->tiles)

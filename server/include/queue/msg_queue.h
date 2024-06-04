@@ -31,8 +31,8 @@ TAILQ_HEAD(msg_queue_head_s, msg_container_s);
 /// @param msg_queue The message queue.
 /// @param message The message to add to queue.
 /// @return 0 for success, 1 for failure.
-status_t add_msg_to_queue(msg_queue_head_t *msg_queue,
-    const msg_t *message);
+status_t add_msg_to_queue(msg_queue_head_t PTR msg_queue,
+    const msg_t PTR message);
 
 /// @brief Function which removes the next message of the message queue and
 /// returns it into message.
@@ -40,7 +40,7 @@ status_t add_msg_to_queue(msg_queue_head_t *msg_queue,
 /// @param msg_queue The message queue.
 /// @param message The pointer on the message structure to write.
 /// @return 0 for success, 1 for failure.
-status_t pop_msg(msg_queue_head_t *msg_queue, msg_t *message);
+status_t pop_msg(msg_queue_head_t PTR msg_queue, msg_t PTR message);
 
 /// @brief Function that clears a message queue.
 ///

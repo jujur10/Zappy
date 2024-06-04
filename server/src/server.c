@@ -28,7 +28,7 @@ int pipe_signals[2];
 /// @param args The parsed program parameters.
 /// @param server The server structure to initialize.
 /// @return 0 on success, 1 on failure.
-static uint8_t init_sig_pipe(const argument_t *args, server_t *server)
+static uint8_t init_sig_pipe(const argument_t PTR args, server_t PTR server)
 {
     if (-1 == pipe(pipe_signals)) {
         ERROR("Signal pipe initialization failed")
@@ -49,7 +49,7 @@ static uint8_t init_sig_pipe(const argument_t *args, server_t *server)
 /// @param args The parsed program parameters.
 /// @param server The server structure to initialize.
 /// @return 0 on success, 1 on failure.
-static uint8_t init_server(const argument_t *args, server_t *server)
+static uint8_t init_server(const argument_t PTR args, server_t PTR server)
 {
     server->sock = create_socket(SO_REUSE | SO_BIND | SO_NODELAY, (ipv4_t){0},
     args->port) LOG("Socket created")
@@ -98,8 +98,8 @@ static uint8_t destroy_server(const argument_t PTR args, server_t PTR server)
 /// @param original The server fd set to copy.
 /// @param read_fds The read fd set to update.
 /// @param write_fds The write fd set to update.
-static void init_fdset(const fd_set *original, fd_set *read_fds, fd_set
-    *write_fds)
+static void init_fdset(const fd_set PTR original, fd_set PTR read_fds,
+    fd_set *write_fds)
 {
     *read_fds = *original;
     *write_fds = *original;
@@ -117,7 +117,7 @@ static uint8_t select_error(void)
 /// @param server The server structure.
 /// @return Returns 0 when the server quited properly, 84 if not (undefined
 ///  behavior).
-static uint8_t server_main_loop(server_t *server)
+static uint8_t server_main_loop(server_t PTR server)
 {
     fd_set rfds;
     fd_set wfds;
@@ -138,7 +138,7 @@ static uint8_t server_main_loop(server_t *server)
     }
 }
 
-uint8_t run_server(const argument_t *args)
+uint8_t run_server(const argument_t PTR args)
 {
     server_t server = {};
     uint8_t ret_val;

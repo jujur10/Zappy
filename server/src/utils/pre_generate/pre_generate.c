@@ -27,10 +27,9 @@ uint16_t world_dim_length;
 /// @return The new offset.
 static uint16_t set_welcome(uint16_t offset)
 {
-    memcpy(pre_generated_responses + offset, WELCOME_MSG,
-    sizeof(WELCOME_MSG) - 1);
     welcome_msg_off = offset;
     welcome_msg_length = sizeof(WELCOME_MSG) - 1;
+    memcpy(pre_generated_responses + offset, WELCOME_MSG, welcome_msg_length);
     return offset + sizeof(WELCOME_MSG) - 1;
 }
 

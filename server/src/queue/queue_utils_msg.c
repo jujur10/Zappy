@@ -15,7 +15,7 @@
 status_t add_msg_to_queue(msg_queue_head_t PTR msg_queue,
     const msg_t PTR message)
 {
-    msg_container_t *msg_ctn = calloc(1, sizeof(msg_container_t));
+    msg_container_t *msg_ctn = malloc(sizeof(msg_container_t));
 
     if (NULL == msg_ctn)
         return FAILURE;
