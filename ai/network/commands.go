@@ -31,6 +31,10 @@ const (
 	SetObject
 	// LevelUp command
 	LevelUp
+	// GetFrequency command
+	GetFrequency
+	// GetDirection command
+	GetDirection
 	// None means no command
 	None
 )
@@ -83,6 +87,14 @@ func (conn ServerConn) levelUp() {
 	_, _ = fmt.Fprintln(conn.Connection, "Incantation")
 }
 
+func (conn ServerConn) GetFrequency() {
+	_, _ = fmt.Fprintln(conn.Connection, "Frequency")
+}
+
+func (conn ServerConn) GetDirection() {
+	_, _ = fmt.Fprintln(conn.Connection, "Direction")
+}
+
 // SendCommand sends the specified command to the serv, using the body string if needed
 func (conn ServerConn) SendCommand(cmdType CommandType, body string) {
 	switch cmdType {
@@ -121,6 +133,12 @@ func (conn ServerConn) SendCommand(cmdType CommandType, body string) {
 		break
 	case LevelUp:
 		conn.levelUp()
+		break
+	case GetFrequency:
+		conn.GetFrequency()
+		break
+	case GetDirection:
+		conn.GetDirection()
 		break
 	default:
 		break

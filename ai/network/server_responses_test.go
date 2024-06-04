@@ -205,3 +205,37 @@ func Test_parseElevationMessage(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseDirectionMessage(t *testing.T) {
+	type args struct {
+		line string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    MessageType
+		want1   any
+		wantErr bool
+	}{
+		{"Invalid prefix", args{line: "direcion: 2"}, Nil, nil, true},
+		{"Invalid value negative", args{line: "direction: -1"}, Nil, nil, true},
+		{"Invalid value too big", args{line: "direction: 5"}, Nil, nil, true},
+		{"Valid case 1", args{line: "direction: 3"}, Direction, PlayerDirection(3), false},
+		{"Valid case 2", args{line: "direction: 0"}, Direction, PlayerDirection(0), false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := parseDirectionMessage(tt.args.line)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseDirectionMessage() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("parseDirectionMessage() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("parseDirectionMessage() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}

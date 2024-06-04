@@ -3,6 +3,7 @@ package ai
 import (
 	"container/heap"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 	"zappy_ai/network"
@@ -38,22 +39,12 @@ type Inventory map[TileItem]int
 // RelativeCoordinates from the origin / spawn point
 type RelativeCoordinates [2]int
 
-// PlayerDirection The Direction in which the Player is going
-type PlayerDirection int
-
-const (
-	Up PlayerDirection = iota
-	Left
-	Down
-	Right
-)
-
 // The WorldCoords of the player
 type WorldCoords struct {
 	// The CoordsFromOrigin, modulo map dimensions
 	CoordsFromOrigin RelativeCoordinates
 	// The Direction in which the player is going
-	Direction PlayerDirection
+	Direction network.PlayerDirection
 }
 
 // FoodManagement is a struct containing values for managing food
@@ -91,14 +82,33 @@ type Game struct {
 	FoodManager FoodManagement
 }
 
+// getInitialDirection fetches the initial direction of the AI from the server
+// It ignores any other messages coming before this one
+func getInitialDirection(conn network.ServerConn) network.PlayerDirection {
+	conn.GetDirection()
+	respType := network.Nil
+	for respType != network.Direction {
+		rType, value, err := conn.GetAndParseResponse()
+		if rType == network.Direction && err == nil {
+			return value.(network.PlayerDirection)
+		}
+		respType = rType
+	}
+	return -1
+}
+
 // InitGame creates a new Game struct
 func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game {
+	initialDirection := getInitialDirection(serverConn)
+	if initialDirection == -1 {
+		log.Fatal("Failed to get player initial direction")
+	}
 	game := Game{View: make(ViewMap, 0),
 		Inventory:              make(Inventory),
 		TimeStep:               time.Second / time.Duration(timeStep),
 		TeamName:               teamName,
 		Socket:                 serverConn,
-		Coordinates:            WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: 0},
+		Coordinates:            WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: initialDirection},
 		MovementQueue:          make(PriorityQueue, 10),
 		LevelUpResources:       levelUpResources,
 		TotalResourcesRequired: totalResourcesRequired,

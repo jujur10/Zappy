@@ -132,13 +132,16 @@ Directions must be computed traditionally using trigonometry internally, and the
 | set object down              | Set object     | 7/f            | ok/ko                                      |
 | start incantation            | Incantation    | 300/f          | Elevation underway / Current level: k / ko |
 | Get frenquency parameter     | Frequency      |                | frequency                                  |
-| Get AI direction             | Direction      |                | K                                          |
+| Get AI direction             | Direction      |                | direction: K                               |
+
 
 > In case of a bad/unknown command, the server must answer “ko”.
 
 > Relating incantations, the server sends back "``Elevation underway``" at the start of every incantation if conditions are valid. And if all the conditions are still valid at the end, it sends "``Current level: K``". In case of any issue, it sends "``ko``" at the end or at the start of the incantation.
 
 > Fork not only creates a new egg on the tile, but it also adds a new slot in the team.
+
+> In the response to the Direction command, `K` is the player direction, from 0 to 3 starting from Up (North) and going clockwise
 
 ### Time
 

@@ -9,6 +9,16 @@ import (
 type MessageType int
 type EventDirection int
 
+// PlayerDirection The Direction in which the Player is going
+type PlayerDirection int
+
+const (
+	Up PlayerDirection = iota
+	Left
+	Down
+	Right
+)
+
 type BroadcastData struct {
 	// The direction from which the message is comming, (from 1 to 8, 0 is the current tile)
 	direction EventDirection
@@ -53,6 +63,8 @@ var validResponsesTypes = map[CommandType][]MessageType{
 	TakeObject:     {Boolean},
 	SetObject:      {Boolean},
 	LevelUp:        {Elevation, Boolean},
+	GetFrequency:   {Int},
+	GetDirection:   {Direction},
 	None:           {},
 }
 
@@ -170,6 +182,17 @@ func parseUnexpectedMessage(line string) (MessageType, any, error) {
 	return Nil, nil, fmt.Errorf("Invalid command\n")
 }
 
+func parseDirectionMessage(line string) (MessageType, any, error) {
+	if strings.HasPrefix(line, "direction: ") {
+		line = strings.TrimPrefix(line, "direction: ")
+		val, err := strconv.Atoi(line)
+		if err == nil && val >= 0 && val < 4 {
+			return Direction, PlayerDirection(val), nil
+		}
+	}
+	return Nil, nil, fmt.Errorf("Invalid command\n")
+}
+
 // parseElevationMessage parses the elevation message sent by the server and return the level or an error
 func parseElevationMessage(line string) (MessageType, any, error) {
 	if line == "Elevation underway" {
@@ -209,6 +232,10 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	unexpectedType, unexpectedValue, err := parseUnexpectedMessage(line)
 	if err == nil {
 		return unexpectedType, unexpectedValue, nil
+	}
+	directionType, directionValue, err := parseDirectionMessage(line)
+	if err == nil {
+		return directionType, directionValue, nil
 	}
 	elevationType, elevationLevel, err := parseElevationMessage(line)
 	if err == nil {
