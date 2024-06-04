@@ -148,7 +148,7 @@ the server sends this to all clients:
 ```
 message K, [text]
 ```
-Where K is the message authors direction.
+Where K is the message author's direction.
 
 The message author is anonymous.
 
