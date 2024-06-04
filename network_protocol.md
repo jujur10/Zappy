@@ -126,6 +126,10 @@ To ask for its field of view, the AI will send the ``look`` command, the server'
 
 > In case of a bad/unknown command, the server must answer “ko”.
 
+> Relating incantations, the server sends back "``Elevation underway``" at the start of every incantation if conditions are valid. And if all the conditions are still valid at the end, it sends "``Current level: K``". In case of any issue, it sends "``ko``" at the end or at the start of the incantation.
+
+> Fork not only creates a new egg on the tile, but it also adds a new slot in the team.
+
 ### Time
 
 If ``f = 1``, an action that takes 7 ticks will last 7 seconds ( 7/1 ).
@@ -144,7 +148,7 @@ the server sends this to all clients:
 ```
 message K, [text]
 ```
-Where K is the message authors position.
+Where K is the message authors direction.
 
 The message author is anonymous.
 
@@ -156,4 +160,4 @@ When the client sends the ``eject`` command every individual on the same tile wi
 ```
 eject: K
 ```
-Where K is the tile the player got pushed in, so that it knows where it got pushed.
+Where K is the direction the player got pushed in, so that it knows where it got pushed.
