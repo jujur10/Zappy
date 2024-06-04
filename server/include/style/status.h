@@ -17,4 +17,4 @@
 typedef enum status_s {
     SUCCESS,
     FAILURE
-} status_t;
+} PACKED status_t;
