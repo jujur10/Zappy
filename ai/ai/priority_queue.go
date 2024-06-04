@@ -6,8 +6,9 @@ import "container/heap"
 
 // An Item is something we manage in a priority queue.
 type Item struct {
-	value    RelativeCoordinates // The value of the item; arbitrary.
-	priority int                 // The priority of the item in the queue.
+	value            RelativeCoordinates // The value of the item; arbitrary.
+	priority         int                 // The priority of the item in the queue. Diminishes with distance
+	originalPriority int                 // The originalPriority of the tile
 	// The index is needed by Update and is maintained by the heap.Interface methods.
 	index int // The index of the item in the heap.
 }

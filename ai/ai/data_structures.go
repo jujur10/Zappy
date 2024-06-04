@@ -52,6 +52,8 @@ type WorldCoords struct {
 	CoordsFromOrigin RelativeCoordinates
 	// The Direction in which the player is going
 	Direction network.PlayerDirection
+	// The WorldSize
+	WorldSize RelativeCoordinates
 }
 
 // FoodManagement is a struct containing values for managing food
