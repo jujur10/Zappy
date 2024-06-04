@@ -51,6 +51,21 @@ func parseArguments() (string, string) {
 	return name, fullAddr
 }
 
+// getFrequencyFromServer fetches the time step / frequency of the AI from the server
+// It ignores any other messages coming before this one
+func getFrequencyFromServer(conn network.ServerConn) int {
+	conn.GetFrequency()
+	respType := network.Nil
+	for respType != network.Int {
+		rType, value, err := conn.GetAndParseResponse()
+		if rType == network.Int && err == nil {
+			return value.(int)
+		}
+		respType = rType
+	}
+	return 0
+}
+
 // main is the main function DUH
 func main() {
 	teamName, fullAddress := parseArguments()
@@ -65,8 +80,11 @@ func main() {
 		log.Fatal("Get id and dims\n", err)
 	}
 	fmt.Printf("Slots left: %d\ndimX %d\ndimY %d\n", slotsLeft, dimX, dimY)
-
-	_ = ai.InitGame(serverConn, teamName, 1) // Timestep: récup la timestep du serveur
+	timeStep := getFrequencyFromServer(serverConn)
+	if timeStep == 0 {
+		log.Fatal("Failed to get timestep : Time step cannot be zero")
+	}
+	_ = ai.InitGame(serverConn, teamName, timeStep)
 
 	ai.AI()
 }
