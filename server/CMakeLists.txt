@@ -20,6 +20,8 @@ add_executable(zappy_server
     src/new_clients_handling.c
     src/utils/itoa/fast_itoa_u32.c
     src/utils/pre_generate/pre_generate.c
+    src/queue/queue_utils_msg.c
+    src/msg.c
 )
 
 target_include_directories(zappy_server PRIVATE

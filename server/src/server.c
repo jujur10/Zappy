@@ -81,14 +81,12 @@ static uint8_t init_server(const argument_t *args, server_t *server)
 /// @param args The parsed program parameters.
 /// @param server The server structure to destroy.
 /// @return Returns 0.
-static uint8_t destroy_server(const argument_t PTR args, const server_t
-    *server)
+static uint8_t destroy_server(const argument_t PTR args, server_t PTR server)
 {
     LOG("Server closing")
     destroy_pre_generated_responses();
-    for (int i = 2; i < server->max_client; i++)
-        if (FD_ISSET(i, &server->current_socks))
-            close(i);
+    for (uint16_t i = 0; i < server->nb_clients; i++)
+        destroy_new_client(server, i);
     close(server->sock);
     free(server->map.tiles);
     destroy_teams(args, server->teams);

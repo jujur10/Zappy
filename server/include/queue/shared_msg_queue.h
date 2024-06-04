@@ -1,8 +1,8 @@
 /*
 ** EPITECH PROJECT, 2024
-** queue.h
+** shared_msg_queue.h
 ** File description:
-** queue.h.
+** shared_msg_queue.h.
 */
 
 #pragma once
@@ -23,4 +23,4 @@ typedef struct shared_message_container_s {
 
 typedef struct shared_message_queue_head_s shared_message_queue_head_t;
 
-TAILQ_HEAD(shared_message_queue_head_s, shared_message_container_t);
+TAILQ_HEAD(shared_message_queue_head_s, shared_message_container_s);

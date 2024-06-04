@@ -13,20 +13,25 @@
 #include "clock.h"
 #include "new_clients_handling.h"
 #include "utils/itoa/fast_itoa.h"
+#include "queue/msg_queue.h"
 
 void init_new_client(server_t PTR server, new_client_t PTR client)
 {
+    msg_t message;
+
     server->nb_clients++;
-    write(client->sock, "WELCOME\n", 8);
+    TAILQ_INIT(&client->queue);
+    create_message("WELCOME\n", 8, &message);
+    add_msg_to_queue(&client->queue, &message);
     client->expiration = server->clock;
-    add_to_clock(&client->expiration, AUTH_TIMEOUT_SEC,
-    AUTH_TIMEOUT_NS);
+    add_to_clock(&client->expiration, AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
 }
 
 void destroy_new_client(server_t PTR server, uint32_t client_idx)
 {
     FD_CLR(server->clients[client_idx].sock, &server->current_socks);
     close(server->clients[client_idx].sock);
+    clear_msg_queue(&server->clients[client_idx].queue);
     server->nb_clients--;
     memmove(&server->clients[client_idx], &server->clients[server->nb_clients],
     sizeof(new_client_t));
@@ -44,12 +49,14 @@ static uint8_t new_client_is_a_gui(server_t PTR server,
     uint64_t team_name_length, uint32_t client_idx, char ARRAY buffer)
 {
     uint64_t msg_length;
+    msg_t message;
 
     if (team_name_length + 1 == sizeof(GUI_TEAM) - 1 &&
     0 == strncmp(buffer, GUI_TEAM, sizeof(GUI_TEAM) - 1)) {
         msg_length = fast_itoa_u32(MAX_CLIENTS - server->nb_guis, buffer);
         memcpy(buffer + msg_length, "\n\0", 2);
-        write(server->clients[client_idx].sock, buffer, msg_length + 2);
+        create_message(buffer, (uint32_t)msg_length + 2, &message);
+        add_msg_to_queue(&server->clients[client_idx].queue, &message);
         return 0;
     }
     return 1;
@@ -67,13 +74,15 @@ static void new_client_is_an_ai(server_t PTR server,
     uint64_t msg_length;
     int32_t team_index = get_team_index_by_name(server->teams,
     server->args->nb_of_teams, buffer, (uint32_t)team_name_length);
+    msg_t message;
 
     if (-1 == team_index)
-        destroy_new_client(server, client_idx);
+        return destroy_new_client(server, client_idx);
     msg_length = fast_itoa_u32(server->teams[team_index].max_nb_of_players -
     server->teams[team_index].nb_of_players, buffer);
     memcpy(buffer + msg_length, "\n\0", 2);
-    write(server->clients[client_idx].sock, buffer, msg_length + 2);
+    create_message(buffer, (uint32_t)msg_length + 2, &message);
+    add_msg_to_queue(&server->clients[client_idx].queue, &message);
 }
 
 void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
@@ -84,7 +93,7 @@ void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
     uint64_t team_name_length;
 
     if (bytes_received < 1)
-        destroy_new_client(server, client_idx);
+        return destroy_new_client(server, client_idx);
     team_name_length = strcspn(buffer, "\n");
     if (0 == new_client_is_a_gui(server, team_name_length, client_idx, buffer))
         return;
@@ -102,8 +111,7 @@ static uint8_t is_ready(server_t PTR server, new_client_t PTR client,
     const fd_set PTR fd_set)
 {
     if (FD_ISSET(client->sock, fd_set)) {
-        if (0 == is_timeout_exceed(&server->clock,
-        &client->expiration))
+        if (0 == is_timeout_exceed(&server->clock, &client->expiration))
             return 0;
         return 1;
     }
@@ -135,6 +143,18 @@ static uint8_t handle_client_rfds(server_t PTR server, uint32_t client_idx,
     }
 }
 
+/// @brief Function which pop message from the queue and send it.
+/// @param client The current client.
+static void send_next_message_from_queue(new_client_t *client)
+{
+    msg_t msg;
+
+    if (FAILURE == pop_msg(&client->queue, &msg))
+        return;
+    write(client->sock, msg.ptr, msg.len);
+    destroy_message(&msg);
+}
+
 /// @brief Function which check and handle if the client's socket waiting to
 /// be write.
 /// @param server The server pointer.
@@ -152,6 +172,7 @@ static uint8_t handle_client_wfds(server_t PTR server, uint32_t client_idx,
             (*select_ret)--;
             return 1;
         case 1:
+            send_next_message_from_queue(&server->clients[client_idx]);
             (*select_ret)--;
             return 1;
         default:
@@ -169,8 +190,7 @@ void handle_new_clients(server_t PTR server, const fd_set PTR rfds,
         if (0 == server->clients[i].sock)
             continue;
         count_client++;
-        if (1 == handle_client_rfds(server, i, rfds,
-        select_ret))
+        if (1 == handle_client_rfds(server, i, rfds, select_ret))
             continue;
         if (1 == handle_client_wfds(server, i, wfds, select_ret))
             continue;
