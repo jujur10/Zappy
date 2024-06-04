@@ -109,7 +109,7 @@ To ask for its field of view, the AI will send the ``look`` command, the server'
 ### Understanding how sound transmission work
 
 From now on, we will use the letter ``K`` when talking about a direction.
-A direction in an integer that goes from 0 to 8, and is always relative to a tile.
+A direction is an integer that goes from 0 to 8, and is always relative to a tile.
 it starts at the player's position (at 0), goes just in front of it, and rotates around it counter-clockwise.
 
 Directions must be computed traditionally using trigonometry internally, and then converted to our direction system that's less precise and harder to work with (instead of simply giving out an angle).
