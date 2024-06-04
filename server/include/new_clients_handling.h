@@ -37,6 +37,8 @@ void on_new_client_rcv(server_t PTR server, uint32_t client_idx);
 /// @brief Function called when a new_client_t is communicating with the
 /// server.\n
 /// @param server The server pointer.
-/// @param client The pointer to the client who sent the message.
+/// @param rfds The pointer on the read fd set.
+/// @param wfds The pointer on the write fd set.
+/// @param select_ret The return value of select.
 void handle_new_clients(server_t PTR server, const fd_set PTR rfds,
     const fd_set PTR wfds, int32_t PTR select_ret);
