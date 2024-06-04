@@ -21,6 +21,9 @@
 #define AUTH_TIMEOUT_SEC 0
 #define AUTH_TIMEOUT_NS 200000000
 
+// GUI team name.
+#define GUI_TEAM "GRAPHIC\n"
+
 // Macro used to put enum on 1 byte.
 #define PACKED __attribute__ ((packed))
 
@@ -33,9 +36,13 @@
 /// @var clock The server's clock.
 /// @var current_socks The server's file descriptor set.
 /// @var max_client The maximal fd to watch.
+/// @var args The pointer on program arguments structure.
 /// @var clients The new clients.
+/// @var nb_clients The number of clients inside the array.
 /// @var players The players.
+/// @var nb_players The number of players inside the array.
 /// @var guis The GUIs.
+/// @var nb_guis The number of GUIs inside the array.
 /// @var teams The teams.
 /// @var map The map.
 typedef struct server_s {
@@ -43,9 +50,13 @@ typedef struct server_s {
     struct timespec clock;
     fd_set current_socks;
     int max_client;
+    const argument_t PTR args;
     new_client_t clients[MAX_CLIENTS];
+    uint16_t nb_clients;
     player_t players[MAX_CLIENTS];
+    uint16_t nb_players;
     gui_t guis[MAX_CLIENTS];
+    uint16_t nb_guis;
     team_t ARRAY teams;
     map_t map;
 } server_t;

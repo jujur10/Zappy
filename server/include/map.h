@@ -31,4 +31,4 @@ typedef struct map_s {
 /// @param args The parsed program parameters.
 /// @param map The map to initialize.
 /// @return 0 on success, 1 on failure.
-uint8_t init_map(const argument_t *args, map_t *map);
+uint8_t init_map(const argument_t PTR args, map_t PTR map);

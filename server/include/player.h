@@ -11,7 +11,7 @@
 
 #include "coordinates.h"
 #include "inventory.h"
-#include "queue.h"
+#include "queue/shared_msg_queue.h"
 
 // Macro used to put enum on 1 byte.
 #define PACKED __attribute__ ((packed))
@@ -20,10 +20,10 @@
 ///
 /// @var PLAYING If the player is playing or idling.
 /// @var INTO_RITUAL If the player is into a ritual.
-typedef enum status_s {
+typedef enum player_status_s {
     PLAYING,
     INTO_RITUAL
-} PACKED status_t;
+} PACKED player_status_t;
 
 /// @brief Structure representing player.
 ///
@@ -40,7 +40,7 @@ typedef enum status_s {
 typedef struct player_s {
     uint16_t sock;
     uint8_t level;
-    status_t status;
+    player_status_t status;
     orientation_t orientation;
     coordinates_t coordinates;
     inventory_t inventory;

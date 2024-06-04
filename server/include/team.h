@@ -33,9 +33,17 @@ typedef struct team_s {
 /// @param args The parsed program parameters.
 /// @param teams The teams to initialize.
 /// @return 0 on success, 1 on failure.
-uint8_t init_teams(const argument_t *args, team_t **teams);
+uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams);
 
 /// @brief Function which destroys teams.
 /// @param args The parsed program parameters.
 /// @param teams The teams to destroys.
 void destroy_teams(const argument_t PTR args, team_t ARRAY teams);
+
+/// @brief Function that returns the index of the searched team.
+/// @param teams The array of teams.
+/// @param nb_of_teams The array's length.
+/// @param searched_name The team name we are searching.
+/// @param len The searched name length.
+int32_t get_team_index_by_name(const team_t ARRAY teams, uint32_t nb_of_teams,
+    const char ARRAY searched_name, uint32_t len);

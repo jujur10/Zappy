@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <malloc.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "arguments.h"
 #include "team.h"
@@ -35,4 +36,13 @@ void destroy_teams(const argument_t PTR args, team_t ARRAY teams)
         free(teams[i].eggs_coordinates);
     }
     free(teams);
+}
+
+int32_t get_team_index_by_name(const team_t ARRAY teams, uint32_t nb_of_teams,
+    const char ARRAY searched_name, uint32_t len)
+{
+    for (uint32_t i = 0; i < nb_of_teams; i++)
+        if (0 == strncmp(teams[i].name, searched_name, len))
+            return (int32_t)i;
+    return -1;
 }

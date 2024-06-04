@@ -16,6 +16,10 @@
 #include "team.h"
 #include "map.h"
 #include "signal_handler.h"
+#include "events.h"
+#include "new_clients_handling.h"
+#include "clock.h"
+#include "utils/pre_generate/pre_generate.h"
 
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
@@ -24,7 +28,7 @@ int pipe_signals[2];
 /// @param args The parsed program parameters.
 /// @param server The server structure to initialize.
 /// @return 0 on success, 1 on failure.
-static uint8_t init_sig_pipe(const argument_t *args, server_t *server)
+static uint8_t init_sig_pipe(const argument_t PTR args, server_t PTR server)
 {
     if (-1 == pipe(pipe_signals)) {
         ERROR("Signal pipe initialization failed")
@@ -45,7 +49,7 @@ static uint8_t init_sig_pipe(const argument_t *args, server_t *server)
 /// @param args The parsed program parameters.
 /// @param server The server structure to initialize.
 /// @return 0 on success, 1 on failure.
-static uint8_t init_server(const argument_t *args, server_t *server)
+static uint8_t init_server(const argument_t PTR args, server_t PTR server)
 {
     server->sock = create_socket(SO_REUSE | SO_BIND | SO_NODELAY, (ipv4_t){0},
     args->port) LOG("Socket created")
@@ -77,13 +81,12 @@ static uint8_t init_server(const argument_t *args, server_t *server)
 /// @param args The parsed program parameters.
 /// @param server The server structure to destroy.
 /// @return Returns 0.
-static uint8_t destroy_server(const argument_t PTR args, const server_t
-    *server)
+static uint8_t destroy_server(const argument_t PTR args, server_t PTR server)
 {
-    LOG("Server is closing");
-    for (int i = 2; i < server->max_client; i++)
-        if (FD_ISSET(i, &server->current_socks))
-            close(i);
+    LOG("Server closing")
+    destroy_pre_generated_responses();
+    for (uint16_t i = 0; i < server->nb_clients; i++)
+        destroy_new_client(server, i);
     close(server->sock);
     free(server->map.tiles);
     destroy_teams(args, server->teams);
@@ -95,8 +98,8 @@ static uint8_t destroy_server(const argument_t PTR args, const server_t
 /// @param original The server fd set to copy.
 /// @param read_fds The read fd set to update.
 /// @param write_fds The write fd set to update.
-static void init_fdset(const fd_set *original, fd_set *read_fds, fd_set
-    *write_fds)
+static void init_fdset(const fd_set PTR original, fd_set PTR read_fds,
+    fd_set *write_fds)
 {
     *read_fds = *original;
     *write_fds = *original;
@@ -114,28 +117,38 @@ static uint8_t select_error(void)
 /// @param server The server structure.
 /// @return Returns 0 when the server quited properly, 84 if not (undefined
 ///  behavior).
-static uint8_t server_main_loop(server_t *server)
+static uint8_t server_main_loop(server_t PTR server)
 {
     fd_set rfds;
     fd_set wfds;
+    int32_t select_ret;
 
-    clock_gettime(CLOCK_MONOTONIC, &server->clock);
     while (true) {
         init_fdset(&server->current_socks, &rfds, &wfds);
-        if (select(server->max_client + 1, &rfds, &wfds, NULL, NULL) == -1)
+        select_ret = select(server->max_client + 1, &rfds, &wfds, NULL, NULL);
+        if (-1 == select_ret)
             return select_error();
+        clock_gettime(CLOCK_MONOTONIC, &server->clock);
         if (FD_ISSET(pipe_signals[0], &rfds))
             return close(pipe_signals[0]), 0;
+        if (FD_ISSET(server->sock, &rfds))
+            on_connection(server);
+        else
+            handle_new_clients(server, &rfds, &wfds, &select_ret);
     }
 }
 
-uint8_t run_server(const argument_t *args)
+uint8_t run_server(const argument_t PTR args)
 {
     server_t server = {};
     uint8_t ret_val;
 
     if (1 == init_server(args, &server))
         return 84;
+    server.args = args;
+    if (1 == pre_generate_responses(&server))
+        return 84;
+    LOG("Server responses pre-generated")
     register_signals();
     ret_val = server_main_loop(&server);
     return destroy_server(args, &server), ret_val;

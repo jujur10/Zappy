@@ -10,11 +10,14 @@
 #include <stdint.h>
 #include <time.h>
 
+#include "queue/msg_queue.h"
+
 /// @brief Structure representing a new client.
 ///
 /// @var sock The client's socket.
-/// @var expiration The client socket expiration.
+/// @var expiration The client's socket expiration.
 typedef struct new_client_s {
     int sock;
     struct timespec expiration;
+    msg_queue_head_t queue;
 } new_client_t;

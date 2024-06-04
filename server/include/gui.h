@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#include "queue.h"
+#include "queue/shared_msg_queue.h"
 
 /// @brief Structure representing GUI.
 ///
