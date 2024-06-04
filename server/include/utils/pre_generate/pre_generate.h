@@ -18,9 +18,11 @@ extern char ARRAY pre_generated_responses;
 /// @brief Welcome message.
 #define WELCOME_MSG "WELCOME\n"
 extern uint16_t welcome_msg_off;
+extern uint16_t welcome_msg_length;
 
 /// @brief World dimensions message.
 extern uint16_t world_dim_off;
+extern uint16_t world_dim_length;
 
 /// @brief Function to pre-generate responses.
 /// @param server The server structure (after initialization).

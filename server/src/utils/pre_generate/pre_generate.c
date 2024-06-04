@@ -18,7 +18,9 @@ char PTR pre_generated_responses;
 
 /// @brief Response offsets.
 uint16_t welcome_msg_off;
+uint16_t welcome_msg_length;
 uint16_t world_dim_off;
+uint16_t world_dim_length;
 
 /// @brief Set the message and returns the new offset of pre-generated array.
 /// @param offset The offset of the pre-generated array to copy to.
@@ -28,6 +30,7 @@ static uint16_t set_welcome(uint16_t offset)
     memcpy(pre_generated_responses + offset, WELCOME_MSG,
     sizeof(WELCOME_MSG) - 1);
     welcome_msg_off = offset;
+    welcome_msg_length = sizeof(WELCOME_MSG) - 1;
     return offset + sizeof(WELCOME_MSG) - 1;
 }
 
@@ -46,6 +49,8 @@ static uint16_t set_world_dimensions(uint16_t offset, const server_t *server)
     pre_generated_responses + offset + write_offset);
     pre_generated_responses[offset + write_offset] = '\n';
     write_offset++;
+    world_dim_off = offset;
+    world_dim_length = write_offset;
     return offset + write_offset;
 }
 
