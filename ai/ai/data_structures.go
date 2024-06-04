@@ -30,6 +30,13 @@ const (
 	Thystame
 )
 
+const (
+	Up network.PlayerDirection = iota
+	Left
+	Down
+	Right
+)
+
 // A ViewMap is a double array of TileItem
 type ViewMap [][]TileItem
 
