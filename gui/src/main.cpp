@@ -7,6 +7,7 @@
 #include <Window.hpp>
 #include <cstring>
 #include <flecs.h>
+#include <my_exit.hpp>
 
 namespace zappy_gui
 {
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
     }
     if (5 != argc)
     {
-        ::_exit(1);
+        zappy_gui::SystemExit::exit(1);
     }
     const auto serverSocket = zappy_gui::connectToServer(argv);
 

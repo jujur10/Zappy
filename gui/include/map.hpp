@@ -18,8 +18,8 @@ struct iter;
 namespace zappy_gui::map
 {
 
-constexpr int32_t MAP_WIDTH  = 1'024;
-constexpr int32_t MAP_HEIGHT = 1'024;
+constexpr int32_t MAP_WIDTH  = 128;
+constexpr int32_t MAP_HEIGHT = 128;
 
 using float32 = std::float32_t;
 
