@@ -18,6 +18,7 @@
 #include "signal_handler.h"
 #include "events.h"
 #include "new_clients_handling.h"
+#include "gui_handling.h"
 #include "clock.h"
 #include "utils/pre_generate/pre_generate.h"
 
@@ -51,7 +52,7 @@ static uint8_t init_sig_pipe(const argument_t PTR args, server_t PTR server)
 /// @return 0 on success, 1 on failure.
 static uint8_t init_server(const argument_t PTR args, server_t PTR server)
 {
-    server->sock = create_socket(SO_REUSE | SO_BIND | SO_NODELAY, (ipv4_t){0},
+    server->sock = create_socket(SO_REUSE | SO_BIND, (ipv4_t){0},
     args->port) LOG("Socket created")
     if (-1 == server->sock)
         return 1;
@@ -86,7 +87,9 @@ static uint8_t destroy_server(const argument_t PTR args, server_t PTR server)
     LOG("Server closing")
     destroy_pre_generated_responses();
     for (uint16_t i = 0; i < server->nb_clients; i++)
-        destroy_new_client(server, i);
+        destroy_new_client(server, i, 1);
+    for (uint16_t i = 0; i < server->nb_guis; i++)
+        destroy_gui(server, i);
     close(server->sock);
     free(server->map.tiles);
     destroy_teams(args, server->teams);
@@ -133,8 +136,10 @@ static uint8_t server_main_loop(server_t PTR server)
             return close(pipe_signals[0]), 0;
         if (FD_ISSET(server->sock, &rfds))
             on_connection(server);
-        else
+        else {
             handle_new_clients(server, &rfds, &wfds, &select_ret);
+            handle_guis(server, &rfds, &wfds, &select_ret);
+        }
     }
 }
 

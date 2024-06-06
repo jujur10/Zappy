@@ -22,6 +22,8 @@ add_executable(zappy_server
     src/utils/pre_generate/pre_generate.c
     src/queue/queue_utils_msg.c
     src/msg.c
+    src/gui_handling.c
+    src/swap_clients.c
 )
 
 target_include_directories(zappy_server PRIVATE

@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#include "queue/shared_msg_queue.h"
+#include "queue/msg_queue.h"
 
 /// @brief Structure representing GUI.
 ///
@@ -20,5 +20,5 @@
 typedef struct gui_s {
     int sock;
     struct timespec blocking_time;
-    shared_message_queue_head_t queue;
+    msg_queue_head_t queue;
 } gui_t;

@@ -14,6 +14,8 @@
 #include "new_clients_handling.h"
 #include "utils/itoa/fast_itoa.h"
 #include "queue/msg_queue.h"
+#include "swap_clients.h"
+#include "logging.h"
 
 void init_new_client(server_t PTR server, new_client_t PTR client)
 {
@@ -27,10 +29,14 @@ void init_new_client(server_t PTR server, new_client_t PTR client)
     add_to_clock(&client->expiration, AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
 }
 
-void destroy_new_client(server_t PTR server, uint32_t client_idx)
+void destroy_new_client(server_t PTR server, uint32_t client_idx,
+    uint8_t preserve_sock)
 {
-    FD_CLR(server->clients[client_idx].sock, &server->current_socks);
-    close(server->clients[client_idx].sock);
+    LOGF("Destroying new client (client idx: %u)", client_idx)
+    if (1 == preserve_sock) {
+        FD_CLR(server->clients[client_idx].sock, &server->current_socks);
+        close(server->clients[client_idx].sock);
+    }
     clear_msg_queue(&server->clients[client_idx].queue);
     server->nb_clients--;
     memmove(&server->clients[client_idx], &server->clients[server->nb_clients],
@@ -48,15 +54,15 @@ void destroy_new_client(server_t PTR server, uint32_t client_idx)
 static uint8_t new_client_is_a_gui(server_t PTR server,
     uint64_t team_name_length, uint32_t client_idx, char ARRAY buffer)
 {
-    uint64_t msg_length;
-    msg_t message;
-
     if (team_name_length + 1 == sizeof(GUI_TEAM) - 1 &&
     0 == strncmp(buffer, GUI_TEAM, sizeof(GUI_TEAM) - 1)) {
-        msg_length = fast_itoa_u32(MAX_CLIENTS - server->nb_guis, buffer);
-        memcpy(buffer + msg_length, "\n\0", 2);
-        create_message(buffer, (uint32_t)msg_length + 2, &message);
-        add_msg_to_queue(&server->clients[client_idx].queue, &message);
+        LOG("Start swapping new client to GUI")
+        if (FAILURE == swap_new_client_to_gui(server, client_idx)) {
+            ERROR("Failed to accept new client in GUI's array")
+            server->clients[client_idx].expiration = server->clock;
+            add_to_clock(&server->clients[client_idx].expiration,
+            AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
+        }
         return 0;
     }
     return 1;
@@ -77,7 +83,7 @@ static void new_client_is_an_ai(server_t PTR server,
     msg_t message;
 
     if (-1 == team_index)
-        return destroy_new_client(server, client_idx);
+        return destroy_new_client(server, client_idx, 1);
     msg_length = fast_itoa_u32(server->teams[team_index].max_nb_of_players -
     server->teams[team_index].nb_of_players, buffer);
     memcpy(buffer + msg_length, "\n\0", 2);
@@ -85,15 +91,26 @@ static void new_client_is_an_ai(server_t PTR server,
     add_msg_to_queue(&server->clients[client_idx].queue, &message);
 }
 
-void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
+/// @brief Function called when the server receive data from a new_client_t.\n
+/// - Put the client's message into a buffer.\n
+/// - If EOF reached, destroy the client.\n
+/// - Else, find out if the requested team exists.\n
+/// - If the team doesn't exist, destroy the client.\n
+/// - If the team exists, respond "ok\\n" to the client.
+/// @param server The server pointer.
+/// @param client The client index of the client who sent the message.
+static void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
 {
     static char buffer[64];
     int64_t bytes_received = read(server->clients[client_idx].sock, buffer,
     sizeof(buffer));
     uint64_t team_name_length;
 
-    if (bytes_received < 1)
-        return destroy_new_client(server, client_idx);
+    if (bytes_received < 1) {
+        LOG("Client closed connection")
+        return destroy_new_client(server, client_idx, 1);
+    }
+    LOGF("Client received : %.*s", (int32_t)bytes_received, buffer)
     team_name_length = strcspn(buffer, "\n");
     if (0 == new_client_is_a_gui(server, team_name_length, client_idx, buffer))
         return;
@@ -129,16 +146,20 @@ static uint8_t is_ready(server_t PTR server, new_client_t PTR client,
 static uint8_t handle_client_rfds(server_t PTR server, uint32_t client_idx,
     const fd_set PTR rfds, int32_t PTR select_ret)
 {
+    LOG("Start handle client rfds");
     switch (is_ready(server, &server->clients[client_idx], rfds)) {
         case 0:
-            destroy_new_client(server, client_idx);
+            destroy_new_client(server, client_idx, 1);
             (*select_ret)--;
+            LOG("Stop handle client rfds 1")
             return 1;
         case 1:
             on_new_client_rcv(server, client_idx);
             (*select_ret)--;
+            LOG("Stop handle client rfds 2")
             return 1;
         default:
+            LOG("Stop handle client rfds 3")
             return 0;
     }
 }
@@ -151,6 +172,8 @@ static void send_next_message_from_queue(new_client_t PTR client)
 
     if (FAILURE == pop_msg(&client->queue, &msg))
         return;
+    LOGF("Send msg from queue (new client sock %i) : %.*s", client->sock, msg
+    .len, msg.ptr)
     write(client->sock, msg.ptr, msg.len);
     destroy_message(&msg);
 }
@@ -166,16 +189,20 @@ static void send_next_message_from_queue(new_client_t PTR client)
 static uint8_t handle_client_wfds(server_t PTR server, uint32_t client_idx,
     const fd_set PTR wfds, int32_t PTR select_ret)
 {
+    LOG("Start handle client wfds");
     switch (is_ready(server, &server->clients[client_idx], wfds)) {
         case 0:
-            destroy_new_client(server, client_idx);
+            destroy_new_client(server, client_idx, 1);
             (*select_ret)--;
+            LOG("Stop handle client wfds 1")
             return 1;
         case 1:
             send_next_message_from_queue(&server->clients[client_idx]);
             (*select_ret)--;
+            LOG("Stop handle client wfds 2")
             return 1;
         default:
+            LOG("Stop handle client wfds 3")
             return 0;
     }
 }
@@ -185,8 +212,10 @@ void handle_new_clients(server_t PTR server, const fd_set PTR rfds,
 {
     uint16_t count_client = 0;
 
+    LOG("Start handling new clients");
     for (int32_t i = 0; count_client < server->nb_clients && *select_ret > 0
     && i < MAX_CLIENTS; i++) {
+        LOGF("Actual client %i", i)
         if (0 == server->clients[i].sock)
             continue;
         count_client++;
@@ -195,4 +224,5 @@ void handle_new_clients(server_t PTR server, const fd_set PTR rfds,
         if (1 == handle_client_wfds(server, i, wfds, select_ret))
             continue;
     }
+    LOG("Stop handling new clients")
 }
