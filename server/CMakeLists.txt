@@ -24,6 +24,7 @@ add_executable(zappy_server
     src/msg.c
     src/gui_handling.c
     src/swap_clients.c
+    src/ai_handling.c
 )
 
 target_include_directories(zappy_server PRIVATE

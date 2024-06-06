@@ -8,6 +8,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <time.h>
 
 #include "queue/msg_queue.h"
 

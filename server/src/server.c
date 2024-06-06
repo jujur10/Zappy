@@ -19,6 +19,7 @@
 #include "events.h"
 #include "new_clients_handling.h"
 #include "gui_handling.h"
+#include "ai_handling.h"
 #include "clock.h"
 #include "utils/pre_generate/pre_generate.h"
 
@@ -139,6 +140,7 @@ static uint8_t server_main_loop(server_t PTR server)
         else {
             handle_new_clients(server, &rfds, &wfds, &select_ret);
             handle_guis(server, &rfds, &wfds, &select_ret);
+            handle_players(server, &rfds, &wfds, &select_ret);
         }
     }
 }

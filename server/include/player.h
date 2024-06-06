@@ -11,7 +11,12 @@
 
 #include "coordinates.h"
 #include "inventory.h"
-#include "queue/shared_msg_queue.h"
+#include "queue/msg_queue.h"
+
+/// @brief Defaults parameters.
+#define BEGINNING_LIFE_UNITS 10
+#define FOOD_TO_TIME_UNITS(x) ((x) * 126)
+#define LIFE_UNITS_TO_TIME_UNITS FOOD_TO_TIME_UNITS
 
 // Macro used to put enum on 1 byte.
 #define PACKED __attribute__ ((packed))
@@ -46,5 +51,5 @@ typedef struct player_s {
     inventory_t inventory;
     uint32_t time_to_live;
     struct timespec blocking_time;
-    shared_message_queue_head_t queue;
+    msg_queue_head_t queue;
 } player_t;

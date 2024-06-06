@@ -77,18 +77,17 @@ static uint8_t new_client_is_a_gui(server_t PTR server,
 static void new_client_is_an_ai(server_t PTR server,
     uint64_t team_name_length, uint32_t client_idx, char ARRAY buffer)
 {
-    uint64_t msg_length;
     int32_t team_index = get_team_index_by_name(server->teams,
     server->args->nb_of_teams, buffer, (uint32_t)team_name_length);
-    msg_t message;
 
     if (-1 == team_index)
         return destroy_new_client(server, client_idx, 1);
-    msg_length = fast_itoa_u32(server->teams[team_index].max_nb_of_players -
-    server->teams[team_index].nb_of_players, buffer);
-    memcpy(buffer + msg_length, "\n\0", 2);
-    create_message(buffer, (uint32_t)msg_length + 2, &message);
-    add_msg_to_queue(&server->clients[client_idx].queue, &message);
+    if (FAILURE == swap_new_client_to_ai(server, client_idx, team_index)) {
+        ERROR("Failed to accept new client in PLAYER's array")
+        server->clients[client_idx].expiration = server->clock;
+        add_to_clock(&server->clients[client_idx].expiration,
+        AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
+    }
 }
 
 /// @brief Function called when the server receive data from a new_client_t.\n
