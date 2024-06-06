@@ -25,8 +25,8 @@ using float32 = std::float32_t;
 
 struct tileModels
 {
-    raylib::Model innerModel;
-    raylib::Model outerModel;
+    raylib::Model *innerModel;
+    raylib::Model *outerModel;
 };
 
 struct innerTile // Tag

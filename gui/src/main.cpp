@@ -1,15 +1,12 @@
-#include "Camera3D.hpp"
-#include "Matrix.hpp"
-#include "Model.hpp"
-#include "Shader.hpp"
-#include "Window.hpp"
-#include "flecs.h"
+#include "map.hpp"
 #include "my_write.hpp"
 #include "sockets.hpp"
-
-#include <cstring>
-#include "map.hpp"
 #include "systems.hpp"
+
+#include <Camera3D.hpp>
+#include <Window.hpp>
+#include <cstring>
+#include <flecs.h>
 
 namespace zappy_gui
 {
@@ -66,9 +63,11 @@ int main(int argc, char *argv[])
         );
     ecs.set<raylib::Camera3D>(camera);
 
+    auto innerMod = raylib::Model("gui/resources/assets/grass_top.glb");
+    auto outerMod = raylib::Model("gui/resources/assets/grass_full.glb");
+
     // Load the animated model mesh and basic data
-    ecs.set<zappy_gui::map::tileModels>({raylib::Model("gui/resources/assets/grass_top.glb"),
-        raylib::Model("gui/resources/assets/grass_full.glb")});
+    ecs.set<zappy_gui::map::tileModels>({&innerMod, &outerMod});
 
     zappy_gui::systems::registerSystems(ecs);
 
@@ -80,8 +79,8 @@ int main(int argc, char *argv[])
     }
 
     const auto tileModels = ecs.get_mut<zappy_gui::map::tileModels>();
-    ::UnloadShader(tileModels->outerModel.GetMaterials()[0].shader);
-    ::UnloadShader(tileModels->innerModel.GetMaterials()[0].shader);
+    ::UnloadShader(tileModels->outerModel->GetMaterials()[0].shader);
+    ::UnloadShader(tileModels->innerModel->GetMaterials()[0].shader);
 
     return 0;
 }

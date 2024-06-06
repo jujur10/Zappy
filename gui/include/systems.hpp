@@ -13,6 +13,6 @@ struct world;
 namespace zappy_gui::systems
 {
 
-void registerSystems(flecs::world &ecs);
+void registerSystems(const flecs::world &ecs);
 
 }

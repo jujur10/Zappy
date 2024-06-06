@@ -31,11 +31,11 @@ void generateMap(const flecs::iter &it)
             // Assign the appropriate tag based on tile position (outer or inner)
             if (0 == x || x == (MAP_WIDTH - 1) || 0 == y || y == (MAP_HEIGHT - 1))
             {
-                it.world().entity().set<Matrix>(position).add<outerTile>();
+                it.world().entity().set<raylib::Matrix>(position).add<outerTile>();
             }
             else
             {
-                it.world().entity().set<Matrix>(position).add<innerTile>();
+                it.world().entity().set<raylib::Matrix>(position).add<innerTile>();
             }
         }
     }

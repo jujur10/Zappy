@@ -2,35 +2,19 @@
 // Created by quentinf on 05/06/24.
 //
 
-#include "map.hpp"
 #include "systems.hpp"
+#include "map.hpp"
+#include "raylib_utils.hpp"
 
+#include <Matrix.hpp>
 #include <Camera3D.hpp>
 #include <flecs.h>
 #include <rlgl.h>
 
 namespace zappy_gui::systems
 {
-static void setupModel(const raylib::Model *const model, const char *const vertShaderPath, const char *const fragShaderPath)
-{
-    Shader shader                        = ::LoadShader(vertShaderPath, fragShaderPath);
-    shader.locs[SHADER_LOC_MATRIX_MODEL] = ::GetShaderLocationAttrib(shader, "instanceTransform");
-    shader.locs[SHADER_LOC_MATRIX_MVP]   = ::GetShaderLocation(shader, "mvp");
-    for (int32_t i = 0; i < model->materialCount; ++i)
-    {
-        model->materials[i].shader = shader;
-    }
-}
 
-static void drawModelInstanced(const raylib::Model *const model, const Matrix *const matrixArray, const int32_t count)
-{
-    for (int32_t i = 0; i < model->meshCount; ++i)
-    {
-        ::DrawMeshInstanced(model->meshes[i], model->materials[model->meshMaterial[i]], matrixArray, count);
-    }
-}
-
-static void registerOnStartSystems(flecs::world &ecs)
+static void registerOnStartSystems(const flecs::world &ecs)
 {
     ecs.system("generateMap")
         .kind(flecs::OnStart)
@@ -39,12 +23,12 @@ static void registerOnStartSystems(flecs::world &ecs)
     ecs.system<map::tileModels>("loadInstancingShader")
         .kind(flecs::OnStart)
         .iter([](flecs::iter &it, const map::tileModels * const models) {
-            setupModel(&models->outerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
-            setupModel(&models->innerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
+        utils::setupModel(models->outerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
+        utils::setupModel(models->innerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
         });
 }
 
-static void registerPreUpdateSystems(flecs::world &ecs)
+static void registerPreUpdateSystems(const flecs::world &ecs)
 {
     ecs.system<raylib::Camera3D>("setupDrawing")
         .term_at(1).singleton()
@@ -60,7 +44,7 @@ static void registerPreUpdateSystems(flecs::world &ecs)
         });
 }
 
-static void registerOnUpdateSystems(flecs::world &ecs)
+static void registerOnUpdateSystems(const flecs::world &ecs)
 {
     ecs.system<raylib::Camera3D>("updateCamera")
         .term_at(1).singleton()
@@ -82,20 +66,20 @@ static void registerOnUpdateSystems(flecs::world &ecs)
                 ::GetMouseWheelMove() * 2.0f);   // Move to target (zoom)
         });
 
-    ecs.system<Matrix, map::outerTile>("drawOuterTile")
+    ecs.system<raylib::Matrix, map::outerTile>("drawOuterTile")
         .kind(flecs::OnUpdate)
-        .iter([](const flecs::iter &it, const Matrix *const tilesPosition, [[maybe_unused]] const map::outerTile *const type) {
-            drawModelInstanced(&it.world().get<map::tileModels>()->outerModel, tilesPosition, static_cast<int32_t>(it.count()));
+        .iter([](const flecs::iter &it, const raylib::Matrix *const tilesPosition, [[maybe_unused]] const map::outerTile *const type) {
+            utils::drawModelInstanced(it.world().get<map::tileModels>()->outerModel, tilesPosition, static_cast<int32_t>(it.count()));
         });
 
-    ecs.system<Matrix, map::innerTile>("drawInnerTile")
+    ecs.system<raylib::Matrix, map::innerTile>("drawInnerTile")
         .kind(flecs::OnUpdate)
-        .iter([](const flecs::iter &it, const Matrix *const tilesPosition, [[maybe_unused]] const map::innerTile *const type) {
-            drawModelInstanced(&it.world().get<map::tileModels>()->innerModel, tilesPosition, static_cast<int32_t>(it.count()));
+        .iter([](const flecs::iter &it, const raylib::Matrix *const tilesPosition, [[maybe_unused]] const map::innerTile *const type) {
+            utils::drawModelInstanced(it.world().get<map::tileModels>()->innerModel, tilesPosition, static_cast<int32_t>(it.count()));
         });
 }
 
-static void registerPostUpdateSystems(flecs::world &ecs)
+static void registerPostUpdateSystems(const flecs::world &ecs)
 {
     ecs.system<raylib::Camera3D>("endDrawing")
         .term_at(1).singleton()
@@ -109,7 +93,7 @@ static void registerPostUpdateSystems(flecs::world &ecs)
     });
 }
 
-void registerSystems(flecs::world &ecs)
+void registerSystems(const flecs::world &ecs)
 {
     registerOnStartSystems(ecs);
     registerPreUpdateSystems(ecs);
