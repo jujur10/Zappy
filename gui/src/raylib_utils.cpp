@@ -4,9 +4,10 @@
 
 #include "raylib_utils.hpp"
 
+#include "raylib.h"
 
-#include <Model.hpp>
 #include <Matrix.hpp>
+#include <Model.hpp>
 
 namespace zappy_gui::utils
 {

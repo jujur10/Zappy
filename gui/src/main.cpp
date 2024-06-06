@@ -20,8 +20,6 @@ constexpr int32_t screenHeight   = 720;
 
 }
 
-
-
 //----------------------------------------------------------------------------------
 // Main Enry Point
 //----------------------------------------------------------------------------------
@@ -39,8 +37,7 @@ int main(int argc, char *argv[])
     {
         ::_exit(1);
     }
-    // const auto serverSocket = zappy_gui::connectToServer(argv);
-
+    const auto serverSocket = zappy_gui::connectToServer(argv);
 
     flecs::world ecs;
 
@@ -50,8 +47,8 @@ int main(int argc, char *argv[])
     // Start REST API with default parameters
     ecs.set<flecs::Rest>({});
 
+    ::SetConfigFlags(FLAG_MSAA_4X_HINT);
     raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
-    window.SetConfigFlags(FLAG_MSAA_4X_HINT);
     window.SetTargetFPS(60);
 
     raylib::Camera3D camera(
@@ -65,8 +62,6 @@ int main(int argc, char *argv[])
 
     auto innerMod = raylib::Model("gui/resources/assets/grass_top.glb");
     auto outerMod = raylib::Model("gui/resources/assets/grass_full.glb");
-
-    // Load the animated model mesh and basic data
     ecs.set<zappy_gui::map::tileModels>({&innerMod, &outerMod});
 
     zappy_gui::systems::registerSystems(ecs);

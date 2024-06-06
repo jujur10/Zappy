@@ -21,7 +21,7 @@ void generateMap(const flecs::iter &it)
     {
         for (int32_t x = 0; x < MAP_WIDTH; ++x)
         {
-            const float32 offsetX = y % 2 == 0 ? 0.f32 : tileSize * 0.5f32;
+            const float32 offsetX = y % 2 == 0 ? 0.f32 : tileSize * 0.5f32; // Offset for odd rows
 
             auto position = raylib::Matrix::Translate(
                 (static_cast<float32>(x) * tileSize + offsetX - static_cast<float32>(MAP_WIDTH) * tileSize * 0.5f32) * spacing,

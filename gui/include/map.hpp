@@ -23,20 +23,28 @@ constexpr int32_t MAP_HEIGHT = 1'024;
 
 using float32 = std::float32_t;
 
+/// @brief Tile models
+///
+/// @note The inner model is the same as the full model but only the top face
 struct tileModels
 {
     raylib::Model *innerModel;
     raylib::Model *outerModel;
 };
 
-struct innerTile // Tag
+/// @brief Tag used to identify the inner tiles in the ECS
+struct innerTile
 {
 };
 
-struct outerTile // Tag
+/// @brief Tag used to identify the outer tiles in the ECS
+struct outerTile
 {
 };
 
+/// @brief Generate the map by computing and creating every tile entity
+///
+/// @param it The ECS query iterator
 void generateMap(const flecs::iter &it);
 
 }

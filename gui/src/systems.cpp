@@ -3,6 +3,7 @@
 //
 
 #include "systems.hpp"
+
 #include "map.hpp"
 #include "raylib_utils.hpp"
 
@@ -14,15 +15,18 @@
 namespace zappy_gui::systems
 {
 
+/// @brief Register systems that will be executed in the OnStart pipeline
 static void registerOnStartSystems(const flecs::world &ecs)
 {
+    /// Generate the map
     ecs.system("generateMap")
         .kind(flecs::OnStart)
         .iter(map::generateMap);
 
+    /// Query the tile models and load the instancing shader into them
     ecs.system<map::tileModels>("loadInstancingShader")
         .kind(flecs::OnStart)
-        .iter([](flecs::iter &it, const map::tileModels * const models) {
+        .iter([]([[maybe_unused]] const flecs::iter &it, const map::tileModels * const models) {
         utils::setupModel(models->outerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
         utils::setupModel(models->innerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
         });
@@ -30,6 +34,7 @@ static void registerOnStartSystems(const flecs::world &ecs)
 
 static void registerPreUpdateSystems(const flecs::world &ecs)
 {
+    /// Query the camera and setup the drawing
     ecs.system<raylib::Camera3D>("setupDrawing")
         .term_at(1).singleton()
         .kind(flecs::PreUpdate)
@@ -46,6 +51,7 @@ static void registerPreUpdateSystems(const flecs::world &ecs)
 
 static void registerOnUpdateSystems(const flecs::world &ecs)
 {
+    /// Query the camera and update it using the keyboard and mouse inputs
     ecs.system<raylib::Camera3D>("updateCamera")
         .term_at(1).singleton()
         .kind(flecs::OnUpdate)
@@ -66,12 +72,14 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                 ::GetMouseWheelMove() * 2.0f);   // Move to target (zoom)
         });
 
+    /// Query all the outer tiles and draw them
     ecs.system<raylib::Matrix, map::outerTile>("drawOuterTile")
         .kind(flecs::OnUpdate)
         .iter([](const flecs::iter &it, const raylib::Matrix *const tilesPosition, [[maybe_unused]] const map::outerTile *const type) {
             utils::drawModelInstanced(it.world().get<map::tileModels>()->outerModel, tilesPosition, static_cast<int32_t>(it.count()));
         });
 
+    /// Query all the inner tiles and draw them
     ecs.system<raylib::Matrix, map::innerTile>("drawInnerTile")
         .kind(flecs::OnUpdate)
         .iter([](const flecs::iter &it, const raylib::Matrix *const tilesPosition, [[maybe_unused]] const map::innerTile *const type) {
@@ -81,6 +89,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
 
 static void registerPostUpdateSystems(const flecs::world &ecs)
 {
+    /// Query the camera, end the drawing and display the FPS
     ecs.system<raylib::Camera3D>("endDrawing")
         .term_at(1).singleton()
         .kind(flecs::PostUpdate)
