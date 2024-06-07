@@ -70,7 +70,7 @@ static uint8_t is_ready(server_t PTR server, player_t PTR player,
     const fd_set PTR fd_set)
 {
     if (FD_ISSET(player->sock, fd_set)) {
-        if (1 == has_blocking_time_expired(&server->clock,
+        if (false == has_blocking_time_expired(&server->clock,
         &player->blocking_time))
             return 0;
         return 1;

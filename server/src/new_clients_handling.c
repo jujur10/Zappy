@@ -12,7 +12,6 @@
 #include "server.h"
 #include "clock.h"
 #include "new_clients_handling.h"
-#include "utils/itoa/fast_itoa.h"
 #include "queue/msg_queue.h"
 #include "swap_clients.h"
 #include "logging.h"
@@ -33,7 +32,7 @@ void destroy_new_client(server_t PTR server, uint32_t client_idx,
     bool preserve_sock)
 {
     LOGF("Destroying new client (client idx: %u)", client_idx)
-    if (1 == preserve_sock) {
+    if (false == preserve_sock) {
         FD_CLR(server->clients[client_idx].sock, &server->current_socks);
         close(server->clients[client_idx].sock);
     }
@@ -63,9 +62,9 @@ static bool new_client_is_a_gui(server_t PTR server,
             add_to_clock(&server->clients[client_idx].expiration,
             AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
         }
-        return 0;
+        return true;
     }
-    return 1;
+    return false;
 }
 
 /// @brief Function executed when the new client is an AI.
@@ -129,7 +128,7 @@ static uint8_t is_ready(server_t PTR server, new_client_t PTR client,
     const fd_set PTR fd_set)
 {
     if (FD_ISSET(client->sock, fd_set)) {
-        if (0 == is_timeout_exceed(&server->clock, &client->expiration))
+        if (true == is_timeout_exceed(&server->clock, &client->expiration))
             return 0;
         return 1;
     }
