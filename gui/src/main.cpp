@@ -28,17 +28,17 @@ int main(int argc, char *argv[])
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    if (2 == argc && 0 == std::strcmp(argv[1], "-help"))
-    {
-        const zappy_gui::FileWriter writer(2);
-        writer.writeNoReturn(zappy_gui::help, sizeof(zappy_gui::help));
-        return 0;
-    }
-    if (5 != argc)
-    {
-        zappy_gui::SystemExit::exit(1);
-    }
-    const auto serverSocket = zappy_gui::connectToServer(argv);
+    // if (2 == argc && 0 == std::strcmp(argv[1], "-help"))
+    // {
+    //     const zappy_gui::FileWriter writer(2);
+    //     writer.writeNoReturn(zappy_gui::help, sizeof(zappy_gui::help));
+    //     return 0;
+    // }
+    // if (5 != argc)
+    // {
+    //     zappy_gui::SystemExit::exit(1);
+    // }
+    // const auto serverSocket = zappy_gui::connectToServer(argv);
 
     flecs::world ecs;
 
