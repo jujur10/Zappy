@@ -65,6 +65,9 @@ endif ()
 add_executable(zappy_gui
     src/main.cpp
     src/argv_parser.cpp
+    src/systems.cpp
+    src/map.cpp
+    src/raylib_utils.cpp
 )
 
 target_include_directories(zappy_gui PRIVATE

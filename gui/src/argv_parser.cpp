@@ -16,11 +16,18 @@
 
 namespace zappy_gui
 {
+/// @brief Enum class for command line parsing errors
 enum class CmdParsingErrors{ WRONG_ARG_POSITION, PORT_ERROR, IP_ERROR, HOST_ERROR };
+
 static constexpr uint32_t ignoreLastByte = 0x00'FF'FF'FF;
 static constexpr uint32_t portFlagValue = 28'717;
 static constexpr uint32_t hostFlagValue = 26'669;
 
+/// @brief Parse the port from the command line arguments
+///
+/// @param portFlag The flag for the port, should be "-p"
+/// @param portValue The value for the port after the flag "-p" as a string
+/// @return The port if the parsing was successful, an error otherwise
 static std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const portFlag, const char * const portValue)
 {
     if ((*std::bit_cast<const uint32_t*>(portFlag) & ignoreLastByte) != portFlagValue)
@@ -36,6 +43,11 @@ static std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const po
     return port;
 }
 
+/// @brief Parse the IP from the command line arguments
+///
+/// @param hostFlag The flag for the host, should be "-h"
+/// @param hostValue The value for the host after the flag "-h" as a string
+/// @return The IP if the parsing was successful, an error otherwise
 static std::expected<std::string, CmdParsingErrors> parseIP(const char * const hostFlag, const char * const hostValue)
 {
     if ((*std::bit_cast<const uint32_t*>(hostFlag) & ignoreLastByte) != hostFlagValue)
