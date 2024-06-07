@@ -167,7 +167,14 @@ func (game Game) computePath() []RelativeCoordinates {
 	if len(middlePoints) == 0 {
 		return computeBasicPath(origin, destination, xDistance, yDistance, xSign, ySign)
 	}
-	return computeOptimalPath(origin, destination, middlePoints)
+	selectedMiddlePoints := computeOptimalPath(origin, destination, middlePoints)
+	path := make([]RelativeCoordinates, 0)
+	lastOrigin := origin
+	for _, point := range selectedMiddlePoints {
+		pathPart := computeBasicPath(lastOrigin, point, xDistance, yDistance, xSign, ySign)
+		path = append(path, pathPart...)
+	}
+	return path
 }
 
 // movePlayer moves the player and updates its position, and updates the movement priority queue
