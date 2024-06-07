@@ -50,21 +50,6 @@ dl_zappy_server_dev:
 
 dl-dev:	dl_zappy_ai_dev	dl_zappy_gui_dev	dl_zappy_server_dev
 
-
-dl_zappy_ai_mr:
-	@curl "$(URL)/0.0.1/zappy_ai" --output zappy_ai
-	@chmod +x zappy_ai
-
-dl_zappy_gui_mr:
-	@curl "$(URL)/0.0.1/zappy_gui" --output zappy_gui
-	@chmod +x zappy_gui
-
-dl_zappy_server_mr:
-	@curl "$(URL)/0.0.1/zappy_server" --output zappy_server
-	@chmod +x zappy_server
-
-dl-mr:	dl_zappy_ai_mr	dl_zappy_gui_mr	dl_zappy_server_mr
-
 generate_build_files:
 	@cmake -B $(BUILD_DIR) . $(CMAKE_GEN_FLAGS) -DCMAKE_BUILD_TYPE=Release
 
@@ -119,4 +104,3 @@ test_server:
 .PHONY: build zappy_ai zappy_server zappy_gui
 .PHONY: dl dl_zappy_ai dl_zappy_gui dl_zappy_server
 .PHONY: dl-dev dl_zappy_ai_dev dl_zappy_gui_dev dl_zappy_server_dev
-.PHONY: dl-mr dl_zappy_ai_mr dl_zappy_gui_mr dl_zappy_server_mr
