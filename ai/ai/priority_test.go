@@ -61,7 +61,7 @@ func TestManhattanDistance(t *testing.T) {
 //	TimeStep: time.Duration(1), TeamName: "",
 //	Socket: network.ServerConn{Reader: nil, LastCommandType: network.None, Connection: nil},
 //	Coordinates: WorldCoords{CoordsFromOrigin: RelativeCoordinates{0,0}},
-//	MovementQueue: PriorityQueue{}, Level: 1, TotalResourcesRequired: totalResourcesRequired,
+//	TilesQueue: PriorityQueue{}, Level: 1, TotalResourcesRequired: totalResourcesRequired,
 //	LevelUpResources: levelUpResources, FoodManager: FoodManagement{FoodPriority: 4, FoodChannel: make(chan int)}}
 
 func TestGame_getLevelUpPriority(t *testing.T) {
@@ -72,7 +72,7 @@ func TestGame_getLevelUpPriority(t *testing.T) {
 		TeamName               string
 		Socket                 network.ServerConn
 		Coordinates            WorldCoords
-		MovementQueue          PriorityQueue
+		Movement               MovementData
 		Level                  int
 		LevelUpResources       map[int]Inventory
 		TotalResourcesRequired Inventory
@@ -110,7 +110,7 @@ func TestGame_getLevelUpPriority(t *testing.T) {
 				TeamName:               tt.fields.TeamName,
 				Socket:                 tt.fields.Socket,
 				Coordinates:            tt.fields.Coordinates,
-				MovementQueue:          tt.fields.MovementQueue,
+				Movement:               tt.fields.Movement,
 				Level:                  tt.fields.Level,
 				LevelUpResources:       tt.fields.LevelUpResources,
 				TotalResourcesRequired: tt.fields.TotalResourcesRequired,
@@ -131,7 +131,7 @@ func TestGame_getResourcePriority(t *testing.T) {
 		TeamName               string
 		Socket                 network.ServerConn
 		Coordinates            WorldCoords
-		MovementQueue          PriorityQueue
+		Movement               MovementData
 		Level                  int
 		LevelUpResources       map[int]Inventory
 		TotalResourcesRequired Inventory
@@ -162,7 +162,7 @@ func TestGame_getResourcePriority(t *testing.T) {
 				TeamName:               tt.fields.TeamName,
 				Socket:                 tt.fields.Socket,
 				Coordinates:            tt.fields.Coordinates,
-				MovementQueue:          tt.fields.MovementQueue,
+				Movement:               tt.fields.Movement,
 				Level:                  tt.fields.Level,
 				LevelUpResources:       tt.fields.LevelUpResources,
 				TotalResourcesRequired: tt.fields.TotalResourcesRequired,
@@ -183,7 +183,7 @@ func TestGame_getTilePriority(t *testing.T) {
 		TeamName               string
 		Socket                 network.ServerConn
 		Coordinates            WorldCoords
-		MovementQueue          PriorityQueue
+		Movement               MovementData
 		Level                  int
 		LevelUpResources       map[int]Inventory
 		TotalResourcesRequired Inventory
@@ -218,7 +218,7 @@ func TestGame_getTilePriority(t *testing.T) {
 				TeamName:               tt.fields.TeamName,
 				Socket:                 tt.fields.Socket,
 				Coordinates:            tt.fields.Coordinates,
-				MovementQueue:          tt.fields.MovementQueue,
+				Movement:               tt.fields.Movement,
 				Level:                  tt.fields.Level,
 				LevelUpResources:       tt.fields.LevelUpResources,
 				TotalResourcesRequired: tt.fields.TotalResourcesRequired,
@@ -239,7 +239,7 @@ func TestGame_isResourceRequired(t *testing.T) {
 		TeamName               string
 		Socket                 network.ServerConn
 		Coordinates            WorldCoords
-		MovementQueue          PriorityQueue
+		Movement               MovementData
 		Level                  int
 		LevelUpResources       map[int]Inventory
 		TotalResourcesRequired Inventory
@@ -269,7 +269,7 @@ func TestGame_isResourceRequired(t *testing.T) {
 				TeamName:               tt.fields.TeamName,
 				Socket:                 tt.fields.Socket,
 				Coordinates:            tt.fields.Coordinates,
-				MovementQueue:          tt.fields.MovementQueue,
+				Movement:               tt.fields.Movement,
 				Level:                  tt.fields.Level,
 				LevelUpResources:       tt.fields.LevelUpResources,
 				TotalResourcesRequired: tt.fields.TotalResourcesRequired,
@@ -290,7 +290,7 @@ func TestGame_removeLevelUpResources(t *testing.T) {
 		TeamName               string
 		Socket                 network.ServerConn
 		Coordinates            WorldCoords
-		MovementQueue          PriorityQueue
+		Movement               MovementData
 		Level                  int
 		LevelUpResources       map[int]Inventory
 		TotalResourcesRequired Inventory
@@ -313,7 +313,7 @@ func TestGame_removeLevelUpResources(t *testing.T) {
 				TeamName:               tt.fields.TeamName,
 				Socket:                 tt.fields.Socket,
 				Coordinates:            tt.fields.Coordinates,
-				MovementQueue:          tt.fields.MovementQueue,
+				Movement:               tt.fields.Movement,
 				Level:                  tt.fields.Level,
 				LevelUpResources:       tt.fields.LevelUpResources,
 				TotalResourcesRequired: tt.fields.TotalResourcesRequired,
@@ -339,7 +339,7 @@ func TestGame_resourceCollected(t *testing.T) {
 		TeamName               string
 		Socket                 network.ServerConn
 		Coordinates            WorldCoords
-		MovementQueue          PriorityQueue
+		Movement               MovementData
 		Level                  int
 		LevelUpResources       map[int]Inventory
 		TotalResourcesRequired Inventory
@@ -368,7 +368,7 @@ func TestGame_resourceCollected(t *testing.T) {
 				TeamName:               tt.fields.TeamName,
 				Socket:                 tt.fields.Socket,
 				Coordinates:            tt.fields.Coordinates,
-				MovementQueue:          tt.fields.MovementQueue,
+				Movement:               tt.fields.Movement,
 				Level:                  tt.fields.Level,
 				LevelUpResources:       tt.fields.LevelUpResources,
 				TotalResourcesRequired: tt.fields.TotalResourcesRequired,

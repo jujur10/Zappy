@@ -30,6 +30,13 @@ const (
 	Thystame
 )
 
+const (
+	Up network.PlayerDirection = iota
+	Left
+	Down
+	Right
+)
+
 // A ViewMap is a double array of TileItem
 type ViewMap [][]TileItem
 
@@ -45,6 +52,8 @@ type WorldCoords struct {
 	CoordsFromOrigin RelativeCoordinates
 	// The Direction in which the player is going
 	Direction network.PlayerDirection
+	// The WorldSize
+	WorldSize RelativeCoordinates
 }
 
 // FoodManagement is a struct containing values for managing food
@@ -56,7 +65,14 @@ type FoodManagement struct {
 	FoodPriority int
 }
 
-// The main struct containing the Game data
+type MovementData struct {
+	// TilesQueue is a PriorityQueue containing the tiles to visit and loot
+	TilesQueue PriorityQueue
+	// Path is the path that the player will follow
+	Path []RelativeCoordinates
+}
+
+// Game is the main struct containing the game data
 type Game struct {
 	// The player View
 	View ViewMap
@@ -70,8 +86,8 @@ type Game struct {
 	Socket network.ServerConn
 	// The world Coordinates of the player
 	Coordinates WorldCoords
-	// MovementQueue is a PriorityQueue containing the future movements of the player
-	MovementQueue PriorityQueue
+	// Movement contains data for the player's movement
+	Movement MovementData
 	// The Level of the player
 	Level int
 	// LevelUpResources is a map of TileItem -> Inventory containing the necessary resources for level ups
@@ -109,12 +125,12 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game
 		TeamName:               teamName,
 		Socket:                 serverConn,
 		Coordinates:            WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: initialDirection},
-		MovementQueue:          make(PriorityQueue, 10),
+		Movement:               MovementData{Path: make([]RelativeCoordinates, 0), TilesQueue: make(PriorityQueue, 0)},
 		LevelUpResources:       levelUpResources,
 		TotalResourcesRequired: totalResourcesRequired,
 		FoodManager:            FoodManagement{FoodChannel: make(chan int), FoodPriority: 1},
 	}
-	heap.Init(&game.MovementQueue)
+	heap.Init(&game.Movement.TilesQueue)
 	go FoodManagementRoutine(game.FoodManager.FoodChannel, game.TimeStep)
 	return game
 }
