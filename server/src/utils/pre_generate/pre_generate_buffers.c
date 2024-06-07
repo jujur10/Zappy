@@ -53,17 +53,17 @@ static uint16_t set_world_dimensions(uint16_t offset, const server_t *server)
     return offset + write_offset;
 }
 
-uint8_t pre_generate_responses(const server_t *server)
+bool pre_generate_responses(const server_t *server)
 {
     uint16_t offset = 0;
 
     pre_generated_responses = malloc(sizeof(char) * PRE_GENERATED_ARR_LEN);
     if (NULL == pre_generated_responses)
-        return 1;
+        return false;
     offset = set_welcome(offset);
     offset = set_world_dimensions(offset, server);
     pre_generated_responses[offset] = '\0';
-    return 0;
+    return true;
 }
 
 void destroy_pre_generated_responses(void)

@@ -6,8 +6,8 @@
 */
 #include <fcntl.h>
 #include <stdint.h>
-#include <malloc.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "socket/sockets.h"
 #include "server.h"
@@ -152,9 +152,12 @@ uint8_t run_server(const argument_t PTR args)
 
     if (1 == init_server(args, &server))
         return 84;
+    srand((uint32_t)time(NULL));
     server.args = args;
-    if (1 == pre_generate_responses(&server))
+    if (false == pre_generate_responses(&server))
         return 84;
+    pre_generate_resources_counter(args);
+    spread_resources_on_map(&server.map);
     LOG("Server responses pre-generated")
     register_signals();
     ret_val = server_main_loop(&server);
