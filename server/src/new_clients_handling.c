@@ -30,7 +30,7 @@ void init_new_client(server_t PTR server, new_client_t PTR client)
 }
 
 void destroy_new_client(server_t PTR server, uint32_t client_idx,
-    uint8_t preserve_sock)
+    bool preserve_sock)
 {
     LOGF("Destroying new client (client idx: %u)", client_idx)
     if (1 == preserve_sock) {
@@ -50,14 +50,14 @@ void destroy_new_client(server_t PTR server, uint32_t client_idx,
 /// @param client_idx The client index of the new client array.
 /// @param buffer The buffer containing the original message (and overwrite
 /// by the response).
-/// @return 0 : If the client is a GUI, 1 If not.
-static uint8_t new_client_is_a_gui(server_t PTR server,
+/// @return true : If the client is a GUI, false If not.
+static bool new_client_is_a_gui(server_t PTR server,
     uint64_t team_name_length, uint32_t client_idx, char ARRAY buffer)
 {
     if (team_name_length + 1 == sizeof(GUI_TEAM) - 1 &&
     0 == strncmp(buffer, GUI_TEAM, sizeof(GUI_TEAM) - 1)) {
         LOG("Start swapping new client to GUI")
-        if (FAILURE == swap_new_client_to_gui(server, client_idx)) {
+        if (FAILURE == transform_new_client_to_gui(server, client_idx)) {
             ERROR("Failed to accept new client in GUI's array")
             server->clients[client_idx].expiration = server->clock;
             add_to_clock(&server->clients[client_idx].expiration,
@@ -81,8 +81,9 @@ static void new_client_is_an_ai(server_t PTR server,
     server->args->nb_of_teams, buffer, (uint32_t)team_name_length);
 
     if (-1 == team_index)
-        return destroy_new_client(server, client_idx, 1);
-    if (FAILURE == swap_new_client_to_ai(server, client_idx, team_index)) {
+        return destroy_new_client(server, client_idx, false);
+    if (FAILURE == transform_new_client_to_ai(server, client_idx,
+    team_index)) {
         ERROR("Failed to accept new client in PLAYER's array")
         server->clients[client_idx].expiration = server->clock;
         add_to_clock(&server->clients[client_idx].expiration,
@@ -107,11 +108,12 @@ static void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
 
     if (bytes_received < 1) {
         LOG("Client closed connection")
-        return destroy_new_client(server, client_idx, 1);
+        return destroy_new_client(server, client_idx, false);
     }
     LOGF("Client received : %.*s", (int32_t)bytes_received, buffer)
     team_name_length = strcspn(buffer, "\n");
-    if (0 == new_client_is_a_gui(server, team_name_length, client_idx, buffer))
+    if (true == new_client_is_a_gui(server, team_name_length, client_idx,
+    buffer))
         return;
     new_client_is_an_ai(server, team_name_length, client_idx, buffer);
 }
@@ -148,7 +150,7 @@ static uint8_t handle_client_rfds(server_t PTR server, uint32_t client_idx,
     LOG("Start handle client rfds");
     switch (is_ready(server, &server->clients[client_idx], rfds)) {
         case 0:
-            destroy_new_client(server, client_idx, 1);
+            destroy_new_client(server, client_idx, false);
             (*select_ret)--;
             LOG("Stop handle client rfds 1")
             return 1;
@@ -191,7 +193,7 @@ static uint8_t handle_client_wfds(server_t PTR server, uint32_t client_idx,
     LOG("Start handle client wfds");
     switch (is_ready(server, &server->clients[client_idx], wfds)) {
         case 0:
-            destroy_new_client(server, client_idx, 1);
+            destroy_new_client(server, client_idx, false);
             (*select_ret)--;
             LOG("Stop handle client wfds 1")
             return 1;

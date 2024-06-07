@@ -13,7 +13,7 @@
 #include "utils/itoa/fast_itoa.h"
 #include "utils/pre_generate/pre_generate.h"
 
-status_t swap_new_client_to_gui(server_t *server, uint32_t client_idx)
+status_t transform_new_client_to_gui(server_t *server, uint32_t client_idx)
 {
     static char buffer[12];
     uint64_t msg_length;
@@ -32,11 +32,11 @@ status_t swap_new_client_to_gui(server_t *server, uint32_t client_idx)
     create_message(pre_generated_responses + world_dim_off, world_dim_length,
     &message);
     add_msg_to_queue(&server->guis[gui_index].queue, &message);
-    destroy_new_client(server, client_idx, 0);
+    destroy_new_client(server, client_idx, true);
     return SUCCESS;
 }
 
-status_t swap_new_client_to_ai(server_t *server, uint32_t client_idx,
+status_t transform_new_client_to_ai(server_t *server, uint32_t client_idx,
     uint32_t team_index)
 {
     static char buffer[12];
@@ -56,6 +56,6 @@ status_t swap_new_client_to_ai(server_t *server, uint32_t client_idx,
     create_message(pre_generated_responses + world_dim_off, world_dim_length,
     &message);
     add_msg_to_queue(&server->players[ai_index].queue, &message);
-    destroy_new_client(server, client_idx, 0);
+    destroy_new_client(server, client_idx, true);
     return SUCCESS;
 }

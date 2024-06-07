@@ -21,9 +21,9 @@ void init_new_client(server_t PTR server, new_client_t PTR client);
 /// the old position of the last element.
 /// @param server The server pointer.
 /// @param client_idx The client index we want to destroy.
-/// @param preserve_sock 0 to preserve socket, 1 to close it.
+/// @param preserve_sock true to preserve socket, false to close it.
 void destroy_new_client(server_t PTR server, uint32_t client_idx,
-    uint8_t preserve_sock);
+    bool preserve_sock);
 
 /// @brief Function called when a new_client_t is communicating with the
 /// server.\n

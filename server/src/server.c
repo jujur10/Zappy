@@ -88,7 +88,7 @@ static uint8_t destroy_server(const argument_t PTR args, server_t PTR server)
     LOG("Server closing")
     destroy_pre_generated_responses();
     for (uint16_t i = 0; i < server->nb_clients; i++)
-        destroy_new_client(server, i, 1);
+        destroy_new_client(server, i, false);
     for (uint16_t i = 0; i < server->nb_guis; i++)
         destroy_gui(server, i);
     close(server->sock);
