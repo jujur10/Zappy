@@ -42,6 +42,8 @@ func updatePosition(position, worldSize RelativeCoordinates, direction network.P
 	return position
 }
 
+// getMiddlePoints returns all the points contained in the priority queue,
+// which are placed between the origin and destination
 func getMiddlePoints(origin, destination RelativeCoordinates, pqueue PriorityQueue) []*Item {
 	possiblePoints := make([]*Item, 0)
 	for _, element := range pqueue {
@@ -56,17 +58,19 @@ func getMiddlePoints(origin, destination RelativeCoordinates, pqueue PriorityQue
 	return possiblePoints
 }
 
+// createGraph creates a graph using the origin, destination and middle points for the Dijkstra algorithm
 func createGraph(origin, destination RelativeCoordinates, middlePoints []*Item) []graphNode {
 	graph := make([]graphNode, 1)
-	graph[0] = graphNode{isOrigin: true, isDestination: false, weight: 0, pos: origin}
-	for _, point := range middlePoints {
+	graph[0] = graphNode{isOrigin: true, isDestination: false, weight: 0, pos: origin} // Add origin
+	for _, point := range middlePoints {                                               // Create graph nodes
 		graph = append(graph,
 			graphNode{isOrigin: false, isDestination: false, weight: point.originalPriority, pos: point.value})
 	}
+	// Add destination node
 	graph = append(graph, graphNode{isOrigin: false, isDestination: true, weight: 0, pos: destination})
 	graphLastIdx := len(graph) - 1
 
-	for origIdx := range graph {
+	for origIdx := range graph { // Add links between nodes
 		links := make([]graphPath, 0)
 		for destIdx := range graph {
 			if graph[origIdx].pos == graph[destIdx].pos || // Avoid loops and connecting origin to destination
@@ -82,6 +86,7 @@ func createGraph(origin, destination RelativeCoordinates, middlePoints []*Item) 
 	return graph
 }
 
+// getQueueItemPtr returns the pointer to the item in the queue containing node
 func getQueueItemPtr(queue graphPriorityQueue, node *graphNode) *graphItem {
 	for _, element := range queue {
 		if element.node == node {
@@ -95,14 +100,14 @@ func getQueueItemPtr(queue graphPriorityQueue, node *graphNode) *graphItem {
 // It uses a modified Dijkstra Algorithm
 func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []*Item) []RelativeCoordinates {
 	graph := createGraph(origin, destination, middlePoints)
-	queue := make(graphPriorityQueue, 1)
+	queue := make(graphPriorityQueue, 1) // Create priority queue
 	queue[0] = &graphItem{node: &graph[0], priority: 0, index: 0}
 
-	distanceMap := make(map[RelativeCoordinates]int)
-	weightsMap := make(map[RelativeCoordinates]int)
-	predecessorsMap := make(map[RelativeCoordinates]graphNode)
+	distanceMap := make(map[RelativeCoordinates]int)           // Create distances map
+	weightsMap := make(map[RelativeCoordinates]int)            // Create weights map
+	predecessorsMap := make(map[RelativeCoordinates]graphNode) // Create predecessors map
 
-	for nodeIdx := range graph {
+	for nodeIdx := range graph { // Initialize the priority queue with all the nodes as 'unreachable'
 		if graph[nodeIdx].isOrigin == false {
 			distanceMap[graph[nodeIdx].pos] = math.MaxInt
 			weightsMap[graph[nodeIdx].pos] = 0
@@ -110,15 +115,15 @@ func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []
 		}
 	}
 
-	for queue.Len() > 0 {
-		bestNode := heap.Pop(&queue).(*graphItem)
-		for _, link := range bestNode.node.paths {
-			dist := distanceMap[bestNode.node.pos] + link.length
+	for queue.Len() > 0 { // Until all the paths are processed
+		bestNode := heap.Pop(&queue).(*graphItem)  // Pop the nearest node
+		for _, link := range bestNode.node.paths { // Iterate over all links
+			dist := distanceMap[bestNode.node.pos] + link.length // Compute next values
 			weight := weightsMap[bestNode.node.pos] + link.destination.weight
 
-			if dist < distanceMap[link.destination.pos] ||
+			if dist < distanceMap[link.destination.pos] || // If the path is shorter or the weight is higher
 				(dist <= distanceMap[link.destination.pos] && weight > weightsMap[link.destination.pos]) {
-				predecessorsMap[link.destination.pos] = *bestNode.node
+				predecessorsMap[link.destination.pos] = *bestNode.node // Update nodes values
 				distanceMap[link.destination.pos] = dist
 				weightsMap[link.destination.pos] = weight
 				queue.Update(getQueueItemPtr(queue, link.destination), link.destination, dist)
@@ -128,12 +133,12 @@ func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []
 
 	out := make([]RelativeCoordinates, 0)
 	nodeKey := destination
-	for nodeKey != origin {
+	for nodeKey != origin { // Get the path
 		out = append(out, nodeKey)
 		nodeKey = predecessorsMap[nodeKey].pos
 	}
 	out = out[1:]
-	slices.Reverse(out)
+	slices.Reverse(out) // Reverse the path
 
 	return out
 }
@@ -167,10 +172,10 @@ func (game Game) computePath() []RelativeCoordinates {
 	if len(middlePoints) == 0 {
 		return computeBasicPath(origin, destination, xDistance, yDistance, xSign, ySign)
 	}
-	selectedMiddlePoints := computeOptimalPath(origin, destination, middlePoints)
+	selectedMiddlePoints := computeOptimalPath(origin, destination, middlePoints) // Get the middle points to go through
 	path := make([]RelativeCoordinates, 0)
 	lastOrigin := origin
-	for _, point := range selectedMiddlePoints {
+	for _, point := range selectedMiddlePoints { // Create the path linking all the points
 		pathPart := computeBasicPath(lastOrigin, point, xDistance, yDistance, xSign, ySign)
 		path = append(path, pathPart...)
 	}
