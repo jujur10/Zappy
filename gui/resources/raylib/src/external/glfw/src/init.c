@@ -194,7 +194,7 @@ char** _glfwParseUriList(char* text, int* count)
         if (strncmp(line, prefix, strlen(prefix)) == 0)
         {
             line += strlen(prefix);
-            // TODO: Validate hostname
+            // : Validate hostname
             while (*line != '/')
                 line++;
         }

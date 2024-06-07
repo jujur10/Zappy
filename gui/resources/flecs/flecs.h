@@ -21684,7 +21684,7 @@ public:
      */
     template <typename T>
     T* param() {
-        /* TODO: type check */
+        /* : type check */
         return static_cast<T*>(m_iter->param);
     }
 

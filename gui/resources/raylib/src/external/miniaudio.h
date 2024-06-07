@@ -10259,7 +10259,7 @@ MA_API ma_resource_manager_pipeline_notifications ma_resource_manager_pipeline_n
 
 
 /* BEGIN BACKWARDS COMPATIBILITY */
-/* TODO: Remove this block in version 0.12. */
+/* : Remove this block in version 0.12. */
 #if 1
 #define ma_resource_manager_job                         ma_job
 #define ma_resource_manager_job_init                    ma_job_init
@@ -11760,7 +11760,7 @@ static MA_INLINE ma_bool32 ma_has_neon(void)
         #if (defined(__ARM_NEON) || defined(__aarch64__) || defined(_M_ARM64))
             return MA_TRUE;    /* If the compiler is allowed to freely generate NEON code we can assume support. */
         #else
-            /* TODO: Runtime check. */
+            /* : Runtime check. */
             return MA_FALSE;
         #endif
     #else
@@ -12251,31 +12251,31 @@ static MA_INLINE void ma_zero_memory_default(void* p, size_t sz)
 
 static MA_INLINE double ma_sind(double x)
 {
-    /* TODO: Implement custom sin(x). */
+    /* : Implement custom sin(x). */
     return sin(x);
 }
 
 static MA_INLINE double ma_expd(double x)
 {
-    /* TODO: Implement custom exp(x). */
+    /* : Implement custom exp(x). */
     return exp(x);
 }
 
 static MA_INLINE double ma_logd(double x)
 {
-    /* TODO: Implement custom log(x). */
+    /* : Implement custom log(x). */
     return log(x);
 }
 
 static MA_INLINE double ma_powd(double x, double y)
 {
-    /* TODO: Implement custom pow(x, y). */
+    /* : Implement custom pow(x, y). */
     return pow(x, y);
 }
 
 static MA_INLINE double ma_sqrtd(double x)
 {
-    /* TODO: Implement custom sqrt(x). */
+    /* : Implement custom sqrt(x). */
     return sqrt(x);
 }
 
@@ -19444,7 +19444,7 @@ static ma_result ma_device_do_operation__null(ma_device* pDevice, ma_uint32 oper
     ma_result result;
 
     /*
-    TODO: Need to review this and consider just using mutual exclusion. I think the original motivation
+    : Need to review this and consider just using mutual exclusion. I think the original motivation
     for this was to just post the event to a queue and return immediately, but that has since changed
     and now this function is synchronous. I think this can be simplified to just use a mutex.
     */
@@ -22124,7 +22124,7 @@ static ma_result ma_device_init_internal__wasapi(ma_context* pContext, ma_device
         exclusive mode. The alternative is to enumerate over different formats and check IsFormatSupported()
         until you find one that works.
 
-        TODO: Add support for exclusive mode to UWP.
+        : Add support for exclusive mode to UWP.
         */
         hr = S_FALSE;
     #endif
@@ -22471,7 +22471,7 @@ static ma_result ma_device_init_internal__wasapi(ma_context* pContext, ma_device
     #else
     {
         /* UWP */
-        /* TODO: Implement me. Need to figure out how to get the ID of the default device. */
+        /* : Implement me. Need to figure out how to get the ID of the default device. */
     }
     #endif
 
@@ -31983,7 +31983,7 @@ static ma_result ma_format_from_AudioStreamBasicDescription(const AudioStreamBas
                     return MA_SUCCESS;
                 } else {
                     if (pDescription->mBytesPerFrame/pDescription->mChannelsPerFrame == sizeof(ma_int32)) {
-                        /* TODO: Implement ma_format_s24_32. */
+                        /* : Implement ma_format_s24_32. */
                         /**pFormatOut = ma_format_s24_32;*/
                         /*return MA_SUCCESS;*/
                         return MA_FORMAT_NOT_SUPPORTED;
@@ -32173,7 +32173,7 @@ static ma_result ma_get_channel_map_from_AudioChannelLayout(AudioChannelLayout* 
                 pChannelMap[0] = MA_CHANNEL_LEFT;
             } break;
 
-            /* TODO: Add support for more tags here. */
+            /* : Add support for more tags here. */
 
             default:
             {
@@ -32365,7 +32365,7 @@ static ma_result ma_get_AudioObject_stream_descriptions(ma_context* pContext, Au
     MA_ASSERT(ppDescriptions != NULL);
 
     /*
-    TODO: Experiment with kAudioStreamPropertyAvailablePhysicalFormats instead of (or in addition to) kAudioStreamPropertyAvailableVirtualFormats. My
+    : Experiment with kAudioStreamPropertyAvailablePhysicalFormats instead of (or in addition to) kAudioStreamPropertyAvailableVirtualFormats. My
           MacBook Pro uses s24/32 format, however, which miniaudio does not currently support.
     */
     propAddress.mSelector = kAudioStreamPropertyAvailableVirtualFormats; /*kAudioStreamPropertyAvailablePhysicalFormats;*/
@@ -33650,7 +33650,7 @@ static void on_start_stop__coreaudio(void* pUserData, AudioUnit audioUnit, Audio
                 will try switching to the new default device seamlessly. We need to somehow find a way to determine whether or not Core Audio will most
                 likely be successful in switching to the new device.
 
-                TODO: Try to predict if Core Audio will switch devices. If not, the stopped callback needs to be posted.
+                : Try to predict if Core Audio will switch devices. If not, the stopped callback needs to be posted.
                 */
                 goto done;
             }
@@ -34333,7 +34333,7 @@ static ma_result ma_device_init_internal__coreaudio(ma_context* pContext, ma_dev
     #endif
     }
 #else
-    /* TODO: Figure out how to get the channel map using AVAudioSession. */
+    /* : Figure out how to get the channel map using AVAudioSession. */
     ma_channel_map_init_standard(ma_standard_channel_map_default, pData->channelMapOut, ma_countof(pData->channelMapOut), pData->channelsOut);
 #endif
 
@@ -38604,7 +38604,7 @@ static ma_result ma_context_enumerate_devices__opensl(ma_context* pContext, ma_e
     }
 
     /*
-    TODO: Test Me.
+    : Test Me.
 
     This is currently untested, so for now we are just returning default devices.
     */
@@ -38750,7 +38750,7 @@ static ma_result ma_context_get_device_info__opensl(ma_context* pContext, ma_dev
     }
 
     /*
-    TODO: Test Me.
+    : Test Me.
 
     This is currently untested, so for now we are just returning default devices.
     */
@@ -39640,7 +39640,7 @@ Web Audio Backend
 #endif
 
 /*
-TODO: Version 0.12: Swap this logic around so that AudioWorklets are used by default. Add MA_NO_AUDIO_WORKLETS.
+: Version 0.12: Swap this logic around so that AudioWorklets are used by default. Add MA_NO_AUDIO_WORKLETS.
 */
 #if defined(MA_ENABLE_AUDIO_WORKLETS) && defined(MA_SUPPORT_AUDIO_WORKLETS)
     #define MA_USE_AUDIO_WORKLETS
@@ -40835,7 +40835,7 @@ MA_API ma_result ma_device_post_init(ma_device* pDevice, ma_device_type deviceTy
     }
 
     /* Update data conversion. */
-    return ma_device__post_init_setup(pDevice, deviceType); /* TODO: Should probably rename ma_device__post_init_setup() to something better. */
+    return ma_device__post_init_setup(pDevice, deviceType); /* : Should probably rename ma_device__post_init_setup() to something better. */
 }
 
 
@@ -42900,7 +42900,7 @@ MA_API void ma_copy_and_apply_volume_factor_per_channel_f32(float* pFramesOut, c
     ma_uint64 iFrame;
 
     if (channels == 2) {
-        /* TODO: Do an optimized implementation for stereo and mono. Can do a SIMD optimized implementation as well. */
+        /* : Do an optimized implementation for stereo and mono. Can do a SIMD optimized implementation as well. */
     }
 
     for (iFrame = 0; iFrame < frameCount; iFrame += 1) {
@@ -47494,7 +47494,7 @@ static ma_result ma_bpf_reinit__internal(const ma_bpf_config* pConfig, void* pHe
         ma_bpf2_config bpf2Config;
         double q;
 
-        /* TODO: Calculate Q to make this a proper Butterworth filter. */
+        /* : Calculate Q to make this a proper Butterworth filter. */
         q = 0.707107;
 
         bpf2Config = ma_bpf2_config_init(pConfig->format, pConfig->channels, pConfig->sampleRate, pConfig->cutoffFrequency, q);
@@ -57930,7 +57930,7 @@ MA_API ma_result ma_audio_buffer_ref_init(ma_format format, ma_uint32 channels, 
 
     pAudioBufferRef->format       = format;
     pAudioBufferRef->channels     = channels;
-    pAudioBufferRef->sampleRate   = 0;  /* TODO: Version 0.12. Set this to sampleRate. */
+    pAudioBufferRef->sampleRate   = 0;  /* : Version 0.12. Set this to sampleRate. */
     pAudioBufferRef->cursor       = 0;
     pAudioBufferRef->sizeInFrames = sizeInFrames;
     pAudioBufferRef->pData        = pData;
@@ -58143,7 +58143,7 @@ MA_API ma_audio_buffer_config ma_audio_buffer_config_init(ma_format format, ma_u
     MA_ZERO_OBJECT(&config);
     config.format       = format;
     config.channels     = channels;
-    config.sampleRate   = 0;    /* TODO: Version 0.12. Set this to sampleRate. */
+    config.sampleRate   = 0;    /* : Version 0.12. Set this to sampleRate. */
     config.sizeInFrames = sizeInFrames;
     config.pData        = pData;
     ma_allocation_callbacks_init_copy(&config.allocationCallbacks, pAllocationCallbacks);
@@ -58174,7 +58174,7 @@ static ma_result ma_audio_buffer_init_ex(const ma_audio_buffer_config* pConfig, 
         return result;
     }
 
-    /* TODO: Version 0.12. Set this in ma_audio_buffer_ref_init() instead of here. */
+    /* : Version 0.12. Set this in ma_audio_buffer_ref_init() instead of here. */
     pAudioBuffer->ref.sampleRate = pConfig->sampleRate;
 
     ma_allocation_callbacks_init_copy(&pAudioBuffer->allocationCallbacks, &pConfig->allocationCallbacks);
@@ -72723,7 +72723,7 @@ static ma_result ma_node_read_pcm_frames(ma_node* pNode, ma_uint32 outputBusInde
                                 framesRead = 0; /* Just for safety, but I don't think it's really needed. */
                             }
 
-                            /* TODO: Minor optimization opportunity here. If no frames were read and the buffer is already filled with silence, no need to re-silence it. */
+                            /* : Minor optimization opportunity here. If no frames were read and the buffer is already filled with silence, no need to re-silence it. */
                             /* Any leftover frames need to silenced for safety. */
                             if (framesRead < framesToProcessIn) {
                                 ma_silence_pcm_frames(ppFramesIn[iInputBus] + (framesRead * ma_node_get_input_channels(pNodeBase, iInputBus)), (framesToProcessIn - framesRead), ma_format_f32, ma_node_get_input_channels(pNodeBase, iInputBus));
@@ -74296,7 +74296,7 @@ static void ma_engine_node_process_pcm_frames__general(ma_engine_node* pEngineNo
                     ma_copy_and_apply_volume_factor_f32(pRunningFramesOut, pWorkingBuffer, framesJustProcessedOut * channelsOut, volume);
                 }
             } else {
-                /* Channel conversion required. TODO: Add support for channel maps here. */
+                /* Channel conversion required. : Add support for channel maps here. */
                 ma_channel_map_apply_f32(pRunningFramesOut, NULL, channelsOut, pWorkingBuffer, NULL, channelsIn, framesJustProcessedOut, ma_channel_mix_mode_simple, pEngineNode->monoExpansionMode);
 
                 /* If we're using smoothing, the volume will have already been applied. */
@@ -75089,7 +75089,7 @@ MA_API ma_result ma_engine_init(const ma_engine_config* pConfig, ma_engine* pEng
         }
         #endif
 
-        result = ma_spatializer_listener_init(&listenerConfig, &pEngine->allocationCallbacks, &pEngine->listeners[iListener]);  /* TODO: Change this to a pre-allocated heap. */
+        result = ma_spatializer_listener_init(&listenerConfig, &pEngine->allocationCallbacks, &pEngine->listeners[iListener]);  /* : Change this to a pre-allocated heap. */
         if (result != MA_SUCCESS) {
             goto on_error_2;
         }

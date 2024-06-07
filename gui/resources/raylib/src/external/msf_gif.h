@@ -217,7 +217,7 @@ int msf_gif_end_to_file(MsfGifState * handle); //returns 0 on error and non-zero
 
 #include <string.h> //memcpy
 
-//TODO: use compiler-specific notation to force-inline functions currently marked inline
+//: use compiler-specific notation to force-inline functions currently marked inline
 #if defined(__GNUC__) //gcc, clang
 static inline int msf_bit_log(int i) { return 32 - __builtin_clz(i); }
 #elif defined(_MSC_VER) //msvc
@@ -279,7 +279,7 @@ static void msf_cook_frame(MsfCookedFrame * frame, uint8_t * raw, uint8_t * used
         int paletteSize = (1 << (rbits + gbits + bbits)) + 1;
         memset(used, 0, paletteSize * sizeof(uint8_t));
 
-        //TODO: document what this math does and why it's correct
+        //: document what this math does and why it's correct
         int rdiff = (1 << (8 - rbits)) - 1;
         int gdiff = (1 << (8 - gbits)) - 1;
         int bdiff = (1 << (8 - bbits)) - 1;
@@ -319,7 +319,7 @@ static void msf_cook_frame(MsfCookedFrame * frame, uint8_t * raw, uint8_t * used
                     __m128i invAlphaMask = _mm_cmplt_epi32(_mm_srli_epi32(p, 24), _mm_set1_epi32(msf_gif_alpha_threshold));
                     out = _mm_or_si128(_mm_and_si128(invAlphaMask, _mm_set1_epi32(paletteSize - 1)), _mm_andnot_si128(invAlphaMask, out));
 
-                    //TODO: does storing this as a __m128i then reading it back as a uint32_t violate strict aliasing?
+                    //: does storing this as a __m128i then reading it back as a uint32_t violate strict aliasing?
                     uint32_t * c = &cooked[y * width + x];
                     _mm_storeu_si128((__m128i *) c, out);
                 }

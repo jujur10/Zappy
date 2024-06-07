@@ -531,7 +531,7 @@ int InitPlatform(void)
     if (orientation == ACONFIGURATION_ORIENTATION_PORT) TRACELOG(LOG_INFO, "ANDROID: Window orientation set as portrait");
     else if (orientation == ACONFIGURATION_ORIENTATION_LAND) TRACELOG(LOG_INFO, "ANDROID: Window orientation set as landscape");
 
-    // TODO: Automatic orientation doesn't seem to work
+    // : Automatic orientation doesn't seem to work
     if (CORE.Window.screen.width <= CORE.Window.screen.height)
     {
         AConfiguration_setOrientation(platform.app->config, ACONFIGURATION_ORIENTATION_PORT);
@@ -828,14 +828,14 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
                     // Initialize random seed
                     SetRandomSeed((unsigned int)time(NULL));
 
-                    // TODO: GPU assets reload in case of lost focus (lost context)
+                    // : GPU assets reload in case of lost focus (lost context)
                     // NOTE: This problem has been solved just unbinding and rebinding context from display
                     /*
                     if (assetsReloadRequired)
                     {
                         for (int i = 0; i < assetCount; i++)
                         {
-                            // TODO: Unload old asset if required
+                            // : Unload old asset if required
 
                             // Load texture again to pointed texture
                             (*textureAsset + i) = LoadTexture(assetPath[i]);

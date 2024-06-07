@@ -1524,7 +1524,7 @@ Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Co
         if (codepoint == '\n')
         {
             // NOTE: Fixed line spacing of 1.5 line-height
-            // TODO: Support custom line spacing defined by user
+            // : Support custom line spacing defined by user
             textOffsetY += (font.baseSize + font.baseSize/2);
             textOffsetX = 0;
         }
@@ -1550,7 +1550,7 @@ Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Co
         TRACELOG(LOG_INFO, "IMAGE: Text scaled by factor: %f", scaleFactor);
 
         // Using nearest-neighbor scaling algorithm for default font
-        // TODO: Allow defining the preferred scaling mechanism externally
+        // : Allow defining the preferred scaling mechanism externally
         if (font.texture.id == GetFontDefault().texture.id) ImageResizeNN(&imText, (int)(imSize.x*scaleFactor), (int)(imSize.y*scaleFactor));
         else ImageResize(&imText, (int)(imSize.x*scaleFactor), (int)(imSize.y*scaleFactor));
     }
@@ -1693,7 +1693,7 @@ void ImageResizeCanvas(Image *image, int newWidth, int newHeight, int offsetX, i
         int bytesPerPixel = GetPixelDataSize(1, 1, image->format);
         unsigned char *resizedData = (unsigned char *)RL_CALLOC(newWidth*newHeight*bytesPerPixel, 1);
 
-        // TODO: Fill resized canvas with fill color (must be formatted to image->format)
+        // : Fill resized canvas with fill color (must be formatted to image->format)
 
         int dstOffsetSize = ((int)dstPos.y*newWidth + (int)dstPos.x)*bytesPerPixel;
 
@@ -3511,7 +3511,7 @@ void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color 
         //    [-] GetPixelColor(): Get Vector4 instead of Color, easier for ColorAlphaBlend()
         //    [ ] Support f32bit channels drawing
 
-        // TODO: Support PIXELFORMAT_UNCOMPRESSED_R32, PIXELFORMAT_UNCOMPRESSED_R32G32B32, PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 and 16-bit equivalents
+        // : Support PIXELFORMAT_UNCOMPRESSED_R32, PIXELFORMAT_UNCOMPRESSED_R32G32B32, PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 and 16-bit equivalents
 
         Color colSrc, colDst, blend;
         bool blendRequired = true;
@@ -3671,7 +3671,7 @@ TextureCubemap LoadTextureCubemap(Image image, int layout)
         }
         else if (layout == CUBEMAP_LAYOUT_PANORAMA)
         {
-            // TODO: Convert panorama image to square faces...
+            // : Convert panorama image to square faces...
             // Ref: https://github.com/denivip/panorama/blob/master/panorama.cpp
         }
         else
@@ -3760,7 +3760,7 @@ RenderTexture2D LoadRenderTexture(int width, int height)
 // Check if a texture is ready
 bool IsTextureReady(Texture2D texture)
 {
-    // TODO: Validate maximum texture size supported by GPU?
+    // : Validate maximum texture size supported by GPU?
 
     return ((texture.id > 0) &&         // Validate OpenGL id
             (texture.width > 0) &&

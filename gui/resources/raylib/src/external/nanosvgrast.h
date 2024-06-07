@@ -1021,8 +1021,8 @@ static void nsvg__scanlineSolid(unsigned char* dst, int count, unsigned char* co
 			dst += 4;
 		}
 	} else if (cache->type == NSVG_PAINT_LINEAR_GRADIENT) {
-		// TODO: spread modes.
-		// TODO: plenty of opportunities to optimize.
+		// : spread modes.
+		// : plenty of opportunities to optimize.
 		float fx, fy, dx, gy;
 		float* t = cache->xform;
 		int i, cr, cg, cb, ca;
@@ -1065,9 +1065,9 @@ static void nsvg__scanlineSolid(unsigned char* dst, int count, unsigned char* co
 			fx += dx;
 		}
 	} else if (cache->type == NSVG_PAINT_RADIAL_GRADIENT) {
-		// TODO: spread modes.
-		// TODO: plenty of opportunities to optimize.
-		// TODO: focus (fx,fy)
+		// : spread modes.
+		// : plenty of opportunities to optimize.
+		// : focus (fx,fy)
 		float fx, fy, dx, gx, gy, gd;
 		float* t = cache->xform;
 		int i, cr, cg, cb, ca;

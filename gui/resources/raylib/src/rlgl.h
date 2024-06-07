@@ -2261,7 +2261,7 @@ void rlLoadExtensions(void *loader)
     RLGL.ExtSupported.maxDepthBits = 24;
     RLGL.ExtSupported.texAnisoFilter = true;
     RLGL.ExtSupported.texMirrorClamp = true;
-    // TODO: Check for additional OpenGL ES 3.0 supported extensions:
+    // : Check for additional OpenGL ES 3.0 supported extensions:
     //RLGL.ExtSupported.texCompDXT = true;
     //RLGL.ExtSupported.texCompETC1 = true;
     //RLGL.ExtSupported.texCompETC2 = true;
@@ -2274,7 +2274,7 @@ void rlLoadExtensions(void *loader)
 #elif defined(GRAPHICS_API_OPENGL_ES2)
 
     #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_DESKTOP_SDL)
-    // TODO: Support GLAD loader for OpenGL ES 3.0
+    // : Support GLAD loader for OpenGL ES 3.0
     if (gladLoadGLES2((GLADloadfunc)loader) == 0) TRACELOG(RL_LOG_WARNING, "GLAD: Cannot load OpenGL ES2.0 functions");
     else TRACELOG(RL_LOG_INFO, "GLAD: OpenGL ES 2.0 loaded successfully");
     #endif
@@ -2727,7 +2727,7 @@ void rlDrawRenderBatch(rlRenderBatch *batch)
     // Update batch vertex buffers
     //------------------------------------------------------------------------------------------------------------
     // NOTE: If there is not vertex data, buffers doesn't need to be updated (vertexCount > 0)
-    // TODO: If no data changed on the CPU arrays --> No need to re-update GPU arrays (use a change detector flag?)
+    // : If no data changed on the CPU arrays --> No need to re-update GPU arrays (use a change detector flag?)
     if (RLGL.State.vertexCounter > 0)
     {
         // Activate elements VAO
@@ -3572,7 +3572,7 @@ void rlUnloadFramebuffer(unsigned int id)
     glBindFramebuffer(GL_FRAMEBUFFER, id);   // Bind framebuffer to query depth texture type
     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &depthType);
 
-    // TODO: Review warning retrieving object name in WebGL
+    // : Review warning retrieving object name in WebGL
     // WARNING: WebGL: INVALID_ENUM: getFramebufferAttachmentParameter: invalid parameter name
     // https://registry.khronos.org/webgl/specs/latest/1.0/
     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &depthId);
@@ -4343,7 +4343,7 @@ Matrix rlGetMatrixTransform(void)
 {
     Matrix mat = rlMatrixIdentity();
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
-    // TODO: Consider possible transform matrices in the RLGL.State.stack
+    // : Consider possible transform matrices in the RLGL.State.stack
     // Is this the right order? or should we start with the first stored matrix instead of the last one?
     //Matrix matStackTransform = rlMatrixIdentity();
     //for (int i = RLGL.State.stackCounter; i > 0; i--) matStackTransform = rlMatrixMultiply(RLGL.State.stack[i], matStackTransform);

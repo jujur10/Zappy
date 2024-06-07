@@ -144,7 +144,7 @@ static PlatformData platform = { 0 };   // Platform specific data
 // Local Variables Definition
 //----------------------------------------------------------------------------------
 // Scancode to keycode mapping for US keyboards
-// TODO: Replace this with a keymap from the X11 to get the correct regional map for the keyboard:
+// : Replace this with a keymap from the X11 to get the correct regional map for the keyboard:
 // Currently non US keyboards will have the wrong mapping for some keys
 static const int keymapUS[] = {
     0, 256, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 45, 61, 259, 258, 81, 87, 69, 82, 84,
@@ -165,7 +165,7 @@ static const int keymapUS[] = {
 };
 
 // NOTE: The complete evdev EV_KEY list can be found at /usr/include/linux/input-event-codes.h
-// TODO: Complete the LUT with all unicode decimal values
+// : Complete the LUT with all unicode decimal values
 static const int EvkeyToUnicodeLUT[] = {
     0, 27, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 45, 61, 8, 0, 113, 119, 101, 114,
     116, 121, 117, 105, 111, 112, 0, 0, 13, 0, 97, 115, 100, 102, 103, 104, 106, 107, 108, 59,
@@ -1525,7 +1525,7 @@ static void ConfigureEvdevDevice(char *device)
     {
         if (sscanf(ptrDevName, "t%d", &devNum) == 1) worker->eventNum = devNum;
     }
-    else worker->eventNum = 0;      // TODO: HACK: Grab number for mouse0 device!
+    else worker->eventNum = 0;      // : HACK: Grab number for mouse0 device!
 
     // At this point we have a connection to the device, but we don't yet know what the device is.
     // It could be many things, even as simple as a power button...

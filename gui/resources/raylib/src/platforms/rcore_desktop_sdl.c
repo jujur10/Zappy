@@ -838,7 +838,7 @@ Vector2 GetWindowScaleDPI(void)
 
     // NOTE: SDL_GetWindowDisplayScale was only added on SDL3
     //       see https://wiki.libsdl.org/SDL3/SDL_GetWindowDisplayScale
-    // TODO: Implement the window scale factor calculation manually.
+    // : Implement the window scale factor calculation manually.
     TRACELOG(LOG_WARNING, "GetWindowScaleDPI() not implemented on target platform");
 
     return scale;
@@ -980,7 +980,7 @@ void PollInputEvents(void)
     for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.previousTouchState[i] = CORE.Input.Touch.currentTouchState[i];
 
     // Reset touch positions
-    // TODO: It resets on target platform the mouse position and not filled again until a move-event,
+    // : It resets on target platform the mouse position and not filled again until a move-event,
     // so, if mouse is not moved it returns a (0, 0) position... this behaviour should be reviewed!
     //for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.position[i] = (Vector2){ 0, 0 };
 
@@ -1032,7 +1032,7 @@ void PollInputEvents(void)
                 {
                     // When a new file is dropped, we reserve a fixed number of slots for all possible dropped files
                     // at the moment we limit the number of drops at once to 1024 files but this behaviour should probably be reviewed
-                    // TODO: Pointers should probably be reallocated for any new file added...
+                    // : Pointers should probably be reallocated for any new file added...
                     CORE.Window.dropFilepaths = (char **)RL_CALLOC(1024, sizeof(char *));
 
                     CORE.Window.dropFilepaths[CORE.Window.dropFileCount] = (char *)RL_CALLOC(MAX_FILEPATH_LENGTH, sizeof(char));
@@ -1089,7 +1089,7 @@ void PollInputEvents(void)
                 KeyboardKey key = ConvertScancodeToKey(event.key.keysym.scancode);
                 if (key != KEY_NULL) CORE.Input.Keyboard.currentKeyState[key] = 1;
 
-                // TODO: Put exitKey verification outside the switch?
+                // : Put exitKey verification outside the switch?
                 if (CORE.Input.Keyboard.currentKeyState[CORE.Input.Keyboard.exitKey])
                 {
                     CORE.Window.shouldClose = true;

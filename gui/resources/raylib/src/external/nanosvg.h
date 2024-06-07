@@ -828,7 +828,7 @@ static NSVGgradient* nsvg__createGradient(NSVGparser* p, const char* id, const f
 	data = nsvg__findGradientData(p, id);
 	if (data == NULL) return NULL;
 
-	// TODO: use ref to fill in all unset values too.
+	// : use ref to fill in all unset values too.
 	ref = data;
 	refIter = 0;
 	while (ref != NULL) {
@@ -1698,7 +1698,7 @@ static char nsvg__parseLineCap(const char* str)
 		return NSVG_CAP_ROUND;
 	else if (strcmp(str, "square") == 0)
 		return NSVG_CAP_SQUARE;
-	// TODO: handle inherit.
+	// : handle inherit.
 	return NSVG_CAP_BUTT;
 }
 
@@ -1710,7 +1710,7 @@ static char nsvg__parseLineJoin(const char* str)
 		return NSVG_JOIN_ROUND;
 	else if (strcmp(str, "bevel") == 0)
 		return NSVG_JOIN_BEVEL;
-	// TODO: handle inherit.
+	// : handle inherit.
 	return NSVG_JOIN_MITER;
 }
 
@@ -1720,7 +1720,7 @@ static char nsvg__parseFillRule(const char* str)
 		return NSVG_FILLRULE_NONZERO;
 	else if (strcmp(str, "evenodd") == 0)
 		return NSVG_FILLRULE_EVENODD;
-	// TODO: handle inherit.
+	// : handle inherit.
 	return NSVG_FILLRULE_NONZERO;
 }
 

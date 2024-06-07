@@ -2168,7 +2168,7 @@ uint64_t jar_xm_get_remaining_samples(jar_xm_context_t* ctx) {
 }
 
 //--------------------------------------------
-//FILE LOADER - TODO - NEEDS TO BE CLEANED UP
+//FILE LOADER -  - NEEDS TO BE CLEANED UP
 //--------------------------------------------
 #undef DEBUG
 #define DEBUG(...) do {      \

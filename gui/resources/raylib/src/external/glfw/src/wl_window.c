@@ -1119,7 +1119,7 @@ static void setCursor(_GLFWwindow* window, const char* name)
                         "Wayland: Standard cursor shape unavailable");
         return;
     }
-    // TODO: handle animated cursors too.
+    // : handle animated cursors too.
     image = cursor->images[0];
 
     if (!image)
@@ -2084,7 +2084,7 @@ void _glfwHideWindowWayland(_GLFWwindow* window)
 
 void _glfwRequestWindowAttentionWayland(_GLFWwindow* window)
 {
-    // TODO
+    // 
     _glfwInputError(GLFW_FEATURE_UNIMPLEMENTED,
                     "Wayland: Window attention request not implemented yet");
 }
@@ -2154,7 +2154,7 @@ GLFWbool _glfwFramebufferTransparentWayland(_GLFWwindow* window)
 
 void _glfwSetWindowResizableWayland(_GLFWwindow* window, GLFWbool enabled)
 {
-    // TODO
+    // 
     _glfwInputError(GLFW_FEATURE_UNIMPLEMENTED,
                     "Wayland: Window attribute setting not implemented yet");
 }

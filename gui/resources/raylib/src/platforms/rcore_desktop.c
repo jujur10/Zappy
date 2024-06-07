@@ -88,7 +88,7 @@
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
-// TODO: HACK: Added flag if not provided by GLFW when using external library
+// : HACK: Added flag if not provided by GLFW when using external library
 // Latest GLFW release (GLFW 3.3.8) does not implement this flag, it was added for 3.4.0-dev
 #if !defined(GLFW_MOUSE_PASSTHROUGH)
     #define GLFW_MOUSE_PASSTHROUGH      0x0002000D
@@ -704,7 +704,7 @@ void *GetWindowHandle(void)
     // typedef unsigned long XID;
     // typedef XID Window;
     //unsigned long id = (unsigned long)glfwGetX11Window(platform.handle);
-    //return NULL;    // TODO: Find a way to return value... cast to void *?
+    //return NULL;    // : Find a way to return value... cast to void *?
     return (void *)platform.handle;
 #endif
 #if defined(__APPLE__)
@@ -1138,7 +1138,7 @@ void PollInputEvents(void)
 
     // Map touch position to mouse position for convenience
     // WARNING: If the target desktop device supports touch screen, this behavious should be reviewed!
-    // TODO: GLFW does not support multi-touch input just yet
+    // : GLFW does not support multi-touch input just yet
     // https://www.codeproject.com/Articles/668404/Programming-for-Multi-Touch
     // https://docs.microsoft.com/en-us/windows/win32/wintouch/getting-started-with-multi-touch-messages
     CORE.Input.Touch.position[0] = CORE.Input.Mouse.currentPosition;
@@ -1245,7 +1245,7 @@ int InitPlatform(void)
 {
     glfwSetErrorCallback(ErrorCallback);
 /*
-    // TODO: Setup GLFW custom allocators to match raylib ones
+    // : Setup GLFW custom allocators to match raylib ones
     const GLFWallocator allocator = {
         .allocate = MemAlloc,
         .deallocate = MemFree,
@@ -1444,7 +1444,7 @@ int InitPlatform(void)
         // Try to setup the most appropriate fullscreen framebuffer for the requested screenWidth/screenHeight
         // It considers device display resolution mode and setups a framebuffer with black bars if required (render size/offset)
         // Modified global variables: CORE.Window.screen.width/CORE.Window.screen.height - CORE.Window.render.width/CORE.Window.render.height - CORE.Window.renderOffset.x/CORE.Window.renderOffset.y - CORE.Window.screenScale
-        // TODO: It is a quite cumbersome solution to display size vs requested size, it should be reviewed or removed...
+        // : It is a quite cumbersome solution to display size vs requested size, it should be reviewed or removed...
         // HighDPI monitors are properly considered in a following similar function: SetupViewport()
         SetupFramebuffer(CORE.Window.display.width, CORE.Window.display.height);
 

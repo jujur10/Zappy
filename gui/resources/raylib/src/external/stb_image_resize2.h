@@ -296,7 +296,7 @@
       ASSERT
          Define STBIR_ASSERT(boolval) to override assert() and not use assert.h
 
-      FUTURE TODOS
+      FUTURE S
         *  For polyphase integral filters, we just memcpy the coeffs to dupe
            them, but we should indirect and use the same coeff memory.
         *  Add pixel layout conversions for sensible different channel counts

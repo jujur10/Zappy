@@ -523,7 +523,7 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
         ifeq ($(USE_WAYLAND_DISPLAY),FALSE)
             LDLIBS += -lX11
         endif
-        # TODO: On ARM 32bit arch, miniaudio requires atomics library
+        # : On ARM 32bit arch, miniaudio requires atomics library
         #LDLIBS += -latomic
     endif
     ifeq ($(PLATFORM_OS),OSX)

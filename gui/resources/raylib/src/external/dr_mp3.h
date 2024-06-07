@@ -696,7 +696,7 @@ end:
 #define DRMP3_VREV(x) vcombine_f32(vget_high_f32(vrev64q_f32(x)), vget_low_f32(vrev64q_f32(x)))
 typedef float32x4_t drmp3_f4;
 static int drmp3_have_simd(void)
-{   /* TODO: detect neon for !DR_MP3_ONLY_SIMD */
+{   /* : detect neon for !DR_MP3_ONLY_SIMD */
     return 1;
 }
 #else

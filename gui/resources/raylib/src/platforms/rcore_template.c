@@ -3,7 +3,7 @@
 *   rcore_<platform> template - Functions to manage window, graphics device and inputs
 *
 *   PLATFORM: <PLATFORM>
-*       - TODO: Define the target platform for the core
+*       - : Define the target platform for the core
 *
 *   LIMITATIONS:
 *       - Limitation 01
@@ -46,13 +46,13 @@
 *
 **********************************************************************************************/
 
-// TODO: Include the platform specific libraries
+// : Include the platform specific libraries
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
 typedef struct {
-    // TODO: Define the platform specific variables required
+    // : Define the platform specific variables required
 
     // Display data
     EGLDisplay device;                  // Native display device (physical screen connection)
@@ -356,7 +356,7 @@ void OpenURL(const char *url)
     if (strchr(url, '\'') != NULL) TRACELOG(LOG_WARNING, "SYSTEM: Provided URL could be potentially malicious, avoid [\'] character");
     else
     {
-        // TODO:
+        // :
     }
 }
 
@@ -408,7 +408,7 @@ void PollInputEvents(void)
     for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.previousTouchState[i] = CORE.Input.Touch.currentTouchState[i];
 
     // Reset touch positions
-    // TODO: It resets on target platform the mouse position and not filled again until a move-event,
+    // : It resets on target platform the mouse position and not filled again until a move-event,
     // so, if mouse is not moved it returns a (0, 0) position... this behaviour should be reviewed!
     //for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.position[i] = (Vector2){ 0, 0 };
 
@@ -420,7 +420,7 @@ void PollInputEvents(void)
         CORE.Input.Keyboard.keyRepeatInFrame[i] = 0;
     }
 
-    // TODO: Poll input events for current plaform
+    // : Poll input events for current plaform
 }
 
 
@@ -431,7 +431,7 @@ void PollInputEvents(void)
 // Initialize platform: graphics, inputs and more
 int InitPlatform(void)
 {
-    // TODO: Initialize graphic device: display/window
+    // : Initialize graphic device: display/window
     // It usually requires setting up the platform display system configuration
     // and connexion with the GPU through some system graphic API
     // raylib uses OpenGL so, platform should create that kind of connection
@@ -553,13 +553,13 @@ int InitPlatform(void)
     TRACELOG(LOG_INFO, "    > Render size:  %i x %i", CORE.Window.render.width, CORE.Window.render.height);
     TRACELOG(LOG_INFO, "    > Viewport offsets: %i, %i", CORE.Window.renderOffset.x, CORE.Window.renderOffset.y);
 
-    // TODO: Load OpenGL extensions
+    // : Load OpenGL extensions
     // NOTE: GL procedures address loader is required to load extensions
     //----------------------------------------------------------------------------
     rlLoadExtensions(eglGetProcAddress);
     //----------------------------------------------------------------------------
 
-    // TODO: Initialize input events system
+    // : Initialize input events system
     // It could imply keyboard, mouse, gamepad, touch...
     // Depending on the platform libraries/SDK it could use a callbacks mechanims
     // For system events and inputs evens polling on a per-frame basis, use PollInputEvents()
@@ -567,12 +567,12 @@ int InitPlatform(void)
     // ...
     //----------------------------------------------------------------------------
 
-    // TODO: Initialize timming system
+    // : Initialize timming system
     //----------------------------------------------------------------------------
     InitTimer();
     //----------------------------------------------------------------------------
 
-    // TODO: Initialize storage system
+    // : Initialize storage system
     //----------------------------------------------------------------------------
     CORE.Storage.basePath = GetWorkingDirectory();
     //----------------------------------------------------------------------------
@@ -585,7 +585,7 @@ int InitPlatform(void)
 // Close platform
 void ClosePlatform(void)
 {
-    // TODO: De-initialize graphics, inputs and more
+    // : De-initialize graphics, inputs and more
 }
 
 // EOF

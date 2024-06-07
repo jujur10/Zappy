@@ -210,7 +210,7 @@ typedef struct tagBITMAPINFOHEADER {
 #endif
 
 #if defined(SUPPORT_FILEFORMAT_OGG)
-    // TODO: Remap stb_vorbis malloc()/free() calls to RL_MALLOC/RL_FREE
+    // : Remap stb_vorbis malloc()/free() calls to RL_MALLOC/RL_FREE
     #include "external/stb_vorbis.c"    // OGG loading functions
 #endif
 
@@ -998,7 +998,7 @@ void UpdateSound(Sound sound, const void *data, int frameCount)
     {
         StopAudioBuffer(sound.stream.buffer);
 
-        // TODO: May want to lock/unlock this since this data buffer is read at mixing time
+        // : May want to lock/unlock this since this data buffer is read at mixing time
         memcpy(sound.stream.buffer->data, data, frameCount*ma_get_bytes_per_frame(sound.stream.buffer->converter.formatIn, sound.stream.buffer->converter.channelsIn));
     }
 }

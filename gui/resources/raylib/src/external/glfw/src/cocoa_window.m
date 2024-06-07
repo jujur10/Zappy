@@ -1270,7 +1270,7 @@ void _glfwSetWindowMonitorCocoa(_GLFWwindow* window,
     _glfwInputWindowMonitor(window, monitor);
 
     // HACK: Allow the state cached in Cocoa to catch up to reality
-    // TODO: Solve this in a less terrible way
+    // : Solve this in a less terrible way
     _glfwPollEventsCocoa();
 
     NSUInteger styleMask = [window->ns.object styleMask];

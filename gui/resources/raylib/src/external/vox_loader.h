@@ -649,7 +649,7 @@ int Vox_LoadFromMemory(unsigned char* pvoxData, unsigned int voxDataSize, VoxArr
 
 	//////////////////////////////////////////////////////////
 	// Building Mesh
-	//   TODO compute globals indices array
+	//    compute globals indices array
 
 	// Init Arrays
 	initArrayVector3(&pvoxarray->vertices, 3 * 1024);

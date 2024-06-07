@@ -57,7 +57,7 @@
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
-// TODO: HACK: Added flag if not provided by GLFW when using external library
+// : HACK: Added flag if not provided by GLFW when using external library
 // Latest GLFW release (GLFW 3.3.8) does not implement this flag, it was added for 3.4.0-dev
 #if !defined(GLFW_MOUSE_PASSTHROUGH)
     #define GLFW_MOUSE_PASSTHROUGH      0x0002000D
@@ -453,7 +453,7 @@ void EnableCursor(void)
 // Disables cursor (lock cursor)
 void DisableCursor(void)
 {
-    // TODO: figure out how not to hard code the canvas ID here.
+    // : figure out how not to hard code the canvas ID here.
     emscripten_request_pointerlock("#canvas", 1);
 
     // Set cursor position in the middle
@@ -587,7 +587,7 @@ void PollInputEvents(void)
     for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.previousTouchState[i] = CORE.Input.Touch.currentTouchState[i];
 
     // Reset touch positions
-    // TODO: It resets on target platform the mouse position and not filled again until a move-event,
+    // : It resets on target platform the mouse position and not filled again until a move-event,
     // so, if mouse is not moved it returns a (0, 0) position... this behaviour should be reviewed!
     //for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.position[i] = (Vector2){ 0, 0 };
 
@@ -662,7 +662,7 @@ void PollInputEvents(void)
 
     CORE.Window.resizedLastFrame = false;
 
-    // TODO: This code does not seem to do anything??
+    // : This code does not seem to do anything??
     //if (CORE.Window.eventWaiting) glfwWaitEvents();     // Wait for in input events before continue (drawing is paused)
     //else glfwPollEvents(); // Poll input events: keyboard/mouse/window events (callbacks) --> WARNING: Where is key input reseted?
 }
@@ -764,7 +764,7 @@ int InitPlatform(void)
     }
     else if (rlGetVersion() == RL_OPENGL_ES_30) // Request OpenGL ES 3.0 context
     {
-        // TODO: It seems WebGL 2.0 context is not set despite being requested
+        // : It seems WebGL 2.0 context is not set despite being requested
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
@@ -822,7 +822,7 @@ int InitPlatform(void)
         // Try to setup the most appropriate fullscreen framebuffer for the requested screenWidth/screenHeight
         // It considers device display resolution mode and setups a framebuffer with black bars if required (render size/offset)
         // Modified global variables: CORE.Window.screen.width/CORE.Window.screen.height - CORE.Window.render.width/CORE.Window.render.height - CORE.Window.renderOffset.x/CORE.Window.renderOffset.y - CORE.Window.screenScale
-        // TODO: It is a quite cumbersome solution to display size vs requested size, it should be reviewed or removed...
+        // : It is a quite cumbersome solution to display size vs requested size, it should be reviewed or removed...
         // HighDPI monitors are properly considered in a following similar function: SetupViewport()
         SetupFramebuffer(CORE.Window.display.width, CORE.Window.display.height);
 
@@ -868,7 +868,7 @@ int InitPlatform(void)
     glfwSetCursorEnterCallback(platform.handle, CursorEnterCallback);
 
     glfwMakeContextCurrent(platform.handle);
-    result = true; // TODO: WARNING: glfwGetError(NULL); symbol can not be found in Web
+    result = true; // : WARNING: glfwGetError(NULL); symbol can not be found in Web
 
     // Check context activation
     if (result == true) //(result != GLFW_NO_WINDOW_CONTEXT) && (result != GLFW_PLATFORM_ERROR))
@@ -1006,7 +1006,7 @@ static void WindowIconifyCallback(GLFWwindow *window, int iconified)
 // GLFW3 Window Maximize Callback, runs when window is maximized
 static void WindowMaximizeCallback(GLFWwindow *window, int maximized)
 {
-    // TODO.
+    // .
 }
 */
 
@@ -1171,7 +1171,7 @@ static void CursorEnterCallback(GLFWwindow *window, int enter)
 // Register fullscreen change events
 static EM_BOOL EmscriptenFullscreenChangeCallback(int eventType, const EmscriptenFullscreenChangeEvent *event, void *userData)
 {
-    // TODO: Implement EmscriptenFullscreenChangeCallback()?
+    // : Implement EmscriptenFullscreenChangeCallback()?
 
     return 1; // The event was consumed by the callback handler
 }
@@ -1179,7 +1179,7 @@ static EM_BOOL EmscriptenFullscreenChangeCallback(int eventType, const Emscripte
 // Register window resize event
 static EM_BOOL EmscriptenWindowResizedCallback(int eventType, const EmscriptenUiEvent *event, void *userData)
 {
-    // TODO: Implement EmscriptenWindowResizedCallback()?
+    // : Implement EmscriptenWindowResizedCallback()?
 
     return 1; // The event was consumed by the callback handler
 }

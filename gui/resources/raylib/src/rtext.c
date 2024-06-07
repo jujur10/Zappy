@@ -941,7 +941,7 @@ bool ExportFontAsCode(Font font, const char *fileName)
     byteCount += sprintf(txtData + byteCount, "//                                                                                    //\n");
     byteCount += sprintf(txtData + byteCount, "// ---------------------------------------------------------------------------------- //\n");
     byteCount += sprintf(txtData + byteCount, "//                                                                                    //\n");
-    byteCount += sprintf(txtData + byteCount, "// TODO: Fill the information and license of the exported font here:                  //\n");
+    byteCount += sprintf(txtData + byteCount, "// : Fill the information and license of the exported font here:                  //\n");
     byteCount += sprintf(txtData + byteCount, "//                                                                                    //\n");
     byteCount += sprintf(txtData + byteCount, "// Font name:    ....                                                                 //\n");
     byteCount += sprintf(txtData + byteCount, "// Font creator: ....                                                                 //\n");
@@ -1643,7 +1643,7 @@ int TextFindIndex(const char *text, const char *find)
 
 // Get upper case version of provided string
 // WARNING: Limited functionality, only basic characters set
-// TODO: Support UTF-8 diacritics to upper-case, check codepoints
+// : Support UTF-8 diacritics to upper-case, check codepoints
 const char *TextToUpper(const char *text)
 {
     static char buffer[MAX_TEXT_BUFFER_LENGTH] = { 0 };

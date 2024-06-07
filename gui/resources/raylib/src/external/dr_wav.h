@@ -4481,7 +4481,7 @@ DRWAV_PRIVATE drwav_bool32 drwav_init_write__internal(drwav* pWav, const drwav_d
     runningPos += drwav__write_u16ne_to_le(pWav, pWav->fmt.blockAlign);
     runningPos += drwav__write_u16ne_to_le(pWav, pWav->fmt.bitsPerSample);
 
-    /* TODO: is a 'fact' chunk required for DR_WAVE_FORMAT_IEEE_FLOAT? */
+    /* : is a 'fact' chunk required for DR_WAVE_FORMAT_IEEE_FLOAT? */
 
     if (!pWav->isSequentialWrite && pWav->pMetadata != NULL && pWav->metadataCount > 0 && (pFormat->container == drwav_container_riff || pFormat->container == drwav_container_rf64)) {
         runningPos += drwav__write_or_count_metadata(pWav, pWav->pMetadata, pWav->metadataCount);
@@ -5856,7 +5856,7 @@ DRWAV_API drwav_bool32 drwav_seek_to_pcm_frame(drwav* pWav, drwav_uint64 targetF
     to seek back to the start.
     */
     if (drwav__is_compressed_format_tag(pWav->translatedFormatTag)) {
-        /* TODO: This can be optimized. */
+        /* : This can be optimized. */
 
         /*
         If we're seeking forward it's simple - just keep reading samples until we hit the sample we're requesting. If we're seeking backwards,
@@ -6101,7 +6101,7 @@ DRWAV_PRIVATE drwav_uint64 drwav_read_pcm_frames_s16__msadpcm(drwav* pWav, drwav
     DRWAV_ASSERT(pWav != NULL);
     DRWAV_ASSERT(framesToRead > 0);
 
-    /* TODO: Lots of room for optimization here. */
+    /* : Lots of room for optimization here. */
 
     while (pWav->readCursorInPCMFrames < pWav->totalPCMFrameCount) {
         DRWAV_ASSERT(framesToRead > 0); /* This loop iteration will never get hit with framesToRead == 0 because it's asserted at the top, and we check for 0 inside the loop just below. */
@@ -6194,7 +6194,7 @@ DRWAV_PRIVATE drwav_uint64 drwav_read_pcm_frames_s16__msadpcm(drwav* pWav, drwav
                 }
                 pWav->msadpcm.bytesRemainingInBlock -= 1;
 
-                /* TODO: Optimize away these if statements. */
+                /* : Optimize away these if statements. */
                 nibble0 = ((nibbles & 0xF0) >> 4); if ((nibbles & 0x80)) { nibble0 |= 0xFFFFFFF0UL; }
                 nibble1 = ((nibbles & 0x0F) >> 0); if ((nibbles & 0x08)) { nibble1 |= 0xFFFFFFF0UL; }
 
@@ -6301,7 +6301,7 @@ DRWAV_PRIVATE drwav_uint64 drwav_read_pcm_frames_s16__ima(drwav* pWav, drwav_uin
     DRWAV_ASSERT(pWav != NULL);
     DRWAV_ASSERT(framesToRead > 0);
 
-    /* TODO: Lots of room for optimization here. */
+    /* : Lots of room for optimization here. */
 
     while (pWav->readCursorInPCMFrames < pWav->totalPCMFrameCount) {
         DRWAV_ASSERT(framesToRead > 0); /* This loop iteration will never get hit with framesToRead == 0 because it's asserted at the top, and we check for 0 inside the loop just below. */

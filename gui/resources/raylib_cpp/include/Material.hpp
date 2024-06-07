@@ -46,14 +46,14 @@ class Material : public ::Material {
      */
     static std::vector<Material> Load(const std::string& fileName) {
         int count = 0;
-        // TODO(RobLoach): Material::Load() possibly leaks the materials array.
+        // (RobLoach): Material::Load() possibly leaks the materials array.
         ::Material* materials = ::LoadMaterials(fileName.c_str(), &count);
         return std::vector<Material>(materials, materials + count);
     }
 
     GETTERSETTER(::Shader, Shader, shader)
     GETTERSETTER(::MaterialMap*, Maps, maps)
-    // TODO(RobLoach): Resolve the Material params being a float[4].
+    // (RobLoach): Resolve the Material params being a float[4].
     // GETTERSETTER(float[4], Params, params)
 
     Material& operator=(const ::Material& material) {

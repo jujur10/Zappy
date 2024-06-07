@@ -10,7 +10,7 @@
 *     Note that some file formats (DDS, PVR, KTX) also support uncompressed data storage.
 *     In those cases data is loaded uncompressed and format is returned.
 *
-*   TODO:
+*   :
 *     - Implement raylib function: rlGetGlTextureFormats(), required by rl_save_ktx_to_memory()
 *     - Review rl_load_ktx_from_memory() to support KTX v2.2 specs
 *
@@ -367,7 +367,7 @@ void *rl_load_pkm_from_memory(const unsigned char *file_data, unsigned int file_
 
 #if defined(RL_GPUTEX_SUPPORT_KTX)
 // Load KTX compressed image data (ETC1/ETC2 compression)
-// TODO: Review KTX loading, many things changed!
+// : Review KTX loading, many things changed!
 void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_size, int *width, int *height, int *format, int *mips)
 {
     void *image_data = NULL;        // Image data pointer
@@ -388,7 +388,7 @@ void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_
     // v2.0 - http://github.khronos.org/KTX-Specification/
 
     // KTX 1.1 Header
-    // TODO: Support KTX 2.2 specs!
+    // : Support KTX 2.2 specs!
     typedef struct {
         char id[12];                            // Identifier: "«KTX 11»\r\n\x1A\n"
         unsigned int endianness;                // Little endian: 0x01 0x02 0x03 0x04
@@ -438,7 +438,7 @@ void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_
             else if (header->gl_internal_format == 0x9274) *format = PIXELFORMAT_COMPRESSED_ETC2_RGB;
             else if (header->gl_internal_format == 0x9278) *format = PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA;
 
-            // TODO: Support uncompressed data formats? Right now it returns format = 0!
+            // : Support uncompressed data formats? Right now it returns format = 0!
         }
     }
 
@@ -447,7 +447,7 @@ void *rl_load_ktx_from_memory(const unsigned char *file_data, unsigned int file_
 
 // Save image data as KTX file
 // NOTE: By default KTX 1.1 spec is used, 2.0 is still on draft (01Oct2018)
-// TODO: Review KTX saving, many things changed!
+// : Review KTX saving, many things changed!
 int rl_save_ktx(const char *file_name, void *data, int width, int height, int format, int mipmaps)
 {
     // KTX file Header (64 bytes)

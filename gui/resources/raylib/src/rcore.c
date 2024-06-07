@@ -392,7 +392,7 @@ typedef enum AutomationEventType {
 } AutomationEventType;
 
 // Event type to config events flags
-// TODO: Not used at the moment
+// : Not used at the moment
 typedef enum {
     EVENT_INPUT_KEYBOARD    = 0,
     EVENT_INPUT_MOUSE       = 1,
@@ -443,7 +443,7 @@ struct AutomationEvent {
 
 static AutomationEventList *currentEventList = NULL;        // Current automation events list, set by user, keep internal pointer
 static bool automationEventRecording = false;               // Recording automation events flag
-//static short automationEventEnabled = 0b0000001111111111; // TODO: Automation events enabled for recording/playing
+//static short automationEventEnabled = 0b0000001111111111; // : Automation events enabled for recording/playing
 #endif
 //-----------------------------------------------------------------------------------
 
@@ -492,7 +492,7 @@ const char *TextFormat(const char *text, ...);              // Formatting of tex
 #elif defined(PLATFORM_ANDROID)
     #include "platforms/rcore_android.c"
 #else
-    // TODO: Include your custom platform backend!
+    // : Include your custom platform backend!
     // i.e software rendering backend or console backend!
 #endif
 
@@ -560,7 +560,7 @@ void InitWindow(int width, int height, const char *title)
 #elif defined(PLATFORM_ANDROID)
     TRACELOG(LOG_INFO, "Platform backend: ANDROID");
 #else
-    // TODO: Include your custom platform backend!
+    // : Include your custom platform backend!
     // i.e software rendering backend or console backend!
     TRACELOG(LOG_INFO, "Platform backend: CUSTOM");
 #endif
@@ -1513,7 +1513,7 @@ Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int heigh
     // Calculate view matrix from camera look at (and transpose it)
     Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
 
-    // TODO: Why not use Vector3Transform(Vector3 v, Matrix mat)?
+    // : Why not use Vector3Transform(Vector3 v, Matrix mat)?
 
     // Convert world position vector to quaternion
     Quaternion worldPos = { position.x, position.y, position.z, 1.0f };
@@ -2287,7 +2287,7 @@ unsigned char *DecompressData(const unsigned char *compData, int compDataSize, i
     int length = sinflate(data, MAX_DECOMPRESSION_SIZE*1024*1024, compData, compDataSize);
 
     // WARNING: RL_REALLOC can make (and leave) data copies in memory, be careful with sensitive compressed data!
-    // TODO: Use a different approach, create another buffer, copy data manually to it and wipe original buffer memory
+    // : Use a different approach, create another buffer, copy data manually to it and wipe original buffer memory
     unsigned char *temp = (unsigned char *)RL_REALLOC(data, length);
 
     if (temp != NULL) data = temp;
@@ -2497,7 +2497,7 @@ bool ExportAutomationEventList(AutomationEventList list, const char *fileName)
 
 #if defined(SUPPORT_AUTOMATION_EVENTS)
     // Export events as binary file
-    // TODO: Save to memory buffer and SaveFileData()
+    // : Save to memory buffer and SaveFileData()
     /*
     unsigned char fileId[4] = "rAE ";
     FILE *raeFile = fopen(fileName, "wb");
@@ -2508,7 +2508,7 @@ bool ExportAutomationEventList(AutomationEventList list, const char *fileName)
     */
 
     // Export events as text
-    // TODO: Save to memory buffer and SaveFileText()
+    // : Save to memory buffer and SaveFileText()
     char *txtData = (char *)RL_CALLOC(256*list.count + 2048, sizeof(char)); // 256 characters per line plus some header
 
     int byteCount = 0;
@@ -2577,7 +2577,7 @@ void PlayAutomationEvent(AutomationEvent event)
 #if defined(SUPPORT_AUTOMATION_EVENTS)
     // WARNING: When should event be played? After/before/replace PollInputEvents()? -> Up to the user!
 
-    if (!automationEventRecording)      // TODO: Allow recording events while playing?
+    if (!automationEventRecording)      // : Allow recording events while playing?
     {
         switch (event.type)
         {
@@ -3001,7 +3001,7 @@ int GetTouchY(void)
 }
 
 // Get touch position XY for a touch point index (relative to screen size)
-// TODO: Touch position should be scaled depending on display size and render size
+// : Touch position should be scaled depending on display size and render size
 Vector2 GetTouchPosition(int index)
 {
     Vector2 position = { -1.0f, -1.0f };
@@ -3269,7 +3269,7 @@ static void ScanDirectoryFilesRecursively(const char *basePath, FilePathList *fi
 static void RecordAutomationEvent(void)
 {
     // Checking events in current frame and save them into currentEventList
-    // TODO: How important is the current frame? Could it be modified?
+    // : How important is the current frame? Could it be modified?
 
     if (currentEventList->count == currentEventList->capacity) return;    // Security check
 
@@ -3412,7 +3412,7 @@ static void RecordAutomationEvent(void)
         if (currentEventList->count == currentEventList->capacity) return;    // Security check
 
         // Event type: INPUT_TOUCH_POSITION
-        // TODO: It requires the id!
+        // : It requires the id!
         /*
         if (((int)CORE.Input.Touch.currentPosition[id].x != (int)CORE.Input.Touch.previousPosition[id].x) ||
             ((int)CORE.Input.Touch.currentPosition[id].y != (int)CORE.Input.Touch.previousPosition[id].y))
@@ -3441,7 +3441,7 @@ static void RecordAutomationEvent(void)
         if ((CORE.Input.Gamepad.currentState[gamepad] != CORE.Input.Gamepad.previousState[gamepad]) &&
             (CORE.Input.Gamepad.currentState[gamepad])) // Check if changed to ready
         {
-            // TODO: Save gamepad connect event
+            // : Save gamepad connect event
         }
         */
 
@@ -3450,7 +3450,7 @@ static void RecordAutomationEvent(void)
         if ((CORE.Input.Gamepad.currentState[gamepad] != CORE.Input.Gamepad.previousState[gamepad]) &&
             (!CORE.Input.Gamepad.currentState[gamepad])) // Check if changed to not-ready
         {
-            // TODO: Save gamepad disconnect event
+            // : Save gamepad disconnect event
         }
         */
 
@@ -3527,12 +3527,12 @@ static void RecordAutomationEvent(void)
 
     // Window events recording
     //-------------------------------------------------------------------------------------
-    // TODO.
+    // .
     //-------------------------------------------------------------------------------------
 
     // Custom actions events recording
     //-------------------------------------------------------------------------------------
-    // TODO.
+    // .
     //-------------------------------------------------------------------------------------
 }
 #endif

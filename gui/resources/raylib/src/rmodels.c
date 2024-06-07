@@ -1844,7 +1844,7 @@ bool ExportMesh(Mesh mesh, const char *fileName)
     }
     else if (IsFileExtension(fileName, ".raw"))
     {
-        // TODO: Support additional file formats to export mesh vertex data
+        // : Support additional file formats to export mesh vertex data
     }
 
     return success;
@@ -1890,7 +1890,7 @@ Material *LoadMaterials(const char *fileName, int *materialCount)
     Material *materials = NULL;
     unsigned int count = 0;
 
-    // TODO: Support IQM and GLTF for materials parsing
+    // : Support IQM and GLTF for materials parsing
 
 #if defined(SUPPORT_FILEFORMAT_MTL)
     if (IsFileExtension(fileName, ".mtl"))
@@ -3366,7 +3366,7 @@ void GenMeshTangents(Mesh *mesh)
         Vector3 normal = { mesh->normals[i*3 + 0], mesh->normals[i*3 + 1], mesh->normals[i*3 + 2] };
         Vector3 tangent = tan1[i];
 
-        // TODO: Review, not sure if tangent computation is right, just used reference proposed maths...
+        // : Review, not sure if tangent computation is right, just used reference proposed maths...
 #if defined(COMPUTE_TANGENTS_METHOD_01)
         Vector3 tmp = Vector3Subtract(tangent, Vector3Scale(normal, Vector3DotProduct(normal, tangent)));
         tmp = Vector3Normalize(tmp);
@@ -4509,7 +4509,7 @@ static ModelAnimation *LoadModelAnimationsIQM(const char *fileName, int *animCou
         animations[a].boneCount = iqmHeader->num_poses;
         animations[a].bones = RL_MALLOC(iqmHeader->num_poses*sizeof(BoneInfo));
         animations[a].framePoses = RL_MALLOC(anim[a].num_frames*sizeof(Transform *));
-        // animations[a].framerate = anim.framerate;     // TODO: Use animation framerate data?
+        // animations[a].framerate = anim.framerate;     // : Use animation framerate data?
 
         for (unsigned int j = 0; j < iqmHeader->num_poses; j++)
         {
@@ -4666,7 +4666,7 @@ static Image LoadImageFromCgltfImage(cgltf_image *cgltfImage, const char *texPat
             else
             {
                 int base64Size = (int)strlen(cgltfImage->uri + i + 1);
-                int outSize = 3*(base64Size/4);         // TODO: Consider padding (-numberOfPaddingCharacters)
+                int outSize = 3*(base64Size/4);         // : Consider padding (-numberOfPaddingCharacters)
                 void *data = NULL;
 
                 cgltf_options options = { 0 };
@@ -4983,7 +4983,7 @@ static Model LoadGLTF(const char *fileName)
                     }
                     else if (data->meshes[i].primitives[p].attributes[j].type == cgltf_attribute_type_texcoord) // TEXCOORD_0
                     {
-                        // TODO: Support additional texture coordinates: TEXCOORD_1 -> mesh.texcoords2
+                        // : Support additional texture coordinates: TEXCOORD_1 -> mesh.texcoords2
 
                         cgltf_accessor *attribute = data->meshes[i].primitives[p].attributes[j].data;
 
@@ -5825,7 +5825,7 @@ static Model LoadM3D(const char *fileName)
                 model.bindPose[i].rotation.z = m3d->vertex[m3d->bone[i].ori].z;
                 model.bindPose[i].rotation.w = m3d->vertex[m3d->bone[i].ori].w;
 
-                // TODO: If the orientation quaternion is not normalized, then that's encoding scaling
+                // : If the orientation quaternion is not normalized, then that's encoding scaling
                 model.bindPose[i].rotation = QuaternionNormalize(model.bindPose[i].rotation);
                 model.bindPose[i].scale.x = model.bindPose[i].scale.y = model.bindPose[i].scale.z = 1.0f;
 
