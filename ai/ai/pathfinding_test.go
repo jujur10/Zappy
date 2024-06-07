@@ -42,25 +42,27 @@ func Test_getMiddlePoints(t *testing.T) {
 		destination RelativeCoordinates
 		pqueue      PriorityQueue
 	}
+
+	argsValid := args{origin: RelativeCoordinates{0, 0}, destination: RelativeCoordinates{6, 6}, pqueue: PriorityQueue{
+		&Item{value: RelativeCoordinates{1, 4}, priority: 2, originalPriority: 3, index: 0},
+		&Item{value: RelativeCoordinates{5, 15}, priority: 1, originalPriority: 5, index: 1},
+		&Item{value: RelativeCoordinates{6, 2}, priority: 0, originalPriority: 4, index: 2},
+	}}
 	tests := []struct {
 		name string
 		args args
-		want []RelativeCoordinates
+		want []*Item
 	}{
-		{"No points", args{origin: RelativeCoordinates{0, 0}, destination: RelativeCoordinates{6, 6}, pqueue: PriorityQueue{}}, []RelativeCoordinates{}},
+		{"No points", args{origin: RelativeCoordinates{0, 0}, destination: RelativeCoordinates{6, 6}, pqueue: PriorityQueue{}}, []*Item{}},
 		{"No valid points",
 			args{origin: RelativeCoordinates{0, 0}, destination: RelativeCoordinates{6, 6}, pqueue: PriorityQueue{
 				&Item{value: RelativeCoordinates{-1, 9}, priority: 2, originalPriority: 3, index: 0},
 				&Item{value: RelativeCoordinates{5, 15}, priority: 1, originalPriority: 5, index: 1},
 				&Item{value: RelativeCoordinates{-6, 2}, priority: 0, originalPriority: 4, index: 2},
-			}}, []RelativeCoordinates{},
+			}}, []*Item{},
 		},
 		{"Valid points",
-			args{origin: RelativeCoordinates{0, 0}, destination: RelativeCoordinates{6, 6}, pqueue: PriorityQueue{
-				&Item{value: RelativeCoordinates{1, 4}, priority: 2, originalPriority: 3, index: 0},
-				&Item{value: RelativeCoordinates{5, 15}, priority: 1, originalPriority: 5, index: 1},
-				&Item{value: RelativeCoordinates{6, 2}, priority: 0, originalPriority: 4, index: 2},
-			}}, []RelativeCoordinates{{1, 4}, {6, 2}},
+			argsValid, []*Item{argsValid.pqueue[0], argsValid.pqueue[2]},
 		},
 	}
 	for _, tt := range tests {
