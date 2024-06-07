@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+#include "style/status.h"
+
 /// @brief Structure representing message.
 ///
 /// @var len The message len.

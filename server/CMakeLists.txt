@@ -22,6 +22,9 @@ add_executable(zappy_server
     src/utils/pre_generate/pre_generate.c
     src/queue/queue_utils_msg.c
     src/msg.c
+    src/gui_handling.c
+    src/swap_clients.c
+    src/ai_handling.c
 )
 
 target_include_directories(zappy_server PRIVATE
@@ -59,8 +62,11 @@ if (DEFINED RUN_TESTS)
     add_executable(test_zappy_server
         tests/tests_parsing.c
         tests/tests_itoa.c
+        tests/tests_queue.c
         src/arguments.c
         src/utils/itoa/fast_itoa_u32.c
+        src/queue/queue_utils_msg.c
+        src/msg.c
     )
 
     target_include_directories(test_zappy_server PRIVATE
@@ -79,6 +85,7 @@ if (DEFINED RUN_TESTS)
     target_compile_definitions(test_zappy_server PRIVATE
         PTR=*
         ARRAY=*
+        "SEMICOLON=\;"
     )
 
     add_custom_command(TARGET test_zappy_server

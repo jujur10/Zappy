@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include "stdbool.h"
 
 // Coding style.
 typedef struct timespec timespec_t;
@@ -27,5 +28,13 @@ void remove_from_clock(timespec_t PTR clock, int64_t sec, int64_t ns);
 /// @brief Function that verify if the timeout has been exceed.
 /// @param server_clock The server's clock (reference).
 /// @param clock_to_inspect The clock to verify.
-uint8_t is_timeout_exceed(timespec_t PTR server_clock,
+/// @return True if timeout exceed, false if not.
+bool is_timeout_exceed(timespec_t PTR server_clock,
+    timespec_t PTR clock_to_inspect);
+
+/// @brief Function that verify if the blocking time is expired.
+/// @param server_clock The server's clock (reference).
+/// @param clock_to_inspect The clock to verify.
+/// @return True if blocking time has expired, false if not.
+bool has_blocking_time_expired(timespec_t PTR server_clock,
     timespec_t PTR clock_to_inspect);

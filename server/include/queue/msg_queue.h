@@ -35,12 +35,19 @@ status_t add_msg_to_queue(msg_queue_head_t PTR msg_queue,
     const msg_t PTR message);
 
 /// @brief Function which removes the next message of the message queue and
-/// returns it into message.
+/// returns it into message.\n
+/// If TAILQ_FIRST still points to the removed entry, update the head.
 ///
 /// @param msg_queue The message queue.
 /// @param message The pointer on the message structure to write.
 /// @return 0 for success, 1 for failure.
 status_t pop_msg(msg_queue_head_t PTR msg_queue, msg_t PTR message);
+
+/// @brief Function which tests if the queue is empty.
+///
+/// @param msg_queue The message queue.
+/// @return Success if the queue is empty, Failure if not.
+status_t queue_empty(const msg_queue_head_t PTR msg_queue);
 
 /// @brief Function that clears a message queue.
 ///
