@@ -28,6 +28,8 @@ add_executable(zappy_server
     src/utils/pre_generate/pre_generate_ressources.c
     src/utils/arrays/arrays_u32.c
     src/utils/arrays/arrays_u64.c
+    src/clock_timeout.c
+    src/server_update.c
 )
 
 target_include_directories(zappy_server PRIVATE
@@ -66,6 +68,7 @@ if (DEFINED RUN_TESTS)
         tests/tests_parsing.c
         tests/tests_itoa.c
         tests/tests_queue.c
+        tests/tests_clock.c
         src/arguments.c
         src/utils/itoa/fast_itoa_u32.c
         src/queue/queue_utils_msg.c
@@ -75,6 +78,7 @@ if (DEFINED RUN_TESTS)
         src/utils/arrays/arrays_u64.c
         src/utils/arrays/arrays_u32.c
         src/utils/pre_generate/pre_generate_ressources.c
+        src/clock.c
     )
 
     target_include_directories(test_zappy_server PRIVATE

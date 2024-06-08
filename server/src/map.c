@@ -4,7 +4,6 @@
 ** File description:
 ** map.c.
 */
-#include <malloc.h>
 #include <stdlib.h>
 
 #include "arguments.h"
@@ -14,8 +13,10 @@
 #include "utils/arrays/arrays_u32.h"
 #include "utils/arrays/arrays_u64.h"
 #include "utils/pre_generate/pre_generate.h"
+#include "game_settings.h"
+#include "logging.h"
 
-status_t init_map(const argument_t ARRAY args, map_t ARRAY map)
+status_t init_map(const argument_t ARRAY args, map_t PTR map)
 {
     map->tiles = malloc(sizeof(resources_t) * (args->height * args->width));
     if (NULL == map->tiles)
@@ -26,7 +27,7 @@ status_t init_map(const argument_t ARRAY args, map_t ARRAY map)
     return SUCCESS;
 }
 
-void spread_resources_on_map(map_t *map)
+void spread_resources_on_map(map_t PTR map)
 {
     int64_t needed_resources[R_STRUCT_SIZE];
     uint32_t x;
@@ -47,4 +48,18 @@ void spread_resources_on_map(map_t *map)
         }
     }
     map->has_been_modified = false;
+}
+
+void update_map(double current_time, map_t PTR map)
+{
+    static double next_update = 0;
+
+    next_update = (0 == next_update) ?
+        current_time + MAP_UPDATE_WAIT : next_update;
+    if (current_time >= next_update) {
+        if (true == map->has_been_modified)
+            spread_resources_on_map(map);
+        next_update = current_time + MAP_UPDATE_WAIT;
+        LOG("Map updated")
+    }
 }

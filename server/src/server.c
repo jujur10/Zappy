@@ -22,6 +22,7 @@
 #include "ai_handling.h"
 #include "clock.h"
 #include "utils/pre_generate/pre_generate.h"
+#include "server_update.h"
 
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
@@ -132,7 +133,7 @@ static uint8_t server_main_loop(server_t PTR server)
         select_ret = select(server->max_client + 1, &rfds, &wfds, NULL, NULL);
         if (-1 == select_ret)
             return select_error();
-        clock_gettime(CLOCK_MONOTONIC, &server->clock);
+        update_server(server);
         if (FD_ISSET(pipe_signals[0], &rfds))
             return close(pipe_signals[0]), 0;
         if (FD_ISSET(server->sock, &rfds))
@@ -152,14 +153,15 @@ uint8_t run_server(const argument_t PTR args)
 
     if (1 == init_server(args, &server))
         return 84;
+    register_signals();
     srand((uint32_t)time(NULL));
     server.args = args;
-    if (false == pre_generate_responses(&server))
+    server.frequency = args->frequency;
+    if (FAILURE == pre_generate_responses(&server))
         return 84;
     pre_generate_resources_counter(args);
     spread_resources_on_map(&server.map);
     LOG("Server responses pre-generated")
-    register_signals();
     ret_val = server_main_loop(&server);
     return destroy_server(args, &server), ret_val;
 }

@@ -12,6 +12,7 @@
 
 #include "server.h"
 #include "resources.h"
+#include "style/status.h"
 
 /// @brief The pre-generated response array.
 #define PRE_GENERATED_ARR_LEN 2048
@@ -29,7 +30,7 @@ extern uint16_t world_dim_length;
 /// @brief Function to pre-generate responses.
 /// @param server The server structure (after initialization).
 /// @return True On success, False on failure.
-bool pre_generate_responses(const server_t PTR server);
+status_t pre_generate_responses(const server_t PTR server);
 
 /// @brief Function to free buffer of pre-generated responses.
 void destroy_pre_generated_responses(void);

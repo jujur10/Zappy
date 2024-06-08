@@ -11,7 +11,7 @@
 #include "utils/pre_generate/pre_generate.h"
 #include "utils/itoa/fast_itoa.h"
 #include "server.h"
-#include "logging.h"
+#include "style/status.h"
 
 /// @brief The pre-generated response array.
 char PTR pre_generated_responses;
@@ -37,7 +37,8 @@ static uint16_t set_welcome(uint16_t offset)
 /// @param offset The offset of the pre-generated array to copy to.
 /// @param server The server structure in order to obtain the world dimensions.
 /// @return The new offset.
-static uint16_t set_world_dimensions(uint16_t offset, const server_t *server)
+static uint16_t set_world_dimensions(uint16_t offset,
+    const server_t PTR server)
 {
     uint16_t write_offset = (uint16_t)fast_itoa_u32(server->args->width,
     pre_generated_responses + offset);
@@ -53,17 +54,17 @@ static uint16_t set_world_dimensions(uint16_t offset, const server_t *server)
     return offset + write_offset;
 }
 
-bool pre_generate_responses(const server_t *server)
+status_t pre_generate_responses(const server_t PTR server)
 {
     uint16_t offset = 0;
 
     pre_generated_responses = malloc(sizeof(char) * PRE_GENERATED_ARR_LEN);
     if (NULL == pre_generated_responses)
-        return false;
+        return FAILURE;
     offset = set_welcome(offset);
     offset = set_world_dimensions(offset, server);
     pre_generated_responses[offset] = '\0';
-    return true;
+    return SUCCESS;
 }
 
 void destroy_pre_generated_responses(void)
