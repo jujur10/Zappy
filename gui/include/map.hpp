@@ -14,12 +14,11 @@ namespace flecs
 struct iter;
 }
 
-
 namespace zappy_gui::map
 {
 
-constexpr int32_t MAP_WIDTH  = 128;
-constexpr int32_t MAP_HEIGHT = 128;
+extern int32_t MAP_WIDTH;
+extern int32_t MAP_HEIGHT;
 
 using float32 = std::float32_t;
 
@@ -47,4 +46,4 @@ struct outerTile
 /// @param it The ECS query iterator
 void generateMap(const flecs::iter &it);
 
-}
+} // namespace zappy_gui::map
