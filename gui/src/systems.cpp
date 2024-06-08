@@ -7,8 +7,8 @@
 #include "map.hpp"
 #include "raylib_utils.hpp"
 
-#include <Camera3D.hpp>
 #include <Matrix.hpp>
+#include <Camera3D.hpp> // Must be included after Matrix.hpp, if not project will not compile
 #include <flecs.h>
 #include <rlgl.h>
 
