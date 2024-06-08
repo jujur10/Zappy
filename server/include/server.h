@@ -36,6 +36,8 @@
 /// @var clock The server's clock.
 /// @var current_socks The server's file descriptor set.
 /// @var max_client The maximal fd to watch.
+/// @var time_units The current time units since start.
+/// @var frequency The actual frequency.
 /// @var args The pointer on program arguments structure.
 /// @var clients The new clients.
 /// @var nb_clients The number of clients inside the array.
@@ -50,6 +52,8 @@ typedef struct server_s {
     struct timespec clock;
     fd_set current_socks;
     int max_client;
+    double time_units;
+    uint32_t frequency;
     const argument_t PTR args;
     new_client_t clients[MAX_CLIENTS];
     uint16_t nb_clients;

@@ -38,3 +38,23 @@ bool is_timeout_exceed(timespec_t PTR server_clock,
 /// @return True if blocking time has expired, false if not.
 bool has_blocking_time_expired(timespec_t PTR server_clock,
     timespec_t PTR clock_to_inspect);
+
+/// @brief Function that calculate the difference between two clocks.
+/// @param clock_1 The first clock.
+/// @param clock_2 The second clock.
+/// @param result The resulting clock containing difference.
+void diff_clock(const timespec_t PTR clock_1,
+    const timespec_t PTR clock_2, timespec_t PTR result);
+
+/// @brief Function that calculate the difference between two clocks in
+/// seconds.
+/// @param clock_1 The first clock.
+/// @param clock_2 The second clock.
+double diff_seconds(const timespec_t PTR clock_1,
+    const timespec_t PTR clock_2);
+
+/// @brief Function that calculate time units from clocks diffs.
+/// @param new_clock The first clock.
+/// @param old_clock The second clock.
+double real_time_clock_to_time_units(uint32_t frequency,
+    const timespec_t PTR new_clock, const timespec_t PTR old_clock);

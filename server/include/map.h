@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #include "resources.h"
+#include "style/status.h"
 
 /// @brief Structure representing player.
 ///
@@ -22,7 +23,7 @@
 typedef struct map_s {
     uint32_t height;
     uint32_t width;
-    resources_t total_resources;
+    resources64_t total_resources;
     resources_t ARRAY tiles;
     bool has_been_modified;
 } map_t;
@@ -30,5 +31,15 @@ typedef struct map_s {
 /// @brief Function which initializes map.
 /// @param args The parsed program parameters.
 /// @param map The map to initialize.
-/// @return 0 on success, 1 on failure.
-uint8_t init_map(const argument_t PTR args, map_t PTR map);
+/// @return SUCCESS or FAILURE.
+status_t init_map(const argument_t PTR args, map_t PTR map);
+
+/// @brief Function which spread resources on the map.
+/// @param map The map to modify.
+void spread_resources_on_map(map_t PTR map);
+
+/// @brief Function which check if update available and update if available.
+/// @param current_time The current in-game time (time_units attribute of
+/// server)
+/// @param map The map to modify.
+void update_map(double current_time, map_t PTR map);

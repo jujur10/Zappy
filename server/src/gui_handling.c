@@ -68,7 +68,7 @@ static uint8_t is_ready(server_t PTR server, gui_t PTR gui,
     const fd_set PTR fd_set)
 {
     if (FD_ISSET(gui->sock, fd_set)) {
-        if (1 == has_blocking_time_expired(&server->clock,
+        if (false == has_blocking_time_expired(&server->clock,
         &gui->blocking_time))
             return 0;
         return 1;
