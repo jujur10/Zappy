@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <cstdint>
 #include <stdexcept>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <utility>
@@ -106,6 +107,31 @@ class Socket {
          * @return The number of bytes read, or -1 if an error occurs.
          */
         ssize_t read(void* buffer, const size_t length) const {
+            return ::read(sockfd, buffer, length);
+        }
+
+        /**
+         * Reads data from the socket with a timeout.
+         * @param buffer The buffer to store the read data.
+         * @param length The maximum length of data to read.
+         * @param timeout_ms The timeout value in milliseconds.
+         * @return The number of bytes read, or -1 if an error occurs or timeout is reached.
+         */
+        ssize_t read_with_timeout(void* buffer, const size_t length, int timeout_ms) const {
+            pollfd pfd {.fd = sockfd, .events = POLLIN, .revents = 0};
+            int ret = poll(&pfd, 1, timeout_ms);
+
+            if (ret == -1) {
+                // Error occurred
+                return -1;
+            }
+            if (ret == 0) {
+                // Timeout reached
+                errno = ETIMEDOUT;
+                return -1;
+            }
+
+            // Socket is ready for reading
             return ::read(sockfd, buffer, length);
         }
 
