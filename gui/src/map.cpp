@@ -41,4 +41,4 @@ void generateMap(const flecs::iter &it)
     }
 }
 
-}
+} // namespace zappy_gui::map

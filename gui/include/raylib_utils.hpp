@@ -8,8 +8,8 @@
 namespace raylib
 {
 class Matrix; // Forward declaration to avoid circular dependency
-class Model; // Forward declaration to avoid circular dependency
-}
+class Model;  // Forward declaration to avoid circular dependency
+} // namespace raylib
 
 namespace zappy_gui::utils
 {
@@ -26,4 +26,4 @@ void setupModel(const raylib::Model *model, const char *vertShaderPath, const ch
 /// @param matrixArray Array of transform matrices for the models
 /// @param count Number of matrices in the array
 void drawModelInstanced(const raylib::Model *model, const raylib::Matrix *matrixArray, int32_t count);
-}
+} // namespace zappy_gui::utils

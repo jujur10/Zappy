@@ -31,4 +31,4 @@ void drawModelInstanced(const raylib::Model *const model, const raylib::Matrix *
     }
 }
 
-}
+} // namespace zappy_gui::utils

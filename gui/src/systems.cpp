@@ -7,8 +7,8 @@
 #include "map.hpp"
 #include "raylib_utils.hpp"
 
-#include <Matrix.hpp>
 #include <Camera3D.hpp>
+#include <Matrix.hpp>
 #include <flecs.h>
 #include <rlgl.h>
 
@@ -19,16 +19,14 @@ namespace zappy_gui::systems
 static void registerOnStartSystems(const flecs::world &ecs)
 {
     /// Generate the map
-    ecs.system("generateMap")
-        .kind(flecs::OnStart)
-        .iter(map::generateMap);
+    ecs.system("generateMap").kind(flecs::OnStart).iter(map::generateMap);
 
     /// Query the tile models and load the instancing shader into them
     ecs.system<map::tileModels>("loadInstancingShader")
         .kind(flecs::OnStart)
-        .iter([]([[maybe_unused]] const flecs::iter &it, const map::tileModels * const models) {
-        utils::setupModel(models->outerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
-        utils::setupModel(models->innerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
+        .iter([]([[maybe_unused]] const flecs::iter &it, const map::tileModels *const models) {
+            utils::setupModel(models->outerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
+            utils::setupModel(models->innerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
         });
 }
 
@@ -36,9 +34,10 @@ static void registerPreUpdateSystems(const flecs::world &ecs)
 {
     /// Query the camera and setup the drawing
     ecs.system<raylib::Camera3D>("setupDrawing")
-        .term_at(1).singleton()
+        .term_at(1)
+        .singleton()
         .kind(flecs::PreUpdate)
-        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D * const camera) {
+        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera) {
             ::BeginDrawing();
 
             ::ClearBackground(BLACK);
@@ -53,9 +52,10 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
 {
     /// Query the camera and update it using the keyboard and mouse inputs
     ecs.system<raylib::Camera3D>("updateCamera")
-        .term_at(1).singleton()
+        .term_at(1)
+        .singleton()
         .kind(flecs::OnUpdate)
-        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D * const camera) {
+        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera) {
             camera->Update(
                 {
                     (::IsKeyDown(KEY_W) || ::IsKeyDown(KEY_UP)) * 0.1f -    // Move forward-backward
@@ -67,7 +67,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                 {
                     ::GetMouseDelta().x * 0.05f, // Rotation: yaw
                     ::GetMouseDelta().y * 0.05f, // Rotation: pitch
-                    0.0f                       // Rotation: roll
+                    0.0f                         // Rotation: roll
                 },
                 ::GetMouseWheelMove() * 2.0f);   // Move to target (zoom)
         });
@@ -91,15 +91,16 @@ static void registerPostUpdateSystems(const flecs::world &ecs)
 {
     /// Query the camera, end the drawing and display the FPS
     ecs.system<raylib::Camera3D>("endDrawing")
-        .term_at(1).singleton()
+        .term_at(1)
+        .singleton()
         .kind(flecs::PostUpdate)
-        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D * const camera) {
+        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera) {
             camera->EndMode();
 
             ::DrawFPS(10, 10);
 
             ::EndDrawing();
-    });
+        });
 }
 
 void registerSystems(const flecs::world &ecs)
@@ -110,4 +111,4 @@ void registerSystems(const flecs::world &ecs)
     registerPostUpdateSystems(ecs);
 }
 
-}
+} // namespace zappy_gui::systems

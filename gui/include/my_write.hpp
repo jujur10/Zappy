@@ -13,7 +13,8 @@ namespace zappy_gui
  * @class FileWriter
  * A class that provides functions to write data to a file descriptor.
  */
-class FileWriter {
+class FileWriter
+{
 public:
     /**
      * Constructs a FileWriter object with the specified file descriptor.
@@ -27,7 +28,8 @@ public:
      * @param size The size of the data to write.
      * @return The number of bytes written, or -1 if an error occurred.
      */
-    int64_t write(const char * const buffer, const uint64_t size) const {
+    int64_t write(const char *const buffer, const uint64_t size) const
+    {
         return ::write(fileDescriptor, buffer, size);
     }
 
@@ -36,10 +38,12 @@ public:
      * @param buffer The buffer containing the data to write.
      * @param size The size of the data to write.
      */
-    void writeNoReturn(const char * const buffer, const uint64_t size) const {
+    void writeNoReturn(const char *const buffer, const uint64_t size) const
+    {
         ::write(fileDescriptor, buffer, size);
     }
-    private:
-        uint16_t fileDescriptor; /**< The file descriptor to write to. */
+
+private:
+    uint16_t fileDescriptor; /**< The file descriptor to write to. */
 };
-}
+} // namespace zappy_gui

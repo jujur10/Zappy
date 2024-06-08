@@ -2,8 +2,8 @@
 // Created by quentinf on 27/05/24.
 //
 
-#include "my_write.hpp"
 #include "my_exit.hpp"
+#include "my_write.hpp"
 #include "sockets.hpp"
 
 #include <cmath>
@@ -17,24 +17,30 @@
 namespace zappy_gui
 {
 /// @brief Enum class for command line parsing errors
-enum class CmdParsingErrors{ WRONG_ARG_POSITION, PORT_ERROR, IP_ERROR, HOST_ERROR };
+enum class CmdParsingErrors
+{
+    WRONG_ARG_POSITION,
+    PORT_ERROR,
+    IP_ERROR,
+    HOST_ERROR
+};
 
 static constexpr uint32_t ignoreLastByte = 0x00'FF'FF'FF;
-static constexpr uint32_t portFlagValue = 28'717;
-static constexpr uint32_t hostFlagValue = 26'669;
+static constexpr uint32_t portFlagValue  = 28'717;
+static constexpr uint32_t hostFlagValue  = 26'669;
 
 /// @brief Parse the port from the command line arguments
 ///
 /// @param portFlag The flag for the port, should be "-p"
 /// @param portValue The value for the port after the flag "-p" as a string
 /// @return The port if the parsing was successful, an error otherwise
-static std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const portFlag, const char * const portValue)
+static std::expected<uint16_t, CmdParsingErrors> parsePort(const char *const portFlag, const char *const portValue)
 {
-    if ((*std::bit_cast<const uint32_t*>(portFlag) & ignoreLastByte) != portFlagValue)
+    if ((*std::bit_cast<const uint32_t *>(portFlag) & ignoreLastByte) != portFlagValue)
     {
         return std::unexpected(CmdParsingErrors::WRONG_ARG_POSITION);
     }
-    char* end = nullptr;
+    char *end           = nullptr;
     const uint64_t port = std::strtoul(portValue, &end, 10);
     if ((portValue == end) || (std::isinf(port)) || (port > UINT16_MAX))
     {
@@ -48,16 +54,16 @@ static std::expected<uint16_t, CmdParsingErrors> parsePort(const char * const po
 /// @param hostFlag The flag for the host, should be "-h"
 /// @param hostValue The value for the host after the flag "-h" as a string
 /// @return The IP if the parsing was successful, an error otherwise
-static std::expected<std::string, CmdParsingErrors> parseIP(const char * const hostFlag, const char * const hostValue)
+static std::expected<std::string, CmdParsingErrors> parseIP(const char *const hostFlag, const char *const hostValue)
 {
-    if ((*std::bit_cast<const uint32_t*>(hostFlag) & ignoreLastByte) != hostFlagValue)
+    if ((*std::bit_cast<const uint32_t *>(hostFlag) & ignoreLastByte) != hostFlagValue)
     {
         return std::unexpected(CmdParsingErrors::WRONG_ARG_POSITION);
     }
     return std::string(hostValue);
 }
 
-Socket connectToServer(char * const * const argv)
+Socket connectToServer(char *const *const argv)
 {
     const FileWriter errorWriter(2);
     const auto port = parsePort(argv[1], argv[2]);
@@ -75,8 +81,7 @@ Socket connectToServer(char * const * const argv)
                 errorWriter.writeNoReturn("Invalid port\n", 13);
                 SystemExit::exit(1);
             }
-            default:
-                SystemExit::exit(1);
+            default: SystemExit::exit(1);
         }
     }
     const auto ip = parseIP(argv[3], argv[4]);
@@ -94,15 +99,14 @@ Socket connectToServer(char * const * const argv)
                 errorWriter.writeNoReturn("Invalid IP\n", 11);
                 SystemExit::exit(1);
             }
-            default:
-                SystemExit::exit(1);
+            default: SystemExit::exit(1);
         }
     }
     try
     {
         Socket socket(port.value());
         constexpr int32_t socketOptVal = 1;
-        socket.setSocketOption(IPPROTO_TCP, TCP_NODELAY, &socketOptVal , sizeof(int32_t));
+        socket.setSocketOption(IPPROTO_TCP, TCP_NODELAY, &socketOptVal, sizeof(int32_t));
         if (!socket.connect(ip.value().c_str(), port.value()))
         {
             errorWriter.writeNoReturn("Can't reach host\n", 17);
@@ -110,11 +114,11 @@ Socket connectToServer(char * const * const argv)
         }
         return socket;
     }
-    catch (const SocketException& e)
+    catch (const SocketException &e)
     {
         errorWriter.writeNoReturn(e.what(), std::strlen(e.what()));
         errorWriter.writeNoReturn("\n", 1);
         SystemExit::exit(1);
     }
 }
-}
+} // namespace zappy_gui
