@@ -169,9 +169,9 @@ func (game Game) computePath() []RelativeCoordinates {
 	xSign := (destination[0] - origin[0]) / xDistance
 	ySign := (destination[1] - origin[1]) / yDistance
 	middlePoints := getMiddlePoints(origin, destination, game.Movement.TilesQueue)
-	if len(middlePoints) == 0 {
+	if len(middlePoints) == 0 { // If there are no intermediate points to go through, make a basic path
 		return computeBasicPath(origin, destination, xDistance, yDistance, xSign, ySign)
-	}
+	} // Else generate the most optimal path
 	selectedMiddlePoints := computeOptimalPath(origin, destination, middlePoints) // Get the middle points to go through
 	path := make([]RelativeCoordinates, 0)
 	lastOrigin := origin
