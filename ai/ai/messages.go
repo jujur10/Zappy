@@ -56,6 +56,19 @@ func levelUpFailed(game Game, targetLevel int) {
 	game.Socket.SendCommand(network.BroadcastText, game.UUID+formatStr)
 }
 
+func parseMessageLevelAndReturn(levelStr string, uuid string, msgType broadcastType) (broadcastMessageContent, error) {
+	level, err := strconv.Atoi(levelStr)
+	if err != nil || level < 2 || level > 8 {
+		if level < 2 || level > 8 {
+			err = fmt.Errorf("invalid level %d", level)
+		}
+		return broadcastMessageContent{}, err
+	}
+	return broadcastMessageContent{msgType: msgType, targetLevel: level, uuid: uuid}, nil
+}
+
+// interpretMessage from another player.
+// It's not that complicated, it's just a lot of duplicated ifs
 func interpretMessage(message string) (broadcastMessageContent, error) {
 	uuid, message, found := strings.Cut(message, " ")
 	if !found {
@@ -68,60 +81,41 @@ func interpretMessage(message string) (broadcastMessageContent, error) {
 			return broadcastMessageContent{}, fmt.Errorf("invalid message format: %s", message)
 		}
 		messageParts[1] = strings.TrimPrefix(messageParts[1], " missing ")
-		level, err := strconv.Atoi(messageParts[0])
-		if err != nil {
-			return broadcastMessageContent{}, err
-		}
+		broadcast, err := parseMessageLevelAndReturn(messageParts[0], uuid, missingPlayers)
 		missing, err := strconv.Atoi(messageParts[1])
+		if missing < 1 || missing > levelUpResources[broadcast.targetLevel][Player] {
+			err = fmt.Errorf("invalid missing value %d", missing)
+		}
 		if err != nil {
 			return broadcastMessageContent{}, err
 		}
-		return broadcastMessageContent{msgType: missingPlayers, targetLevel: level, missingPlayers: missing, uuid: uuid}, nil
+		broadcast.missingPlayers = missing
+		return broadcast, nil
 	}
 
 	if strings.HasPrefix(message, "Cancel ") {
 		message = strings.TrimPrefix(message, "Cancel ")
-		level, err := strconv.Atoi(message)
-		if err != nil {
-			return broadcastMessageContent{}, err
-		}
-		return broadcastMessageContent{msgType: cancelLvlUp, targetLevel: level, uuid: uuid}, nil
+		return parseMessageLevelAndReturn(message, uuid, cancelLvlUp)
 	}
 
 	if strings.HasPrefix(message, "Join ") {
 		message = strings.TrimPrefix(message, "Join ")
-		level, err := strconv.Atoi(message)
-		if err != nil {
-			return broadcastMessageContent{}, err
-		}
-		return broadcastMessageContent{msgType: announcePresence, targetLevel: level, uuid: uuid}, nil
+		return parseMessageLevelAndReturn(message, uuid, announcePresence)
 	}
 
 	if strings.HasPrefix(message, "Starting ") {
 		message = strings.TrimPrefix(message, "Starting ")
-		level, err := strconv.Atoi(message)
-		if err != nil {
-			return broadcastMessageContent{}, err
-		}
-		return broadcastMessageContent{msgType: startLvlUp, targetLevel: level, uuid: uuid}, nil
+		return parseMessageLevelAndReturn(message, uuid, startLvlUp)
 	}
 
 	if strings.HasPrefix(message, "Reached ") {
 		message = strings.TrimPrefix(message, "Reached ")
-		level, err := strconv.Atoi(message)
-		if err != nil {
-			return broadcastMessageContent{}, err
-		}
-		return broadcastMessageContent{msgType: lvlUpComplete, targetLevel: level, uuid: uuid}, nil
+		return parseMessageLevelAndReturn(message, uuid, lvlUpComplete)
 	}
 
 	if strings.HasPrefix(message, "Failed ") {
 		message = strings.TrimPrefix(message, "Failed ")
-		level, err := strconv.Atoi(message)
-		if err != nil {
-			return broadcastMessageContent{}, err
-		}
-		return broadcastMessageContent{msgType: lvlUpFailed, targetLevel: level, uuid: uuid}, nil
+		return parseMessageLevelAndReturn(message, uuid, lvlUpFailed)
 	}
 
 	return broadcastMessageContent{}, fmt.Errorf("invalid message: %s", message)
