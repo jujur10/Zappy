@@ -9,7 +9,6 @@ namespace flecs
 struct world;
 }
 
-
 namespace zappy_gui::systems
 {
 /// @brief Register all systems in the ECS
@@ -17,4 +16,4 @@ namespace zappy_gui::systems
 /// @param ecs The ECS to register the systems in
 void registerSystems(const flecs::world &ecs);
 
-}
+} // namespace zappy_gui::systems
