@@ -32,6 +32,7 @@ add_executable(zappy_server
     src/server_update.c
     src/commands/gui/gui_command_parsing.c
     src/utils/string/string.c
+    src/commands/player/player_command_parsing.c
 )
 
 target_include_directories(zappy_server PRIVATE

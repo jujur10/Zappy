@@ -12,6 +12,7 @@
 #include "coordinates.h"
 #include "inventory.h"
 #include "queue/msg_queue.h"
+#include "commands/player_commands.h"
 
 /// @brief Defaults parameters.
 #define BEGINNING_LIFE_UNITS 10
@@ -34,13 +35,14 @@ typedef enum player_status_s {
 ///
 /// @var sock The player's socket.
 /// @var level The player's level (correlated to player's field of vision).
+/// @var status The current player's status.
 /// @var orientation The orientation of the player.
 /// @var coordinates The coordinates of the player on the map.
 /// @var inventory The inventory of the player.
 /// @var time_to_live The remaining time to live for the player.
 /// @var blocking_time Representing the time at which the player can execute
 /// an action again.
-/// @var status The current player's status.
+/// @var command_buffer The player's command buffer.
 /// @var queue The player's receiving message queue.
 typedef struct player_s {
     uint16_t sock;
@@ -51,5 +53,6 @@ typedef struct player_s {
     inventory_t inventory;
     uint32_t time_to_live;
     struct timespec blocking_time;
+    player_command_buffer_t command_buffer;
     msg_queue_head_t queue;
 } player_t;
