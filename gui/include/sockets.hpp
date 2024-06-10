@@ -171,9 +171,28 @@ class Socket
      * @return The extracted line from the buffer, excluding the newline
      * character. If an error occurs, an empty string is returned.
      */
-    std::string ReadLine(std::vector<char> &buffer,
+    std::string ReadLineTimeout(std::vector<char> &buffer,
                          int timeout,
                          std::string &errorMsg) const;
+
+   /**
+       * @brief Reads a line from the socket until a newline character ('\n') is
+       * encountered or a timeout occurs.
+       *
+       * This method reads data from the socket and appends it to the provided
+       * buffer until a newline character ('\n') is found or the specified timeout
+       * is reached. If the buffer already contains a complete line, it extracts
+       * and returns that line without reading from the socket.
+       *
+       * @param buffer A reference to the buffer where the data read from the
+       * socket will be stored.
+       * @param errorMsg A reference to a string where an error message will be
+       * stored if the read operation fails.
+       * @return The extracted line from the buffer, excluding the newline
+       * character. If an error occurs, an empty string is returned.
+       */
+   std::string ReadLine(std::vector<char> &buffer,
+                        std::string &errorMsg) const;
 
     /**
      * Sets a socket option.

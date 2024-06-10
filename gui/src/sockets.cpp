@@ -213,7 +213,7 @@ ssize_t Socket::ReadUntilTimeout(std::vector<char> &buffer,
     return totalBytesRead;
 }
 
-std::string Socket::ReadLine(std::vector<char> &buffer,
+std::string Socket::ReadLineTimeout(std::vector<char> &buffer,
                              const int32_t timeout,
                              std::string &errorMsg) const
 {
@@ -222,6 +222,33 @@ std::string Socket::ReadLine(std::vector<char> &buffer,
     if (newlinePos == buffer.end())
     {
         const ssize_t bytesRead = ReadUntilTimeout(buffer, '\n', timeout);
+        if (-1 == bytesRead)
+        {
+            errorMsg = "Failed to read line from socket, timeout or no \\n";
+            return "";
+        }
+
+        newlinePos = std::ranges::find(buffer, '\n');
+        if (buffer.end() == newlinePos)
+        {
+            errorMsg = "Failed to find \\n in the received data";
+            return "";
+        }
+    }
+
+    std::string line(buffer.begin(), newlinePos);
+    buffer.erase(buffer.begin(), newlinePos + 1);
+    return line;
+}
+
+std::string Socket::ReadLine(std::vector<char> &buffer,
+                             std::string &errorMsg) const
+{
+    auto newlinePos = std::ranges::find(buffer, '\n');
+
+    if (newlinePos == buffer.end())
+    {
+        const ssize_t bytesRead = ReadUntil(buffer, '\n');
         if (-1 == bytesRead)
         {
             errorMsg = "Failed to read line from socket, timeout or no \\n";

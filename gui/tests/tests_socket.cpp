@@ -179,7 +179,7 @@ Test(Socket_ReadLine, ValidLine)
     std::vector<char> buffer;
     int timeoutMs = 1000;
     std::string errorMsg;
-    std::string line = socket.ReadLine(buffer, timeoutMs, errorMsg);
+    std::string line = socket.ReadLineTimeout(buffer, timeoutMs, errorMsg);
     cr_assert_eq(line, response.substr(0, response.length() - 1), "Socket should read the expected line");
     cr_assert_str_empty(errorMsg.c_str(), "No error message should be set");
 
