@@ -22,8 +22,8 @@ constexpr int32_t screenHeight   = 720;
 
 namespace map
 {
-    int32_t MAP_WIDTH;
-    int32_t MAP_HEIGHT;
+    int32_t kMAP_WIDTH;
+    int32_t kMAP_HEIGHT;
 } // namespace map
 
 /**
@@ -44,7 +44,7 @@ namespace map
  *
  * @param serverSocket The socket used for communication with the server.
  */
-void handshake(const Socket &serverSocket)
+void Handshake(const Socket &serverSocket)
 {
     const FileWriter errWriter(2);
     std::vector<char> responseBuffer;
@@ -58,7 +58,7 @@ void handshake(const Socket &serverSocket)
 
     // Lambda to read a line from the server and check for errors
     auto readLineAndCheck = [&serverSocket, &responseBuffer, &errorMsg, &exitWithError] {
-        std::string line = serverSocket.readLine(responseBuffer, 1'000, errorMsg);
+        std::string line = serverSocket.ReadLine(responseBuffer, 1'000, errorMsg);
         if (line.empty())
         {
             exitWithError(errorMsg);
@@ -72,7 +72,7 @@ void handshake(const Socket &serverSocket)
         exitWithError("Failed handshake with server, did not receive welcome or received too much data");
     }
 
-    if (serverSocket.write(static_cast<const char *>("GRAPHIC\n"), 8) == -1)
+    if (serverSocket.Write(static_cast<const char *>("GRAPHIC\n"), 8) == -1)
     {
         exitWithError("Failed handshake with server at writing team name");
     }
@@ -106,8 +106,8 @@ void handshake(const Socket &serverSocket)
         exitWithError("Failed handshake with server, invalid map size");
     }
 
-    map::MAP_WIDTH  = mapWidth;
-    map::MAP_HEIGHT = mapHeight;
+    map::kMAP_WIDTH  = mapWidth;
+    map::kMAP_HEIGHT = mapHeight;
 }
 
 } // namespace zappy_gui
@@ -115,7 +115,7 @@ void handshake(const Socket &serverSocket)
 //----------------------------------------------------------------------------------
 // Main Enry Point
 //----------------------------------------------------------------------------------
-int main(const int argc, char *argv[])
+int32_t main(const int32_t argc, char *argv[])
 {
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -129,9 +129,9 @@ int main(const int argc, char *argv[])
     {
         zappy_gui::SystemExit::exit(1);
     }
-    const zappy_gui::Socket serverSocket = zappy_gui::connectToServer(argv);
+    const zappy_gui::Socket serverSocket = zappy_gui::ConnectToServer(argv);
 
-    handshake(serverSocket);
+    Handshake(serverSocket);
 
     flecs::world ecs;
 

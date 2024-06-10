@@ -19,14 +19,14 @@ namespace zappy_gui::systems
 static void registerOnStartSystems(const flecs::world &ecs)
 {
     /// Generate the map
-    ecs.system("generateMap").kind(flecs::OnStart).iter(map::generateMap);
+    ecs.system("GenerateMap").kind(flecs::OnStart).iter(map::GenerateMap);
 
     /// Query the tile models and load the instancing shader into them
     ecs.system<map::tileModels>("loadInstancingShader")
         .kind(flecs::OnStart)
         .iter([]([[maybe_unused]] const flecs::iter &it, const map::tileModels *const models) {
-            utils::setupModel(models->outerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
-            utils::setupModel(models->innerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
+            utils::SetupModel(models->outerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
+            utils::SetupModel(models->innerModel, "gui/resources/shaders/tile_instancing.vs", nullptr);
         });
 }
 
@@ -76,14 +76,14 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     ecs.system<raylib::Matrix, map::outerTile>("drawOuterTile")
         .kind(flecs::OnUpdate)
         .iter([](const flecs::iter &it, const raylib::Matrix *const tilesPosition, [[maybe_unused]] const map::outerTile *const type) {
-            utils::drawModelInstanced(it.world().get<map::tileModels>()->outerModel, tilesPosition, static_cast<int32_t>(it.count()));
+            utils::DrawModelInstanced(it.world().get<map::tileModels>()->outerModel, tilesPosition, static_cast<int32_t>(it.count()));
         });
 
     /// Query all the inner tiles and draw them
     ecs.system<raylib::Matrix, map::innerTile>("drawInnerTile")
         .kind(flecs::OnUpdate)
         .iter([](const flecs::iter &it, const raylib::Matrix *const tilesPosition, [[maybe_unused]] const map::innerTile *const type) {
-            utils::drawModelInstanced(it.world().get<map::tileModels>()->innerModel, tilesPosition, static_cast<int32_t>(it.count()));
+            utils::DrawModelInstanced(it.world().get<map::tileModels>()->innerModel, tilesPosition, static_cast<int32_t>(it.count()));
         });
 }
 

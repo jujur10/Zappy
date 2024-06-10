@@ -12,7 +12,7 @@
 namespace zappy_gui::utils
 {
 
-void setupModel(const raylib::Model *const model, const char *const vertShaderPath, const char *const fragShaderPath)
+void SetupModel(const raylib::Model *const model, const char *const vertShaderPath, const char *const fragShaderPath)
 {
     Shader shader                        = ::LoadShader(vertShaderPath, fragShaderPath);
     shader.locs[SHADER_LOC_MATRIX_MODEL] = ::GetShaderLocationAttrib(shader, "instanceTransform");
@@ -23,7 +23,7 @@ void setupModel(const raylib::Model *const model, const char *const vertShaderPa
     }
 }
 
-void drawModelInstanced(const raylib::Model *const model, const raylib::Matrix *const matrixArray, const int32_t count)
+void DrawModelInstanced(const raylib::Model *const model, const raylib::Matrix *const matrixArray, const int32_t count)
 {
     for (int32_t i = 0; i < model->meshCount; ++i)
     {

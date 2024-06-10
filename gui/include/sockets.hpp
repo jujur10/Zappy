@@ -1,12 +1,8 @@
 #pragma once
 
 #include <arpa/inet.h>
-#include <sys/poll.h>
 #include <sys/socket.h>
-#include <unistd.h>
 
-#include <algorithm>
-#include <cerrno>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -68,13 +64,13 @@ class Socket
      * @brief Socket file descriptor getter.
      * @return The file descriptor of the socket.
      */
-    [[nodiscard]] int32_t getSocketFd() const;
+    [[nodiscard]] int32_t GetSocketFd() const;
 
     /**
      * @brief Socket address getter.
      * @return The address of the socket.
      */
-    [[nodiscard]] sockaddr_in getAddress() const;
+    [[nodiscard]] sockaddr_in GetAddress() const;
 
     /**
      * @brief Binds the socket to an address.
@@ -83,14 +79,14 @@ class Socket
      *
      * @throw SocketException If binding the socket fails.
      */
-    void bind() const;
+    void Bind() const;
 
     /**
      * @brief Listens for incoming connections on the socket.
      * @param connectionNumber The maximum number of connections to queue.
      * @return true if listening is successful, false otherwise.
      */
-    [[nodiscard]] bool listen(int32_t connectionNumber) const;
+    [[nodiscard]] bool Listen(int32_t connectionNumber) const;
 
     /**
      * @brief Accepts a connection on the socket.
@@ -98,7 +94,7 @@ class Socket
      * @param clientAddressLength The length of the client address.
      * @return The file descriptor of the client socket.
      */
-    int32_t accept(sockaddr_in *clientAddress,
+    int32_t Accept(sockaddr_in *clientAddress,
                    socklen_t *clientAddressLength) const;
 
     /**
@@ -108,7 +104,7 @@ class Socket
      * @return true if the connection is successful, false otherwise.
      * @throw SocketException If the IP address is invalid or connection fails.
      */
-    bool connect(const char *ip, uint16_t port);
+    bool Connect(const char *ip, uint16_t port);
 
     /**
      * Writes data to the socket.
@@ -116,7 +112,7 @@ class Socket
      * @param length The length of the data to write.
      * @return The number of bytes written, or -1 if an error occurs.
      */
-    ssize_t write(const char *buffer, size_t length) const;
+    ssize_t Write(const char *buffer, size_t length) const;
 
     /**
      * Reads data from the socket.
@@ -124,7 +120,7 @@ class Socket
      * @param length The maximum length of data to read.
      * @return The number of bytes read, or -1 if an error occurs.
      */
-    ssize_t read(char *buffer, size_t length) const;
+    ssize_t Read(char *buffer, size_t length) const;
 
     /**
      * Reads data from the socket with a timeout.
@@ -134,7 +130,7 @@ class Socket
      * @return The number of bytes read, or -1 if an error occurs or timeout is
      * reached.
      */
-    ssize_t readWithTimeout(char *buffer, size_t length, int timeoutMs) const;
+    ssize_t ReadWithTimeout(char *buffer, size_t length, int timeoutMs) const;
 
     /**
      * Reads data from the socket until a specific delimiter is encountered.
@@ -142,7 +138,7 @@ class Socket
      * @param delimiter The delimiter character to stop reading at.
      * @return The number of bytes read, or -1 if an error occurs.
      */
-    ssize_t readUntil(std::vector<char> &buffer, char delimiter) const;
+    ssize_t ReadUntil(std::vector<char> &buffer, char delimiter) const;
 
     /**
      * Reads data from the socket until a specific delimiter is encountered or a
@@ -153,7 +149,7 @@ class Socket
      * @return The number of bytes read, or -1 if an error occurs or timeout is
      * reached.
      */
-    ssize_t readUntilTimeout(std::vector<char> &buffer,
+    ssize_t ReadUntilTimeout(std::vector<char> &buffer,
                              char delimiter,
                              int timeoutMs) const;
 
@@ -175,7 +171,7 @@ class Socket
      * @return The extracted line from the buffer, excluding the newline
      * character. If an error occurs, an empty string is returned.
      */
-    std::string readLine(std::vector<char> &buffer,
+    std::string ReadLine(std::vector<char> &buffer,
                          int timeout,
                          std::string &errorMsg) const;
 
@@ -187,7 +183,7 @@ class Socket
      * @param optlen The length of the option value.
      * @throw SocketException If setting the socket option fails.
      */
-    void setSocketOption(int level,
+    void SetSocketOption(int level,
                          int optname,
                          const void *optval,
                          socklen_t optlen) const;
@@ -200,7 +196,7 @@ class Socket
      * @param optlen The length of the option value buffer.
      * @throw SocketException If getting the socket option fails.
      */
-    void getSocketOption(int level,
+    void GetSocketOption(int level,
                          int optname,
                          void *optval,
                          socklen_t *optlen) const;
@@ -215,5 +211,5 @@ class Socket
  * @param argv The command-line arguments.
  * @return The connected socket.
  */
-Socket connectToServer(char *const *argv);
+Socket ConnectToServer(char *const *argv);
 }  // namespace zappy_gui

@@ -1,7 +1,13 @@
 //
 // Created by quentinf on 09/06/24.
 //
+
 #include "sockets.hpp"
+
+#include <sys/poll.h>
+#include <unistd.h>
+
+#include <algorithm>
 
 namespace zappy_gui
 {
@@ -33,17 +39,17 @@ Socket::~Socket()
     ::close(_sockFd);
 }
 
-int32_t Socket::getSocketFd() const
+int32_t Socket::GetSocketFd() const
 {
     return _sockFd;
 }
 
-sockaddr_in Socket::getAddress() const
+sockaddr_in Socket::GetAddress() const
 {
     return _addr;
 }
 
-void Socket::bind() const
+void Socket::Bind() const
 {
     if (::bind(_sockFd, std::bit_cast<sockaddr *>(&_addr), sizeof(_addr)) == -1)
     {
@@ -51,19 +57,19 @@ void Socket::bind() const
     }
 }
 
-int32_t Socket::accept(sockaddr_in *clientAddress,
-                       socklen_t *clientAddressLength) const
+int32_t Socket::Accept(sockaddr_in * const clientAddress,
+                       socklen_t * const clientAddressLength) const
 {
     return ::accept(
         _sockFd, std::bit_cast<sockaddr *>(clientAddress), clientAddressLength);
 }
 
-bool Socket::listen(const int32_t connectionNumber) const
+bool Socket::Listen(const int32_t connectionNumber) const
 {
     return ::listen(_sockFd, connectionNumber) != -1;
 }
 
-bool Socket::connect(const char *const ip, const uint16_t port)
+bool Socket::Connect(const char *const ip, const uint16_t port)
 {
     _addr.sin_addr.s_addr = ::inet_addr(ip);
 
@@ -81,17 +87,17 @@ bool Socket::connect(const char *const ip, const uint16_t port)
     return true;
 }
 
-ssize_t Socket::write(const char *const buffer, const size_t length) const
+ssize_t Socket::Write(const char *const buffer, const size_t length) const
 {
     return ::write(_sockFd, std::bit_cast<void *>(buffer), length);
 }
 
-ssize_t Socket::read(char *const buffer, const size_t length) const
+ssize_t Socket::Read(char *const buffer, const size_t length) const
 {
     return ::read(_sockFd, std::bit_cast<void *>(buffer), length);
 }
 
-ssize_t Socket::readWithTimeout(char *const buffer,
+ssize_t Socket::ReadWithTimeout(char *const buffer,
                                 const size_t length,
                                 const int32_t timeoutMs) const
 {
@@ -114,7 +120,7 @@ ssize_t Socket::readWithTimeout(char *const buffer,
     return ::read(_sockFd, std::bit_cast<void *>(buffer), length);
 }
 
-ssize_t Socket::readUntil(std::vector<char> &buffer, const char delimiter) const
+ssize_t Socket::ReadUntil(std::vector<char> &buffer, const char delimiter) const
 {
     ssize_t totalBytesRead = 0;
     const size_t chunkSize = 32;
@@ -151,7 +157,7 @@ ssize_t Socket::readUntil(std::vector<char> &buffer, const char delimiter) const
     return totalBytesRead;
 }
 
-ssize_t Socket::readUntilTimeout(std::vector<char> &buffer,
+ssize_t Socket::ReadUntilTimeout(std::vector<char> &buffer,
                                  const char delimiter,
                                  const int32_t timeoutMs) const
 {
@@ -207,7 +213,7 @@ ssize_t Socket::readUntilTimeout(std::vector<char> &buffer,
     return totalBytesRead;
 }
 
-std::string Socket::readLine(std::vector<char> &buffer,
+std::string Socket::ReadLine(std::vector<char> &buffer,
                              const int32_t timeout,
                              std::string &errorMsg) const
 {
@@ -215,7 +221,7 @@ std::string Socket::readLine(std::vector<char> &buffer,
 
     if (newlinePos == buffer.end())
     {
-        const ssize_t bytesRead = readUntilTimeout(buffer, '\n', timeout);
+        const ssize_t bytesRead = ReadUntilTimeout(buffer, '\n', timeout);
         if (-1 == bytesRead)
         {
             errorMsg = "Failed to read line from socket, timeout or no \\n";
@@ -235,7 +241,7 @@ std::string Socket::readLine(std::vector<char> &buffer,
     return line;
 }
 
-void Socket::setSocketOption(const int32_t level,
+void Socket::SetSocketOption(const int32_t level,
                              const int32_t optname,
                              const void *const optval,
                              const socklen_t optlen) const
@@ -246,7 +252,7 @@ void Socket::setSocketOption(const int32_t level,
     }
 }
 
-void Socket::getSocketOption(const int32_t level,
+void Socket::GetSocketOption(const int32_t level,
                              const int32_t optname,
                              void *const optval,
                              socklen_t *const optlen) const
