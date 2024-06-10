@@ -1,14 +1,15 @@
-#include "map.hpp"
-#include "my_write.hpp"
-#include "sockets.hpp"
-#include "string_utils.hpp"
-#include "systems.hpp"
+#include <flecs.h>
 
 #include <Camera3D.hpp>
 #include <Window.hpp>
 #include <cstring>
-#include <flecs.h>
-#include <my_exit.hpp>
+
+#include "map.hpp"
+#include "my_exit.hpp"
+#include "my_write.hpp"
+#include "sockets.hpp"
+#include "string_utils.hpp"
+#include "systems.hpp"
 
 namespace zappy_gui
 {
@@ -17,30 +18,34 @@ namespace zappy_gui
 // Global Variables Definition
 //----------------------------------------------------------------------------------
 constexpr const char *const help = "USAGE: ./zappy_gui -p port -h machine\n";
-constexpr int32_t screenWidth    = 1'280;
-constexpr int32_t screenHeight   = 720;
+constexpr int32_t screenWidth = 1'280;
+constexpr int32_t screenHeight = 720;
 
 namespace map
 {
-    int32_t kMAP_WIDTH;
-    int32_t kMAP_HEIGHT;
-} // namespace map
+int32_t kMAP_WIDTH;
+int32_t kMAP_HEIGHT;
+}  // namespace map
 
 /**
  * @brief Performs the handshake process with the server.
  *
- * This function handles the handshake process with the server. It exchanges necessary information and validates
- * the received data to establish a connection and retrieve the map dimensions.
+ * This function handles the handshake process with the server. It exchanges
+ * necessary information and validates the received data to establish a
+ * connection and retrieve the map dimensions.
  *
  * The function follows these steps:
  * 1. Reads the welcome message from the server and verifies it.
  * 2. Sends the team name to the server.
  * 3. Receives the client number from the server and validates it.
- * 4. Receives the map dimensions (width and height) from the server and validates them.
- * 5. Sets the `map::MAP_WIDTH` and `map::MAP_HEIGHT` variables with the received map dimensions.
+ * 4. Receives the map dimensions (width and height) from the server and
+ * validates them.
+ * 5. Sets the `map::MAP_WIDTH` and `map::MAP_HEIGHT` variables with the
+ * received map dimensions.
  *
- * If any errors occur during the handshake process, such as receiving invalid data or failing to convert the data,
- * the function writes an appropriate error message to the error writer and exits the program with a status code of 1.
+ * If any errors occur during the handshake process, such as receiving invalid
+ * data or failing to convert the data, the function writes an appropriate error
+ * message to the error writer and exits the program with a status code of 1.
  *
  * @param serverSocket The socket used for communication with the server.
  */
@@ -51,14 +56,18 @@ void Handshake(const Socket &serverSocket)
     std::string errorMsg;
 
     // Lambda to exit with an error message
-    auto exitWithError = [&errWriter](const std::string &msg) {
+    auto exitWithError = [&errWriter](const std::string &msg)
+    {
         errWriter.writeNoReturn(msg.c_str(), msg.length());
         SystemExit::exit(1);
     };
 
     // Lambda to read a line from the server and check for errors
-    auto readLineAndCheck = [&serverSocket, &responseBuffer, &errorMsg, &exitWithError] {
-        std::string line = serverSocket.ReadLine(responseBuffer, 1'000, errorMsg);
+    auto readLineAndCheck =
+        [&serverSocket, &responseBuffer, &errorMsg, &exitWithError]
+    {
+        std::string line =
+            serverSocket.ReadLine(responseBuffer, 1'000, errorMsg);
         if (line.empty())
         {
             exitWithError(errorMsg);
@@ -69,7 +78,9 @@ void Handshake(const Socket &serverSocket)
     std::string responseLine = readLineAndCheck();
     if (responseLine != "WELCOME" || !responseBuffer.empty())
     {
-        exitWithError("Failed handshake with server, did not receive welcome or received too much data");
+        exitWithError(
+            "Failed handshake with server, did not receive welcome or received "
+            "too much data");
     }
 
     if (serverSocket.Write(static_cast<const char *>("GRAPHIC\n"), 8) == -1)
@@ -87,17 +98,23 @@ void Handshake(const Socket &serverSocket)
         exitWithError("Failed handshake with server, no slot left");
     }
 
-    responseLine             = readLineAndCheck();
+    responseLine = readLineAndCheck();
     const size_t mapWidthIdx = responseLine.find(' ');
     if (mapWidthIdx == std::string::npos)
     {
-        exitWithError("Failed handshake with server, missing space between map_width and map_height");
+        exitWithError(
+            "Failed handshake with server, missing space between map_width and "
+            "map_height");
     }
 
-    int32_t mapWidth  = 0;
+    int32_t mapWidth = 0;
     int32_t mapHeight = 0;
-    if (!string_utils::convertFromString(static_cast<std::string_view>(responseLine).substr(0, mapWidthIdx), mapWidth)
-        || !string_utils::convertFromString(static_cast<std::string_view>(responseLine).substr(mapWidthIdx + 1), mapHeight))
+    if (!string_utils::convertFromString(
+            static_cast<std::string_view>(responseLine).substr(0, mapWidthIdx),
+            mapWidth) ||
+        !string_utils::convertFromString(
+            static_cast<std::string_view>(responseLine).substr(mapWidthIdx + 1),
+            mapHeight))
     {
         exitWithError("Failed to convert map dimensions from string");
     }
@@ -106,12 +123,13 @@ void Handshake(const Socket &serverSocket)
         exitWithError("Failed handshake with server, invalid map size");
     }
 
-    map::kMAP_WIDTH  = mapWidth;
+    map::kMAP_WIDTH = mapWidth;
     map::kMAP_HEIGHT = mapHeight;
 }
 
-} // namespace zappy_gui
+}  // namespace zappy_gui
 
+#include "commands.hpp"
 //----------------------------------------------------------------------------------
 // Main Enry Point
 //----------------------------------------------------------------------------------
@@ -142,10 +160,16 @@ int32_t main(const int32_t argc, char *argv[])
     ecs.set<flecs::Rest>({});
 
     ::SetConfigFlags(FLAG_MSAA_4X_HINT);
-    raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
+    raylib::Window window(zappy_gui::screenWidth,
+                          zappy_gui::screenHeight,
+                          "raylib-cpp - basic window");
     window.SetTargetFPS(60);
 
-    raylib::Camera3D camera({10.0f, 10.0f, 10.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, 45.f, CAMERA_PERSPECTIVE);
+    raylib::Camera3D camera({10.0f, 10.0f, 10.0f},
+                            {0.0f, 0.0f, 0.0f},
+                            {0.0f, 1.0f, 0.0f},
+                            45.f,
+                            CAMERA_PERSPECTIVE);
     ecs.set<raylib::Camera3D>(camera);
 
     auto innerMod = raylib::Model("gui/resources/assets/grass_top.glb");
@@ -154,10 +178,11 @@ int32_t main(const int32_t argc, char *argv[])
 
     zappy_gui::systems::registerSystems(ecs);
 
-    ecs.progress(); // Progress throught OnStart pipeline
+    ecs.progress();  // Progress throught OnStart pipeline
     //--------------------------------------------------------------------------------------
     // Main game loop
-    while (!window.ShouldClose() && ecs.progress()) // Detect window close button or ESC key
+    while (!window.ShouldClose() &&
+           ecs.progress())  // Detect window close button or ESC key
     {
     }
 

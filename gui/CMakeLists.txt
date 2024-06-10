@@ -9,6 +9,8 @@ if (NOT DEFINED BUILD_PACKAGE)
     set(CMAKE_C_FLAGS "-Ofast -march=native -flto=auto" CACHE STRING "" FORCE)
 endif ()
 
+
+
 #######################
 ###### Add Flecs ######
 #######################
@@ -19,6 +21,8 @@ target_include_directories(flecs INTERFACE
     resources/flecs
 )
 set_target_properties(flecs PROPERTIES C_STANDARD 99)
+
+
 
 #######################
 ###### Add Raylib #####
@@ -35,6 +39,15 @@ add_subdirectory(resources/raylib/ resources/raylib/src)
 add_subdirectory(resources/raylib_cpp/include)
 
 
+
+#######################
+###### Add Queue ######
+#######################
+add_library(atomic_queue INTERFACE)
+target_include_directories(atomic_queue INTERFACE
+    resources/atomic_queue
+)
+
 #######################
 ###### Zappy GUI ######
 #######################
@@ -45,6 +58,8 @@ add_executable(zappy_gui
     src/systems.cpp
     src/map.cpp
     src/raylib_utils.cpp
+    src/network_main_loop.cpp
+    include/commands.hpp
 )
 
 target_include_directories(zappy_gui PRIVATE
@@ -56,6 +71,7 @@ target_link_libraries(zappy_gui PRIVATE
     raylib
     raylib_cpp
     flecs
+    atomic_queue
 )
 
 set_target_properties(zappy_gui PROPERTIES
@@ -93,6 +109,7 @@ if (DEFINED RUN_TESTS)
         raylib
         raylib_cpp
         flecs
+        atomic_queue
     )
 
     target_compile_options(test_zappy_gui PRIVATE
