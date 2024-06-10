@@ -6,7 +6,6 @@
 #include <Camera3D.hpp>
 #include <Window.hpp>
 #include <cstring>
-#include <time.h>
 #include <flecs.h>
 #include <my_exit.hpp>
 
@@ -20,30 +19,6 @@ constexpr const char *const help = "USAGE: ./zappy_gui -p port -h machine\n";
 constexpr int32_t screenWidth    = 1'280;
 constexpr int32_t screenHeight   = 720;
 
-}
-
-//----------------------------------------------------------------------------------
-// Disables and Enables menu interactions
-//----------------------------------------------------------------------------------
-void handleMenuInteraction(bool &menuInteraction)
-{
-    // A timer is used to prevent the menu from toggling too fast
-    static time_t lastInteraction = time(NULL);
-    time_t currentTime = time(NULL);
-
-    if (IsKeyDown(KEY_I) && difftime(currentTime, lastInteraction) > 0.5)
-    {
-        menuInteraction = !menuInteraction;
-        if (menuInteraction)
-        {
-            ::EnableCursor();
-        }
-        else
-        {
-            ::DisableCursor();
-        }
-        lastInteraction = currentTime;
-    }
 }
 
 //----------------------------------------------------------------------------------
@@ -64,8 +39,6 @@ int main(int argc, char *argv[])
         zappy_gui::SystemExit::exit(1);
     }
     const auto serverSocket = zappy_gui::connectToServer(argv);
-
-    bool menuInteraction = false;
 
     flecs::world ecs;
 
@@ -101,7 +74,6 @@ int main(int argc, char *argv[])
     // Main game loop
     while (!window.ShouldClose() && ecs.progress()) // Detect window close button or ESC key
     {
-        handleMenuInteraction(menuInteraction);
     }
 
     const auto tileModels = ecs.get_mut<zappy_gui::map::tileModels>();
