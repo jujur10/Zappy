@@ -10,16 +10,11 @@ namespace zappy_gui::net
 {
 // Command types
 struct PlayerNewCommand {
-    int playerIndex;
-    int x, y;
-    int orientation;
-    int level;
+    // example
 };
 
 struct PlayerPositionCommand {
-    int playerIndex;
-    int x, y;
-    int orientation;
+    // example
 };
 
 // ... define other command types ...
@@ -29,7 +24,6 @@ using Command = std::variant<PlayerNewCommand, PlayerPositionCommand>;
 
 // Command queue
 using Queue = atomic_queue::AtomicQueueB2<Command>;
-extern Queue guiToServerQueue;
 extern Queue serverToGuiQueue;
 
 }

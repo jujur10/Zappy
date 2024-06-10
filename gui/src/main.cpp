@@ -3,7 +3,10 @@
 #include <Camera3D.hpp>
 #include <Window.hpp>
 #include <cstring>
+#include <networking.hpp>
+#include <thread>
 
+#include "commands.hpp"
 #include "map.hpp"
 #include "my_exit.hpp"
 #include "my_write.hpp"
@@ -20,12 +23,15 @@ namespace zappy_gui
 constexpr const char *const help = "USAGE: ./zappy_gui -p port -h machine\n";
 constexpr int32_t screenWidth = 1'280;
 constexpr int32_t screenHeight = 720;
+constexpr uint32_t serverToGuiQueueCapacity = 64;
 
 namespace map
 {
 int32_t kMAP_WIDTH;
 int32_t kMAP_HEIGHT;
 }  // namespace map
+
+net::Queue net::serverToGuiQueue{serverToGuiQueueCapacity};
 
 /**
  * @brief Performs the handshake process with the server.
@@ -67,7 +73,7 @@ void Handshake(const Socket &serverSocket)
         [&serverSocket, &responseBuffer, &errorMsg, &exitWithError]
     {
         std::string line =
-            serverSocket.ReadLine(responseBuffer, 1'000, errorMsg);
+            serverSocket.ReadLineTimeout(responseBuffer, 1'000, errorMsg);
         if (line.empty())
         {
             exitWithError(errorMsg);
@@ -129,7 +135,6 @@ void Handshake(const Socket &serverSocket)
 
 }  // namespace zappy_gui
 
-#include "commands.hpp"
 //----------------------------------------------------------------------------------
 // Main Enry Point
 //----------------------------------------------------------------------------------
@@ -179,12 +184,16 @@ int32_t main(const int32_t argc, char *argv[])
     zappy_gui::systems::registerSystems(ecs);
 
     ecs.progress();  // Progress throught OnStart pipeline
+
+    std::jthread networkThread(zappy_gui::net::networkTreadLoop, serverSocket);
     //--------------------------------------------------------------------------------------
     // Main game loop
     while (!window.ShouldClose() &&
            ecs.progress())  // Detect window close button or ESC key
     {
     }
+
+    networkThread.request_stop();
 
     const auto *tileModels = ecs.get_mut<zappy_gui::map::tileModels>();
     ::UnloadShader(tileModels->outerModel->GetMaterials()[0].shader);
