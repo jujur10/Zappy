@@ -146,7 +146,7 @@ func Test_parseUnexpectedMessage(t *testing.T) {
 		{"Valid eject", args{"eject: 4"}, Direction, EventDirection(4), false},
 		{"Invalid eject bad prefix", args{"ejekt: 4"}, Nil, nil, true},
 		{"Invalid eject invalid direction", args{"eject: 9"}, Nil, nil, true},
-		{"Valid message", args{"message 6, hello world"}, Broadcast, BroadcastData{text: "hello world", direction: EventDirection(6)}, false},
+		{"Valid message", args{"message 6, hello world"}, Broadcast, BroadcastData{Text: "hello world", Direction: EventDirection(6)}, false},
 		{"Invalid message bad direction", args{"message 15, hello world"}, Nil, nil, true},
 		{"Invalid message no direction", args{"message , hello world"}, Nil, nil, true},
 		{"Invalid message bad prefix", args{"mesage 15, hello world"}, Nil, nil, true},
