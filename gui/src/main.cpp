@@ -185,7 +185,7 @@ int32_t main(const int32_t argc, char *argv[])
 
     ecs.progress();  // Progress throught OnStart pipeline
 
-    std::jthread networkThread(zappy_gui::net::networkTreadLoop, serverSocket);
+    std::jthread networkThread(zappy_gui::net::NetworkTreadLoop, serverSocket);
     //--------------------------------------------------------------------------------------
     // Main game loop
     while (!window.ShouldClose() &&

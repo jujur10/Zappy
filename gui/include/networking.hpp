@@ -10,6 +10,6 @@
 
 namespace zappy_gui::net
 {
-void networkTreadLoop(const std::stop_token& stoken,
+void NetworkTreadLoop(const std::stop_token& stoken,
                       const Socket& serverSocket);
 }

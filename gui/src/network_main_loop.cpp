@@ -9,7 +9,7 @@
 
 namespace zappy_gui::net
 {
-void networkTreadLoop(const std::stop_token& stoken, const Socket& serverSocket)
+void NetworkTreadLoop(const std::stop_token& stoken, const Socket& serverSocket)
 {
     const FileWriter errWriter(2);
     std::vector<char> responseBuffer;
