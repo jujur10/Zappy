@@ -39,6 +39,7 @@ add_subdirectory(resources/raylib_cpp/include)
 ###### Zappy GUI ######
 #######################
 add_executable(zappy_gui
+    src/sockets.cpp
     src/main.cpp
     src/argv_parser.cpp
     src/systems.cpp
@@ -73,5 +74,33 @@ if (DEFINED BUILD_PACKAGE)
 else ()
     target_compile_options(zappy_gui PRIVATE
         -march=native
+    )
+endif ()
+
+if (DEFINED RUN_TESTS)
+    add_executable(test_zappy_gui
+        tests/tests_socket.cpp
+        src/sockets.cpp
+    )
+
+    target_include_directories(test_zappy_gui PRIVATE
+        include
+    )
+
+    target_link_libraries(test_zappy_gui PRIVATE
+        criterion
+        gcov
+        raylib
+        raylib_cpp
+        flecs
+    )
+
+    target_compile_options(test_zappy_gui PRIVATE
+        --coverage
+    )
+
+    add_custom_command(TARGET test_zappy_gui
+        POST_BUILD COMMAND cp test_zappy_gui ../
+        POST_BUILD COMMAND cp test_zappy_gui ../../
     )
 endif ()
