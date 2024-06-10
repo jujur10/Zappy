@@ -47,13 +47,35 @@ func Test_interpretMessage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := interpretMessage(tt.args.message)
+			got, err := parsePlayerMessage(tt.args.message)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("interpretMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("parsePlayerMessage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("interpretMessage() got = %v, want %v", got, tt.want)
+				t.Errorf("parsePlayerMessage() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getMessageIndex(t *testing.T) {
+	type args struct {
+		content     broadcastMessageContent
+		messageList []broadcastMessageContent
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{"Value in array", args{content: broadcastMessageContent{uuid: "aaa123"}, messageList: []broadcastMessageContent{{uuid: "abc124"}, {uuid: "aaa123"}, {uuid: "azerty1235"}}}, 1},
+		{"Value not in array", args{content: broadcastMessageContent{uuid: "aaa123"}, messageList: []broadcastMessageContent{{uuid: "abc124"}, {uuid: "azerty1235"}}}, -1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getMessageIndex(tt.args.content, tt.args.messageList); got != tt.want {
+				t.Errorf("getMessageIndex() = %v, want %v", got, tt.want)
 			}
 		})
 	}

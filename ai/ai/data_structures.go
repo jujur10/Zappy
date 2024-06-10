@@ -74,6 +74,17 @@ type MovementData struct {
 	Path []RelativeCoordinates
 }
 
+type MessagesManagement struct {
+	// UUID is the client UUID
+	UUID string
+	// messageStatusList is a list of all the "useful" status messages
+	messageStatusList []broadcastMessageContent
+	// Is the player waitingForLevelUp
+	waitingForLevelUp bool
+	// waitLevelUpMsg a pointer to the level up message if present, else nil
+	waitLevelUpMsg *broadcastMessageContent
+}
+
 // Game is the main struct containing the game data
 type Game struct {
 	// The player View
@@ -98,8 +109,8 @@ type Game struct {
 	TotalResourcesRequired Inventory
 	// FoodManager is a struct containing values for managing food
 	FoodManager FoodManagement
-	// UUID is the client UUID
-	UUID string
+	// MessageManager is a struct containing data for managing AI / AI messages
+	MessageManager MessagesManagement
 }
 
 // getInitialDirection fetches the initial direction of the AI from the server
@@ -133,15 +144,16 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game
 		log.Fatal("Failed to get player initial direction")
 	}
 	game := Game{View: make(ViewMap, 0),
-		Inventory:              make(Inventory),
-		TimeStep:               time.Second / time.Duration(timeStep),
-		TeamName:               teamName,
-		Socket:                 serverConn,
-		Coordinates:            WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: initialDirection},
-		Movement:               MovementData{Path: make([]RelativeCoordinates, 0), TilesQueue: make(PriorityQueue, 0)},
-		LevelUpResources:       levelUpResources,
-		Level:                  1,
-		UUID:                   createUUID(teamName),
+		Inventory:        make(Inventory),
+		TimeStep:         time.Second / time.Duration(timeStep),
+		TeamName:         teamName,
+		Socket:           serverConn,
+		Coordinates:      WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: initialDirection},
+		Movement:         MovementData{Path: make([]RelativeCoordinates, 0), TilesQueue: make(PriorityQueue, 0)},
+		LevelUpResources: levelUpResources,
+		Level:            1,
+		MessageManager: MessagesManagement{UUID: createUUID(teamName),
+			messageStatusList: make([]broadcastMessageContent, 0)},
 		TotalResourcesRequired: totalResourcesRequired,
 		FoodManager:            FoodManagement{FoodChannel: make(chan int), FoodPriority: 1},
 	}
