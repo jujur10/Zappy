@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         );
     ecs.set<raylib::Camera3D>(camera);
 
-    DisableCursor(); // Hides cursor and locks it to the window
+    ::DisableCursor(); // Hides cursor and locks it to the window
 
     auto innerMod = raylib::Model("gui/resources/assets/grass_top.glb");
     auto outerMod = raylib::Model("gui/resources/assets/grass_full.glb");
