@@ -9,7 +9,7 @@
 
 #include <Matrix.hpp>
 #include <Camera3D.hpp>
-#include <time.h>
+#include <ctime>
 #include <flecs.h>
 #include <rlgl.h>
 
@@ -19,9 +19,9 @@ namespace zappy_gui::systems
 //----------------------------------------------------------------------------------
 // Disables and Enables menu interactions
 //----------------------------------------------------------------------------------
-void handleMenuInteraction(bool &menuInteraction)
+void HandleMenuInteraction(bool &menuInteraction)
 {
-    if (IsKeyPressed(KEY_I))
+    if (::IsKeyPressed(KEY_I))
     {
         menuInteraction = !menuInteraction;
         if (menuInteraction)
@@ -77,8 +77,8 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
         .kind(flecs::OnUpdate)
         .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D * const camera) {
             static bool menuInteraction = false;
-            static Vector3 nullVector = {0.0f, 0.0f, 0.0f}; // Is set as static so that it doesn't get deleted and recreated every frame
-            handleMenuInteraction(menuInteraction);
+            const static Vector3 nullVector = {0.0f, 0.0f, 0.0f}; // Is set as static so that it doesn't get deleted and recreated every frame
+            HandleMenuInteraction(menuInteraction);
             camera->Update(
                 Vector3{
                     (::IsKeyDown(KEY_W) || ::IsKeyDown(KEY_UP)) * 0.1f -    // Move forward-backward
@@ -87,13 +87,13 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                         (::IsKeyDown(KEY_A) || ::IsKeyDown(KEY_LEFT)) * 0.1f,
                     0.0f                                                    // Move up-down
                 },
-                (menuInteraction) ? nullVector :
+                menuInteraction ? nullVector :
                 Vector3{
                     ::GetMouseDelta().x * 0.05f, // Rotation: yaw
                     ::GetMouseDelta().y * 0.05f, // Rotation: pitch
                     0.0f                       // Rotation: roll
                 },
-                (menuInteraction) ? 0.0f :
+                menuInteraction ? 0.0f :
                 ::GetMouseWheelMove() * 2.0f);   // Move to target (zoom)
         });
 
