@@ -20,10 +20,17 @@ const (
 )
 
 type BroadcastData struct {
-	// The direction from which the message is comming, (from 1 to 8, 0 is the current tile)
-	direction EventDirection
-	// The text of the message
-	text string
+	// The Direction from which the message is coming, (from 1 to 8, 0 is the current tile)
+	Direction EventDirection
+	// The Text of the message
+	Text string
+}
+
+type BroadcastDegreeData struct {
+	// The Direction in degrees from which the message is coming. -1 is the current tile
+	Direction int
+	// The Text of the message
+	Text string
 }
 
 const (
@@ -37,6 +44,8 @@ const (
 	Int
 	// A Broadcast message
 	Broadcast
+	// A BroadcastD is a BroadcastDegree message
+	BroadcastD
 	// A Direction
 	Direction
 	// An Elevation message
@@ -176,7 +185,7 @@ func parseUnexpectedMessage(line string) (MessageType, any, error) {
 		rest[1] = strings.TrimSpace(rest[1])
 		val, err := strconv.Atoi(rest[0])
 		if err == nil && val >= 0 && val < 9 {
-			return Broadcast, BroadcastData{direction: EventDirection(val), text: rest[1]}, nil
+			return Broadcast, BroadcastData{Direction: EventDirection(val), Text: rest[1]}, nil
 		}
 	}
 	return Nil, nil, fmt.Errorf("Invalid command\n")

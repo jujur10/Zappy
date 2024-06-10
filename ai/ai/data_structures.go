@@ -4,6 +4,8 @@ import (
 	"container/heap"
 	"fmt"
 	"log"
+	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 	"zappy_ai/network"
@@ -96,6 +98,8 @@ type Game struct {
 	TotalResourcesRequired Inventory
 	// FoodManager is a struct containing values for managing food
 	FoodManager FoodManagement
+	// UUID is the client UUID
+	UUID string
 }
 
 // getInitialDirection fetches the initial direction of the AI from the server
@@ -113,6 +117,15 @@ func getInitialDirection(conn network.ServerConn) network.PlayerDirection {
 	return -1
 }
 
+func createUUID(teamName string) string {
+	val1 := rand.Int()
+	val2 := rand.Int()
+	val3 := rand.Int()
+	uuidValue := val1 ^ val3 ^ val2
+	stringUuidVal := strconv.FormatInt(int64(uuidValue%1000000), 10)
+	return teamName + stringUuidVal
+}
+
 // InitGame creates a new Game struct
 func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game {
 	initialDirection := getInitialDirection(serverConn)
@@ -127,6 +140,8 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game
 		Coordinates:            WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: initialDirection},
 		Movement:               MovementData{Path: make([]RelativeCoordinates, 0), TilesQueue: make(PriorityQueue, 0)},
 		LevelUpResources:       levelUpResources,
+		Level:                  1,
+		UUID:                   createUUID(teamName),
 		TotalResourcesRequired: totalResourcesRequired,
 		FoodManager:            FoodManagement{FoodChannel: make(chan int), FoodPriority: 1},
 	}
