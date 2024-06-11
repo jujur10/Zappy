@@ -111,3 +111,26 @@ void gui_command_handling(server_t PTR server, char ARRAY buffer, uint32_t len,
 /// @param next_command The command popped.
 status_t get_next_command(gui_command_buffer_t *gui_command_buffer,
     gui_command_t *next_command);
+
+/// @brief The gui commands.
+
+/// @brief Function which execute a given command.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+/// @param command The command to execute.
+void execute_gui_command(server_t *server, uint16_t gui_idx,
+    const gui_command_t *command);
+
+/// @brief The MSZ command implementation.
+///
+/// @param gui The gui who made the request.
+void execute_gui_msz_command(gui_t *gui);
+
+/// @brief The BCT command implementation.
+///
+/// @param server The server structure.
+/// @param gui The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_bct_command(const server_t PTR server, gui_t PTR gui,
+    const gui_command_t PTR command);

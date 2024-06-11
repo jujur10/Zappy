@@ -35,6 +35,8 @@ add_executable(zappy_server
     src/commands/player/player_command_parsing.c
     src/utils/string/buffer.c
     src/commands/gui/gui_command.c
+    src/commands/gui/gui_msz_command.c
+    src/commands/gui/gui_bct_command.c
 )
 
 target_include_directories(zappy_server PRIVATE
@@ -95,6 +97,11 @@ if (DEFINED RUN_TESTS)
         src/commands/player/player_command_parsing.c
         src/ai_handling.c
         src/utils/string/buffer.c
+        tests/commands/gui/tests_gui_bct_command.c
+        tests/commands/gui/tests_gui_msz_command.c
+        src/commands/gui/gui_bct_command.c
+        src/commands/gui/gui_msz_command.c
+        src/commands/gui/gui_command.c
     )
 
     target_include_directories(test_zappy_server PRIVATE
