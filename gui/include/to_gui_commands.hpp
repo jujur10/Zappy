@@ -23,7 +23,11 @@ struct PlayerPositionCommand {
 using Command = std::variant<PlayerNewCommand, PlayerPositionCommand>;
 
 // Command queue
-using Queue = atomic_queue::AtomicQueueB2<Command>;
-extern Queue serverToGuiQueue;
+using STGQueue = atomic_queue::AtomicQueueB2<Command>;
+extern STGQueue ServerToGuiQueue;
+
+// Parsing functions for commands coming from the server
+
+void ParseTileUpdateCommand(const std::string_view& line);
 
 }

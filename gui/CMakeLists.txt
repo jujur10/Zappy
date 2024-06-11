@@ -59,7 +59,7 @@ add_executable(zappy_gui
     src/map.cpp
     src/raylib_utils.cpp
     src/network_main_loop.cpp
-    include/commands.hpp
+    src/server_command_parsing.cpp
 )
 
 target_include_directories(zappy_gui PRIVATE

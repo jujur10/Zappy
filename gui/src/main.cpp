@@ -6,13 +6,14 @@
 #include <networking.hpp>
 #include <thread>
 
-#include "commands.hpp"
 #include "map.hpp"
 #include "my_exit.hpp"
 #include "my_write.hpp"
 #include "sockets.hpp"
 #include "string_utils.hpp"
 #include "systems.hpp"
+#include "to_gui_commands.hpp"
+#include "to_server_command.hpp"
 
 namespace zappy_gui
 {
@@ -23,7 +24,8 @@ namespace zappy_gui
 constexpr const char *const help = "USAGE: ./zappy_gui -p port -h machine\n";
 constexpr int32_t screenWidth = 1'280;
 constexpr int32_t screenHeight = 720;
-constexpr uint32_t serverToGuiQueueCapacity = 64;
+constexpr uint32_t serverToGuiQueueCapacity = 128;
+constexpr uint32_t GuiToServerQueueCapacity = 1024;
 
 namespace map
 {
@@ -31,7 +33,8 @@ int32_t kMAP_WIDTH;
 int32_t kMAP_HEIGHT;
 }  // namespace map
 
-net::Queue net::serverToGuiQueue{serverToGuiQueueCapacity};
+net::STGQueue net::ServerToGuiQueue{serverToGuiQueueCapacity};
+net::GTSQueue net::GuiToServerQueue{GuiToServerQueueCapacity};
 
 /**
  * @brief Performs the handshake process with the server.

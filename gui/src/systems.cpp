@@ -11,6 +11,8 @@
 #include <Camera3D.hpp> // Must be included after Matrix.hpp, if not project will not compile
 #include <flecs.h>
 #include <rlgl.h>
+#include "to_server_command.hpp"
+#include "gui_commands.hpp"
 
 namespace zappy_gui::systems
 {
@@ -124,6 +126,13 @@ static void registerPostUpdateSystems(const flecs::world &ecs)
             ::DrawFPS(10, 10);
 
             ::EndDrawing();
+        });
+
+    ecs.system("AskForMapRessourcesUpdate")
+        .kind(flecs::PostUpdate)
+        .iter([]([[maybe_unused]] const flecs::iter &it)
+        {
+            net::GuiToServerQueue.push(GUI_MAP_TILES);
         });
 }
 
