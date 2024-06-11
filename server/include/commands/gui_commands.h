@@ -104,3 +104,10 @@ typedef struct gui_command_buffer_s {
 /// @param gui_index The index of the gui in the gui array.
 void gui_command_handling(server_t PTR server, char ARRAY buffer, uint32_t len,
     uint32_t gui_index);
+
+/// @brief Function which pop the next command in the next_command variable.
+///
+/// @param gui_command_buffer The gui command buffer.
+/// @param next_command The command popped.
+status_t get_next_command(gui_command_buffer_t *gui_command_buffer,
+    gui_command_t *next_command);
