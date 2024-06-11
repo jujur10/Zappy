@@ -89,7 +89,7 @@ clean_binaries:
 
 fclean: clean	clean_binaries
 
-tests_run: test_server test_ai
+tests_run: test_server test_ai test_gui
 
 test_ai:
 	@cd ai/ && go test $(shell cd ai/ && find . -type d) -v -cover && cd ../
@@ -100,7 +100,14 @@ test_server:
 	cmake --build build_test --config Release $(DCMAKE_BUILD_FLAGS) \
 	--target test_zappy_server && ./test_zappy_server
 
+test_gui:
+	cmake -B build_test . $(CMAKE_GEN_FLAGS) -DCMAKE_BUILD_TYPE=Release \
+	-DRUN_TESTS=1
+	cmake --build build_test --config Release $(DCMAKE_BUILD_FLAGS) \
+	--target test_zappy_gui && ./test_zappy_gui
+
 .PHONY: all clean fclean re tests_run debug clean_binaries
 .PHONY: build zappy_ai zappy_server zappy_gui
+.PHONY: test_ai test_server test_gui
 .PHONY: dl dl_zappy_ai dl_zappy_gui dl_zappy_server
 .PHONY: dl-dev dl_zappy_ai_dev dl_zappy_gui_dev dl_zappy_server_dev

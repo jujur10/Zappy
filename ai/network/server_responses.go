@@ -20,10 +20,17 @@ const (
 )
 
 type BroadcastData struct {
-	// The direction from which the message is comming, (from 1 to 8, 0 is the current tile)
-	direction EventDirection
-	// The text of the message
-	text string
+	// The Direction from which the message is coming, (from 1 to 8, 0 is the current tile)
+	Direction EventDirection
+	// The Text of the message
+	Text string
+}
+
+type BroadcastDegreeData struct {
+	// The Direction in degrees from which the message is coming. -1 is the current tile
+	Direction int
+	// The Text of the message
+	Text string
 }
 
 const (
@@ -37,8 +44,12 @@ const (
 	Int
 	// A Broadcast message
 	Broadcast
+	// A BroadcastD is a BroadcastDegree message
+	BroadcastD
 	// A Direction
 	Direction
+	// A Frequency
+	Frequency
 	// An Elevation message
 	Elevation
 	// A message signifying the Death of a player
@@ -49,6 +60,7 @@ const (
 
 var inventoryIndexes = []string{"food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"}
 var validObjects = []string{"food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame", "player"}
+var invalidCommandError = fmt.Errorf("Invalid command\n")
 
 var validResponsesTypes = map[CommandType][]MessageType{
 	RotateRight:    {Boolean},
@@ -158,7 +170,7 @@ func parseArray(line string) (MessageType, any, error) {
 	return View, individualValues, nil
 }
 
-// parseUnexpectedMessage parses a message which is NOT a response to a client command, then returns it or an error
+// parseUnexpectedMessage parses a message, which is NOT a response to a client command, then returns it or an error
 func parseUnexpectedMessage(line string) (MessageType, any, error) {
 	if line == "dead" {
 		return Death, nil, nil
@@ -176,10 +188,10 @@ func parseUnexpectedMessage(line string) (MessageType, any, error) {
 		rest[1] = strings.TrimSpace(rest[1])
 		val, err := strconv.Atoi(rest[0])
 		if err == nil && val >= 0 && val < 9 {
-			return Broadcast, BroadcastData{direction: EventDirection(val), text: rest[1]}, nil
+			return Broadcast, BroadcastData{Direction: EventDirection(val), Text: rest[1]}, nil
 		}
 	}
-	return Nil, nil, fmt.Errorf("Invalid command\n")
+	return Nil, nil, invalidCommandError
 }
 
 func parseDirectionMessage(line string) (MessageType, any, error) {
@@ -190,7 +202,18 @@ func parseDirectionMessage(line string) (MessageType, any, error) {
 			return Direction, PlayerDirection(val), nil
 		}
 	}
-	return Nil, nil, fmt.Errorf("Invalid command\n")
+	return Nil, nil, invalidCommandError
+}
+
+func parseFrequencyMessage(line string) (MessageType, any, error) {
+	if strings.HasPrefix(line, "frequency: ") {
+		line = strings.TrimPrefix(line, "frequency: ")
+		val, err := strconv.Atoi(line)
+		if err == nil {
+			return Frequency, val, nil
+		}
+	}
+	return Nil, nil, invalidCommandError
 }
 
 // parseElevationMessage parses the elevation message sent by the server and return the level or an error
@@ -232,6 +255,10 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	unexpectedType, unexpectedValue, err := parseUnexpectedMessage(line)
 	if err == nil {
 		return unexpectedType, unexpectedValue, nil
+	}
+	frequencyType, frequencyValue, err := parseFrequencyMessage(line)
+	if err == nil {
+		return frequencyType, frequencyValue, nil
 	}
 	directionType, directionValue, err := parseDirectionMessage(line)
 	if err == nil {

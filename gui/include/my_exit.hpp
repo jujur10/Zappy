@@ -14,8 +14,10 @@ namespace zappy_gui::SystemExit
  * @param status The exit status code.
  * @note This function does not return.
  */
-[[noreturn]] static void exit(const uint8_t status) {
+[[noreturn]]
+static void exit(const uint8_t status)
+{
     ::_exit(status);
     __builtin_unreachable();
 }
-}
+} // namespace zappy_gui::SystemExit

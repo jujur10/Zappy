@@ -66,3 +66,4 @@ dkms.conf
 /zappy_gui
 cmake-build-*/
 build*/
+/test_zappy_gui
