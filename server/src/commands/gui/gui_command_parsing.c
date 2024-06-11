@@ -225,8 +225,6 @@ void gui_command_handling(server_t *server, char ARRAY buffer, uint32_t len,
 
     buffer[len + 1] = '\0';
     len = (uint32_t)strlen(buffer);
-    if (len < 4)
-        return;
     if (NULL != gui_buffer->raw_buffer.ptr) {
         if (FAILURE == use_gui_buffer(buffer, len, gui_buffer))
             destroy_gui(server, gui_index);

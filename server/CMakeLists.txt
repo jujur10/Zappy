@@ -88,6 +88,9 @@ if (DEFINED RUN_TESTS)
         src/gui_handling.c
         src/clock_timeout.c
         tests/tests_gui_command_handling.c
+        tests/tests_player_command_handling.c
+        src/commands/player/player_command_parsing.c
+        src/ai_handling.c
     )
 
     target_include_directories(test_zappy_server PRIVATE

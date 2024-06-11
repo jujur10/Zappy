@@ -49,17 +49,17 @@ static void parse_variable_command(const char ARRAY current_ptr, uint32_t len,
     player_command_buffer_t *player_cmd_buff)
 {
     if (len >= 5 && 0 == strncmp(current_ptr, PLAYER_SET_OBJ_TXT, sizeof
-    (PLAYER_SET_OBJ_TXT))) {
+    (PLAYER_SET_OBJ_TXT) - 1)) {
         set_string_parameter(player_cmd_buff, current_ptr + 4, len - 4);
         return set_base_command(player_cmd_buff, PLAYER_SET_OBJ_CMD);
     }
     if (len >= 6 && 0 == strncmp(current_ptr, PLAYER_TAKE_OBJ_TXT, sizeof
-    (PLAYER_TAKE_OBJ_TXT))) {
+    (PLAYER_TAKE_OBJ_TXT) - 1)) {
         set_string_parameter(player_cmd_buff, current_ptr + 5, len - 5);
         return set_base_command(player_cmd_buff, PLAYER_TAKE_OBJ_CMD);
     }
     if (len >= 11 && 0 == strncmp(current_ptr, PLAYER_BROADCAST_TXT, sizeof
-    (PLAYER_BROADCAST_TXT))) {
+    (PLAYER_BROADCAST_TXT) - 1)) {
         set_string_parameter(player_cmd_buff, current_ptr + 10, len - 10);
         return set_base_command(player_cmd_buff, PLAYER_BROADCAST_CMD);
     }
@@ -229,8 +229,6 @@ void player_command_handling(server_t *server, char ARRAY buffer, uint32_t len,
 
     buffer[len + 1] = '\0';
     len = (uint32_t)strlen(buffer);
-    if (len < 4)
-        return;
     if (NULL != player_buffer->raw_buffer.ptr) {
         if (FAILURE == use_player_buffer(buffer, len, player_buffer))
             destroy_ai(server, player_index);
