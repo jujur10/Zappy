@@ -46,7 +46,7 @@ void destroy_gui(server_t PTR server, uint32_t gui_idx)
 /// @param gui_idx The gui index of the gui who sent the message.
 static void on_gui_rcv(server_t PTR server, uint32_t gui_idx)
 {
-    static char buffer[READ_BUFFER_SIZE];
+    char buffer[READ_BUFFER_SIZE];
     int64_t bytes_received = read(server->guis[gui_idx].sock, buffer,
     sizeof(buffer) - 1);
 

@@ -31,21 +31,21 @@ void init_string(string_t *str, const string_t *from);
 /// @param str The string to init (non terminated by '\0').
 /// @param from The buffer to copy.
 /// @param len The buffer length.
-void init_string_from_char(string_t *str, const char *from, uint32_t len);
+void init_string_from_chars(string_t *str, const char *from, uint32_t len);
 
 /// @brief Function which sets a new string from a buffer.
 ///
 /// @param str The string to set (non terminated by '\0').
 /// @param from The buffer to copy.
 /// @param len The buffer length.
-void set_string_from_char(string_t *str, const char *from, uint32_t len);
+void reassign_string_from_chars(string_t *str, const char *from, uint32_t len);
 
 /// @brief Function which append to the string from a buffer.
 ///
 /// @param str The string to appends to (non terminated by '\0').
 /// @param from The buffer to copy.
 /// @param len The buffer length.
-status_t append_to_string_from_char(string_t *str, const char *from,
+status_t append_to_string_from_chars(string_t *str, const char *from,
     uint32_t len);
 
 /// @brief Function which clear a existing string (and free).

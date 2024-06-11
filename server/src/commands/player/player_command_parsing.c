@@ -36,7 +36,7 @@ static void set_string_parameter(player_command_buffer_t *player_cmd_buff,
 {
     if (len < 1)
         return set_base_command(player_cmd_buff, PLAYER_NONE_CMD);
-    init_string_from_char(&player_cmd_buff->commands[player_cmd_buff
+    init_string_from_chars(&player_cmd_buff->commands[player_cmd_buff
     ->nb_of_command].argument, start_string, len);
 }
 
@@ -175,7 +175,7 @@ static status_t parse_player_commands(const char ARRAY buffer, uint32_t len,
             return SUCCESS;
         current_len = (uint32_t)strcspn(current_ptr, "\n");
         if ('\0' == current_ptr[current_len]) {
-            init_string_from_char(to_append, current_ptr, current_len);
+            init_string_from_chars(to_append, current_ptr, current_len);
             return FAILURE;
         }
         if (current_len < 4) {
@@ -209,7 +209,7 @@ static status_t use_player_buffer(char ARRAY buffer, uint32_t len,
         set_base_command(player_buffer, PLAYER_NONE_CMD);
         return SUCCESS;
     }
-    append_to_string_from_char(&player_buffer->raw_buffer, buffer, len);
+    append_to_string_from_chars(&player_buffer->raw_buffer, buffer, len);
     if (FAILURE == parse_player_commands(player_buffer->raw_buffer.ptr,
         player_buffer->raw_buffer.len, player_buffer, &to_append)) {
         clear_string(&player_buffer->raw_buffer);

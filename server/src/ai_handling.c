@@ -48,7 +48,7 @@ void destroy_ai(server_t PTR server, uint32_t ai_idx)
 /// @param player_idx The player index of the player who sent the message.
 static void on_ai_rcv(server_t PTR server, uint32_t player_idx)
 {
-    static char buffer[READ_BUFFER_SIZE];
+    char buffer[READ_BUFFER_SIZE];
     int64_t bytes_received = read(server->players[player_idx].sock, buffer,
     sizeof(buffer) - 1);
 

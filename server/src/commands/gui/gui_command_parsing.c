@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "style/status.h"
 #include "commands/gui_commands.h"
@@ -54,7 +55,7 @@ static void set_basic_command(uint32_t command,
 /// @param current_ptr The pointer on the current command.
 /// @param len The current command length.
 static void set_bct_command_parameters(gui_command_buffer_t *gui_cmd_buff,
-    const char ARRAY current_ptr, uint64_t len)
+    const char ARRAY current_ptr, uint32_t len)
 {
     uint64_t temp_value;
     char *end_ptr;
@@ -62,14 +63,14 @@ static void set_bct_command_parameters(gui_command_buffer_t *gui_cmd_buff,
     if (len < 5)
         return set_base_command(gui_cmd_buff, GUI_NONE_CMD);
     temp_value = strtol(current_ptr + 4, &end_ptr, 10);
-    if (temp_value >= UINT16_MAX)
+    if ((EINVAL == errno || ERANGE == errno) || temp_value >= UINT16_MAX)
         return set_base_command(gui_cmd_buff, GUI_NONE_CMD);
     gui_cmd_buff->commands[gui_cmd_buff->nb_of_command].args[0] =
         (uint16_t)temp_value;
     if ((uint64_t)(end_ptr - current_ptr + 1) >= len)
         return set_base_command(gui_cmd_buff, GUI_NONE_CMD);
     temp_value = strtol(end_ptr + 1, &end_ptr, 10);
-    if (temp_value >= UINT16_MAX)
+    if ((EINVAL == errno || ERANGE == errno) || temp_value >= UINT16_MAX)
         return set_base_command(gui_cmd_buff, GUI_NONE_CMD);
     gui_cmd_buff->commands[gui_cmd_buff->nb_of_command].args[1] =
         (uint16_t)temp_value;
@@ -90,7 +91,7 @@ static void set_num_parameters(gui_command_buffer_t *gui_cmd_buff,
     if (len < 5)
         return set_base_command(gui_cmd_buff, GUI_NONE_CMD);
     temp_value = strtol(current_ptr + 4, &end_ptr, 10);
-    if (temp_value >= UINT16_MAX)
+    if ((EINVAL == errno || ERANGE == errno) || temp_value >= UINT16_MAX)
         return set_base_command(gui_cmd_buff, GUI_NONE_CMD);
     gui_cmd_buff->commands[gui_cmd_buff->nb_of_command].args[0] =
         (uint16_t)temp_value;
@@ -103,7 +104,7 @@ static void set_num_parameters(gui_command_buffer_t *gui_cmd_buff,
 /// @param len The current command length.
 static void set_advanced_command(uint32_t command,
     gui_command_buffer_t *gui_cmd_buff, const char ARRAY current_ptr,
-    uint64_t len)
+    uint32_t len)
 {
     switch (command) {
         case GUI_BCT_U32:
@@ -127,11 +128,13 @@ static void set_advanced_command(uint32_t command,
 }
 
 /// @brief Function which parse the command and at it to the buffer.
+/// The current command is casted as uint32_t and the last byte is ignored.
+/// In order to obtain the command alias fastly.
 ///
 /// @param current_ptr The pointer on the current command.
 /// @param len The current command length.
 /// @param gui_cmd_buff The gui's command buffer.
-static void parse_command(const char ARRAY current_ptr, uint64_t len,
+static void parse_command(const char ARRAY current_ptr, uint32_t len,
     gui_command_buffer_t *gui_cmd_buff)
 {
     uint32_t command = *(const uint32_t *)current_ptr & 0x00FFFFFF;
@@ -172,7 +175,7 @@ static status_t parse_gui_commands(const char ARRAY buffer, uint32_t len,
             return SUCCESS;
         current_len = (uint32_t)strcspn(current_ptr, "\n");
         if ('\0' == current_ptr[current_len]) {
-            init_string_from_char(to_append, current_ptr, current_len);
+            init_string_from_chars(to_append, current_ptr, current_len);
             return FAILURE;
         }
         if (current_len < 3) {
@@ -206,7 +209,7 @@ static status_t use_gui_buffer(char ARRAY buffer, uint32_t len,
         set_base_command(gui_buffer, GUI_NONE_CMD);
         return SUCCESS;
     }
-    append_to_string_from_char(&gui_buffer->raw_buffer, buffer, len);
+    append_to_string_from_chars(&gui_buffer->raw_buffer, buffer, len);
     if (FAILURE == parse_gui_commands(gui_buffer->raw_buffer.ptr,
         gui_buffer->raw_buffer.len, gui_buffer, &to_append)) {
         clear_string(&gui_buffer->raw_buffer);
