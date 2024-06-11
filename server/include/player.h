@@ -56,3 +56,10 @@ typedef struct player_s {
     player_command_buffer_t command_buffer;
     msg_queue_head_t queue;
 } player_t;
+
+/// @brief Function to returns the index of the player by socket.
+///
+/// @param server The server structure.
+/// @param sock The socket of the player.
+/// @return The index of the player or -1 if not found.
+int32_t get_player_by_socket(const server_t *server, uint16_t sock);

@@ -50,6 +50,7 @@ typedef enum {
     GUI_PIN_CMD,
     GUI_SGT_CMD,
     GUI_SST_CMD,
+    GUI_NB_OF_CMD
 } PACKED gui_command_base_t;
 
 /// @brief Enumeration representing the GUI's commands alias as uint32.
@@ -122,15 +123,78 @@ status_t get_next_command(gui_command_buffer_t *gui_command_buffer,
 void execute_gui_command(server_t *server, uint16_t gui_idx,
     const gui_command_t *command);
 
+/// @brief Function called when unknown command has been made.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+/// @param command The command to execute.
+void execute_gui_none_command(server_t *server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t *command);
+
 /// @brief The MSZ command implementation.
 ///
-/// @param gui The gui who made the request.
-void execute_gui_msz_command(gui_t *gui);
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+/// @param command The command to execute.
+void execute_gui_msz_command(server_t *server, uint16_t gui_idx,
+    const gui_command_t *command);
 
 /// @brief The BCT command implementation.
 ///
 /// @param server The server structure.
 /// @param gui The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_bct_command(const server_t PTR server, gui_t PTR gui,
-    const gui_command_t PTR command);
+void execute_gui_bct_command(server_t *server, uint16_t gui_idx,
+    const gui_command_t *command);
+
+/// @brief The PPO command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_ppo_command(server_t *server, uint16_t gui_idx,
+    const gui_command_t *command);
+
+/// @brief The PLV command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_plv_command(server_t *server, uint16_t gui_idx,
+    const gui_command_t *command);
+
+/// @brief The PIN command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_pin_command(server_t *server, uint16_t gui_idx,
+    const gui_command_t *command);
+
+/// @brief The SGT command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_sgt_command(server_t *server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t *command);
+
+/// @brief The SST command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_sst_command(server_t *server, uint16_t gui_idx,
+    const gui_command_t *command);
+
+/// @brief Array of function pointer representing the functions to call when
+/// a command is received.
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void (*gui_commands[GUI_NB_OF_CMD])(server_t *server, uint16_t gui_idx,
+    const gui_command_t *command) = {execute_gui_none_command,
+    execute_gui_msz_command, execute_gui_bct_command, NULL, NULL,
+    execute_gui_ppo_command,
+    execute_gui_plv_command, execute_gui_pin_command,
+    execute_gui_sgt_command, execute_gui_sst_command};

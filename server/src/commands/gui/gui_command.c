@@ -7,8 +7,8 @@
 #include <string.h>
 
 #include "style/status.h"
-#include "gui.h"
 #include "server.h"
+#include "commands/gui_commands.h"
 
 status_t get_next_command(gui_command_buffer_t *gui_command_buffer,
     gui_command_t *next_command)
@@ -27,13 +27,5 @@ status_t get_next_command(gui_command_buffer_t *gui_command_buffer,
 void execute_gui_command(server_t *server, uint16_t gui_idx,
     const gui_command_t *command)
 {
-    switch (command->command) {
-        case GUI_MSZ_CMD:
-            return execute_gui_msz_command(&server->guis[gui_idx]);
-        case GUI_BCT_CMD:
-            return execute_gui_bct_command(server, &server->guis[gui_idx],
-            command);
-        default:
-            return;
-    }
+    return gui_commands[command->command](server, gui_idx, command);
 }

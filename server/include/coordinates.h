@@ -24,12 +24,12 @@ typedef struct coordinates_s {
 /// @brief Enumeration representing orientation.
 ///
 /// @var LOOK_TOP Representation of look up.
-/// @var LOOK_BOTTOM Representation of look bottom.
 /// @var LOOK_RIGHT Representation of look right.
+/// @var LOOK_BOTTOM Representation of look bottom.
 /// @var LOOK_LEFT Representation of look left.
 typedef enum orientation_s {
     LOOK_TOP,
-    LOOK_BOTTOM,
     LOOK_RIGHT,
+    LOOK_BOTTOM,
     LOOK_LEFT
 } PACKED orientation_t;

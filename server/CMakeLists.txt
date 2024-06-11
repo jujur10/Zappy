@@ -37,6 +37,13 @@ add_executable(zappy_server
     src/commands/gui/gui_command.c
     src/commands/gui/gui_msz_command.c
     src/commands/gui/gui_bct_command.c
+    src/commands/gui/gui_ppo_command.c
+    src/player.c
+    src/commands/gui/gui_pin_command.c
+    src/commands/gui/gui_plv_command.c
+    src/commands/gui/gui_sst_command.c
+    src/commands/gui/gui_sgt_command.c
+    src/commands/gui/gui_none_command.c
 )
 
 target_include_directories(zappy_server PRIVATE
