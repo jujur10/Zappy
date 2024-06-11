@@ -13,6 +13,7 @@
 #include "clock.h"
 #include "queue/msg_queue.h"
 #include "logging.h"
+#include "commands/gui_commands.h"
 
 int32_t init_gui(server_t PTR server, int sock)
 {
@@ -45,15 +46,16 @@ void destroy_gui(server_t PTR server, uint32_t gui_idx)
 /// @param gui_idx The gui index of the gui who sent the message.
 static void on_gui_rcv(server_t PTR server, uint32_t gui_idx)
 {
-    static char buffer[64];
+    char buffer[READ_BUFFER_SIZE];
     int64_t bytes_received = read(server->guis[gui_idx].sock, buffer,
-    sizeof(buffer));
+    sizeof(buffer) - 1);
 
     if (bytes_received < 1) {
         LOG("Gui closed connection")
         return destroy_gui(server, gui_idx);
     }
     LOGF("Gui received : %.*s", (int32_t)bytes_received, buffer)
+    gui_command_handling(server, buffer, (uint32_t)bytes_received, gui_idx);
 }
 
 /// @brief Check the status of the gui.
