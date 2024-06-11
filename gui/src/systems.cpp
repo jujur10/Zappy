@@ -8,12 +8,7 @@
 #include "raylib_utils.hpp"
 
 #include <Matrix.hpp>
-<<<<<<< HEAD
-#include <Camera3D.hpp>
-#include <ctime>
-=======
 #include <Camera3D.hpp> // Must be included after Matrix.hpp, if not project will not compile
->>>>>>> dev
 #include <flecs.h>
 #include <rlgl.h>
 
