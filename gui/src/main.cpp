@@ -177,6 +177,8 @@ int32_t main(const int32_t argc, char *argv[])
                             CAMERA_PERSPECTIVE);
     ecs.set<raylib::Camera3D>(camera);
 
+    ::DisableCursor(); // Hides cursor and locks it to the window
+
     auto innerMod = raylib::Model("gui/resources/assets/grass_top.glb");
     auto outerMod = raylib::Model("gui/resources/assets/grass_full.glb");
     ecs.set<zappy_gui::map::tileModels>({&innerMod, &outerMod});

@@ -15,6 +15,25 @@
 namespace zappy_gui::systems
 {
 
+//----------------------------------------------------------------------------------
+// Disables and Enables menu interactions
+//----------------------------------------------------------------------------------
+void HandleMenuInteraction(bool &menuInteraction)
+{
+    if (::IsKeyPressed(KEY_I))
+    {
+        menuInteraction = !menuInteraction;
+        if (menuInteraction)
+        {
+            ::EnableCursor();
+        }
+        else
+        {
+            ::DisableCursor();
+        }
+    }
+}
+
 /// @brief Register systems that will be executed in the OnStart pipeline
 static void registerOnStartSystems(const flecs::world &ecs)
 {
@@ -55,20 +74,25 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
         .term_at(1)
         .singleton()
         .kind(flecs::OnUpdate)
-        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera) {
+        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D * const camera) {
+            static bool menuInteraction = false;
+            const static Vector3 nullVector = {0.0f, 0.0f, 0.0f}; // Is set as static so that it doesn't get deleted and recreated every frame
+            HandleMenuInteraction(menuInteraction);
             camera->Update(
-                {
+                Vector3{
                     (::IsKeyDown(KEY_W) || ::IsKeyDown(KEY_UP)) * 0.1f -    // Move forward-backward
                         (::IsKeyDown(KEY_S) || ::IsKeyDown(KEY_DOWN)) * 0.1f,
                     (::IsKeyDown(KEY_D) || ::IsKeyDown(KEY_RIGHT)) * 0.1f - // Move right-left
                         (::IsKeyDown(KEY_A) || ::IsKeyDown(KEY_LEFT)) * 0.1f,
                     0.0f                                                    // Move up-down
                 },
-                {
+                menuInteraction ? nullVector :
+                Vector3{
                     ::GetMouseDelta().x * 0.05f, // Rotation: yaw
                     ::GetMouseDelta().y * 0.05f, // Rotation: pitch
                     0.0f                         // Rotation: roll
                 },
+                menuInteraction ? 0.0f :
                 ::GetMouseWheelMove() * 2.0f);   // Move to target (zoom)
         });
 
