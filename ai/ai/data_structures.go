@@ -63,8 +63,9 @@ type FoodManagement struct {
 	// Channel to communicate with the food management goroutine.
 	// New food comes in, and food priority comes out
 	// In case of death by starvation, priority is -1
-	FoodChannel  chan int
-	FoodPriority int
+	FoodChannel     chan int
+	TimeStepChannel chan time.Duration
+	FoodPriority    int
 }
 
 type MovementData struct {
@@ -79,7 +80,7 @@ type MessagesManagement struct {
 	UUID string
 	// messageStatusList is a list of all the "useful" status messages
 	messageStatusList []broadcastMessageContent
-	// Is the player waitingForLevelUp
+	// Is the player waitingForLevelUp?
 	waitingForLevelUp bool
 	// waitLevelUpMsg a pointer to the level up message if present, else nil
 	waitLevelUpMsg *broadcastMessageContent
@@ -111,6 +112,8 @@ type Game struct {
 	FoodManager FoodManagement
 	// MessageManager is a struct containing data for managing AI / AI messages
 	MessageManager MessagesManagement
+	// The number of SlotsLeft
+	SlotsLeft int
 }
 
 // getInitialDirection fetches the initial direction of the AI from the server
@@ -138,7 +141,7 @@ func createUUID(teamName string) string {
 }
 
 // InitGame creates a new Game struct
-func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game {
+func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLeft int) Game {
 	initialDirection := getInitialDirection(serverConn)
 	if initialDirection == -1 {
 		log.Fatal("Failed to get player initial direction")
@@ -155,12 +158,18 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep int) Game
 		MessageManager: MessagesManagement{UUID: createUUID(teamName),
 			messageStatusList: make([]broadcastMessageContent, 0)},
 		TotalResourcesRequired: totalResourcesRequired,
-		FoodManager:            FoodManagement{FoodChannel: make(chan int), FoodPriority: 1},
+		SlotsLeft:              slotsLeft,
+		FoodManager: FoodManagement{FoodChannel: make(chan int), TimeStepChannel: make(chan time.Duration),
+			FoodPriority: 1},
 	}
 	heap.Init(&game.Movement.TilesQueue)
-	go FoodManagementRoutine(game.FoodManager.FoodChannel, game.TimeStep)
+	go FoodManagementRoutine(game.FoodManager.FoodChannel, game.FoodManager.TimeStepChannel)
+	game.FoodManager.TimeStepChannel <- game.TimeStep
 	return game
 }
+
+var parsedKeyToInvKey = map[string]TileItem{"food": Food, "linemate": Linemate,
+	"deraumere": Deraumere, "sibur": Sibur, "mendiane": Mendiane, "phiras": Phiras, "thystame": Thystame}
 
 // CreateViewMap creates a ViewMap from a parsed double array of strings
 func CreateViewMap(parsedList [][]string) (ViewMap, error) {
@@ -179,28 +188,27 @@ func CreateViewMap(parsedList [][]string) (ViewMap, error) {
 		for itemIdx, tileItem := range tile {
 			tileItem = strings.ToLower(tileItem)
 			var item TileItem
-			switch tileItem {
-			case "player":
+			if tileItem == "player" {
 				item = Player
-			case "food":
-				item = Food
-			case "linemate":
-				item = Linemate
-			case "deraumere":
-				item = Deraumere
-			case "sibur":
-				item = Sibur
-			case "mendiane":
-				item = Mendiane
-			case "phiras":
-				item = Phiras
-			case "thystame":
-				item = Thystame
-			default:
-				return nil, fmt.Errorf("invalid tileItem: %s", tileItem)
+			} else if val, ok := parsedKeyToInvKey[tileItem]; ok {
+				item = val
+			} else {
+				return nil, fmt.Errorf("invalid item in view map")
 			}
 			viewMap[idx][itemIdx] = item
 		}
 	}
 	return viewMap, nil
+}
+
+func CreateInventory(parsedInv map[string]int) (Inventory, error) {
+	inv := make(Inventory)
+	for key, val := range parsedInv {
+		if item, ok := parsedKeyToInvKey[key]; ok {
+			inv[item] = val
+		} else {
+			return nil, fmt.Errorf("invalid item in inventory")
+		}
+	}
+	return inv, nil
 }

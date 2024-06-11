@@ -21,10 +21,10 @@ func Test_updatePosition(t *testing.T) {
 		{"Up wrapping", args{RelativeCoordinates{0, 9}, RelativeCoordinates{10, 10}, network.Up}, RelativeCoordinates{0, 0}},
 		{"Down", args{RelativeCoordinates{0, 9}, RelativeCoordinates{10, 10}, network.Down}, RelativeCoordinates{0, 8}},
 		{"Down wrapping", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Down}, RelativeCoordinates{0, 9}},
-		{"Left", args{RelativeCoordinates{5, 0}, RelativeCoordinates{10, 10}, network.Left}, RelativeCoordinates{4, 0}},
-		{"Left wrapping", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Left}, RelativeCoordinates{9, 0}},
-		{"Right", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Right}, RelativeCoordinates{1, 0}},
-		{"Right wrapping", args{RelativeCoordinates{9, 0}, RelativeCoordinates{10, 10}, network.Right}, RelativeCoordinates{0, 0}},
+		{"Right", args{RelativeCoordinates{5, 0}, RelativeCoordinates{10, 10}, network.Right}, RelativeCoordinates{4, 0}},
+		{"Right wrapping", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Right}, RelativeCoordinates{9, 0}},
+		{"Left", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Left}, RelativeCoordinates{1, 0}},
+		{"Left wrapping", args{RelativeCoordinates{9, 0}, RelativeCoordinates{10, 10}, network.Left}, RelativeCoordinates{0, 0}},
 		{"Invalid direction", args{RelativeCoordinates{5, 5}, RelativeCoordinates{10, 10}, network.PlayerDirection(5)}, RelativeCoordinates{5, 5}},
 	}
 	for _, tt := range tests {

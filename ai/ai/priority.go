@@ -22,9 +22,6 @@ const levelUpPriority = 7
 // leechLevelUpPriority is the priority for leeching of a level up process from another player
 const leechLevelUpPriority = 8
 
-// Todo: update when inter-AI messages are implemented
-const levelUpLeechingAvailable = false
-
 // resourceCollected update the resource tables or the food goroutine when the player collects a resource
 func (game Game) resourceCollected(item TileItem) {
 	if item == Player {
@@ -103,7 +100,7 @@ func (game Game) getLevelUpPriority() int {
 	if game.FoodManager.FoodPriority > 8 {
 		return 0
 	}
-	if levelUpLeechingAvailable {
+	if game.isLevelUpLeechAvailable() {
 		return leechLevelUpPriority
 	}
 	neededResourcesSum := 0

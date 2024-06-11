@@ -84,7 +84,7 @@ func main() {
 	if timeStep == 0 {
 		log.Fatal("Failed to get timestep : Time step cannot be zero")
 	}
-	_ = ai.InitGame(serverConn, teamName, timeStep)
+	_ = ai.InitGame(serverConn, teamName, timeStep, slotsLeft)
 
 	ai.AI()
 }

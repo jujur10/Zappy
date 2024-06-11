@@ -14,17 +14,31 @@ const foodMinPriority = 1
 // When a whole food item is consumed, the food priority is updated.
 // When the player collects food, the collected amount is sent through the channel.
 // The lifeTime is incremented by 126 and the priority recomputed.
-func FoodManagementRoutine(food chan int, timeStep time.Duration) {
+func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
 	lifeTime := 1260
 	consumptionCounter := 0
+	timeStep := time.Duration(0)
 	for { // While true
 		select {
 		case newFood, ok := <-food:
 			if !ok {
 				return
 			}
+			if newFood < 0 {
+				if -newFood < (lifeTime/foodLifeTimeIncrement) ||
+					-newFood > ((lifeTime+foodLifeTimeIncrement)/foodLifeTimeIncrement) {
+					lifeTime = (-newFood) * foodLifeTimeIncrement
+					food <- computeFoodPriority(lifeTime)
+				}
+				break
+			}
 			lifeTime += foodLifeTimeIncrement * newFood
 			food <- computeFoodPriority(lifeTime)
+		case ts, ok := <-timeStepChan:
+			if !ok {
+				return
+			}
+			timeStep = ts
 		default:
 
 		}
