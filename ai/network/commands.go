@@ -39,6 +39,8 @@ const (
 	None
 )
 
+const EmptyBody = ""
+
 func (conn ServerConn) rotateRight() {
 	_, _ = fmt.Fprintln(conn.Connection, "Right")
 }

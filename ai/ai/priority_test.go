@@ -198,7 +198,7 @@ func TestGame_getTilePriority(t *testing.T) {
 		args   args
 		want   int
 	}{
-		{"Tile with player and food", fields{FoodManager: FoodManagement{FoodPriority: 5, FoodChannel: make(chan int)}}, args{[]TileItem{Player, Food}}, 5},
+		{"Tile with player and food", fields{FoodManager: FoodManagement{FoodPriority: 5, FoodChannel: make(chan int)}}, args{[]TileItem{Player, Food}}, 0},
 		{"Tile with only player", fields{}, args{[]TileItem{Player}}, 0},
 		{"Tile with unneeded resource and player", fields{Level: 1, LevelUpResources: map[int]Inventory{
 			1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}}, args{[]TileItem{Player, Thystame}}, 0},

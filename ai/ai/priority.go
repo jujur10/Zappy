@@ -17,10 +17,10 @@ var levelUpResources = map[int]Inventory{
 var totalResourcesRequired = Inventory{Linemate: 9, Deraumere: 8, Sibur: 10, Mendiane: 5, Phiras: 6, Thystame: 1}
 
 // levelUpPriority is the priority of starting the level up process
-const levelUpPriority = 7
+const levelUpPriority = 8
 
 // leechLevelUpPriority is the priority for leeching of a level up process from another player
-const leechLevelUpPriority = 8
+const leechLevelUpPriority = 9
 
 // resourceCollected update the resource tables or the food goroutine when the player collects a resource
 func (game Game) resourceCollected(item TileItem) {
@@ -89,6 +89,9 @@ func (game Game) getResourcePriority(item TileItem) int {
 func (game Game) getTilePriority(tile []TileItem) int {
 	prio := 0
 	for _, item := range tile {
+		if item == Player {
+			return 0
+		}
 		itemPrio := game.getResourcePriority(item)
 		prio = max(prio, itemPrio)
 	}
@@ -105,7 +108,7 @@ func (game Game) getLevelUpPriority() int {
 	}
 	neededResourcesSum := 0
 	for key, value := range game.LevelUpResources[game.Level] {
-		if key == Player {
+		if key == Player || key == Food {
 			continue
 		}
 		neededResourcesSum += value

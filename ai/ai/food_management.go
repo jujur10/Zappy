@@ -6,8 +6,8 @@ import (
 
 const foodLifeTimeIncrement = 126
 const playerOutOfFood = -1
-const foodMaxPriority = 10
-const foodMinPriority = 1
+const foodMaxPriority = 11
+const foodMinPriority = 2
 
 // FoodManagementRoutine is meant to run in a goroutine and manage the food
 // One lifeTime unit is removed at each turn
@@ -67,5 +67,5 @@ func computeFoodPriority(lifeTime int) int {
 	if lifeTime <= 3*foodLifeTimeIncrement {
 		return foodMaxPriority
 	}
-	return 13 - (lifeTime / foodLifeTimeIncrement)
+	return 14 - (lifeTime / foodLifeTimeIncrement)
 }
