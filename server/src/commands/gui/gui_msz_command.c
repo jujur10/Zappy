@@ -6,15 +6,18 @@
 */
 #include <string.h>
 
+#include "gui_handling.h"
 #include "utils/pre_generate/pre_generate.h"
 
-void execute_gui_msz_command(gui_t *gui)
+void execute_gui_msz_command(server_t *server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t *command)
 {
     char buffer[30] = "msz ";
     msg_t message;
+    const buffer_t *world_dims_buffer = &server->generated_buffers
+        .buffers[PRE_WORLD_DIM_BUFFER];
 
-    memcpy(buffer + 4, pre_generated_responses + world_dim_off,
-        world_dim_length);
-    create_message(buffer, 4 + world_dim_length, &message);
-    add_msg_to_queue(&gui->queue, &message);
+    memcpy(buffer + 4, world_dims_buffer->ptr, world_dims_buffer->len);
+    create_message(buffer, 4 + world_dims_buffer->len, &message);
+    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
 }

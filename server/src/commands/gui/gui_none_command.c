@@ -5,7 +5,7 @@
 ** gui_none_command.c.
 */
 #include "utils/itoa/fast_itoa.h"
-#include "utils/pre_generate/pre_generate.h"
+#include "gui_handling.h"
 
 void execute_gui_none_command(server_t *server, uint16_t gui_idx,
     __attribute__((unused)) const gui_command_t *command)

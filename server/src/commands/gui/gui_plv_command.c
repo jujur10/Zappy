@@ -5,7 +5,10 @@
 ** gui_plv_command.c.
 */
 #include "utils/itoa/fast_itoa.h"
-#include "utils/pre_generate/pre_generate.h"
+#include "server.h"
+#include "player.h"
+#include "commands/gui_commands.h"
+#include "msg.h"
 
 /// @brief Write a number to the buffer and increment the count value.
 ///

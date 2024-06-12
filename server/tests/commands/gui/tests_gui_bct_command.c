@@ -21,9 +21,10 @@ Test(TEST_GUI_BCT_COMMAND, test_gui_bct_command_1)
 
     args.width = 20;
     args.height = 20;
+    server.args = &args;
     init_map(&args, &server.map);
-    pre_generate_resources_counter(&args);
-    spread_resources_on_map(&server.map);
+    pre_generate_buffers(&server);
+    spread_resources_on_map(&server.map, &server.generated_buffers);
     TAILQ_INIT(&server.guis[0].queue);
     server.map.tiles[(command.args[1] * server.map.width) + command
         .args[0]].attr.foods = 10;
@@ -39,7 +40,7 @@ Test(TEST_GUI_BCT_COMMAND, test_gui_bct_command_1)
         .args[0]].attr.phiras = 60;
     server.map.tiles[(command.args[1] * server.map.width) + command
         .args[0]].attr.thystames = 70;
-    execute_gui_bct_command(&server, &server.guis[0], &command);
+    execute_gui_bct_command(&server, 0, &command);
     pop_msg(&server.guis[0].queue, &message);
     memcpy(buffer, message.ptr, message.len);
     buffer[message.len] = '\0';

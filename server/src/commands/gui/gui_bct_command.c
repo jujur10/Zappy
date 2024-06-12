@@ -4,6 +4,7 @@
 ** File description:
 ** gui_bct_command.c.
 */
+#include "gui_handling.h"
 #include "utils/pre_generate/pre_generate.h"
 #include "utils/itoa/fast_itoa.h"
 

@@ -108,7 +108,15 @@ if (DEFINED RUN_TESTS)
         tests/commands/gui/tests_gui_msz_command.c
         src/commands/gui/gui_bct_command.c
         src/commands/gui/gui_msz_command.c
+        src/commands/gui/gui_ppo_command.c
+        src/commands/gui/gui_pin_command.c
+        src/commands/gui/gui_plv_command.c
+        src/commands/gui/gui_sst_command.c
+        src/commands/gui/gui_sgt_command.c
+        src/commands/gui/gui_none_command.c
         src/commands/gui/gui_command.c
+        src/player.c
+
     )
 
     target_include_directories(test_zappy_server PRIVATE
