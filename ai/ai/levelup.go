@@ -5,6 +5,7 @@ import (
 	"zappy_ai/network"
 )
 
+// resourcesToDrop is a constant reference table for looking up which resources to drop before leveling up
 var resourcesToDrop = map[int]Inventory{
 	1: {Linemate: 1, Deraumere: 0, Sibur: 0, Mendiane: 0, Phiras: 0, Thystame: 0},
 	2: {Linemate: 1, Deraumere: 1, Sibur: 1, Mendiane: 0, Phiras: 0, Thystame: 0},
@@ -15,6 +16,7 @@ var resourcesToDrop = map[int]Inventory{
 	7: {Linemate: 2, Deraumere: 2, Sibur: 2, Mendiane: 2, Phiras: 2, Thystame: 1},
 }
 
+// itemToString converts TileItems to strings
 var itemToString = map[TileItem]string{
 	Linemate:  "linemate",
 	Deraumere: "deraumere",
@@ -24,6 +26,7 @@ var itemToString = map[TileItem]string{
 	Thystame:  "thystame",
 }
 
+// isLevelUpLeechAvailable checks if a hosted level up is available to leech from
 func (game Game) isLevelUpLeechAvailable() bool {
 	if game.MessageManager.waitingForLevelUp {
 		return false
@@ -38,6 +41,8 @@ func (game Game) isLevelUpLeechAvailable() bool {
 	return false
 }
 
+// areLevelUpConditionsMet checks if all the level up conditions are met, i.e., enough food and
+// Enough resources to host a level up OR a level up leeching
 func (game Game) areLevelUpConditionsMet() bool {
 	if game.FoodManager.FoodPriority >= 7 {
 		return false
@@ -57,6 +62,7 @@ func (game Game) areLevelUpConditionsMet() bool {
 	return true
 }
 
+// dropResources drops the resources needed for a level up to the ground
 func dropResources(game *Game) {
 	levelResources := resourcesToDrop[game.Level]
 	for resource, amount := range levelResources {
@@ -74,6 +80,7 @@ func dropResources(game *Game) {
 	}
 }
 
+// startLevelUpHost starts the level up hosting process
 func (game Game) startLevelUpHost() {
 	dropResources(&game)
 	startLevelUp(game, game.Level+1)
@@ -95,6 +102,7 @@ func (game Game) startLevelUpHost() {
 	}
 }
 
+// startLevelUpHost starts the level up leeching process
 func (game Game) startLevelUpLeech() {
 	game.Socket.SendCommand(network.LevelUp, network.EmptyBody)
 	initialResponse := awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
@@ -113,6 +121,8 @@ func (game Game) startLevelUpLeech() {
 	}
 }
 
+// levelUpHostLoop starts a level up "lobby", and waits until there are enough players gathered
+// or until the food reserves are too low to continue
 func (game Game) levelUpHostLoop() {
 	targetLevel := game.Level + 1
 	nbMissingPlayers := levelUpResources[game.Level][Player] - 1
@@ -149,6 +159,8 @@ func (game Game) levelUpHostLoop() {
 	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 }
 
+// levelUpHostLoop joins a level up "lobby", and waits until there are enough players gathered
+// or until the food reserves are too low to continue
 func (game Game) levelUpLeechLoop() {
 	targetLevel := game.Level + 1
 	log.Println("Joining level up : target level ", targetLevel)

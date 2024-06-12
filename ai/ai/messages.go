@@ -22,25 +22,33 @@ const (
 )
 
 type broadcastMessageContent struct {
-	msgType        broadcastType
-	targetLevel    int
+	// msgType is the type of the broadcast
+	msgType broadcastType
+	// targetLevel is the level to reach
+	targetLevel int
+	// missingPlayers is the number of players missing to start the level up, if applicable
 	missingPlayers int
-	uuid           string
-	direction      network.EventDirection
+	// the uuid of the message sender
+	uuid string
+	// the direction the message is coming from
+	direction network.EventDirection
 }
 
+// levelUpReadyMissingPlayers sends a formatted missingPlayers message
 func levelUpReadyMissingPlayers(game Game, targetLevel, playersMissing int) {
 	formatStr := fmt.Sprintf(" Ready %d, missing %d\n", targetLevel, playersMissing)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = true
 }
 
+// cancelLevelUp sends a formatted cancelLvlUp message
 func cancelLevelUp(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Cancel %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
+// announcePresenceLevelUp sends a formatted announcePresence message
 func announcePresenceLevelUp(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Join %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
@@ -48,30 +56,35 @@ func announcePresenceLevelUp(game Game, targetLevel int) {
 	game.MessageManager.waitingForLevelUp = false
 }
 
+// announceDepartureLevelUp sends a formatted announceDeparture message
 func announceDepartureLevelUp(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Leave %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUpLeech = true
 }
 
+// startLevelUp sends a formatted startLvlUp message
 func startLevelUp(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Starting %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
+// levelUpComplete sends a formatted lvlUpComplete message
 func levelUpComplete(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Reached %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
+// levelUpFailed sends a formatted lvlUpFailed message
 func levelUpFailed(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Failed %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
+// parseMessageLevelAndReturn parses the target level of the messages and returns a broadcastMessageContent struct
 func parseMessageLevelAndReturn(levelStr string, uuid string, msgType broadcastType) (broadcastMessageContent, error) {
 	level, err := strconv.Atoi(levelStr)
 	if err != nil || level < 2 || level > 8 {
@@ -90,7 +103,7 @@ func parsePlayerMessage(message string) (broadcastMessageContent, error) {
 	if !found {
 		return broadcastMessageContent{}, errors.New("invalid message format")
 	}
-	if strings.HasPrefix(message, "Ready ") {
+	if strings.HasPrefix(message, "Ready ") { // Check if it's a missingPlayers message
 		message = strings.TrimPrefix(message, "Ready ")
 		messageParts := strings.Split(message, ",")
 		if len(messageParts) != 2 || !strings.HasPrefix(messageParts[1], " missing ") {
@@ -137,6 +150,7 @@ func parsePlayerMessage(message string) (broadcastMessageContent, error) {
 	return broadcastMessageContent{}, fmt.Errorf("invalid message: %s", message)
 }
 
+// getMessageIndex using the message sender's UUID as a reference
 func getMessageIndex(content broadcastMessageContent, messageList []broadcastMessageContent) int {
 	for i, message := range messageList {
 		if content.uuid == message.uuid {
@@ -146,6 +160,7 @@ func getMessageIndex(content broadcastMessageContent, messageList []broadcastMes
 	return -1
 }
 
+// InterpretPlayerMessage parses the broadcast message and handles its content as necessary
 func (game Game) InterpretPlayerMessage(message network.BroadcastData) {
 	messageContent, err := parsePlayerMessage(message.Text)
 	if err != nil {
@@ -155,27 +170,27 @@ func (game Game) InterpretPlayerMessage(message network.BroadcastData) {
 	messageContent.direction = message.Direction
 	messageIndex := getMessageIndex(messageContent, game.MessageManager.messageStatusList)
 	if messageIndex == -1 {
-		if messageContent.msgType == missingPlayers {
+		if messageContent.msgType == missingPlayers { // New level up lobby
 			game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList, messageContent)
 			return
 		}
 		log.Println("Invalid message, message not in array: ", message.Text)
 		return
 	}
-	if messageContent.msgType == missingPlayers {
+	if messageContent.msgType == missingPlayers { // Update to a level up lobby
 		game.MessageManager.messageStatusList[messageIndex] = messageContent
-	} else if messageContent.msgType == cancelLvlUp ||
+	} else if messageContent.msgType == cancelLvlUp || // Closed level up lobby
 		messageContent.msgType == lvlUpComplete ||
 		messageContent.msgType == lvlUpFailed {
 		game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList[:messageIndex],
 			game.MessageManager.messageStatusList[messageIndex+1:]...)
 	}
-	if game.MessageManager.waitingForLevelUp &&
+	if game.MessageManager.waitingForLevelUp && // Player joined / left the lobby
 		messageContent.targetLevel == game.Level+1 &&
 		(messageContent.msgType == announcePresence || messageContent.msgType == announceDeparture) {
 		game.MessageManager.levelUpMessageChannel <- messageContent
 	}
-	if game.MessageManager.waitingForLevelUpLeech &&
+	if game.MessageManager.waitingForLevelUpLeech && // Host's lobby update
 		messageContent.targetLevel == game.Level+1 &&
 		(messageContent.msgType == startLvlUp || messageContent.msgType == cancelLvlUp) {
 		game.MessageManager.levelUpMessageChannel <- messageContent

@@ -133,6 +133,7 @@ func getInitialDirection(conn network.ServerConn) network.PlayerDirection {
 	return -1
 }
 
+// createUUID creates a new, random UUID for the player
 func createUUID(teamName string) string {
 	val1 := rand.Int()
 	val2 := rand.Int()
@@ -171,6 +172,7 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLef
 	return game
 }
 
+// EndGame closes the channels when the program exit, thus telling the goroutines to stop
 func EndGame(game *Game) {
 	log.Println("Closing channels...")
 	close(game.FoodManager.FoodChannel)
@@ -180,6 +182,7 @@ func EndGame(game *Game) {
 	log.Println("Channels closed")
 }
 
+// parsedKeyToInvKey converts the strings to tileItems
 var parsedKeyToInvKey = map[string]TileItem{"food": Food, "linemate": Linemate,
 	"deraumere": Deraumere, "sibur": Sibur, "mendiane": Mendiane, "phiras": Phiras, "thystame": Thystame}
 
@@ -213,7 +216,8 @@ func CreateViewMap(parsedList [][]string) (ViewMap, error) {
 	return viewMap, nil
 }
 
-func CreateInventory(parsedInv map[string]int) (Inventory, error) {
+// createInventory creates a new inventory from a parsed double array of strings
+func createInventory(parsedInv map[string]int) (Inventory, error) {
 	inv := make(Inventory)
 	for key, val := range parsedInv {
 		if item, ok := parsedKeyToInvKey[key]; ok {

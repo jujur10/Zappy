@@ -6,6 +6,7 @@ import (
 	"zappy_ai/network"
 )
 
+// switchResponseTypes runs the defined action for the given response type and updates the feedback channel
 func switchResponseTypes(msgType network.MessageType, message any, game *Game, feedbackChannel chan<- bool) {
 	switch msgType {
 	case network.Death:
@@ -34,7 +35,7 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 		}
 	case network.Inventory:
 		feedbackChannel <- true
-		inv, invErr := CreateInventory(message.(map[string]int))
+		inv, invErr := createInventory(message.(map[string]int))
 		if invErr != nil {
 			log.Println("Error: invalid inventory", invErr)
 			break
@@ -61,6 +62,7 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 	}
 }
 
+// serverResponseRoutine is the goroutine that manages the server's responses
 func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 	for {
 		select {
@@ -82,6 +84,7 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 	}
 }
 
+// awaitResponseToCommand is used to wait until the server returns a response to the command
 func awaitResponseToCommand(feedbackChannel <-chan bool) bool {
 	select {
 	case value, ok := <-feedbackChannel:
