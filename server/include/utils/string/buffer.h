@@ -46,7 +46,20 @@ void init_buffer_from_chars(buffer_t PTR buffer, uint32_t max_size,
 void reassign_buffer_from_chars(buffer_t PTR buffer, const char ARRAY from,
     uint32_t len);
 
+/// @brief Function which append to the buffer structure from chars.
+///
+/// @param buffer The buffer to appends.
+/// @param from The chars to copy.
+/// @param len The chars length.
+void append_to_buffer_from_chars(buffer_t PTR buffer, const char ARRAY from,
+    uint32_t len);
+
 /// @brief Function which destroy an existing buffer.
 ///
 /// @param buffer The buffer to clear.
 void destroy_buffer(buffer_t PTR buffer);
+
+/// @brief Macro which reinitialize an existing buffer.
+///
+/// @param buffer The buffer to reinitialize.
+#define REINITIALIZE_BUFFER(buffer) (buffer->len = 0)

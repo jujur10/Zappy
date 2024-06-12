@@ -1,8 +1,8 @@
 /*
 ** EPITECH PROJECT, 2024
-** gui_pre_generated_tna.c
+** gui_pre_generate_tna.c
 ** File description:
-** gui_pre_generated_tna.c.
+** gui_pre_generate_tna.c.
 */
 #include <string.h>
 #include "server.h"

@@ -59,6 +59,7 @@ status_t pre_generate_buffers(server_t PTR server)
     set_world_dimensions(server, &server->generated_buffers);
     pre_generate_resources_counter(server->args, &server->generated_buffers);
     set_tna_response(server);
+    set_mct_buffer(server);
     server->generated_buffers.nb_of_buffer = PRE_GENERATED_ARR_LEN;
     return SUCCESS;
 }

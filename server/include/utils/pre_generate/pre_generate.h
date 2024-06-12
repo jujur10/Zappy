@@ -30,6 +30,7 @@ typedef enum {
     PRE_WORLD_DIM_BUFFER,
     PRE_GENERATED_RESOURCE_COUNTER,
     PRE_TNA_RESPONSE,
+    PRE_MAP_BUFFER,
     PRE_GENERATED_ARR_LEN
 } generated_enum_t;
 
@@ -54,3 +55,7 @@ void pre_generate_resources_counter(const argument_t PTR args,
 /// @brief Function to pre-generate the tna response.
 /// @param server The server structure.
 void set_tna_response(server_t PTR server);
+
+/// @brief Function to allocate the map buffer.
+/// @param server The server structure.
+void set_mct_buffer(server_t *server);

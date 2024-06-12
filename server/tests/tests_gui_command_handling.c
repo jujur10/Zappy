@@ -10,6 +10,21 @@
 #include "commands/gui_commands.h"
 #include "server.h"
 
+void execute_gui_mct_command(__attribute__((unused)) server_t *server,
+    __attribute__((unused)) uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t *command)
+{
+    return;
+}
+
+void execute_gui_tna_command(__attribute__((unused)) server_t *server,
+    __attribute__((unused)) uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t *command)
+{
+    return;
+}
+
+
 Test(TEST_GUI_COMMAND_HANDLING, test_gui_command_handling_1)
 {
     server_t server = {};

@@ -36,6 +36,13 @@ void reassign_buffer_from_chars(buffer_t *buffer, const char *from,
     buffer->ptr[len] = '\0';
 }
 
+void append_to_buffer_from_chars(buffer_t PTR buffer, const char ARRAY from,
+    uint32_t len)
+{
+    memcpy(buffer->ptr + buffer->len, from, len);
+    buffer->len += len;
+}
+
 void destroy_buffer(buffer_t *buffer)
 {
     free(buffer->ptr);

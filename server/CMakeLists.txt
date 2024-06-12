@@ -44,8 +44,11 @@ add_executable(zappy_server
     src/commands/gui/gui_sst_command.c
     src/commands/gui/gui_sgt_command.c
     src/commands/gui/gui_none_command.c
-    src/utils/pre_generate/gui/gui_pre_generated_tna.c
+    src/utils/pre_generate/gui/gui_pre_generate_tna.c
     src/commands/gui/gui_tna_command.c
+    src/utils/pre_generate/gui/gui_pre_generate_mct.c
+    src/map_buffer.c
+    src/commands/gui/gui_mct_command.c
 )
 
 target_include_directories(zappy_server PRIVATE
@@ -118,7 +121,9 @@ if (DEFINED RUN_TESTS)
         src/commands/gui/gui_none_command.c
         src/commands/gui/gui_command.c
         src/player.c
-
+        src/utils/pre_generate/gui/gui_pre_generate_mct.c
+        src/utils/pre_generate/gui/gui_pre_generate_tna.c
+        src/map_buffer.c
     )
 
     target_include_directories(test_zappy_server PRIVATE

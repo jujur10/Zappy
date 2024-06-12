@@ -160,6 +160,8 @@ uint8_t run_server(const argument_t PTR args)
     if (FAILURE == pre_generate_buffers(&server))
         return 84;
     spread_resources_on_map(&server.map, &server.generated_buffers);
+    update_map_buffer(&server.map, &server.generated_buffers
+        .buffers[PRE_MAP_BUFFER]);
     LOG("Server responses pre-generated")
     ret_val = server_main_loop(&server);
     return destroy_server(args, &server), ret_val;

@@ -17,6 +17,11 @@
 /// @brief Max number of reallocations.
 #define MAX_TEMP_BUFFER_LEN 1024
 
+/// @brief Macros for BCT command.
+#define LEN_OF_UINT32_IN_CHAR 10
+#define NB_OF_MAP_AXIS 2
+#define BCT_COMMAND_LEN 4
+
 /// @brief Redefinition of structures.
 typedef struct gui_s gui_t;
 typedef struct server_s server_t;
@@ -146,6 +151,14 @@ void execute_gui_msz_command(server_t *server, uint16_t gui_idx,
 /// @param command The command to execute.
 void execute_gui_bct_command(server_t *server, uint16_t gui_idx,
     const gui_command_t *command);
+
+/// @brief The MCT command implementation.
+///
+/// @param server The server structure.
+/// @param gui The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_mct_command(server_t *server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t *command);
 
 /// @brief The TNA command implementation.
 ///

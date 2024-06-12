@@ -7,9 +7,11 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "style/status.h"
+#include "utils/string/buffer.h"
 
 /// @brief Structure representing message.
 ///
@@ -18,6 +20,7 @@
 typedef struct msg_s {
     uint32_t len;
     char ARRAY ptr;
+    bool to_free;
 } msg_t;
 
 /// @brief Function used to create a message.
@@ -28,6 +31,20 @@ typedef struct msg_s {
 /// @return Success or failure if the allocation failed.
 status_t create_message(const char *msg_content, uint32_t len,
     msg_t PTR message);
+
+/// @brief Function used to create a message without allocation.
+///
+/// @param ptr The pointer on the buffer to send.
+/// @param len The data length.
+/// @param message The pointer on the structure to fill.
+void create_message_from_ptr(char ARRAY ptr, uint32_t len,
+    msg_t PTR message);
+
+/// @brief Function used to create a message from an existing buffer.
+///
+/// @param buffer The pointer on the buffer to send.
+/// @param message The pointer on the structure to fill.
+void create_message_from_buffer(const buffer_t *buffer, msg_t PTR message);
 
 /// @brief Function used to destroy a message.
 ///
