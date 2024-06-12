@@ -12,11 +12,12 @@ static void copy_resources_counter_into_buffer(
     const resources64_t *total_required_resources,
     generated_buffers_t *pre_generated_buffers)
 {
-    init_buffer_from_chars
-    (&pre_generated_buffers->buffers[PRE_GENERATED_RESOURCE_COUNTER],
-    sizeof(*total_required_resources) + 1,
-    (const char *)total_required_resources,
-    sizeof(*total_required_resources) + 1);
+    init_buffer_from_chars(
+        &pre_generated_buffers->buffers[PRE_GENERATED_RESOURCE_COUNTER],
+        sizeof(*total_required_resources) + 1,
+        (const char *)total_required_resources,
+        sizeof(*total_required_resources) + 1
+    );
 }
 
 void pre_generate_resources_counter(const argument_t *args,

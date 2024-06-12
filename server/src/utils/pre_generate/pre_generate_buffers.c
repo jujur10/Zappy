@@ -19,8 +19,10 @@
 /// @return The new offset.
 static void set_welcome(generated_buffers_t PTR pre_generated_buffers)
 {
-    init_buffer_from_chars(&pre_generated_buffers->buffers[PRE_WELCOME_BUFFER
-    ], sizeof(WELCOME_MSG), WELCOME_MSG, sizeof(WELCOME_MSG) - 1);
+    init_buffer_from_chars(
+        &pre_generated_buffers->buffers[PRE_WELCOME_BUFFER],
+        sizeof(WELCOME_MSG), WELCOME_MSG, sizeof(WELCOME_MSG) - 1
+    );
 }
 
 /// @brief Set the message and returns the new offset of pre-generated array.
@@ -39,9 +41,12 @@ static void set_world_dimensions(const server_t PTR server,
     write_offset += fast_itoa_u32(server->args->height, buffer + write_offset);
     buffer[write_offset] = '\n';
     write_offset++;
-    init_buffer_from_chars
-    (&pre_generated_buffers->buffers[PRE_WORLD_DIM_BUFFER], write_offset + 1,
-    buffer, write_offset);
+    init_buffer_from_chars(
+        &pre_generated_buffers->buffers[PRE_WORLD_DIM_BUFFER],
+        write_offset + 1,
+        buffer,
+        write_offset
+    );
 }
 
 status_t pre_generate_buffers(server_t PTR server)
