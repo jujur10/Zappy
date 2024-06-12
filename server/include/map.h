@@ -12,6 +12,7 @@
 
 #include "resources.h"
 #include "style/status.h"
+#include "utils/pre_generate/pre_generate.h"
 
 /// @brief Structure representing player.
 ///
@@ -35,11 +36,16 @@ typedef struct map_s {
 status_t init_map(const argument_t PTR args, map_t PTR map);
 
 /// @brief Function which spread resources on the map.
+///
 /// @param map The map to modify.
-void spread_resources_on_map(map_t PTR map);
+/// @param generated_buffers The already generated buffers.
+void spread_resources_on_map(map_t PTR map,
+    const generated_buffers_t PTR generated_buffers);
 
 /// @brief Function which check if update available and update if available.
 /// @param current_time The current in-game time (time_units attribute of
 /// server)
 /// @param map The map to modify.
-void update_map(double current_time, map_t PTR map);
+/// @param generated_buffers The already generated buffers.
+void update_map(double current_time, map_t PTR map,
+    const generated_buffers_t PTR generated_buffers);

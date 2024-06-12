@@ -12,62 +12,55 @@
 #include "utils/itoa/fast_itoa.h"
 #include "server.h"
 #include "style/status.h"
-
-/// @brief The pre-generated response array.
-char PTR pre_generated_responses;
-
-/// @brief Response offsets.
-uint16_t welcome_msg_off;
-uint16_t welcome_msg_length;
-uint16_t world_dim_off;
-uint16_t world_dim_length;
+#include "utils/string/buffer.h"
 
 /// @brief Set the message and returns the new offset of pre-generated array.
 /// @param offset The offset of the pre-generated array to copy to.
 /// @return The new offset.
-static uint16_t set_welcome(uint16_t offset)
+static void set_welcome(generated_buffers_t PTR pre_generated_buffers)
 {
-    welcome_msg_off = offset;
-    welcome_msg_length = sizeof(WELCOME_MSG) - 1;
-    memcpy(pre_generated_responses + offset, WELCOME_MSG, welcome_msg_length);
-    return offset + sizeof(WELCOME_MSG) - 1;
+    init_buffer_from_chars(&pre_generated_buffers->buffers[PRE_WELCOME_BUFFER
+    ], sizeof(WELCOME_MSG), WELCOME_MSG, sizeof(WELCOME_MSG) - 1);
 }
 
 /// @brief Set the message and returns the new offset of pre-generated array.
 /// @param offset The offset of the pre-generated array to copy to.
 /// @param server The server structure in order to obtain the world dimensions.
 /// @return The new offset.
-static uint16_t set_world_dimensions(uint16_t offset,
-    const server_t PTR server)
+static void set_world_dimensions(const server_t PTR server,
+    generated_buffers_t PTR pre_generated_buffers)
 {
+    char buffer[100];
     uint16_t write_offset = (uint16_t)fast_itoa_u32(server->args->width,
-    pre_generated_responses + offset);
+    buffer);
 
-    pre_generated_responses[offset + write_offset] = ' ';
+    buffer[write_offset] = ' ';
     write_offset++;
-    write_offset += fast_itoa_u32(server->args->height,
-    pre_generated_responses + offset + write_offset);
-    pre_generated_responses[offset + write_offset] = '\n';
+    write_offset += fast_itoa_u32(server->args->height, buffer + write_offset);
+    buffer[write_offset] = '\n';
     write_offset++;
-    world_dim_off = offset;
-    world_dim_length = write_offset;
-    return offset + write_offset;
+    init_buffer_from_chars
+    (&pre_generated_buffers->buffers[PRE_WORLD_DIM_BUFFER], write_offset + 1,
+    buffer, write_offset);
 }
 
-status_t pre_generate_responses(const server_t PTR server)
+status_t pre_generate_buffers(server_t PTR server)
 {
-    uint16_t offset = 0;
-
-    pre_generated_responses = malloc(sizeof(char) * PRE_GENERATED_ARR_LEN);
-    if (NULL == pre_generated_responses)
+    server->generated_buffers.buffers = malloc(sizeof(buffer_t) *
+        PRE_GENERATED_ARR_LEN);
+    if (NULL == server->generated_buffers.buffers)
         return FAILURE;
-    offset = set_welcome(offset);
-    offset = set_world_dimensions(offset, server);
-    pre_generated_responses[offset] = '\0';
+    set_welcome(&server->generated_buffers);
+    set_world_dimensions(server, &server->generated_buffers);
+    pre_generate_resources_counter(server->args, &server->generated_buffers);
+    server->generated_buffers.nb_of_buffer = PRE_GENERATED_ARR_LEN;
     return SUCCESS;
 }
 
-void destroy_pre_generated_responses(void)
+void destroy_pre_generated_buffers(
+    generated_buffers_t PTR pre_generated_buffers)
 {
-    free(pre_generated_responses);
+    for (uint32_t i = 0; i < pre_generated_buffers->nb_of_buffer; i++)
+        destroy_buffer(&pre_generated_buffers->buffers[i]);
+    free(pre_generated_buffers->buffers);
 }

@@ -29,8 +29,9 @@ status_t transform_new_client_to_gui(server_t *server, uint32_t client_idx)
         return FAILURE;
     }
     add_msg_to_queue(&server->guis[gui_index].queue, &message);
-    create_message(pre_generated_responses + world_dim_off, world_dim_length,
-    &message);
+    create_message(server->generated_buffers
+    .buffers[PRE_WORLD_DIM_BUFFER].ptr, server->generated_buffers
+    .buffers[PRE_WORLD_DIM_BUFFER].len, &message);
     add_msg_to_queue(&server->guis[gui_index].queue, &message);
     destroy_new_client(server, client_idx, true);
     return SUCCESS;
@@ -53,8 +54,9 @@ status_t transform_new_client_to_ai(server_t *server, uint32_t client_idx,
         return FAILURE;
     }
     add_msg_to_queue(&server->players[ai_index].queue, &message);
-    create_message(pre_generated_responses + world_dim_off, world_dim_length,
-    &message);
+    create_message(server->generated_buffers
+    .buffers[PRE_WORLD_DIM_BUFFER].ptr, server->generated_buffers
+    .buffers[PRE_WORLD_DIM_BUFFER].len, &message);
     add_msg_to_queue(&server->players[ai_index].queue, &message);
     destroy_new_client(server, client_idx, true);
     return SUCCESS;

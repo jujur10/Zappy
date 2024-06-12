@@ -87,7 +87,7 @@ static uint8_t init_server(const argument_t PTR args, server_t PTR server)
 static uint8_t destroy_server(const argument_t PTR args, server_t PTR server)
 {
     LOG("Server closing")
-    destroy_pre_generated_responses();
+    destroy_pre_generated_buffers(&server->generated_buffers);
     for (uint16_t i = 0; i < server->nb_clients; i++)
         destroy_new_client(server, i, false);
     for (uint16_t i = 0; i < server->nb_guis; i++)
@@ -157,10 +157,9 @@ uint8_t run_server(const argument_t PTR args)
     srand((uint32_t)time(NULL));
     server.args = args;
     server.frequency = args->frequency;
-    if (FAILURE == pre_generate_responses(&server))
+    if (FAILURE == pre_generate_buffers(&server))
         return 84;
-    pre_generate_resources_counter(args);
-    spread_resources_on_map(&server.map);
+    spread_resources_on_map(&server.map, &server.generated_buffers);
     LOG("Server responses pre-generated")
     ret_val = server_main_loop(&server);
     return destroy_server(args, &server), ret_val;

@@ -10,34 +10,42 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "server.h"
-#include "resources.h"
 #include "style/status.h"
+#include "utils/string/buffer.h"
 
-/// @brief The pre-generated response array.
-#define PRE_GENERATED_ARR_LEN 2048
-extern char ARRAY pre_generated_responses;
+typedef struct server_s server_t;
+typedef struct argument_s argument_t;
+
+/// @brief Structure representing pre-generated buffers.
+///
+/// @var buffers The generated buffers.
+/// @var len The number of generated buffers.
+typedef struct generated_buffers_s {
+    buffer_t ARRAY buffers;
+    uint32_t nb_of_buffer;
+} generated_buffers_t;
+
+typedef enum {
+    PRE_WELCOME_BUFFER,
+    PRE_WORLD_DIM_BUFFER,
+    PRE_GENERATED_RESOURCE_COUNTER,
+    PRE_GENERATED_ARR_LEN
+} generated_enum_t;
 
 /// @brief Welcome message.
 #define WELCOME_MSG "WELCOME\n"
-extern uint16_t welcome_msg_off;
-extern uint16_t welcome_msg_length;
-
-/// @brief World dimensions message.
-extern uint16_t world_dim_off;
-extern uint16_t world_dim_length;
 
 /// @brief Function to pre-generate responses.
 /// @param server The server structure (after initialization).
 /// @return True On success, False on failure.
-status_t pre_generate_responses(const server_t PTR server);
+status_t pre_generate_buffers(server_t PTR server);
 
 /// @brief Function to free buffer of pre-generated responses.
-void destroy_pre_generated_responses(void);
-
-/// @brief Structure containing the number of resources for the whole map.
-extern resources64_t total_required_resources;
+void destroy_pre_generated_buffers(
+    generated_buffers_t PTR pre_generated_buffers);
 
 /// @brief Function to pre-generate the total required resources structure.
 /// @param args The argument structure (after initialization).
-void pre_generate_resources_counter(const argument_t *args);
+/// @param generated_buffers The pre-generated buffers.
+void pre_generate_resources_counter(const argument_t PTR args,
+    generated_buffers_t PTR pre_generated_buffers);

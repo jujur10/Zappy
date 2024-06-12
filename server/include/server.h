@@ -10,12 +10,13 @@
 #include <stdint.h>
 #include <sys/select.h>
 
-#include "player.h"
-#include "new_clients.h"
-#include "gui.h"
-#include "team.h"
-#include "map.h"
 #include "arguments.h"
+#include "gui.h"
+#include "map.h"
+#include "new_clients.h"
+#include "player.h"
+#include "team.h"
+#include "utils/pre_generate/pre_generate.h"
 
 // Authentication timeout in seconds and nanoseconds.
 #define AUTH_TIMEOUT_SEC 0
@@ -38,6 +39,7 @@
 /// @var max_client The maximal fd to watch.
 /// @var time_units The current time units since start.
 /// @var frequency The actual frequency.
+/// @var generated_buffers The pre-generated buffers.
 /// @var args The pointer on program arguments structure.
 /// @var clients The new clients.
 /// @var nb_clients The number of clients inside the array.
@@ -54,6 +56,7 @@ typedef struct server_s {
     int max_client;
     double time_units;
     uint32_t frequency;
+    generated_buffers_t generated_buffers;
     const argument_t PTR args;
     new_client_t clients[MAX_CLIENTS];
     uint16_t nb_clients;
