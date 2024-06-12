@@ -82,8 +82,10 @@ type MessagesManagement struct {
 	messageStatusList []broadcastMessageContent
 	// Is the player waitingForLevelUp?
 	waitingForLevelUp bool
-	// waitLevelUpMsg a pointer to the level up message if present, else nil
-	waitLevelUpMsg *broadcastMessageContent
+	// Is the player waitingForLevelUpLeech?
+	waitingForLevelUpLeech bool
+	// The levelUpMessageChannel
+	levelUpMessageChannel chan broadcastMessageContent
 }
 
 // Game is the main struct containing the game data
@@ -156,7 +158,7 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLef
 		LevelUpResources: levelUpResources,
 		Level:            1,
 		MessageManager: MessagesManagement{UUID: createUUID(teamName),
-			messageStatusList: make([]broadcastMessageContent, 0)},
+			messageStatusList: make([]broadcastMessageContent, 0), levelUpMessageChannel: make(chan broadcastMessageContent)},
 		TotalResourcesRequired: totalResourcesRequired,
 		SlotsLeft:              slotsLeft,
 		FoodManager: FoodManagement{FoodChannel: make(chan int), TimeStepChannel: make(chan time.Duration),
@@ -164,8 +166,18 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLef
 	}
 	heap.Init(&game.Movement.TilesQueue)
 	go FoodManagementRoutine(game.FoodManager.FoodChannel, game.FoodManager.TimeStepChannel)
+	go serverResponseRoutine(game.Socket.ResponseFeedbackChannel, &game)
 	game.FoodManager.TimeStepChannel <- game.TimeStep
 	return game
+}
+
+func EndGame(game *Game) {
+	log.Println("Closing channels...")
+	close(game.FoodManager.FoodChannel)
+	close(game.FoodManager.TimeStepChannel)
+	close(game.Socket.ResponseFeedbackChannel)
+	close(game.MessageManager.levelUpMessageChannel)
+	log.Println("Channels closed")
 }
 
 var parsedKeyToInvKey = map[string]TileItem{"food": Food, "linemate": Linemate,

@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"log"
 	"time"
 )
 
@@ -22,6 +23,7 @@ func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
 		select {
 		case newFood, ok := <-food:
 			if !ok {
+				log.Println("Food Management : channel closed, exiting..")
 				return
 			}
 			if newFood < 0 {
@@ -36,6 +38,7 @@ func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
 			food <- computeFoodPriority(lifeTime)
 		case ts, ok := <-timeStepChan:
 			if !ok {
+				log.Println("Food Management : channel closed, exiting..")
 				return
 			}
 			timeStep = ts
@@ -46,6 +49,7 @@ func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
 		consumptionCounter++
 		if lifeTime <= 0 {
 			food <- playerOutOfFood
+			log.Println("Food Management : player out of food, exiting..")
 			return
 		}
 		if consumptionCounter >= foodLifeTimeIncrement {
