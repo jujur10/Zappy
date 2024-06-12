@@ -10,6 +10,7 @@
 #include "arguments.h"
 #include "map.h"
 #include "utils/pre_generate/pre_generate.h"
+#include "server.h"
 
 Test(TEST_SPREADING, test_spreading_1)
 {
@@ -19,11 +20,13 @@ Test(TEST_SPREADING, test_spreading_1)
     argument_t args = {};
     map_t map = {};
     resources64_t result = {};
+    server_t server = {};
 
     get_arguments(argc, (const char **)argv, &args);
+    server.args = &args;
     init_map(&args, &map);
-    pre_generate_resources_counter(&args);
-    spread_resources_on_map(&map);
+    pre_generate_buffers(&server);
+    spread_resources_on_map(&map, &server.generated_buffers);
     for (uint64_t i = 0; i < map.height * map.width; i++)
         for (uint8_t j = 0; j < R_STRUCT_SIZE - 1; j++)
             result.arr[j] += map.tiles[i].arr[j];
@@ -45,13 +48,15 @@ Test(TEST_SPREADING, test_spreading_2)
     argument_t args = {};
     map_t map = {};
     resources64_t result = {};
+    server_t server = {};
 
     get_arguments(argc, (const char **)argv, &args);
+    server.args = &args;
     init_map(&args, &map);
-    pre_generate_resources_counter(&args);
+    pre_generate_buffers(&server);
     map.tiles[42].attr.siburs = 600;
     map.total_resources.attr.siburs = 600;
-    spread_resources_on_map(&map);
+    spread_resources_on_map(&map, &server.generated_buffers);
     for (uint64_t i = 0; i < map.height * map.width; i++)
         for (uint8_t j = 0; j < R_STRUCT_SIZE - 1; j++)
             result.arr[j] += map.tiles[i].arr[j];
@@ -73,13 +78,15 @@ Test(TEST_SPREADING, test_spreading_3)
     argument_t args = {};
     map_t map = {};
     resources64_t result = {};
+    server_t server = {};
 
     get_arguments(argc, (const char **)argv, &args);
+    server.args = &args;
     init_map(&args, &map);
-    pre_generate_resources_counter(&args);
+    pre_generate_buffers(&server);
     map.tiles[42].attr.siburs = 9;
     map.total_resources.attr.siburs = 9;
-    spread_resources_on_map(&map);
+    spread_resources_on_map(&map, &server.generated_buffers);
     for (uint64_t i = 0; i < map.height * map.width; i++)
         for (uint8_t j = 0; j < R_STRUCT_SIZE - 1; j++)
             result.arr[j] += map.tiles[i].arr[j];
@@ -101,18 +108,20 @@ Test(TEST_SPREADING, test_spreading_4)
     argument_t args = {};
     map_t map = {};
     resources64_t result = {};
+    server_t server = {};
 
     get_arguments(argc, (const char **)argv, &args);
+    server.args = &args;
     init_map(&args, &map);
-    pre_generate_resources_counter(&args);
+    pre_generate_buffers(&server);
     map.tiles[42].attr.siburs = 9;
     map.total_resources.attr.siburs = 9;
-    spread_resources_on_map(&map);
+    spread_resources_on_map(&map, &server.generated_buffers);
     for (uint64_t i = 0; i < map.height * map.width; i++)
         for (uint8_t j = 0; j < R_STRUCT_SIZE - 1; j++)
             result.arr[j] += map.tiles[i].arr[j];
-    spread_resources_on_map(&map);
-    spread_resources_on_map(&map);
+    spread_resources_on_map(&map, &server.generated_buffers);
+    spread_resources_on_map(&map, &server.generated_buffers);
     cr_assert_eq(result.attr.foods, NB_OF_FOODS);
     cr_assert_eq(result.attr.linemates, NB_OF_LINEMATES);
     cr_assert_eq(result.attr.deraumeres, NB_OF_DERAUMERES);

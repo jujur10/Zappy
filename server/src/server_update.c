@@ -29,5 +29,5 @@ static void update_game_clock(server_t PTR server)
 void update_server(server_t PTR server)
 {
     update_game_clock(server);
-    update_map(server->time_units, &server->map);
+    update_map(server->time_units, &server->map, &server->generated_buffers);
 }

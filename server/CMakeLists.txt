@@ -25,7 +25,7 @@ add_executable(zappy_server
     src/gui_handling.c
     src/swap_clients.c
     src/ai_handling.c
-    src/utils/pre_generate/pre_generate_ressources.c
+    src/utils/pre_generate/pre_generate_resources.c
     src/utils/arrays/arrays_u32.c
     src/utils/arrays/arrays_u64.c
     src/clock_timeout.c
@@ -33,6 +33,7 @@ add_executable(zappy_server
     src/commands/gui/gui_command_parsing.c
     src/utils/string/string.c
     src/commands/player/player_command_parsing.c
+    src/utils/string/buffer.c
 )
 
 target_include_directories(zappy_server PRIVATE
@@ -80,7 +81,8 @@ if (DEFINED RUN_TESTS)
         src/map.c
         src/utils/arrays/arrays_u64.c
         src/utils/arrays/arrays_u32.c
-        src/utils/pre_generate/pre_generate_ressources.c
+        src/utils/pre_generate/pre_generate_resources.c
+        src/utils/pre_generate/pre_generate_buffers.c
         src/clock.c
         tests/tests_string.c
         src/utils/string/string.c
@@ -91,6 +93,7 @@ if (DEFINED RUN_TESTS)
         tests/tests_player_command_handling.c
         src/commands/player/player_command_parsing.c
         src/ai_handling.c
+        src/utils/string/buffer.c
     )
 
     target_include_directories(test_zappy_server PRIVATE
