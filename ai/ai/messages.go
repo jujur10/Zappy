@@ -112,7 +112,7 @@ func parsePlayerMessage(message string) (broadcastMessageContent, error) {
 		messageParts[1] = strings.TrimPrefix(messageParts[1], " missing ")
 		broadcast, err := parseMessageLevelAndReturn(messageParts[0], uuid, missingPlayers)
 		missing, err := strconv.Atoi(messageParts[1])
-		if missing < 1 || missing > levelUpResources[broadcast.targetLevel][Player] {
+		if missing < 1 || missing > levelUpResources[broadcast.targetLevel-1][Player] {
 			err = fmt.Errorf("invalid missing value %d", missing)
 		}
 		if err != nil {
@@ -130,6 +130,11 @@ func parsePlayerMessage(message string) (broadcastMessageContent, error) {
 	if strings.HasPrefix(message, "Join ") {
 		message = strings.TrimPrefix(message, "Join ")
 		return parseMessageLevelAndReturn(message, uuid, announcePresence)
+	}
+
+	if strings.HasPrefix(message, "Leave ") {
+		message = strings.TrimPrefix(message, "Leave ")
+		return parseMessageLevelAndReturn(message, uuid, announceDeparture)
 	}
 
 	if strings.HasPrefix(message, "Starting ") {
