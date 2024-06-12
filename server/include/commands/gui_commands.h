@@ -147,6 +147,14 @@ void execute_gui_msz_command(server_t *server, uint16_t gui_idx,
 void execute_gui_bct_command(server_t *server, uint16_t gui_idx,
     const gui_command_t *command);
 
+/// @brief The TNA command implementation.
+///
+/// @param server The server structure.
+/// @param gui The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_tna_command(server_t *server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t *command);
+
 /// @brief The PPO command implementation.
 ///
 /// @param server The server structure.

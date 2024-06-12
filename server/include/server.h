@@ -10,13 +10,13 @@
 #include <stdint.h>
 #include <sys/select.h>
 
+#include "utils/pre_generate/pre_generate.h"
 #include "arguments.h"
 #include "gui.h"
 #include "map.h"
 #include "new_clients.h"
 #include "player.h"
 #include "team.h"
-#include "utils/pre_generate/pre_generate.h"
 
 // Authentication timeout in seconds and nanoseconds.
 #define AUTH_TIMEOUT_SEC 0

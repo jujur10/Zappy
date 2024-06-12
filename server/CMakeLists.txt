@@ -44,6 +44,8 @@ add_executable(zappy_server
     src/commands/gui/gui_sst_command.c
     src/commands/gui/gui_sgt_command.c
     src/commands/gui/gui_none_command.c
+    src/utils/pre_generate/gui/gui_pre_generated_tna.c
+    src/commands/gui/gui_tna_command.c
 )
 
 target_include_directories(zappy_server PRIVATE

@@ -13,7 +13,7 @@
 void (*gui_commands[GUI_NB_OF_CMD]) (server_t *server, uint16_t gui_idx,
     const gui_command_t *command) = {
     execute_gui_none_command, execute_gui_msz_command,
-    execute_gui_bct_command, NULL, NULL,
+    execute_gui_bct_command, NULL, execute_gui_tna_command,
     execute_gui_ppo_command, execute_gui_plv_command,
     execute_gui_pin_command, execute_gui_sgt_command,
     execute_gui_sst_command
