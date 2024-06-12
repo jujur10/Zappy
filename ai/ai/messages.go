@@ -15,6 +15,7 @@ const (
 	missingPlayers broadcastType = iota
 	cancelLvlUp
 	announcePresence
+	announceDeparture
 	startLvlUp
 	lvlUpComplete
 	lvlUpFailed
@@ -25,6 +26,7 @@ type broadcastMessageContent struct {
 	targetLevel    int
 	missingPlayers int
 	uuid           string
+	direction      network.EventDirection
 }
 
 func levelUpReadyMissingPlayers(game Game, targetLevel, playersMissing int) {
@@ -37,33 +39,37 @@ func cancelLevelUp(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Cancel %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
-	game.MessageManager.waitLevelUpMsg = nil
 }
 
 func announcePresenceLevelUp(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Join %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	game.MessageManager.waitingForLevelUpLeech = true
+	game.MessageManager.waitingForLevelUp = false
+}
+
+func announceDepartureLevelUp(game Game, targetLevel int) {
+	formatStr := fmt.Sprintf(" Leave %d\n", targetLevel)
+	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	game.MessageManager.waitingForLevelUpLeech = true
 }
 
 func startLevelUp(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Starting %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
-	game.MessageManager.waitLevelUpMsg = nil
 }
 
 func levelUpComplete(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Reached %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
-	game.MessageManager.waitLevelUpMsg = nil
 }
 
 func levelUpFailed(game Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Failed %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
-	game.MessageManager.waitLevelUpMsg = nil
 }
 
 func parseMessageLevelAndReturn(levelStr string, uuid string, msgType broadcastType) (broadcastMessageContent, error) {
@@ -146,6 +152,7 @@ func (game Game) InterpretPlayerMessage(message network.BroadcastData) {
 		log.Println("Error parsing player message:", err)
 	}
 
+	messageContent.direction = message.Direction
 	messageIndex := getMessageIndex(messageContent, game.MessageManager.messageStatusList)
 	if messageIndex == -1 {
 		if messageContent.msgType == missingPlayers {
@@ -164,34 +171,13 @@ func (game Game) InterpretPlayerMessage(message network.BroadcastData) {
 			game.MessageManager.messageStatusList[messageIndex+1:]...)
 	}
 	if game.MessageManager.waitingForLevelUp &&
-		game.MessageManager.waitLevelUpMsg != nil &&
-		messageContent.msgType == announcePresence &&
-		messageContent.targetLevel == game.Level+1 {
-		(*game.MessageManager.waitLevelUpMsg).missingPlayers -= 1
-		if (*game.MessageManager.waitLevelUpMsg).missingPlayers == 0 {
-			startLevelUp(game, game.Level+1)
-			// Todo start level up
-		} else {
-			levelUpReadyMissingPlayers(game, game.Level+1, (*game.MessageManager.waitLevelUpMsg).missingPlayers)
-		}
+		messageContent.targetLevel == game.Level+1 &&
+		(messageContent.msgType == announcePresence || messageContent.msgType == announceDeparture) {
+		game.MessageManager.levelUpMessageChannel <- messageContent
 	}
-	if messageContent.msgType == startLvlUp &&
-		message.Direction == 0 &&
-		messageContent.targetLevel == game.Level+1 {
-		// Todo start level up
+	if game.MessageManager.waitingForLevelUpLeech &&
+		messageContent.targetLevel == game.Level+1 &&
+		(messageContent.msgType == startLvlUp || messageContent.msgType == cancelLvlUp) {
+		game.MessageManager.levelUpMessageChannel <- messageContent
 	}
-}
-
-func (game Game) isLevelUpLeechAvailable() bool {
-	if game.MessageManager.waitingForLevelUp || game.MessageManager.waitLevelUpMsg != nil {
-		return false
-	}
-	for _, message := range game.MessageManager.messageStatusList {
-		if message.msgType == missingPlayers &&
-			message.uuid != game.MessageManager.UUID &&
-			message.targetLevel == game.Level+1 {
-			return true
-		}
-	}
-	return false
 }
