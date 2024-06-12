@@ -49,6 +49,7 @@ add_executable(zappy_server
     src/utils/pre_generate/gui/gui_pre_generate_mct.c
     src/map_buffer.c
     src/commands/gui/gui_mct_command.c
+    src/commands/command_utils.c
 )
 
 target_include_directories(zappy_server PRIVATE

@@ -9,19 +9,7 @@
 #include "player.h"
 #include "commands/gui_commands.h"
 #include "msg.h"
-
-/// @brief Write a number to the buffer and increment the count value.
-///
-/// param nb The number to write into the buffer.
-/// param buffer The buffer to modify.
-/// param count The count value to use and modify.
-static void write_nb_to_buffer(uint32_t nb, char ARRAY buffer,
-    uint32_t PTR count)
-{
-    (*count) += fast_itoa_u32(nb, buffer + *count);
-    buffer[*count] = ' ';
-    (*count)++;
-}
+#include "commands/command_utils.h"
 
 void execute_gui_plv_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command)

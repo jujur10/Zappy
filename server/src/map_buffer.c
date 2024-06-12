@@ -8,25 +8,13 @@
 
 #include "utils/string/buffer.h"
 #include "utils/itoa/fast_itoa.h"
-
-/// @brief Write a number to the buffer and increment the count value.
-///
-/// param nb The number to write into the buffer.
-/// param buffer The buffer to modify.
-/// param count The count value to use and modify.
-static void write_nb_to_buffer(uint32_t nb, char ARRAY buffer,
-    uint32_t PTR count)
-{
-    (*count) += fast_itoa_u32(nb, buffer + *count);
-    buffer[*count] = ' ';
-    (*count)++;
-}
+#include "commands/command_utils.h"
 
 void add_tile_to_buffer(uint32_t x, uint32_t y, buffer_t *map_buff,
     const resources_t *tile)
 {
     static char temp_buffer[(NB_OF_MAP_AXIS + R_STRUCT_SIZE - 1) *
-    (LEN_OF_UINT32_IN_CHAR + 1) + BCT_COMMAND_LEN] = "bct ";
+        (LEN_OF_UINT32_IN_CHAR + 1) + BCT_COMMAND_LEN] = "bct ";
     uint32_t wrote = 4;
 
     write_nb_to_buffer(x, temp_buffer, &wrote);

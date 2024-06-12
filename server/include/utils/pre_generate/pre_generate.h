@@ -64,4 +64,4 @@ void set_tna_response(server_t PTR server);
 /// @brief Function to allocate the map buffer.
 ///
 /// @param server The server structure.
-void set_mct_buffer(server_t *server);
+void set_mct_buffer(server_t PTR server);

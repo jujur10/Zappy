@@ -10,8 +10,8 @@
 #include "server.h"
 #include "commands/gui_commands.h"
 
-void (*gui_commands[GUI_NB_OF_CMD]) (server_t PTR server, uint16_t gui_idx,
-    const gui_command_t PTR command) = {
+static void (* const gui_commands[GUI_NB_OF_CMD])(server_t PTR server,
+    uint16_t gui_idx, const gui_command_t PTR command) = {
     execute_gui_none_command, execute_gui_msz_command,
     execute_gui_bct_command, execute_gui_mct_command,
     execute_gui_tna_command, execute_gui_ppo_command,
@@ -19,8 +19,8 @@ void (*gui_commands[GUI_NB_OF_CMD]) (server_t PTR server, uint16_t gui_idx,
     execute_gui_sgt_command, execute_gui_sst_command
 };
 
-status_t get_next_command(gui_command_buffer_t *gui_command_buffer,
-    gui_command_t *next_command)
+status_t get_next_command(gui_command_buffer_t PTR gui_command_buffer,
+    gui_command_t PTR next_command)
 {
     if (0 == gui_command_buffer->nb_of_command)
         return FAILURE;

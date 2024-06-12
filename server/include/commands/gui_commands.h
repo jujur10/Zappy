@@ -207,11 +207,3 @@ void execute_gui_sgt_command(server_t PTR server, uint16_t gui_idx,
 /// @param command The command to execute.
 void execute_gui_sst_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command);
-
-/// @brief Array of function pointer representing the functions to call when
-/// a command is received.
-/// @param server The server structure.
-/// @param gui_idx The gui who made the request.
-/// @param command The command to execute.
-extern void (*gui_commands[GUI_NB_OF_CMD])(server_t PTR server,
-    uint16_t gui_idx, const gui_command_t PTR command);
