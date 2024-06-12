@@ -14,7 +14,8 @@
 /// @brief Structure representing buffers.
 ///
 /// @var ptr The ptr on the buffer data.
-/// @var len The len of the string.
+/// @var len The actual length of the buffer data.
+/// @var max_size The maximum capacity of the buffer.
 typedef struct buffer_s {
     char ARRAY ptr;
     uint32_t len;
