@@ -1,6 +1,6 @@
 # Zappy Network protocol
 
-> All packets are sent in plaintext, just like CLI programs. So no fancy structs to send to eachother. They also always end with a linebreak (\n).
+> All packets are sent in plain text, just like CLI programs. So no fancy structs to send to each other. They also always end with a linebreak (\n).
 
 Here is an example of a command that could be sent by the server:
 
@@ -8,7 +8,9 @@ Here is an example of a command that could be sent by the server:
 msz 128 128
 ```
 
-The first word is the command and all the others are arguments, in this case, this command is sent by the server to the GUI, and it will tell it that the map has a width of 128 and a height of 128.
+The first word is the command.
+All the others are arguments, in this case, this command is sent by the server to the GUI,
+and it will tell it that the map has a width of 128 and a height of 128.
 
 ## Handshake
 
@@ -19,9 +21,9 @@ Server      ->    [client_num]
 Server      ->    [x] [y]
 ```
 
-``team_name`` realates to the client's team, it will always be "``GRAPHICAL``" when we are talking about the GUI.
+``team_name`` relates to the client's team, it will always be "``GRAPHIC``" when we are talking about the GUI.
 
-``client_num`` relates to the number of clients from the specified team that can connect. Because there can theoretically be an infinite number of GUIs, and because the ``select()`` function can only handle a maximum of 1024 conccurent connections, it will display 1024 minus the number of connected clients in this case.
+``client_num`` relates to the number of available slots remaining on the server for the specified team. Because there can theoretically be an infinite number of GUIs, and because the ``select()`` function can only handle a maximum of 1024 conccurent connections, it will display 1024 minus the number of connected clients in this case.
 
 ``x`` and ``y`` relate to the map size.
 
@@ -109,33 +111,41 @@ To ask for its field of view, the AI will send the ``look`` command, the server'
 ### Understanding how sound transmission work
 
 From now on, we will use the letter ``K`` when talking about a direction.
-A direction is an integer that goes from 0 to 8, and is always relative to a tile.
+A direction is an integer that goes from 0 to 8 and is always relative to a tile.
 it starts at the player's position (at 0), goes just in front of it, and rotates around it counter-clockwise.
 
 Directions must be computed traditionally using trigonometry internally, and then converted to our direction system that's less precise and harder to work with (instead of simply giving out an angle).
 
 ### Commands
 
-| **Action**                   | **Command**    | **Time limit** | **Response**                               |
-|------------------------------|----------------|----------------|--------------------------------------------|
-| move up one tile             | Forward        | 7/f            | ok                                         |
-| turn 90° right               | Right          | 7/f            | ok                                         |
-| turn 90° left                | Left           | 7/f            | ok                                         |
-| look around                  | Look           | 7/f            | [tile1, tile2,. .. ]                       |
-| inventory                    | Inventory      | 1/f            | [linemate n, sibur n,. .. ]                |
-| broadcast text               | Broadcast text | 7/f            | ok                                         |
-| number of team unused slots  | Connect_nbr    |                | value                                      |
-| fork a player                | Fork           | 42/f           | ok                                         |
-| eject players from this tile | Eject          | 7/f            | ok/ko                                      |
-| death of a player            |                |                | dead                                       |
-| take object                  | Take object    | 7/f            | ok/ko                                      |
-| set object down              | Set object     | 7/f            | ok/ko                                      |
-| start incantation            | Incantation    | 300/f          | Elevation underway / Current level: k / ko |
-| Get frenquency parameter     | Frequency      |                | frequency                                  |
-| Get AI direction             | Direction      |                | direction: K                               |
+The server responds to the command after the given time limit.
+
+There are two exceptions to this rule:
+ - When there is no time limit, the server responds directly
+ - With the 'Incatation' command, the server 'Elevation underway' or 'ko' after the initial checks, and 'Current level...' or 'ko' as a result of the checks after the time delay has passed
+
+| **Action**                   | **Command**  | **Argument** | **Time limit** | **Response**                                  |
+|------------------------------|--------------|--------------|----------------|-----------------------------------------------|
+| move up one tile             | Forward      |              | 7/f            | ok                                            |
+| turn 90° right               | Right        |              | 7/f            | ok                                            |
+| turn 90° left                | Left         |              | 7/f            | ok                                            |
+| look around                  | Look         |              | 7/f            | [tile1, tile2,. .. ]                          |
+| inventory                    | Inventory    |              | 1/f            | [linemate n, sibur n,. .. ]                   |
+| broadcast text               | Broadcast    | $(Text)      | 7/f            | ok                                            |
+| number of team unused slots  | Connect_nbr  |              |                | $(value)                                      |
+| fork a player                | Fork         |              | 42/f           | ok                                            |
+| eject players from this tile | Eject        |              | 7/f            | ok/ko                                         |
+| death of a player            |              |              |                | dead                                          |
+| take object                  | Take         | $(Object)    | 7/f            | ok/ko                                         |
+| set object down              | Set          | $(Object)    | 7/f            | ok/ko                                         |
+| start incantation            | Incantation  |              | 300/f          | Elevation underway / Current level: $(k) / ko |
+| Get frequency parameter      | Frequency    |              |                | frequency: $(frequency)                       |
+| Get AI direction             | Direction    |              |                | direction: $(K)                               |
 
 
-> In case of a bad/unknown command, the server must answer “ko”.
+> In case of a bad/unknown command, the server must answer "ko"
+> The client can send up to 10 requests in a row without any response from the server.
+> Over 10, the server will no longer take them into account and will not respond "ko"
 
 > Relating incantations, the server sends back "``Elevation underway``" at the start of every incantation if conditions are valid. And if all the conditions are still valid at the end, it sends "``Current level: K``". In case of any issue, it sends "``ko``" at the end or at the start of the incantation.
 
@@ -149,7 +159,7 @@ If ``f = 1``, an action that takes 7 ticks will last 7 seconds ( 7/1 ).
 
 If ``f = 100``, and action that takes 7 ticks will last 0.07 seconds ( 7/100 ).
 
-f is the frequency at which the simulation runs, it's set by default to 100.
+f is the frequency at which the simulation runs; it's set by default to 100.
 
 ### Broadcasting
 
@@ -167,7 +177,7 @@ The message author is anonymous.
 
 ### Eject
 
-This command will most likely not be utilized, but in case it ever does, here is how it works:
+This command will most likely not be used, but in case it ever does, here is how it works:
 
 When the client sends the ``eject`` command every individual on the same tile will get pushed away in a random direction, and will receive this command:
 ```
