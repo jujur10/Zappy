@@ -125,6 +125,7 @@ if (DEFINED RUN_TESTS)
         src/utils/pre_generate/gui/gui_pre_generate_mct.c
         src/utils/pre_generate/gui/gui_pre_generate_tna.c
         src/map_buffer.c
+        src/commands/command_utils.c
     )
 
     target_include_directories(test_zappy_server PRIVATE

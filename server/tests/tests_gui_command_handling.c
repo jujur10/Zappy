@@ -24,7 +24,6 @@ void execute_gui_tna_command(__attribute__((unused)) server_t *server,
     return;
 }
 
-
 Test(TEST_GUI_COMMAND_HANDLING, test_gui_command_handling_1)
 {
     server_t server = {};
