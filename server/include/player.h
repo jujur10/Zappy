@@ -57,7 +57,7 @@ typedef struct player_s {
     msg_queue_head_t queue;
 } player_t;
 
-/// @brief Function to returns the index of the player by socket.
+/// @brief Function which returns the index of the player for a given socket.
 ///
 /// @param server The server structure.
 /// @param sock The socket of the player.

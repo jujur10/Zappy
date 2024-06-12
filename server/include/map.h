@@ -30,6 +30,7 @@ typedef struct map_s {
 } map_t;
 
 /// @brief Function which initializes map.
+///
 /// @param args The parsed program parameters.
 /// @param map The map to initialize.
 /// @return SUCCESS or FAILURE.
@@ -43,6 +44,7 @@ void spread_resources_on_map(map_t PTR map,
     const generated_buffers_t PTR generated_buffers);
 
 /// @brief Function which check if update available and update if available.
+///
 /// @param current_time The current in-game time (time_units attribute of
 /// server)
 /// @param map The map to modify.
@@ -51,8 +53,7 @@ void update_map(double current_time, map_t PTR map,
     const generated_buffers_t PTR generated_buffers);
 
 /// @brief Function which check if update available and update if available.
-/// @param current_time The current in-game time (time_units attribute of
-/// server)
+///
 /// @param map The map.
 /// @param buffer The map buffer.
 void update_map_buffer(const map_t PTR map, buffer_t PTR buffer);

@@ -20,8 +20,8 @@ static void write_nb_to_buffer(uint32_t nb, char ARRAY buffer,
     (*count)++;
 }
 
-void execute_gui_sgt_command(server_t *server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t *command)
+void execute_gui_sgt_command(server_t PTR server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t PTR command)
 {
     char buffer[50] = "sgt ";
     msg_t message;

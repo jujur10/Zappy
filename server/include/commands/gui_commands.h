@@ -115,7 +115,7 @@ void gui_command_handling(server_t PTR server, char ARRAY buffer, uint32_t len,
 ///
 /// @param gui_command_buffer The gui command buffer.
 /// @param next_command The command popped.
-status_t get_next_command(gui_command_buffer_t *gui_command_buffer,
+status_t get_next_command(gui_command_buffer_t PTR gui_command_buffer,
     gui_command_t *next_command);
 
 /// @brief The gui commands.
@@ -125,93 +125,93 @@ status_t get_next_command(gui_command_buffer_t *gui_command_buffer,
 /// @param server The server structure.
 /// @param gui_idx The gui index.
 /// @param command The command to execute.
-void execute_gui_command(server_t *server, uint16_t gui_idx,
-    const gui_command_t *command);
+void execute_gui_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
 
 /// @brief Function called when unknown command has been made.
 ///
 /// @param server The server structure.
 /// @param gui_idx The gui index.
 /// @param command The command to execute.
-void execute_gui_none_command(server_t *server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t *command);
+void execute_gui_none_command(server_t PTR server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t PTR command);
 
 /// @brief The MSZ command implementation.
 ///
 /// @param server The server structure.
 /// @param gui_idx The gui index.
 /// @param command The command to execute.
-void execute_gui_msz_command(server_t *server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t *command);
+void execute_gui_msz_command(server_t PTR server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t PTR command);
 
 /// @brief The BCT command implementation.
 ///
 /// @param server The server structure.
 /// @param gui The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_bct_command(server_t *server, uint16_t gui_idx,
-    const gui_command_t *command);
+void execute_gui_bct_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
 
 /// @brief The MCT command implementation.
 ///
 /// @param server The server structure.
 /// @param gui The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_mct_command(server_t *server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t *command);
+void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t PTR command);
 
 /// @brief The TNA command implementation.
 ///
 /// @param server The server structure.
 /// @param gui The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_tna_command(server_t *server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t *command);
+void execute_gui_tna_command(server_t PTR server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t PTR command);
 
 /// @brief The PPO command implementation.
 ///
 /// @param server The server structure.
 /// @param gui_idx The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_ppo_command(server_t *server, uint16_t gui_idx,
-    const gui_command_t *command);
+void execute_gui_ppo_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
 
 /// @brief The PLV command implementation.
 ///
 /// @param server The server structure.
 /// @param gui_idx The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_plv_command(server_t *server, uint16_t gui_idx,
-    const gui_command_t *command);
+void execute_gui_plv_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
 
 /// @brief The PIN command implementation.
 ///
 /// @param server The server structure.
 /// @param gui_idx The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_pin_command(server_t *server, uint16_t gui_idx,
-    const gui_command_t *command);
+void execute_gui_pin_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
 
 /// @brief The SGT command implementation.
 ///
 /// @param server The server structure.
 /// @param gui_idx The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_sgt_command(server_t *server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t *command);
+void execute_gui_sgt_command(server_t PTR server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t PTR command);
 
 /// @brief The SST command implementation.
 ///
 /// @param server The server structure.
 /// @param gui_idx The gui who made the request.
 /// @param command The command to execute.
-void execute_gui_sst_command(server_t *server, uint16_t gui_idx,
-    const gui_command_t *command);
+void execute_gui_sst_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
 
 /// @brief Array of function pointer representing the functions to call when
 /// a command is received.
 /// @param server The server structure.
 /// @param gui_idx The gui who made the request.
 /// @param command The command to execute.
-extern void (*gui_commands[GUI_NB_OF_CMD])(server_t *server,
-    uint16_t gui_idx, const gui_command_t *command);
+extern void (*gui_commands[GUI_NB_OF_CMD])(server_t PTR server,
+    uint16_t gui_idx, const gui_command_t PTR command);

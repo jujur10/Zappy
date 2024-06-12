@@ -20,8 +20,8 @@ static void write_nb_to_buffer(uint32_t nb, char ARRAY buffer,
     (*count)++;
 }
 
-void execute_gui_ppo_command(server_t *server, uint16_t gui_idx,
-    const gui_command_t *command)
+void execute_gui_ppo_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command)
 {
     char buffer[50] = "ppo ";
     msg_t message;

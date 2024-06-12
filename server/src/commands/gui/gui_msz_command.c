@@ -9,8 +9,8 @@
 #include "gui_handling.h"
 #include "utils/pre_generate/pre_generate.h"
 
-void execute_gui_msz_command(server_t *server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t *command)
+void execute_gui_msz_command(server_t PTR server, uint16_t gui_idx,
+    __attribute__((unused)) const gui_command_t PTR command)
 {
     char buffer[30] = "msz ";
     msg_t message;
