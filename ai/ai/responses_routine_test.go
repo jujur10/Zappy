@@ -27,4 +27,12 @@ func Test_awaitResponseToCommand(t *testing.T) {
 		}
 	})
 	close(channelTrue)
+	closedChannel := make(chan bool)
+	t.Run("Test channel closed", func(t *testing.T) {
+		go helperTest_awaitResponseToCommand(closedChannel, true)
+		close(closedChannel)
+		if got := awaitResponseToCommand(closedChannel); got != false {
+			t.Errorf("awaitResponseToCommand() = %v, want %v", got, false)
+		}
+	})
 }

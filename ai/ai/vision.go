@@ -7,8 +7,6 @@ import (
 	"zappy_ai/network"
 )
 
-const currentTile = 0
-
 // parsedKeyToInvKey converts the strings to tileItems
 var parsedKeyToInvKey = map[string]TileItem{"food": Food, "linemate": Linemate,
 	"deraumere": Deraumere, "sibur": Sibur, "mendiane": Mendiane, "phiras": Phiras, "thystame": Thystame}
@@ -43,8 +41,7 @@ func CreateViewMap(parsedList [][]string) (ViewMap, error) {
 	return viewMap, nil
 }
 
-// TODO TEST
-// buildAbsoluteCoordsMap create a list of the absolute coordinates of the tiles in the ViewMap
+// buildAbsoluteCoordsMap create a list containing the absolute coordinates of the tiles in the ViewMap
 func buildAbsoluteCoordsMap(direction network.PlayerDirection, worldSize RelativeCoordinates,
 	position RelativeCoordinates, viewMapLen int) []RelativeCoordinates {
 	directionsVectors := map[network.PlayerDirection]RelativeCoordinates{Up: {0, 1},
@@ -85,12 +82,14 @@ func buildAbsoluteCoordsMap(direction network.PlayerDirection, worldSize Relativ
 	return absoluteMap
 }
 
-// TODO TEST
-// getTileUsefulResources returns a list of all the useful resources of a tile
+// getTileUsefulResources returns a list containing all the useful resources of a tile
 func getTileUsefulResources(totalResourcesNeeded Inventory, tile []TileItem) []TileItem {
 	useful := make([]TileItem, 0)
 	for _, resource := range tile {
-		if totalResourcesNeeded[resource] > 0 {
+		if resource == Player {
+			continue
+		}
+		if totalResourcesNeeded[resource] > 0 || resource == Food {
 			useful = append(useful, resource)
 		}
 	}

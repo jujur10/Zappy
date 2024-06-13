@@ -77,6 +77,7 @@ func TestGame_getLevelUpPriority(t *testing.T) {
 		LevelUpResources       map[int]Inventory
 		TotalResourcesRequired Inventory
 		FoodManager            FoodManagement
+		MessageManager         MessagesManagement
 	}
 	tests := []struct {
 		name   string
@@ -100,6 +101,9 @@ func TestGame_getLevelUpPriority(t *testing.T) {
 			LevelUpResources: map[int]Inventory{5: {Player: 4, Linemate: 0, Deraumere: 0, Sibur: 0, Mendiane: 0, Phiras: 0, Thystame: 0}},
 			FoodManager:      FoodManagement{FoodPriority: 4, FoodChannel: make(chan int)}},
 			levelUpPriority},
+		{"Level up leech available", fields{Level: 2, FoodManager: FoodManagement{FoodPriority: 5},
+			MessageManager: MessagesManagement{waitingForLevelUp: false, UUID: "azerty1234",
+				messageStatusList: []broadcastMessageContent{{uuid: "aaa123", targetLevel: 3}}}}, leechLevelUpPriority},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -115,6 +119,7 @@ func TestGame_getLevelUpPriority(t *testing.T) {
 				LevelUpResources:       tt.fields.LevelUpResources,
 				TotalResourcesRequired: tt.fields.TotalResourcesRequired,
 				FoodManager:            tt.fields.FoodManager,
+				MessageManager:         tt.fields.MessageManager,
 			}
 			if got := game.getLevelUpPriority(); got != tt.want {
 				t.Errorf("getLevelUpPriority() = %v, want %v", got, tt.want)
