@@ -10,11 +10,11 @@
 #include "utils/itoa/fast_itoa.h"
 #include "commands/command_utils.h"
 
-void add_tile_to_buffer(uint32_t x, uint32_t y, buffer_t *map_buff,
-    const resources_t *tile)
+void add_tile_to_buffer(uint32_t x, uint32_t y, buffer_t PTR map_buff,
+    const resources_t PTR tile)
 {
     static char temp_buffer[(NB_OF_MAP_AXIS + R_STRUCT_SIZE - 1) *
-        (LEN_OF_UINT32_IN_CHAR + 1) + BCT_COMMAND_LEN] = "bct ";
+        (UINT32_MAX_DIGITS + 1) + BCT_COMMAND_LEN] = "bct ";
     uint32_t wrote = 4;
 
     write_nb_to_buffer(x, temp_buffer, &wrote);

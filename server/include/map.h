@@ -52,7 +52,7 @@ void spread_resources_on_map(map_t PTR map,
 void update_map(double current_time, map_t PTR map,
     const generated_buffers_t PTR generated_buffers);
 
-/// @brief Function which check if update available and update if available.
+/// @brief Function which checks if an update is available and updates if so.
 ///
 /// @param map The map.
 /// @param buffer The map buffer.

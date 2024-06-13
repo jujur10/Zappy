@@ -32,7 +32,7 @@ void create_message_from_ptr(char ARRAY ptr, uint32_t len,
     message->to_free = false;
 }
 
-void create_message_from_buffer(const buffer_t *buffer, msg_t PTR message)
+void create_message_from_buffer(const buffer_t PTR buffer, msg_t PTR message)
 {
     message->ptr = buffer->ptr;
     message->len = buffer->len;

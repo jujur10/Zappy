@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "utils/string/string.h"
+#include "style/macros.h"
 
 /// @brief Read buffer size in byte.
 #define READ_BUFFER_SIZE 256
@@ -18,16 +19,13 @@
 #define MAX_TEMP_BUFFER_LEN 1024
 
 /// @brief Macros for BCT command.
-#define LEN_OF_UINT32_IN_CHAR 10
+#define UINT32_MAX_DIGITS 10
 #define NB_OF_MAP_AXIS 2
 #define BCT_COMMAND_LEN 4
 
 /// @brief Redefinition of structures.
 typedef struct gui_s gui_t;
 typedef struct server_s server_t;
-
-// Macro used to put enum on 1 byte.
-#define PACKED __attribute__ ((packed))
 
 /// @brief Max number of commands into the buffer for GUIs.
 #define MAX_NB_OF_COMMAND_FOR_BUFFER 10
@@ -116,7 +114,7 @@ void gui_command_handling(server_t PTR server, char ARRAY buffer, uint32_t len,
 /// @param gui_command_buffer The gui command buffer.
 /// @param next_command The command popped.
 status_t get_next_command(gui_command_buffer_t PTR gui_command_buffer,
-    gui_command_t *next_command);
+    gui_command_t PTR next_command);
 
 /// @brief The gui commands.
 
@@ -134,7 +132,7 @@ void execute_gui_command(server_t PTR server, uint16_t gui_idx,
 /// @param gui_idx The gui index.
 /// @param command The command to execute.
 void execute_gui_none_command(server_t PTR server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t PTR command);
+    UNUSED const gui_command_t PTR command);
 
 /// @brief The MSZ command implementation.
 ///
@@ -142,7 +140,7 @@ void execute_gui_none_command(server_t PTR server, uint16_t gui_idx,
 /// @param gui_idx The gui index.
 /// @param command The command to execute.
 void execute_gui_msz_command(server_t PTR server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t PTR command);
+    UNUSED const gui_command_t PTR command);
 
 /// @brief The BCT command implementation.
 ///
@@ -158,7 +156,7 @@ void execute_gui_bct_command(server_t PTR server, uint16_t gui_idx,
 /// @param gui The gui who made the request.
 /// @param command The command to execute.
 void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t PTR command);
+    UNUSED const gui_command_t PTR command);
 
 /// @brief The TNA command implementation.
 ///
@@ -166,7 +164,7 @@ void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
 /// @param gui The gui who made the request.
 /// @param command The command to execute.
 void execute_gui_tna_command(server_t PTR server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t PTR command);
+    UNUSED const gui_command_t PTR command);
 
 /// @brief The PPO command implementation.
 ///
@@ -198,7 +196,7 @@ void execute_gui_pin_command(server_t PTR server, uint16_t gui_idx,
 /// @param gui_idx The gui who made the request.
 /// @param command The command to execute.
 void execute_gui_sgt_command(server_t PTR server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t PTR command);
+    UNUSED const gui_command_t PTR command);
 
 /// @brief The SST command implementation.
 ///

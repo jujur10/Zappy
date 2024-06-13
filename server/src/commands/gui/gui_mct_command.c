@@ -9,7 +9,7 @@
 #include "utils/itoa/fast_itoa.h"
 
 void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t PTR command)
+    UNUSED const gui_command_t PTR command)
 {
     msg_t message;
 

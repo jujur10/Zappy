@@ -9,8 +9,7 @@
 
 #include <stdint.h>
 
-// Macro used to put enum on 1 byte.
-#define PACKED __attribute__ ((packed))
+#include "style/macros.h"
 
 /// @brief Structure representing map resources.
 ///

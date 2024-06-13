@@ -9,7 +9,7 @@
 #include "commands/command_utils.h"
 
 void execute_gui_sgt_command(server_t PTR server, uint16_t gui_idx,
-    __attribute__((unused)) const gui_command_t PTR command)
+    UNUSED const gui_command_t PTR command)
 {
     char buffer[50] = "sgt ";
     msg_t message;

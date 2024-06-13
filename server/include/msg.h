@@ -23,7 +23,7 @@ typedef struct msg_s {
     bool to_free;
 } msg_t;
 
-/// @brief Function used to create a message.
+/// @brief Function which creates a message.
 ///
 /// @param msg_content The message content to put into the message.
 /// @param len The message length.
@@ -32,7 +32,7 @@ typedef struct msg_s {
 status_t create_message(const char ARRAY msg_content, uint32_t len,
     msg_t PTR message);
 
-/// @brief Function used to create a message without allocation.
+/// @brief Function which creates a message without allocation.
 ///
 /// @param ptr The pointer on the buffer to send.
 /// @param len The data length.
@@ -40,13 +40,13 @@ status_t create_message(const char ARRAY msg_content, uint32_t len,
 void create_message_from_ptr(char ARRAY ptr, uint32_t len,
     msg_t PTR message);
 
-/// @brief Function used to create a message from an existing buffer.
+/// @brief Function which creates a message from an existing buffer.
 ///
 /// @param buffer The pointer on the buffer to send.
 /// @param message The pointer on the structure to fill.
 void create_message_from_buffer(const buffer_t PTR buffer, msg_t PTR message);
 
-/// @brief Function used to destroy a message.
+/// @brief Function which destroys a message.
 ///
 /// @param message The pointer on the message to free.
 void destroy_message(msg_t PTR message);
