@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "utils/string/string.h"
+#include "style/macros.h"
 
 /// @brief Read buffer size in byte.
 #define READ_BUFFER_SIZE 256
@@ -17,12 +18,14 @@
 /// @brief Max number of reallocations.
 #define MAX_TEMP_BUFFER_LEN 1024
 
+/// @brief Macros for BCT command.
+#define UINT32_MAX_DIGITS 10
+#define NB_OF_MAP_AXIS 2
+#define BCT_COMMAND_LEN 4
+
 /// @brief Redefinition of structures.
 typedef struct gui_s gui_t;
 typedef struct server_s server_t;
-
-// Macro used to put enum on 1 byte.
-#define PACKED __attribute__ ((packed))
 
 /// @brief Max number of commands into the buffer for GUIs.
 #define MAX_NB_OF_COMMAND_FOR_BUFFER 10
@@ -50,6 +53,7 @@ typedef enum {
     GUI_PIN_CMD,
     GUI_SGT_CMD,
     GUI_SST_CMD,
+    GUI_NB_OF_CMD
 } PACKED gui_command_base_t;
 
 /// @brief Enumeration representing the GUI's commands alias as uint32.
@@ -104,3 +108,100 @@ typedef struct gui_command_buffer_s {
 /// @param gui_index The index of the gui in the gui array.
 void gui_command_handling(server_t PTR server, char ARRAY buffer, uint32_t len,
     uint32_t gui_index);
+
+/// @brief Function which pop the next command in the next_command variable.
+///
+/// @param gui_command_buffer The gui command buffer.
+/// @param next_command The command popped.
+status_t get_next_command(gui_command_buffer_t PTR gui_command_buffer,
+    gui_command_t PTR next_command);
+
+/// @brief The gui commands.
+
+/// @brief Function which execute a given command.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+/// @param command The command to execute.
+void execute_gui_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
+
+/// @brief Function called when unknown command has been made.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+/// @param command The command to execute.
+void execute_gui_none_command(server_t PTR server, uint16_t gui_idx,
+    UNUSED const gui_command_t PTR command);
+
+/// @brief The MSZ command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+/// @param command The command to execute.
+void execute_gui_msz_command(server_t PTR server, uint16_t gui_idx,
+    UNUSED const gui_command_t PTR command);
+
+/// @brief The BCT command implementation.
+///
+/// @param server The server structure.
+/// @param gui The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_bct_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
+
+/// @brief The MCT command implementation.
+///
+/// @param server The server structure.
+/// @param gui The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
+    UNUSED const gui_command_t PTR command);
+
+/// @brief The TNA command implementation.
+///
+/// @param server The server structure.
+/// @param gui The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_tna_command(server_t PTR server, uint16_t gui_idx,
+    UNUSED const gui_command_t PTR command);
+
+/// @brief The PPO command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_ppo_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
+
+/// @brief The PLV command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_plv_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
+
+/// @brief The PIN command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_pin_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);
+
+/// @brief The SGT command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_sgt_command(server_t PTR server, uint16_t gui_idx,
+    UNUSED const gui_command_t PTR command);
+
+/// @brief The SST command implementation.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui who made the request.
+/// @param command The command to execute.
+void execute_gui_sst_command(server_t PTR server, uint16_t gui_idx,
+    const gui_command_t PTR command);

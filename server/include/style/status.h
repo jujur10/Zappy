@@ -7,8 +7,7 @@
 
 #pragma once
 
-// Macro used to put enum on 1 byte.
-#define PACKED __attribute__ ((packed))
+#include "style/macros.h"
 
 /// @brief Enumeration representing the returns status of a function.
 ///

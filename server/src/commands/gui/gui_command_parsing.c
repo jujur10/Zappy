@@ -19,7 +19,7 @@
 ///
 /// @param gui_cmd_buff The gui's command buffer.
 /// @param cmd_base The command to set.
-static void set_base_command(gui_command_buffer_t *gui_cmd_buff,
+static void set_base_command(gui_command_buffer_t PTR gui_cmd_buff,
     gui_command_base_t cmd_base)
 {
     gui_cmd_buff->commands[gui_cmd_buff->nb_of_command].command =
@@ -32,7 +32,7 @@ static void set_base_command(gui_command_buffer_t *gui_cmd_buff,
 /// @param command The client's command (casted as uint32_t).
 /// @param gui_cmd_buff The gui's command buffer.
 static void set_basic_command(uint32_t command,
-    gui_command_buffer_t *gui_cmd_buff)
+    gui_command_buffer_t PTR gui_cmd_buff)
 {
     switch (command) {
         case GUI_MSZ_U32:
@@ -54,7 +54,7 @@ static void set_basic_command(uint32_t command,
 /// @param gui_cmd_buff The gui's command buffer.
 /// @param current_ptr The pointer on the current command.
 /// @param len The current command length.
-static void set_bct_command_parameters(gui_command_buffer_t *gui_cmd_buff,
+static void set_bct_command_parameters(gui_command_buffer_t PTR gui_cmd_buff,
     const char ARRAY current_ptr, uint32_t len)
 {
     uint64_t temp_value;
@@ -82,7 +82,7 @@ static void set_bct_command_parameters(gui_command_buffer_t *gui_cmd_buff,
 /// @param gui_cmd_buff The gui's command buffer.
 /// @param current_ptr The pointer on the current command.
 /// @param len The current command length.
-static void set_num_parameters(gui_command_buffer_t *gui_cmd_buff,
+static void set_num_parameters(gui_command_buffer_t PTR gui_cmd_buff,
     const char ARRAY current_ptr, uint64_t len)
 {
     uint64_t temp_value;
@@ -103,7 +103,7 @@ static void set_num_parameters(gui_command_buffer_t *gui_cmd_buff,
 /// @param current_ptr The pointer on the current command.
 /// @param len The current command length.
 static void set_advanced_command(uint32_t command,
-    gui_command_buffer_t *gui_cmd_buff, const char ARRAY current_ptr,
+    gui_command_buffer_t PTR gui_cmd_buff, const char ARRAY current_ptr,
     uint32_t len)
 {
     switch (command) {
@@ -135,7 +135,7 @@ static void set_advanced_command(uint32_t command,
 /// @param len The current command length.
 /// @param gui_cmd_buff The gui's command buffer.
 static void parse_command(const char ARRAY current_ptr, uint32_t len,
-    gui_command_buffer_t *gui_cmd_buff)
+    gui_command_buffer_t PTR gui_cmd_buff)
 {
     uint32_t command = *(const uint32_t *)current_ptr & 0x00FFFFFF;
 
@@ -164,7 +164,7 @@ static void parse_command(const char ARRAY current_ptr, uint32_t len,
 /// @param gui_buffer The gui's command buffer.
 /// @return Success if string not modified, Failure if modified.
 static status_t parse_gui_commands(const char ARRAY buffer, uint32_t len,
-    gui_command_buffer_t *gui_buffer, string_t *to_append)
+    gui_command_buffer_t PTR gui_buffer, string_t PTR to_append)
 {
     const char *current_ptr = buffer;
     uint32_t current_len;
@@ -197,7 +197,7 @@ static status_t parse_gui_commands(const char ARRAY buffer, uint32_t len,
 /// @return FAILURE if temporary buffer full and command buffer also full,
 /// SUCCESS otherwise.
 static status_t use_gui_buffer(char ARRAY buffer, uint32_t len,
-    gui_command_buffer_t *gui_buffer)
+    gui_command_buffer_t PTR gui_buffer)
 {
     string_t to_append = {};
 
@@ -220,7 +220,7 @@ static status_t use_gui_buffer(char ARRAY buffer, uint32_t len,
     return SUCCESS;
 }
 
-void gui_command_handling(server_t *server, char ARRAY buffer, uint32_t len,
+void gui_command_handling(server_t PTR server, char ARRAY buffer, uint32_t len,
     uint32_t gui_index)
 {
     string_t to_append;

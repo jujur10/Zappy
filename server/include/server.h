@@ -10,13 +10,14 @@
 #include <stdint.h>
 #include <sys/select.h>
 
+#include "utils/pre_generate/pre_generate.h"
 #include "arguments.h"
 #include "gui.h"
 #include "map.h"
 #include "new_clients.h"
 #include "player.h"
 #include "team.h"
-#include "utils/pre_generate/pre_generate.h"
+#include "style/macros.h"
 
 // Authentication timeout in seconds and nanoseconds.
 #define AUTH_TIMEOUT_SEC 0
@@ -24,9 +25,6 @@
 
 // GUI team name.
 #define GUI_TEAM "GRAPHIC\n"
-
-// Macro used to put enum on 1 byte.
-#define PACKED __attribute__ ((packed))
 
 // Set the max client macro based on FD_SETSIZE.
 #define MAX_CLIENTS FD_SETSIZE

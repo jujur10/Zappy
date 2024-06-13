@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "utils/string/string.h"
+#include "style/macros.h"
 
 /// @brief Read buffer size in byte.
 #define READ_BUFFER_SIZE 256
@@ -20,9 +21,6 @@
 /// @brief Redefinition of structures.
 typedef struct player_s player_t;
 typedef struct server_s server_t;
-
-// Macro used to put enum on 1 byte.
-#define PACKED __attribute__ ((packed))
 
 /// @brief Max number of commands into the buffer for PLAYER's.
 #define MAX_NB_OF_COMMAND_FOR_BUFFER 10

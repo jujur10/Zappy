@@ -18,7 +18,7 @@
 
 status_t init_map(const argument_t ARRAY args, map_t PTR map)
 {
-    map->tiles = malloc(sizeof(resources_t) * (args->height * args->width));
+    map->tiles = calloc(args->height * args->width, sizeof(resources_t));
     if (NULL == map->tiles)
         return FAILURE;
     map->height = args->height;
@@ -60,8 +60,11 @@ void update_map(double current_time, map_t PTR map,
     next_update = (0 == next_update) ?
         current_time + MAP_UPDATE_WAIT : next_update;
     if (current_time >= next_update) {
-        if (true == map->has_been_modified)
+        if (true == map->has_been_modified) {
             spread_resources_on_map(map, generated_buffers);
+            update_map_buffer(map,
+                &generated_buffers->buffers[PRE_MAP_BUFFER]);
+        }
         next_update = current_time + MAP_UPDATE_WAIT;
         LOG("Map updated")
     }

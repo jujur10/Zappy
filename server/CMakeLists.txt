@@ -8,32 +8,48 @@ set(CMAKE_C_FLAGS "-Wall -Wextra")
 set(EXECUTABLE_NAME zappy_server)
 
 add_executable(zappy_server
-    src/main.c
-    src/server.c
-    src/arguments.c
-    src/socket/create_socket.c
-    src/team.c
-    src/map.c
-    src/signal_handler.c
-    src/clock.c
-    src/server_events.c
-    src/new_clients_handling.c
-    src/utils/itoa/fast_itoa_u32.c
-    src/utils/pre_generate/pre_generate_buffers.c
-    src/queue/queue_utils_msg.c
-    src/msg.c
-    src/gui_handling.c
-    src/swap_clients.c
     src/ai_handling.c
-    src/utils/pre_generate/pre_generate_resources.c
+    src/arguments.c
+    src/clock.c
+    src/clock_timeout.c
+    src/commands/command_utils.c
+    src/commands/gui/gui_bct_command.c
+    src/commands/gui/gui_command.c
+    src/commands/gui/gui_command_parsing.c
+    src/commands/gui/gui_mct_command.c
+    src/commands/gui/gui_msz_command.c
+    src/commands/gui/gui_none_command.c
+    src/commands/gui/gui_pin_command.c
+    src/commands/gui/gui_plv_command.c
+    src/commands/gui/gui_ppo_command.c
+    src/commands/gui/gui_sgt_command.c
+    src/commands/gui/gui_sst_command.c
+    src/commands/gui/gui_tna_command.c
+    src/commands/player/player_command_parsing.c
+    src/gui_handling.c
+    src/main.c
+    src/map.c
+    src/map_buffer.c
+    src/msg.c
+    src/new_clients_handling.c
+    src/player.c
+    src/queue/queue_utils_msg.c
+    src/server.c
+    src/server_events.c
+    src/server_update.c
+    src/signal_handler.c
+    src/socket/create_socket.c
+    src/swap_clients.c
+    src/team.c
     src/utils/arrays/arrays_u32.c
     src/utils/arrays/arrays_u64.c
-    src/clock_timeout.c
-    src/server_update.c
-    src/commands/gui/gui_command_parsing.c
-    src/utils/string/string.c
-    src/commands/player/player_command_parsing.c
+    src/utils/itoa/fast_itoa_u32.c
+    src/utils/pre_generate/gui/gui_pre_generate_mct.c
+    src/utils/pre_generate/gui/gui_pre_generate_tna.c
+    src/utils/pre_generate/pre_generate_buffers.c
+    src/utils/pre_generate/pre_generate_resources.c
     src/utils/string/buffer.c
+    src/utils/string/string.c
 )
 
 target_include_directories(zappy_server PRIVATE
@@ -69,31 +85,47 @@ endif ()
 
 if (DEFINED RUN_TESTS)
     add_executable(test_zappy_server
-        tests/tests_parsing.c
-        tests/tests_itoa.c
-        tests/tests_queue.c
-        tests/tests_clock.c
-        src/arguments.c
-        src/utils/itoa/fast_itoa_u32.c
-        src/queue/queue_utils_msg.c
-        src/msg.c
-        tests/tests_spreading.c
-        src/map.c
-        src/utils/arrays/arrays_u64.c
-        src/utils/arrays/arrays_u32.c
-        src/utils/pre_generate/pre_generate_resources.c
-        src/utils/pre_generate/pre_generate_buffers.c
-        src/clock.c
-        tests/tests_string.c
-        src/utils/string/string.c
-        src/commands/gui/gui_command_parsing.c
-        src/gui_handling.c
-        src/clock_timeout.c
-        tests/tests_gui_command_handling.c
-        tests/tests_player_command_handling.c
-        src/commands/player/player_command_parsing.c
         src/ai_handling.c
+        src/arguments.c
+        src/clock.c
+        src/clock_timeout.c
+        src/commands/command_utils.c
+        src/commands/gui/gui_bct_command.c
+        src/commands/gui/gui_command.c
+        src/commands/gui/gui_command_parsing.c
+        src/commands/gui/gui_msz_command.c
+        src/commands/gui/gui_none_command.c
+        src/commands/gui/gui_pin_command.c
+        src/commands/gui/gui_plv_command.c
+        src/commands/gui/gui_ppo_command.c
+        src/commands/gui/gui_sgt_command.c
+        src/commands/gui/gui_sst_command.c
+        src/commands/player/player_command_parsing.c
+        src/gui_handling.c
+        src/map.c
+        src/map_buffer.c
+        src/msg.c
+        src/player.c
+        src/queue/queue_utils_msg.c
+        src/utils/arrays/arrays_u32.c
+        src/utils/arrays/arrays_u64.c
+        src/utils/itoa/fast_itoa_u32.c
+        src/utils/pre_generate/gui/gui_pre_generate_mct.c
+        src/utils/pre_generate/gui/gui_pre_generate_tna.c
+        src/utils/pre_generate/pre_generate_buffers.c
+        src/utils/pre_generate/pre_generate_resources.c
         src/utils/string/buffer.c
+        src/utils/string/string.c
+        tests/commands/gui/tests_gui_bct_command.c
+        tests/commands/gui/tests_gui_msz_command.c
+        tests/tests_clock.c
+        tests/tests_gui_command_handling.c
+        tests/tests_itoa.c
+        tests/tests_parsing.c
+        tests/tests_player_command_handling.c
+        tests/tests_queue.c
+        tests/tests_spreading.c
+        tests/tests_string.c
     )
 
     target_include_directories(test_zappy_server PRIVATE

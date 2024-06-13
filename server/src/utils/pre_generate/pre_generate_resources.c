@@ -20,6 +20,15 @@ static void copy_resources_counter_into_buffer(
     );
 }
 
+static void set_default_values(resources64_t *total_required_resources)
+{
+    for (uint32_t i = 0; i < R_STRUCT_SIZE - 1; i++)
+        total_required_resources->arr[i] =
+            (0 == total_required_resources->arr[i]) ? 1 :
+            total_required_resources->arr[i];
+    total_required_resources->attr.players = 0;
+}
+
 void pre_generate_resources_counter(const argument_t *args,
     generated_buffers_t *pre_generated_buffers)
 {
@@ -40,7 +49,7 @@ void pre_generate_resources_counter(const argument_t *args,
         (uint64_t)((double)total_cells * GET_RES_PROPORTION(NB_OF_PHIRAS));
     total_required_resources.attr.thystames =
         (uint64_t)((double)total_cells * GET_RES_PROPORTION(NB_OF_THYSTAMES));
-    total_required_resources.attr.players = 0;
+    set_default_values(&total_required_resources);
     copy_resources_counter_into_buffer(&total_required_resources,
     pre_generated_buffers);
 }

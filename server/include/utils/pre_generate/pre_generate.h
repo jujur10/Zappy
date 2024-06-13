@@ -29,6 +29,8 @@ typedef enum {
     PRE_WELCOME_BUFFER,
     PRE_WORLD_DIM_BUFFER,
     PRE_GENERATED_RESOURCE_COUNTER,
+    PRE_TNA_RESPONSE,
+    PRE_MAP_BUFFER,
     PRE_GENERATED_ARR_LEN
 } generated_enum_t;
 
@@ -36,16 +38,30 @@ typedef enum {
 #define WELCOME_MSG "WELCOME\n"
 
 /// @brief Function to pre-generate responses.
+///
 /// @param server The server structure (after initialization).
 /// @return True On success, False on failure.
 status_t pre_generate_buffers(server_t PTR server);
 
 /// @brief Function to free buffer of pre-generated responses.
+///
+/// @param pre_generated_buffers The allocated buffers to destroy.
 void destroy_pre_generated_buffers(
     generated_buffers_t PTR pre_generated_buffers);
 
 /// @brief Function to pre-generate the total required resources structure.
+///
 /// @param args The argument structure (after initialization).
 /// @param generated_buffers The pre-generated buffers.
 void pre_generate_resources_counter(const argument_t PTR args,
     generated_buffers_t PTR pre_generated_buffers);
+
+/// @brief Function to pre-generate the tna response.
+///
+/// @param server The server structure.
+void set_tna_response(server_t PTR server);
+
+/// @brief Function to allocate the map buffer.
+///
+/// @param server The server structure.
+void set_mct_buffer(server_t PTR server);

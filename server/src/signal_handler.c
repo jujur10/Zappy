@@ -9,9 +9,10 @@
 
 #include "signal_handler.h"
 #include "logging.h"
+#include "style/macros.h"
 
 /// @brief Function that handle signals.
-static void handle_signal(__attribute__((unused)) int sig)
+static void handle_signal(UNUSED int sig)
 {
     if (pipe_signals[1] != -1) {
         write(pipe_signals[1], "TERMINATED", 10);
