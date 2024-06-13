@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"log"
 )
 
 type CommandType int
@@ -42,59 +43,101 @@ const (
 const EmptyBody = ""
 
 func (conn ServerConn) rotateRight() {
-	_, _ = fmt.Fprintln(conn.Connection, "Right")
+	_, err := fmt.Fprintln(conn.Connection, "Right")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) rotateLeft() {
-	_, _ = fmt.Fprintln(conn.Connection, "Left")
+	_, err := fmt.Fprintln(conn.Connection, "Left")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) goForward() {
-	_, _ = fmt.Fprintln(conn.Connection, "Forward")
+	_, err := fmt.Fprintln(conn.Connection, "Forward")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) lookAround() {
-	_, _ = fmt.Fprintln(conn.Connection, "Look")
+	_, err := fmt.Fprintln(conn.Connection, "Look")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) getInventory() {
-	_, _ = fmt.Fprintln(conn.Connection, "Inventory")
+	_, err := fmt.Fprintln(conn.Connection, "Inventory")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) broadcastText(text string) {
-	_, _ = fmt.Fprintf(conn.Connection, "Broadcast %s\n", text)
+	_, err := fmt.Fprintf(conn.Connection, "Broadcast %s\n", text)
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) getUnusedSlots() {
-	_, _ = fmt.Fprintln(conn.Connection, "Connect_nbr")
+	_, err := fmt.Fprintln(conn.Connection, "Connect_nbr")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) fork() {
-	_, _ = fmt.Fprintln(conn.Connection, "Fork")
+	_, err := fmt.Fprintln(conn.Connection, "Fork")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) ejectPlayers() {
-	_, _ = fmt.Fprintln(conn.Connection, "Eject")
+	_, err := fmt.Fprintln(conn.Connection, "Eject")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) takeObject(object string) {
-	_, _ = fmt.Fprintf(conn.Connection, "Take %s\n", object)
+	_, err := fmt.Fprintf(conn.Connection, "Take %s\n", object)
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) dropObject(object string) {
-	_, _ = fmt.Fprintf(conn.Connection, "Set %s\n", object)
+	_, err := fmt.Fprintf(conn.Connection, "Set %s\n", object)
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) levelUp() {
-	_, _ = fmt.Fprintln(conn.Connection, "Incantation")
+	_, err := fmt.Fprintln(conn.Connection, "Incantation")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) GetFrequency() {
-	_, _ = fmt.Fprintln(conn.Connection, "Frequency")
+	_, err := fmt.Fprintln(conn.Connection, "Frequency")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 func (conn ServerConn) GetDirection() {
-	_, _ = fmt.Fprintln(conn.Connection, "Direction")
+	_, err := fmt.Fprintln(conn.Connection, "Direction")
+	if err != nil {
+		log.Fatal("Failed to send message to server: ", err)
+	}
 }
 
 // SendCommand sends the specified command to the serv, using the body string if needed
