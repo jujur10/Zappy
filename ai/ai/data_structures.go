@@ -34,9 +34,9 @@ const (
 
 const (
 	Up network.PlayerDirection = iota
-	Left
-	Down
 	Right
+	Down
+	Left
 )
 
 // A ViewMap is a double array of TileItem

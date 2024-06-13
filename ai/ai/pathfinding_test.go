@@ -21,10 +21,10 @@ func Test_updatePosition(t *testing.T) {
 		{"Up wrapping", args{RelativeCoordinates{0, 9}, RelativeCoordinates{10, 10}, network.Up}, RelativeCoordinates{0, 0}},
 		{"Down", args{RelativeCoordinates{0, 9}, RelativeCoordinates{10, 10}, network.Down}, RelativeCoordinates{0, 8}},
 		{"Down wrapping", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Down}, RelativeCoordinates{0, 9}},
-		{"Right", args{RelativeCoordinates{5, 0}, RelativeCoordinates{10, 10}, network.Right}, RelativeCoordinates{4, 0}},
-		{"Right wrapping", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Right}, RelativeCoordinates{9, 0}},
-		{"Left", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Left}, RelativeCoordinates{1, 0}},
-		{"Left wrapping", args{RelativeCoordinates{9, 0}, RelativeCoordinates{10, 10}, network.Left}, RelativeCoordinates{0, 0}},
+		{"Left", args{RelativeCoordinates{5, 0}, RelativeCoordinates{10, 10}, network.Left}, RelativeCoordinates{4, 0}},
+		{"Left wrapping", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Left}, RelativeCoordinates{9, 0}},
+		{"Right", args{RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}, network.Right}, RelativeCoordinates{1, 0}},
+		{"Right wrapping", args{RelativeCoordinates{9, 0}, RelativeCoordinates{10, 10}, network.Right}, RelativeCoordinates{0, 0}},
 		{"Invalid direction", args{RelativeCoordinates{5, 5}, RelativeCoordinates{10, 10}, network.PlayerDirection(5)}, RelativeCoordinates{5, 5}},
 	}
 	for _, tt := range tests {
@@ -132,6 +132,32 @@ func Test_computeBasicPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := computeBasicPath(tt.args.origin, tt.args.destination, tt.args.xDistance, tt.args.yDistance, tt.args.xSign, tt.args.ySign); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("computeBasicPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getTileDirection(t *testing.T) {
+	type args struct {
+		pos  RelativeCoordinates
+		tile RelativeCoordinates
+	}
+	tests := []struct {
+		name string
+		args args
+		want network.PlayerDirection
+	}{
+		{"Direction Right", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{2, 1}}, network.Right},
+		{"Direction Left", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{0, 1}}, network.Left},
+		{"Direction Down", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 0}}, network.Down},
+		{"Direction Up", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 2}}, network.Up},
+		{"Invalid direction same tile", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 1}}, -1},
+		{"Invalid direction diagonal", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{2, 2}}, -1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getTileDirection(tt.args.pos, tt.args.tile); got != tt.want {
+				t.Errorf("getTileDirection() = %v, want %v", got, tt.want)
 			}
 		})
 	}

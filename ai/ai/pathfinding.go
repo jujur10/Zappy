@@ -2,6 +2,7 @@ package ai
 
 import (
 	"container/heap"
+	"log"
 	"math"
 	"slices"
 	"zappy_ai/network"
@@ -32,17 +33,11 @@ type graphNode struct {
 func updatePosition(position, worldSize RelativeCoordinates, direction network.PlayerDirection) RelativeCoordinates {
 	switch direction {
 	case Down:
-		position[1] -= 1
-		if position[1] < 0 {
-			position[1] = worldSize[1] - 1
-		}
+		position[1] = (position[1] + worldSize[1] - 1) % worldSize[1]
 	case Up:
 		position[1] = (position[1] + 1) % worldSize[1]
 	case Left:
-		position[0] = position[0] - 1
-		if position[0] < 0 {
-			position[0] = worldSize[0] - 1
-		}
+		position[0] = (position[0] + worldSize[0] - 1) % worldSize[0]
 	case Right:
 		position[0] = (position[0] + 1) % worldSize[0]
 	default:
@@ -190,11 +185,27 @@ func (game Game) computePath() []RelativeCoordinates {
 	return path
 }
 
-// movePlayer moves the player and updates its position, and updates the movement priority queue
-func (game Game) movePlayer() {
+// movePlayerForward moves the player and updates its position, and updates the movement priority queue
+func (game Game) movePlayerForward() {
+	game.Socket.SendCommand(network.GoForward, network.EmptyBody)
+	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 	game.Coordinates.CoordsFromOrigin =
 		updatePosition(game.Coordinates.CoordsFromOrigin, game.Coordinates.WorldSize, game.Coordinates.Direction)
 	game.updateMovementQueueOnMove()
+}
+
+// turnLeft turns the player 90° left, and updates its direction
+func (game Game) turnLeft() {
+	game.Socket.SendCommand(network.RotateLeft, network.EmptyBody)
+	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+	game.Coordinates.Direction += network.Left % 4 // (N + 3) % 4 = N - 1
+}
+
+// turnRight turns the player 90° right, and updates its direction
+func (game Game) turnRight() {
+	game.Socket.SendCommand(network.RotateRight, network.EmptyBody)
+	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+	game.Coordinates.Direction += network.Right % 4 // (N + 1) % 4
 }
 
 // updateMovementQueueOnMove updates the priority of the items in the priority queue
@@ -204,18 +215,81 @@ func (game Game) updateMovementQueueOnMove() {
 		switch item.action {
 		case LevelUp:
 			positions[item] = Item{value: game.Coordinates.CoordsFromOrigin, priority: levelUpPriority,
-				originalPriority: item.originalPriority, index: item.index}
+				originalPriority: item.originalPriority, index: item.index, usefulObjects: item.usefulObjects}
 		case LevelUpLeech:
 			positions[item] = Item{value: item.value, priority: leechLevelUpPriority,
-				originalPriority: item.originalPriority, index: item.index}
+				originalPriority: item.originalPriority, index: item.index, usefulObjects: item.usefulObjects}
 		case ResourceCollection:
 			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
 			positions[item] = Item{value: item.value, priority: max(0, item.originalPriority-distance),
-				originalPriority: item.originalPriority, index: item.index}
+				originalPriority: item.originalPriority, index: item.index, usefulObjects: item.usefulObjects}
 		default:
 		}
 	}
 	for originalItem, newItem := range positions {
 		game.Movement.TilesQueue.Update(originalItem, newItem.value, newItem.priority)
+	}
+}
+
+// TODO TEST
+// getTileDirection returns the direction in which the given tile is from the current position
+// Returns -1 in case of error
+func getTileDirection(pos RelativeCoordinates, tile RelativeCoordinates) network.PlayerDirection {
+	deltaX := tile[0] - pos[0]
+	deltaY := tile[1] - pos[1]
+	if deltaY == 0 { // Horizontal movement
+		if deltaX > 0 {
+			return network.Right
+		}
+		if deltaX < 0 {
+			return network.Left
+		}
+	}
+	if deltaX == 0 {
+		if deltaY > 0 {
+			return network.Up
+		}
+		if deltaY < 0 {
+			return network.Down
+		}
+	}
+	return -1
+}
+
+// moveToTile moves the player to a given adjacent tile
+func (game Game) moveToTile(tile RelativeCoordinates) {
+	if ManhattanDistance(game.Coordinates.CoordsFromOrigin, tile) != 1 {
+		log.Println("Error! Cannot move to non adjacent tile ", tile, ", position is ", game.Coordinates.CoordsFromOrigin)
+		return
+	}
+	direction := getTileDirection(game.Coordinates.CoordsFromOrigin, tile)
+	if direction == -1 {
+		log.Println("Error targeted tile: Invalid direction !")
+		return
+	}
+	leftOffset := direction - game.Coordinates.Direction
+	rightOffset := game.Coordinates.Direction - direction
+	if rightOffset > leftOffset {
+		for range leftOffset {
+			game.turnLeft()
+		}
+	} else {
+		for range rightOffset {
+			game.turnRight()
+		}
+	}
+	game.movePlayerForward()
+}
+
+// followPath follows the given path while collecting all useful resources on the visited tiles
+func (game Game) followPath(path []RelativeCoordinates) {
+	for _, tile := range path {
+		game.moveToTile(tile)
+		// TODO Implement vision, update ViewMap and collect tile resources
+		pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(tile)
+		if pqTileIndex != -1 { // Remove tile if it was in the queue
+			game.Movement.TilesQueue = append(game.Movement.TilesQueue[:pqTileIndex],
+				game.Movement.TilesQueue[pqTileIndex+1:]...)
+		}
 	}
 }
