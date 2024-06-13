@@ -51,5 +51,13 @@ status_t queue_empty(const msg_queue_head_t PTR msg_queue);
 
 /// @brief Function that clears a message queue.
 ///
-/// @param queue The message queue.
-void clear_msg_queue(msg_queue_head_t PTR queue);
+/// @param msg_queue The message queue.
+void clear_msg_queue(msg_queue_head_t PTR msg_queue);
+
+/// @brief Function which adds a buffer to a message queue.
+///
+/// @param msg_queue The message queue.
+/// @param buffer The buffer to add to queue.
+/// @return SUCCESS for success, FAILURE for failure.
+status_t add_buffer_to_queue(msg_queue_head_t PTR msg_queue,
+    const buffer_t PTR buffer);

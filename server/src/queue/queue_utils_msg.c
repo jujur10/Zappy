@@ -51,16 +51,25 @@ status_t queue_empty(const msg_queue_head_t PTR msg_queue)
     return FAILURE;
 }
 
-void clear_msg_queue(msg_queue_head_t PTR queue)
+void clear_msg_queue(msg_queue_head_t PTR msg_queue)
 {
-    msg_container_t *current_element = TAILQ_FIRST(queue);
+    msg_container_t *current_element = TAILQ_FIRST(msg_queue);
     msg_container_t *temp;
 
-    LOGF("Clearing %lu queue", (uint64_t)queue);
+    LOGF("Clearing %lu queue", (uint64_t)msg_queue);
     while (current_element != NULL) {
         temp = TAILQ_NEXT(current_element, entries);
         destroy_message(&current_element->message);
         free(current_element);
         current_element = temp;
     }
+}
+
+status_t add_buffer_to_queue(msg_queue_head_t PTR msg_queue,
+    const buffer_t PTR buffer)
+{
+    msg_t message;
+
+    create_message_from_buffer(buffer, &message);
+    return add_msg_to_queue(msg_queue, &message);
 }

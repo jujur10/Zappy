@@ -45,6 +45,7 @@ typedef enum {
     PLAYER_INCANTATION_CMD,
     PLAYER_FREQUENCY_CMD,
     PLAYER_DIRECTION_CMD,
+    PLAYER_NB_OF_CMD
 } PACKED player_command_base_t;
 
 /// @brief Macros representing the PLAYER's commands as text.
@@ -92,3 +93,37 @@ typedef struct player_command_buffer_s {
 /// @param player_index The index of the player in the player array.
 void player_command_handling(server_t PTR server, char ARRAY buffer,
     uint32_t len, uint32_t player_index);
+
+/// @brief Function which pop the next command in the next_command variable.
+///
+/// @param player_command_buffer The player command buffer.
+/// @param next_command The command popped.
+status_t get_next_player_command(
+    player_command_buffer_t PTR player_command_buffer,
+    player_command_t PTR next_command);
+
+/// @brief The player's commands.
+
+/// @brief Function which execute a given player's command.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_command(server_t PTR server, uint16_t player_idx,
+    const player_command_t PTR command);
+
+/// @brief Function called when an unknown command has been made.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_none_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The MSZ command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_forward_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);

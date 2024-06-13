@@ -19,7 +19,7 @@ static void (* const gui_commands[GUI_NB_OF_CMD])(server_t PTR server,
     execute_gui_sgt_command, execute_gui_sst_command
 };
 
-status_t get_next_command(gui_command_buffer_t PTR gui_command_buffer,
+status_t get_next_gui_command(gui_command_buffer_t PTR gui_command_buffer,
     gui_command_t PTR next_command)
 {
     if (0 == gui_command_buffer->nb_of_command)

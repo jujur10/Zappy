@@ -22,8 +22,8 @@
 /// @var tiles The map representation.
 /// @var has_been_modified Is the map has been modified.
 typedef struct map_s {
-    uint32_t height;
-    uint32_t width;
+    uint16_t height;
+    uint16_t width;
     resources64_t total_resources;
     resources_t ARRAY tiles;
     bool has_been_modified;

@@ -57,7 +57,7 @@ static void on_gui_rcv(server_t PTR server, uint32_t gui_idx)
     }
     LOGF("Gui received : %.*s", (int32_t)bytes_received, buffer)
     gui_command_handling(server, buffer, (uint32_t)bytes_received, gui_idx);
-    if (SUCCESS == get_next_command(&server->guis[gui_idx].command_buffer,
+    if (SUCCESS == get_next_gui_command(&server->guis[gui_idx].command_buffer,
     &next_command)) {
         execute_gui_command(server, (uint16_t)gui_idx, &next_command);
     }

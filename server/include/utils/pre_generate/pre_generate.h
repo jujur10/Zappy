@@ -27,6 +27,8 @@ typedef struct generated_buffers_s {
 
 typedef enum {
     PRE_WELCOME_BUFFER,
+    PRE_OK_RESPONSE,
+    PRE_KO_RESPONSE,
     PRE_WORLD_DIM_BUFFER,
     PRE_GENERATED_RESOURCE_COUNTER,
     PRE_TNA_RESPONSE,
@@ -36,6 +38,12 @@ typedef enum {
 
 /// @brief Welcome message.
 #define WELCOME_MSG "WELCOME\n"
+
+/// @brief OK response.
+#define OK_RESPONSE "ok\n"
+
+/// @brief KO response.
+#define KO_RESPONSE "ko\n"
 
 /// @brief Function to pre-generate responses.
 ///

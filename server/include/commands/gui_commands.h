@@ -113,7 +113,7 @@ void gui_command_handling(server_t PTR server, char ARRAY buffer, uint32_t len,
 ///
 /// @param gui_command_buffer The gui command buffer.
 /// @param next_command The command popped.
-status_t get_next_command(gui_command_buffer_t PTR gui_command_buffer,
+status_t get_next_gui_command(gui_command_buffer_t PTR gui_command_buffer,
     gui_command_t PTR next_command);
 
 /// @brief The gui commands.

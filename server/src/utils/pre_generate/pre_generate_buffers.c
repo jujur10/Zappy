@@ -14,14 +14,29 @@
 #include "style/status.h"
 #include "utils/string/buffer.h"
 
-/// @brief Set the message and returns the new offset of pre-generated array.
-/// @param offset The offset of the pre-generated array to copy to.
-/// @return The new offset.
+/// @brief Set the welcome message into the welcome message buffer.
+///
+/// @param pre_generated_buffers The server buffers.
 static void set_welcome(generated_buffers_t PTR pre_generated_buffers)
 {
     init_buffer_from_chars(
         &pre_generated_buffers->buffers[PRE_WELCOME_BUFFER],
         sizeof(WELCOME_MSG), WELCOME_MSG, sizeof(WELCOME_MSG) - 1
+    );
+}
+
+/// @brief Set the ok and ko messages into their respective buffers.
+///
+/// @param pre_generated_buffers The server buffers.
+static void set_ok_ko(generated_buffers_t PTR pre_generated_buffers)
+{
+    init_buffer_from_chars(
+        &pre_generated_buffers->buffers[PRE_OK_RESPONSE],
+        sizeof(OK_RESPONSE), OK_RESPONSE, sizeof(OK_RESPONSE) - 1
+    );
+    init_buffer_from_chars(
+        &pre_generated_buffers->buffers[PRE_KO_RESPONSE],
+        sizeof(KO_RESPONSE), KO_RESPONSE, sizeof(KO_RESPONSE) - 1
     );
 }
 
@@ -56,6 +71,7 @@ status_t pre_generate_buffers(server_t PTR server)
     if (NULL == server->generated_buffers.buffers)
         return FAILURE;
     set_welcome(&server->generated_buffers);
+    set_ok_ko(&server->generated_buffers);
     set_world_dimensions(server, &server->generated_buffers);
     pre_generate_resources_counter(server->args, &server->generated_buffers);
     set_tna_response(server);

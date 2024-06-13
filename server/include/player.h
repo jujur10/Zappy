@@ -50,7 +50,7 @@ typedef struct player_s {
     coordinates_t coordinates;
     inventory_t inventory;
     uint32_t time_to_live;
-    struct timespec blocking_time;
+    double blocking_time;
     player_command_buffer_t command_buffer;
     msg_queue_head_t queue;
 } player_t;
@@ -61,3 +61,11 @@ typedef struct player_s {
 /// @param sock The socket of the player.
 /// @return The index of the player or -1 if not found.
 int32_t get_player_by_socket(const server_t PTR server, uint16_t sock);
+
+/// @brief Function which adds the time limit to the player.
+///
+/// @param server_time_units The server current time units counter.
+/// @param time_limit The time limit to set.
+/// @param player The player we want to add the time limit to.
+void add_time_limit_to_player(double server_time_units,
+    uint32_t time_limit, player_t *player);
