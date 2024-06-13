@@ -19,6 +19,8 @@ type ServerConn struct {
 	Connection      net.Conn
 	Reader          *textproto.Reader
 	LastCommandType CommandType
+	// ResponseFeedbackChannel from the response routine
+	ResponseFeedbackChannel chan bool
 }
 
 // CreateConnectionContext creates a new dialer context with specified options
@@ -41,7 +43,7 @@ func CreateConnectionContext() *net.Dialer {
 
 // GetTextReader returns a complete server connection with a text protocol reader
 func GetTextReader(conn net.Conn) ServerConn {
-	return ServerConn{conn, textproto.NewReader(bufio.NewReader(conn)), None}
+	return ServerConn{conn, textproto.NewReader(bufio.NewReader(conn)), None, make(chan bool)}
 }
 
 // GetIdAndDims parses and returns the information sent by the server during the handshake

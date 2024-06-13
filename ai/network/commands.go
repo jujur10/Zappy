@@ -2,7 +2,6 @@ package network
 
 import (
 	"fmt"
-	"log"
 )
 
 type CommandType int
@@ -36,11 +35,11 @@ const (
 	GetFrequency
 	// GetDirection command
 	GetDirection
-	// BroadcastDegree command
-	BroadcastDegree
 	// None means no command
 	None
 )
+
+const EmptyBody = ""
 
 func (conn ServerConn) rotateRight() {
 	_, _ = fmt.Fprintln(conn.Connection, "Right")
@@ -96,10 +95,6 @@ func (conn ServerConn) GetFrequency() {
 
 func (conn ServerConn) GetDirection() {
 	_, _ = fmt.Fprintln(conn.Connection, "Direction")
-}
-
-func (conn ServerConn) broadcastDegree(text string) {
-	log.Fatal("Command 'broadcastDegree' is not implemented")
 }
 
 // SendCommand sends the specified command to the serv, using the body string if needed

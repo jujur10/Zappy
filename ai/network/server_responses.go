@@ -14,9 +14,9 @@ type PlayerDirection int
 
 const (
 	Up PlayerDirection = iota
-	Left
-	Down
 	Right
+	Down
+	Left
 )
 
 type BroadcastData struct {
@@ -44,8 +44,6 @@ const (
 	Int
 	// A Broadcast message
 	Broadcast
-	// A BroadcastD is a BroadcastDegree message
-	BroadcastD
 	// A Direction
 	Direction
 	// A Frequency
@@ -75,7 +73,7 @@ var validResponsesTypes = map[CommandType][]MessageType{
 	TakeObject:     {Boolean},
 	SetObject:      {Boolean},
 	LevelUp:        {Elevation, Boolean},
-	GetFrequency:   {Int},
+	GetFrequency:   {Frequency},
 	GetDirection:   {Direction},
 	None:           {},
 }
@@ -271,8 +269,11 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	return Nil, nil, fmt.Errorf("Invalid line\n")
 }
 
-// isResponseTypeValid checks if the type of the obtained response is expected for the last command sent
-func (conn ServerConn) isResponseTypeValid(msgType MessageType) bool {
+// IsResponseTypeValid checks if the type of the obtained response is expected for the last command sent
+func (conn ServerConn) IsResponseTypeValid(msgType MessageType) bool {
+	if msgType == Broadcast || msgType == Death {
+		return true
+	}
 	for _, validType := range validResponsesTypes[conn.LastCommandType] {
 		if validType == msgType {
 			return true

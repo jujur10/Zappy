@@ -7,6 +7,14 @@ import (
 	"zappy_ai/network"
 )
 
+type PlayerAction int
+
+const (
+	ResourceCollection PlayerAction = iota
+	LevelUp
+	LevelUpLeech
+)
+
 type graphPath struct {
 	destination *graphNode
 	length      int
@@ -193,9 +201,19 @@ func (game Game) movePlayer() {
 func (game Game) updateMovementQueueOnMove() {
 	positions := make(map[*Item]Item)
 	for _, item := range game.Movement.TilesQueue {
-		distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
-		positions[item] = Item{value: item.value, priority: max(0, item.originalPriority-distance),
-			originalPriority: item.originalPriority, index: item.index}
+		switch item.action {
+		case LevelUp:
+			positions[item] = Item{value: game.Coordinates.CoordsFromOrigin, priority: levelUpPriority,
+				originalPriority: item.originalPriority, index: item.index}
+		case LevelUpLeech:
+			positions[item] = Item{value: item.value, priority: leechLevelUpPriority,
+				originalPriority: item.originalPriority, index: item.index}
+		case ResourceCollection:
+			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
+			positions[item] = Item{value: item.value, priority: max(0, item.originalPriority-distance),
+				originalPriority: item.originalPriority, index: item.index}
+		default:
+		}
 	}
 	for originalItem, newItem := range positions {
 		game.Movement.TilesQueue.Update(originalItem, newItem.value, newItem.priority)

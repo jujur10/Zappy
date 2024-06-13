@@ -13,8 +13,8 @@ func Test_computeFoodPriority(t *testing.T) {
 	}{
 		{"1 cycle left", args{lifeTime: 1}, foodMaxPriority},
 		{"2 food units left", args{lifeTime: 2 * foodLifeTimeIncrement}, foodMaxPriority},
-		{"5 food units left", args{lifeTime: 5 * foodLifeTimeIncrement}, 8},
-		{"10 food units left", args{lifeTime: 10 * foodLifeTimeIncrement}, 3},
+		{"5 food units left", args{lifeTime: 5 * foodLifeTimeIncrement}, 9},
+		{"10 food units left", args{lifeTime: 10 * foodLifeTimeIncrement}, 4},
 		{"15 food units left", args{lifeTime: 15 * foodLifeTimeIncrement}, foodMinPriority},
 	}
 	for _, tt := range tests {

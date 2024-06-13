@@ -9,6 +9,7 @@ type Item struct {
 	value            RelativeCoordinates // The value of the item; arbitrary.
 	priority         int                 // The priority of the item in the queue. Diminishes with distance
 	originalPriority int                 // The originalPriority of the tile
+	action           PlayerAction        // The action to execute
 	// The index is needed by Update and is maintained by the heap.Interface methods.
 	index int // The index of the item in the heap.
 }

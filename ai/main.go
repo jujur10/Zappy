@@ -72,19 +72,21 @@ func main() {
 	connectionContext := network.CreateConnectionContext()
 	conn, err := network.InitServerConnection(fullAddress, teamName, connectionContext)
 	if err != nil {
-		log.Fatal("Init server connection\n", err)
+		log.Fatal("Init server connection: ", err)
 	}
 	serverConn := network.GetTextReader(conn)
 	slotsLeft, dimX, dimY, err := network.GetIdAndDims(serverConn.Reader)
 	if err != nil {
-		log.Fatal("Get id and dims\n", err)
+		log.Fatal("Get id and dims: ", err)
 	}
-	fmt.Printf("Slots left: %d\ndimX %d\ndimY %d\n", slotsLeft, dimX, dimY)
+	log.Printf("Slots left: %d\ndimX %d\ndimY %d\n", slotsLeft, dimX, dimY)
 	timeStep := getFrequencyFromServer(serverConn)
 	if timeStep == 0 {
-		log.Fatal("Failed to get timestep : Time step cannot be zero")
+		log.Fatal("Failed to get timestep: Time step cannot be zero")
 	}
-	_ = ai.InitGame(serverConn, teamName, timeStep)
+	game := ai.InitGame(serverConn, teamName, timeStep, slotsLeft)
+	log.Println("AI initialized")
+	ai.EndGame(&game)
 
 	ai.AI()
 }
