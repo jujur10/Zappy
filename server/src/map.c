@@ -21,8 +21,8 @@ status_t init_map(const argument_t ARRAY args, map_t PTR map)
     map->tiles = calloc(args->height * args->width, sizeof(resources_t));
     if (NULL == map->tiles)
         return FAILURE;
-    map->height = args->height;
-    map->width = args->width;
+    map->height = (uint16_t)args->height;
+    map->width = (uint16_t)args->width;
     map->has_been_modified = true;
     return SUCCESS;
 }

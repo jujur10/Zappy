@@ -12,7 +12,8 @@
 
 static void (* const player_commands[PLAYER_NB_OF_CMD])(server_t PTR server,
     uint16_t player_idx, const player_command_t PTR command) = {
-    execute_player_none_command, execute_player_forward_command
+    execute_player_none_command, execute_player_forward_command,
+    execute_player_right_command, execute_player_left_command
 };
 
 status_t get_next_player_command(
@@ -23,9 +24,9 @@ status_t get_next_player_command(
         return FAILURE;
     *next_command = player_command_buffer->commands[0];
     memmove(player_command_buffer->commands,
-            player_command_buffer->commands + 1,
-            sizeof(player_command_t) *
-            (player_command_buffer->nb_of_command - 1));
+        player_command_buffer->commands + 1,
+        sizeof(player_command_t) *
+        (player_command_buffer->nb_of_command - 1));
     player_command_buffer->nb_of_command--;
     memset(player_command_buffer->commands +
         player_command_buffer->nb_of_command, 0, sizeof(player_command_t));

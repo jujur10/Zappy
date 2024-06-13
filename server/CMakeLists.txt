@@ -53,6 +53,7 @@ add_executable(zappy_server
     src/commands/player/player_command.c
     src/commands/player/player_forward_command.c
     src/commands/player/player_none_command.c
+    src/commands/player/player_right_left_command.c
 )
 
 target_include_directories(zappy_server PRIVATE

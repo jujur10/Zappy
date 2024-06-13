@@ -75,12 +75,28 @@ static uint8_t is_ready(server_t PTR server, gui_t PTR gui,
     const fd_set PTR fd_set)
 {
     if (FD_ISSET(gui->sock, fd_set)) {
-        if (false == has_blocking_time_expired(&server->clock,
-        &gui->blocking_time))
+        if (false == is_timeout_exceed(&server->clock, &gui->blocking_time))
             return 0;
         return 1;
     }
     return 2;
+}
+
+static void blocking_time_not_respected(server_t PTR server,
+    uint32_t gui_idx, int32_t PTR select_ret)
+{
+    msg_t message;
+    char buffer[10];
+    uint64_t bytes_received = read(server->guis[gui_idx].sock, buffer,
+        sizeof(buffer));
+
+    if (bytes_received < 1) {
+        LOG("Player closed connection")
+        return destroy_gui(server, gui_idx);
+    }
+    create_message("ko\n", 4, &message);
+    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    (*select_ret)--;
 }
 
 /// @brief Function which check and handle if the gui's socket waiting to
@@ -94,14 +110,10 @@ static uint8_t is_ready(server_t PTR server, gui_t PTR gui,
 static uint8_t handle_guis_rfds(server_t PTR server, uint32_t gui_idx,
     const fd_set PTR rfds, int32_t PTR select_ret)
 {
-    msg_t message;
-
     LOG("Start handle GUI rfds");
     switch (is_ready(server, &server->guis[gui_idx], rfds)) {
         case 0:
-            create_message("ko\n", 4, &message);
-            add_msg_to_queue(&server->guis[gui_idx].queue, &message);
-            (*select_ret)--;
+            blocking_time_not_respected(server, gui_idx, select_ret);
             LOG("Stop handle GUI rfds 1")
             return 1;
         case 1:

@@ -73,12 +73,29 @@ static uint8_t is_ready(server_t PTR server, player_t PTR player,
     const fd_set PTR fd_set)
 {
     if (FD_ISSET(player->sock, fd_set)) {
-        if (false == has_blocking_time_expired(&server->clock,
-        &player->blocking_time))
+        if (false == has_blocking_time_expired(server->time_units,
+        player->blocking_time))
             return 0;
         return 1;
     }
     return 2;
+}
+
+static void blocking_time_not_respected(server_t PTR server,
+    uint32_t player_idx, int32_t PTR select_ret)
+{
+    msg_t message;
+    char buffer[10];
+    uint64_t bytes_received = read(server->players[player_idx].sock, buffer,
+        sizeof(buffer));
+
+    if (bytes_received < 1) {
+        LOG("Player closed connection")
+        return destroy_ai(server, player_idx);
+    }
+    create_message("ko\n", 4, &message);
+    add_msg_to_queue(&server->players[player_idx].queue, &message);
+    (*select_ret)--;
 }
 
 /// @brief Function which check and handle if the player's socket waiting to
@@ -92,14 +109,10 @@ static uint8_t is_ready(server_t PTR server, player_t PTR player,
 static uint8_t handle_players_rfds(server_t PTR server, uint32_t player_idx,
     const fd_set PTR rfds, int32_t PTR select_ret)
 {
-    msg_t message;
-
     LOG("Start handle PLAYER rfds");
     switch (is_ready(server, &server->players[player_idx], rfds)) {
         case 0:
-            create_message("ko\n", 4, &message);
-            add_msg_to_queue(&server->players[player_idx].queue, &message);
-            (*select_ret)--;
+            blocking_time_not_respected(server, player_idx, select_ret);
             LOG("Stop handle PLAYER rfds 1")
             return 1;
         case 1:

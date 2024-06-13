@@ -30,5 +30,6 @@ typedef enum orientation_s {
     LOOK_TOP,
     LOOK_RIGHT,
     LOOK_BOTTOM,
-    LOOK_LEFT
+    LOOK_LEFT,
+    NB_OF_ORIENTATION
 } PACKED orientation_t;
