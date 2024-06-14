@@ -25,7 +25,8 @@ typedef struct team_s {
     uint16_t ARRAY players_idx;
     uint16_t nb_of_players;
     uint16_t max_nb_of_players;
-    uint32_t nb_of_eggs;
+    uint16_t nb_of_eggs;
+    uint16_t nb_of_allocated_eggs;
     coordinates_t ARRAY eggs_coordinates;
 } team_t;
 

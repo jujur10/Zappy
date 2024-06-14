@@ -29,5 +29,5 @@ void execute_player_take_command(server_t PTR server, uint16_t player_idx,
             &server->generated_buffers.buffers[PRE_OK_RESPONSE]);
     }
     add_buffer_to_queue(&player->queue, &server->generated_buffers
-    .buffers[PRE_KO_RESPONSE]);
+        .buffers[PRE_KO_RESPONSE]);
 }

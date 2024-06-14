@@ -23,6 +23,7 @@ uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams)
         (*teams)[i].players_idx = calloc(args->clients_nb,
         sizeof(*((*teams)->players_idx)));
         (*teams)[i].nb_of_eggs = args->clients_nb;
+        (*teams)[i].nb_of_allocated_eggs = args->clients_nb;
         (*teams)[i].eggs_coordinates = calloc(args->clients_nb,
         sizeof(*((*teams)->eggs_coordinates)));
     }
@@ -53,5 +54,5 @@ uint16_t get_nb_of_unused_slot(const team_t PTR team)
 
     theoretical = (theoretical < 0) ? 0 : theoretical;
     return (theoretical < (int32_t)team->nb_of_eggs) ? (uint16_t)theoretical :
-        (uint16_t)team->nb_of_eggs;
+        team->nb_of_eggs;
 }

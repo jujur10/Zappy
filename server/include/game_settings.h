@@ -25,5 +25,8 @@
 /// @brief The cooldown delay for a set action of the player.
 #define PLAYER_SET_WAIT 7
 
-// @brief The cooldown delay for MCT in ns.
+///@brief The cooldown delay for the fork action.
+#define PLAYER_FORK_WAIT 42
+
+/// @brief The cooldown delay for MCT in ns.
 #define GUI_MCT_REQUEST_COOLDOWN 100000000

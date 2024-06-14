@@ -28,6 +28,7 @@ add_executable(zappy_server
     src/commands/player/player_command.c
     src/commands/player/player_command_parsing.c
     src/commands/player/player_connect_nbr_command.c
+    src/commands/player/player_fork_command.c
     src/commands/player/player_forward_command.c
     src/commands/player/player_inventory_command.c
     src/commands/player/player_none_command.c

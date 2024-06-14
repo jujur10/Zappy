@@ -52,19 +52,19 @@ static uint32_t write_inventory_as_chars(char ARRAY buffer,
     buffer[wrote] = '[';
     wrote++;
     wrote += write_string_with_nb(buffer + wrote, FOOD_STR, sizeof
-    (FOOD_STR) - 1, inventory->attr.food);
+        (FOOD_STR) - 1, inventory->attr.food);
     wrote += write_string_with_nb(buffer + wrote, LINEMATE_STR, sizeof
-    (LINEMATE_STR) - 1, inventory->attr.linemate);
+        (LINEMATE_STR) - 1, inventory->attr.linemate);
     wrote += write_string_with_nb(buffer + wrote, DERAUMERE_STR, sizeof
-    (DERAUMERE_STR) - 1, inventory->attr.deraumere);
+        (DERAUMERE_STR) - 1, inventory->attr.deraumere);
     wrote += write_string_with_nb(buffer + wrote, SIBUR_STR, sizeof
-    (SIBUR_STR) - 1, inventory->attr.sibur);
+        (SIBUR_STR) - 1, inventory->attr.sibur);
     wrote += write_string_with_nb(buffer + wrote, MENDIANE_STR, sizeof
-    (MENDIANE_STR) - 1, inventory->attr.mendiane);
+        (MENDIANE_STR) - 1, inventory->attr.mendiane);
     wrote += write_string_with_nb(buffer + wrote, PHIRAS_STR, sizeof
-    (PHIRAS_STR) - 1, inventory->attr.phiras);
+        (PHIRAS_STR) - 1, inventory->attr.phiras);
     wrote += write_string_with_nb(buffer + wrote, THYSTAME_STR, sizeof
-    (THYSTAME_STR) - 1, inventory->attr.thystame);
+        (THYSTAME_STR) - 1, inventory->attr.thystame);
     buffer[wrote - 2] = ']';
     return wrote;
 }

@@ -15,7 +15,7 @@ static void (* const player_commands[PLAYER_NB_OF_CMD])(server_t PTR server,
     execute_player_none_command, execute_player_forward_command,
     execute_player_right_command, execute_player_left_command,
     NULL, execute_player_inventory_command, NULL,
-    execute_player_connect_nbr_command, NULL, NULL,
+    execute_player_connect_nbr_command, execute_player_fork_command, NULL,
     execute_player_take_command, execute_player_set_command
 };
 
