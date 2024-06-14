@@ -15,15 +15,37 @@
 #include "logging.h"
 #include "commands/player_commands.h"
 
-int32_t init_ai(server_t PTR server, int sock)
+/// @brief Function which adds a player to a team (if possible).
+///
+/// @param server The server structure.
+/// @param team_idx The team we want to assign the player to.
+/// @param player_idx The player to add to the team.
+/// @return SUCCESS if the player has been added successfully, FAILURE if not.
+static status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
+    uint16_t player_idx)
 {
-    if (MAX_CLIENTS == server->nb_players)
+    if (0 == get_nb_of_unused_slot(&server->teams[team_idx]))
+        return FAILURE;
+    server->teams[team_idx].nb_of_eggs--;
+    server->teams[team_idx].players_idx[server->teams[team_idx]
+        .nb_of_players] = player_idx;
+    server->teams[team_idx].nb_of_players++;
+    server->players[player_idx].team_idx = team_idx;
+    return SUCCESS;
+}
+
+int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
+{
+    player_t *player = &server->players[server->nb_players];
+
+    if (MAX_CLIENTS == server->nb_players ||
+    FAILURE == add_player_to_team(server, team_idx, server->nb_players))
         return -1;
     LOGF("Swapped to AI %i", server->nb_players)
-    server->players[server->nb_players].sock = (uint16_t)sock;
-    TAILQ_INIT(&server->players[server->nb_players].queue);
-    server->players[server->nb_players].time_to_live =
-        LIFE_UNITS_TO_TIME_UNITS(BEGINNING_LIFE_UNITS);
+    player->sock = (uint16_t)sock;
+    TAILQ_INIT(&player->queue);
+    player->time_to_live = LIFE_UNITS_TO_TIME_UNITS(BEGINNING_LIFE_UNITS);
+    player->team_idx = team_idx;
     server->nb_players++;
     return server->nb_players - 1;
 }

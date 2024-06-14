@@ -47,3 +47,8 @@ void destroy_teams(const argument_t PTR args, team_t ARRAY teams);
 /// @param len The searched name length.
 int32_t get_team_index_by_name(const team_t ARRAY teams, uint32_t nb_of_teams,
     const char ARRAY searched_name, uint32_t len);
+
+/// @brief Function that returns the number of unused slot for the team.
+/// @param team The team.
+/// @return The number of unused slots for the team.
+uint16_t get_nb_of_unused_slot(const team_t PTR team);

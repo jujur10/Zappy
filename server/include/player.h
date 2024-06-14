@@ -45,6 +45,7 @@ typedef enum player_status_s {
 typedef struct player_s {
     uint16_t sock;
     uint8_t level;
+    uint16_t team_idx;
     player_status_t status;
     orientation_t orientation;
     coordinates_t coordinates;
