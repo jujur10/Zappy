@@ -139,6 +139,7 @@ func createUUID(teamName string) string {
 	val3 := rand.Int()
 	uuidValue := val1 ^ val3 ^ val2
 	stringUuidVal := strconv.FormatInt(int64(uuidValue%1000000), 10)
+	log.Println("Created player UUID: ", stringUuidVal)
 	return teamName + stringUuidVal
 }
 

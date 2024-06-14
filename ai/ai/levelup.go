@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"fmt"
 	"log"
 	"zappy_ai/network"
 )
@@ -85,37 +86,45 @@ func (game Game) startLevelUpHost() {
 	dropResources(&game)
 	startLevelUp(game, game.Level+1)
 	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+	fmt.Println("Starting level up process as host, target level ", game.Level+1)
 	game.Socket.SendCommand(network.LevelUp, network.EmptyBody)
 	initialResponse := awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 	if !initialResponse {
 		levelUpFailed(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+		log.Println("Failed to start level up process as host, target level ", game.Level+1)
 		return
 	}
 	finalResponse := awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 	if finalResponse {
 		levelUpComplete(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+		log.Println("Successfully leveled up as host, new level ", game.Level+1)
 	} else {
 		levelUpFailed(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+		log.Println("Failed to level up as host, target level ", game.Level+1)
 	}
 }
 
 // startLevelUpHost starts the level up leeching process
 func (game Game) startLevelUpLeech() {
+	log.Println("Starting level up as leech, target level ", game.Level+1)
 	game.Socket.SendCommand(network.LevelUp, network.EmptyBody)
 	initialResponse := awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 	if !initialResponse {
+		log.Println("Failed to start level up as leech, target level ", game.Level+1)
 		levelUpFailed(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 		return
 	}
 	finalResponse := awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 	if finalResponse {
+		log.Println("Successfully leveled up as leech, new level ", game.Level+1)
 		levelUpComplete(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 	} else {
+		log.Println("Failed to level up as leech, target level ", game.Level+1)
 		levelUpFailed(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 	}

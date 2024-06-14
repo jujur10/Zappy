@@ -91,7 +91,8 @@ func main() {
 	}
 	game := ai.InitGame(serverConn, teamName, timeStep, slotsLeft)
 	log.Println("AI initialized")
-	ai.EndGame(&game)
 
-	ai.AI()
+	ai.MainLoop()
+
+	ai.EndGame(&game)
 }

@@ -65,6 +65,7 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 
 // serverResponseRoutine is the goroutine that manages the server's responses
 func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
+	log.Println("Starting server response routine")
 	for {
 		select {
 		case _, ok := <-feedbackChannel:

@@ -1,9 +1,9 @@
 package ai
 
 import (
-	"fmt"
+	"log"
 )
 
-func AI() {
-	fmt.Println("Hello from AI")
+func MainLoop() {
+	log.Println("Hello from AI")
 }
