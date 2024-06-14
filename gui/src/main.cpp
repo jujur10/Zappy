@@ -3,12 +3,14 @@
 #include <Camera3D.hpp>
 #include <Window.hpp>
 #include <cstring>
+#include <gui_commands.hpp>
 #include <networking.hpp>
 #include <thread>
 
 #include "map.hpp"
 #include "my_exit.hpp"
 #include "my_write.hpp"
+#include "server_commands.hpp"
 #include "sockets.hpp"
 #include "string_utils.hpp"
 #include "systems.hpp"
@@ -24,8 +26,8 @@ namespace zappy_gui
 constexpr const char *const help = "USAGE: ./zappy_gui -p port -h machine\n";
 constexpr int32_t screenWidth = 1'280;
 constexpr int32_t screenHeight = 720;
-constexpr uint32_t serverToGuiQueueCapacity = 128;
-constexpr uint32_t GuiToServerQueueCapacity = 1024;
+constexpr uint32_t serverToGuiQueueCapacity = 4096; // 4096 is the minimum size for the queues
+constexpr uint32_t GuiToServerQueueCapacity = 4096;
 
 namespace map
 {
@@ -76,7 +78,7 @@ void Handshake(const Socket &serverSocket)
         [&serverSocket, &responseBuffer, &errorMsg, &exitWithError]
     {
         std::string line =
-            serverSocket.ReadLineTimeout(responseBuffer, 1'000, errorMsg);
+            serverSocket.ReadLineTimeout(responseBuffer, 1'0000000000, errorMsg);
         if (line.empty())
         {
             exitWithError(errorMsg);
@@ -98,7 +100,39 @@ void Handshake(const Socket &serverSocket)
     }
 
     uint16_t clientNumber = 0;
-    if (!string_utils::convertFromString(readLineAndCheck(), clientNumber))
+    responseLine = readLineAndCheck();
+
+    // Check if the response is a command or a client number
+    const uint32_t command = *std::bit_cast<const uint32_t *>(responseLine.c_str()) & 0x00'FF'FF'FFu;
+    if (command == static_cast<uint32_t>(net::ServerCommands::MAP_SIZE))
+    {
+        // Epitech test server doesn't follow the full AI protocol
+        // They send no client number and no map size
+        // Instead they send the commands: msz, sgt
+        // After that they send bct * tile number every 200ms
+        const std::string args = responseLine.substr(4);
+
+        const size_t mapWidthIdx = args.find(' ');
+
+        int32_t mapWidth = 0;
+        int32_t mapHeight = 0;
+        if (!string_utils::convertFromString(
+                static_cast<std::string_view>(args).substr(0, mapWidthIdx), mapWidth) ||
+            !string_utils::convertFromString(
+                static_cast<std::string_view>(args).substr(mapWidthIdx + 1), mapHeight))
+        {
+            exitWithError("Failed to convert map dimensions from string");
+        }
+        if (mapWidth <= 0 || mapHeight <= 0)
+        {
+            exitWithError("Failed handshake with server, invalid map size");
+        }
+
+        map::kMAP_WIDTH = mapWidth;
+        map::kMAP_HEIGHT = mapHeight;
+        return;
+    }
+    if (!string_utils::convertFromString(responseLine, clientNumber))
     {
         exitWithError("Failed to convert client number from string");
     }
@@ -160,6 +194,7 @@ int32_t main(const int32_t argc, char *argv[])
     Handshake(serverSocket);
 
     flecs::world ecs;
+    ecs.set_entity_range(4'269'42, 0); // Allow flecs to only genereate entity ids starting from 4'269'420
 
     ecs.import <flecs::monitor>();
     ecs.import <flecs::metrics>();
@@ -180,11 +215,12 @@ int32_t main(const int32_t argc, char *argv[])
                             CAMERA_PERSPECTIVE);
     ecs.set<raylib::Camera3D>(camera);
 
-    ::DisableCursor(); // Hides cursor and locks it to the window
+    auto grassMod = raylib::Model("gui/resources/assets/grass2.glb");
+    ecs.set<zappy_gui::map::tileModels>({&grassMod});
 
-    auto innerMod = raylib::Model("gui/resources/assets/grass_top.glb");
-    auto outerMod = raylib::Model("gui/resources/assets/grass_full.glb");
-    ecs.set<zappy_gui::map::tileModels>({&innerMod, &outerMod});
+    auto res1 = raylib::Model("gui/resources/assets/crystal1_optimized.glb");
+
+    ecs.set<zappy_gui::map::ressourceModels>({&res1});
 
     zappy_gui::systems::registerSystems(ecs);
 
@@ -193,6 +229,7 @@ int32_t main(const int32_t argc, char *argv[])
     std::jthread networkThread(zappy_gui::net::NetworkTreadLoop, serverSocket);
     //--------------------------------------------------------------------------------------
     // Main game loop
+
     while (!window.ShouldClose() &&
            ecs.progress())  // Detect window close button or ESC key
     {
@@ -201,6 +238,8 @@ int32_t main(const int32_t argc, char *argv[])
     networkThread.request_stop();
 
     const auto *tileModels = ecs.get_mut<zappy_gui::map::tileModels>();
-    ::UnloadShader(tileModels->outerModel->GetMaterials()[0].shader);
-    ::UnloadShader(tileModels->innerModel->GetMaterials()[0].shader);
+    ::UnloadShader(tileModels->grassModel->GetMaterials()[0].shader);
+
+    const auto *ressourceModels = ecs.get_mut<zappy_gui::map::ressourceModels>();
+        ::UnloadShader(ressourceModels->crystal->GetMaterials()[0].shader);
 }
