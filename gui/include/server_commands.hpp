@@ -9,6 +9,7 @@
 namespace zappy_gui::net
 {
 enum class ServerCommands: uint32_t {
-    MAP_TILE = 7627629,
+    MAP_SIZE = 8024941,
+    MAP_TILE = 7627618,
 };
 }
