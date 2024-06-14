@@ -56,6 +56,7 @@ add_executable(zappy_server
     src/utils/pre_generate/pre_generate_resources.c
     src/utils/string/buffer.c
     src/utils/string/string.c
+    src/commands/player/player_set_command.c
 )
 
 target_include_directories(zappy_server PRIVATE

@@ -1,14 +1,14 @@
 /*
 ** EPITECH PROJECT, 2024
-** player_take_command.c
+** player_set_command.c
 ** File description:
-** player_take_command.c.
+** player_set_command.c.
 */
 #include "server.h"
 
 #include "queue/msg_queue.h"
 
-void execute_player_take_command(server_t PTR server, uint16_t player_idx,
+void execute_player_set_command(server_t PTR server, uint16_t player_idx,
     const player_command_t PTR command)
 {
     player_t *player = &server->players[player_idx];
@@ -20,9 +20,9 @@ void execute_player_take_command(server_t PTR server, uint16_t player_idx,
     if (R_STRUCT_SIZE == resource_idx)
         return (void)add_buffer_to_queue(&player->queue,
             &server->generated_buffers.buffers[PRE_KO_RESPONSE]);
-    if (current_tile->arr[resource_idx] > 0) {
-        current_tile->arr[resource_idx]--;
-        player->inventory.arr[resource_idx]++;
+    if (player->inventory.arr[resource_idx] > 0) {
+        player->inventory.arr[resource_idx]--;
+        current_tile->arr[resource_idx]++;
         return (void)add_buffer_to_queue(&player->queue,
             &server->generated_buffers.buffers[PRE_OK_RESPONSE]);
     }
