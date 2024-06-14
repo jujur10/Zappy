@@ -124,36 +124,37 @@ ssize_t Socket::ReadUntil(std::vector<char> &buffer, const char delimiter) const
 {
     ssize_t totalBytesRead = 0;
     const size_t chunkSize = 32;
-    buffer.clear();
+    const size_t originalSize = buffer.size();
 
     while (true)
     {
         buffer.resize(buffer.size() + chunkSize);
-        const ssize_t bytesRead =
-            ::read(_sockFd, buffer.data() + totalBytesRead, chunkSize);
+        const ssize_t bytes_read =
+            ::read(_sockFd, buffer.data() + originalSize + totalBytesRead, chunkSize);
 
-        if (-1 == bytesRead)
+        if (-1 == bytes_read)
         {
             buffer.clear();
             return -1;
         }
-        if (0 == bytesRead)
+        if (0 == bytes_read)
         {
-            buffer.resize(static_cast<size_t>(totalBytesRead));
+            buffer.resize(originalSize + static_cast<size_t>(totalBytesRead));
             break;
         }
 
-        totalBytesRead += bytesRead;
+        totalBytesRead += bytes_read;
 
-        const auto it = std::find(buffer.begin() + totalBytesRead - bytesRead,
-                                  buffer.begin() + totalBytesRead,
+        const auto it = std::find(buffer.begin() + originalSize + totalBytesRead - bytes_read,
+                                  buffer.begin() + totalBytesRead + originalSize,
                                   delimiter);
-        if (it != buffer.begin() + totalBytesRead)
+        if (it != buffer.begin() + totalBytesRead + originalSize)
         {
-            buffer.resize(static_cast<size_t>(totalBytesRead));
+            buffer.resize(originalSize + static_cast<size_t>(totalBytesRead));
             break;
         }
     }
+
     return totalBytesRead;
 }
 
@@ -163,7 +164,7 @@ ssize_t Socket::ReadUntilTimeout(std::vector<char> &buffer,
 {
     ssize_t totalBytesRead = 0;
     const size_t chunkSize = 32;
-    buffer.clear();
+    const size_t originalSize = buffer.size();
 
     while (true)
     {
@@ -179,13 +180,13 @@ ssize_t Socket::ReadUntilTimeout(std::vector<char> &buffer,
         if (0 == ret)
         {
             errno = ETIMEDOUT;
-            buffer.resize(static_cast<size_t>(totalBytesRead));
+            buffer.clear();
             return -1;
         }
 
         buffer.resize(buffer.size() + chunkSize);
         const ssize_t bytes_read =
-            ::read(_sockFd, buffer.data() + totalBytesRead, chunkSize);
+            ::read(_sockFd, buffer.data() + originalSize + totalBytesRead, chunkSize);
 
         if (-1 == bytes_read)
         {
@@ -194,23 +195,90 @@ ssize_t Socket::ReadUntilTimeout(std::vector<char> &buffer,
         }
         if (0 == bytes_read)
         {
-            buffer.resize(static_cast<size_t>(totalBytesRead));
+            buffer.resize(originalSize + static_cast<size_t>(totalBytesRead));
             break;
         }
 
         totalBytesRead += bytes_read;
 
-        const auto it = std::find(buffer.begin() + totalBytesRead - bytes_read,
-                                  buffer.begin() + totalBytesRead,
+        const auto it = std::find(buffer.begin() + originalSize + totalBytesRead - bytes_read,
+                                  buffer.begin() + totalBytesRead + originalSize,
                                   delimiter);
-        if (it != buffer.begin() + totalBytesRead)
+        if (it != buffer.begin() + totalBytesRead + originalSize)
         {
-            buffer.resize(static_cast<size_t>(totalBytesRead));
+            buffer.resize(originalSize + static_cast<size_t>(totalBytesRead));
             break;
         }
     }
 
     return totalBytesRead;
+}
+
+ssize_t Socket::ReadUntilFast(std::vector<char> &buffer, const char delimiter) const
+{
+    ssize_t totalBytesRead = 0;
+    const size_t chunkSize = 2048;
+    const size_t originalSize = buffer.size();
+
+    while (true)
+    {
+        buffer.resize(buffer.size() + chunkSize);
+        const ssize_t bytes_read =
+            ::recv(_sockFd, buffer.data() + originalSize + totalBytesRead, chunkSize, MSG_DONTWAIT);
+
+        if (0 == bytes_read && (EAGAIN == errno || EWOULDBLOCK == errno))
+        {
+            buffer.resize(originalSize + static_cast<size_t>(totalBytesRead));
+            break;
+        }
+        if (-1 == bytes_read)
+        {
+            buffer.clear();
+            return -1;
+        }
+
+
+        totalBytesRead += bytes_read;
+
+        const auto it = std::find(buffer.begin() + originalSize + totalBytesRead - bytes_read,
+                                  buffer.begin() + totalBytesRead + originalSize,
+                                  delimiter);
+        if (it != buffer.begin() + totalBytesRead + originalSize || (EAGAIN == errno || EWOULDBLOCK == errno))
+        {
+            buffer.resize(originalSize + static_cast<size_t>(totalBytesRead));
+            break;
+        }
+    }
+
+    return totalBytesRead;
+}
+
+std::string Socket::ReadLineFast(std::vector<char> &buffer) const
+{
+    auto newlinePos = std::ranges::find(buffer, '\n');
+
+    if (newlinePos == buffer.end())
+    {
+        const ssize_t bytesRead = ReadUntilFast(buffer, '\n');
+        if (-1 == bytesRead)
+        {
+            return "";
+        }
+
+        newlinePos = std::ranges::find(buffer, '\n');
+        if (buffer.end() == newlinePos)
+        {
+            return "";
+        }
+    }
+
+    std::string line(buffer.begin(), newlinePos);
+    buffer.erase(buffer.begin(), newlinePos + 1);
+    if (buffer.empty())
+    {
+        buffer.shrink_to_fit();
+    }
+    return line;
 }
 
 std::string Socket::ReadLineTimeout(std::vector<char> &buffer,
