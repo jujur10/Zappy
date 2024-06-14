@@ -13,6 +13,7 @@
 #include "resources.h"
 #include "style/status.h"
 #include "utils/pre_generate/pre_generate.h"
+#include "coordinates.h"
 
 /// @brief Structure representing player.
 ///
@@ -57,3 +58,12 @@ void update_map(double current_time, map_t PTR map,
 /// @param map The map.
 /// @param buffer The map buffer.
 void update_map_buffer(const map_t PTR map, buffer_t PTR buffer);
+
+/// @brief Function which returns a pointer on a tile corresponding to the
+/// given coordinates.
+///
+/// @param map The map containing the tiles.
+/// @param coordinates The coordinates to of the tile.
+/// @return The pointer on the tile for the given coordinates.
+resources_t *get_resource_tile_by_coordinates(const map_t PTR map,
+    const coordinates_t PTR coordinates);

@@ -25,7 +25,12 @@ add_executable(zappy_server
     src/commands/gui/gui_sgt_command.c
     src/commands/gui/gui_sst_command.c
     src/commands/gui/gui_tna_command.c
+    src/commands/player/player_command.c
     src/commands/player/player_command_parsing.c
+    src/commands/player/player_forward_command.c
+    src/commands/player/player_none_command.c
+    src/commands/player/player_right_left_command.c
+    src/commands/player/player_take_command.c
     src/gui_handling.c
     src/main.c
     src/map.c
@@ -34,6 +39,7 @@ add_executable(zappy_server
     src/new_clients_handling.c
     src/player.c
     src/queue/queue_utils_msg.c
+    src/resource.c
     src/server.c
     src/server_events.c
     src/server_update.c
@@ -50,10 +56,6 @@ add_executable(zappy_server
     src/utils/pre_generate/pre_generate_resources.c
     src/utils/string/buffer.c
     src/utils/string/string.c
-    src/commands/player/player_command.c
-    src/commands/player/player_forward_command.c
-    src/commands/player/player_none_command.c
-    src/commands/player/player_right_left_command.c
 )
 
 target_include_directories(zappy_server PRIVATE

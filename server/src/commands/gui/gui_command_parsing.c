@@ -226,7 +226,7 @@ void gui_command_handling(server_t PTR server, char ARRAY buffer, uint32_t len,
     string_t to_append;
     gui_command_buffer_t *gui_buffer = &server->guis[gui_index].command_buffer;
 
-    buffer[len + 1] = '\0';
+    buffer[len] = '\0';
     len = (uint32_t)strlen(buffer);
     if (NULL != gui_buffer->raw_buffer.ptr) {
         if (FAILURE == use_gui_buffer(buffer, len, gui_buffer))

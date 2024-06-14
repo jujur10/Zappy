@@ -38,6 +38,23 @@ void destroy_gui(server_t PTR server, uint32_t gui_idx)
     memset(&server->guis[server->nb_guis], 0, sizeof(gui_t));
 }
 
+/// @brief Function which execute command if available.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+static void execute_command_if_available(server_t PTR server, uint32_t gui_idx)
+{
+    gui_command_t next_command;
+
+    if (false == is_timeout_exceed(&server->clock, &server->guis[gui_idx]
+    .blocking_time))
+        return;
+    if (SUCCESS == get_next_gui_command(&server->guis[gui_idx].command_buffer,
+    &next_command)) {
+        execute_gui_command(server, (uint16_t)gui_idx, &next_command);
+    }
+}
+
 /// @brief Function called when the server receive data from a gui_t.\n
 /// - Put the client's message into a buffer.\n
 /// - If EOF reached, destroy the gui.\n
@@ -174,13 +191,14 @@ void handle_guis(server_t PTR server, const fd_set PTR rfds,
     LOG("Start handling GUIs");
     for (int32_t i = 0; count_guis < server->nb_guis && *select_ret > 0
     && i < MAX_CLIENTS; i++) {
-        LOGF("Actual GUI %i", i)
         if (0 == server->guis[i].sock)
             continue;
         count_guis++;
         if (FAILURE == queue_empty(&server->guis[i].queue)) {
             handle_guis_wfds(server, i, wfds, select_ret);
             continue;
+        } else {
+            execute_command_if_available(server, i);
         }
         if (1 == handle_guis_rfds(server, i, rfds, select_ret))
             continue;

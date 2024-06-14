@@ -15,6 +15,7 @@
 #include "utils/pre_generate/pre_generate.h"
 #include "game_settings.h"
 #include "logging.h"
+#include "coordinates.h"
 
 status_t init_map(const argument_t ARRAY args, map_t PTR map)
 {
@@ -68,4 +69,10 @@ void update_map(double current_time, map_t PTR map,
         next_update = current_time + MAP_UPDATE_WAIT;
         LOG("Map updated")
     }
+}
+
+resources_t *get_resource_tile_by_coordinates(const map_t PTR map,
+    const coordinates_t PTR coordinates)
+{
+    return &map->tiles[coordinates->y * map->height + coordinates->x];
 }

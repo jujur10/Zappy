@@ -76,6 +76,15 @@ typedef enum resources_index_s {
     R_STRUCT_SIZE
 } PACKED resources_index_t;
 
+/// @brief Macros to represent the resources as array of chars.
+#define R_FOOD_STR "food"
+#define R_LINEMATE_STR "linemate"
+#define R_DERAUMERE_STR "deraumere"
+#define R_SIBUR_STR "sibur"
+#define R_MENDIANE_STR "mendiane"
+#define R_PHIRAS_STR "phiras"
+#define R_THYSTAME_STR "thystame"
+
 /// @brief Union representing the resources (accessible by attribute or array).
 ///
 /// @var attr In order to access the resources by attribute.
@@ -120,3 +129,11 @@ typedef enum {
 
 /// @brief Macro to calculate the resource ratio.
 #define GET_RES_PROPORTION(x) (((double)(x)) / RES_PROPORTION_MULTIPLIER)
+
+/// @brief Function which returns the resource index resulting of the string
+/// comparison.
+///
+/// @param string The string to convert.
+/// @return The resource index representing the string or R_STRUCT_SIZE on
+/// failure.
+resources_index_t get_resource_index_from_str(const char *string);

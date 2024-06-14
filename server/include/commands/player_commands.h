@@ -143,3 +143,11 @@ void execute_player_right_command(server_t PTR server, uint16_t player_idx,
 /// @param command The command to execute.
 void execute_player_left_command(server_t PTR server, uint16_t player_idx,
     UNUSED const player_command_t PTR command);
+
+/// @brief The "take" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_take_command(server_t PTR server, uint16_t player_idx,
+    const player_command_t PTR command);
