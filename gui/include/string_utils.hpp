@@ -5,6 +5,7 @@
 #pragma once
 
 #include <charconv>
+#include <string_view>
 
 namespace zappy_gui::string_utils
 {
