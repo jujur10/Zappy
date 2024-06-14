@@ -78,7 +78,7 @@ void Handshake(const Socket &serverSocket)
         [&serverSocket, &responseBuffer, &errorMsg, &exitWithError]
     {
         std::string line =
-            serverSocket.ReadLineTimeout(responseBuffer, 1'0000000000, errorMsg);
+            serverSocket.ReadLineTimeout(responseBuffer, 1'000000000, errorMsg);
         if (line.empty())
         {
             exitWithError(errorMsg);
@@ -194,7 +194,7 @@ int32_t main(const int32_t argc, char *argv[])
     Handshake(serverSocket);
 
     flecs::world ecs;
-    ecs.set_entity_range(4'269'42, 0); // Allow flecs to only genereate entity ids starting from 4'269'420
+    ecs.set_entity_range(4'269'420, 0); // Allow flecs to only genereate entity ids starting from 4'269'420
 
     ecs.import <flecs::monitor>();
     ecs.import <flecs::metrics>();

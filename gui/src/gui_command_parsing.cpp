@@ -6,6 +6,8 @@
 
 #include <flecs.h>
 
+#include <map.hpp>
+
 #include "map_utils.hpp"
 #include "to_gui_commands.hpp"
 
@@ -25,33 +27,38 @@ void ParseGuiCommands(const flecs::iter &it)
                 if (auto const *updateTile = std::get_if<UpdateTileCommand>(&cmd))
                 {
                     flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(updateTile->x, updateTile->y));
-                    uint8_t counter = 0;
-                    uint8_t counter2 = 0;
+
                     tile.children(
-                        [&counter, &updateTile, &counter2](flecs::entity child)
+                        [&updateTile](flecs::entity child)
                         {
-                            if (counter2 >= 6)
-                            {
-                                printf("tile %d %d is full\n", updateTile->x, updateTile->y);
-                            }
-                            if (counter >= 6)
+                            const auto *type = child.get<map::ressourceType>();
+                            if (type == nullptr)
                             {
                                 return;
                             }
-                            *child.get_mut<uint16_t>() = updateTile->resources[counter];
-                            // if (updateTile->resources[counter] == 0 && child.enabled())
-                            // {
-                            // }
-                            //     child.disable();
-                            if (updateTile->resources[counter] > 0)
+
+                            const auto newResourceVal = updateTile->resources[static_cast<int32_t>(*type)];
+                            auto &currentResourceVal = child.ensure<uint16_t>();
+                            // printf("type: %s\n", child.type().str().c_str());
+                            if (currentResourceVal == newResourceVal)
                             {
-                                counter2++;
+                                return;
+                            }
+
+                            currentResourceVal = newResourceVal;
+
+                            if (currentResourceVal == 0 && child.enabled())
+                            {
+                                child.disable();
+                            }
+                            else if (currentResourceVal > 0 && !child.enabled())
+                            {
                                 child.enable();
                             }
-                            counter++;
                         });
                 }
             }
+            default:;
         }
     }
 }

@@ -117,13 +117,13 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all the grass tiles and draw them
     ecs.system<raylib::Matrix>("drawTiles")
         .kind(flecs::OnUpdate)
-        .without<map::food>()
-        .without<map::linemate>()
-        .without<map::deraumere>()
-        .without<map::sibur>()
-        .without<map::mendiane>()
-        .without<map::phiras>()
-        .without<map::thystame>()
+        .without(map::ressourceType::food)
+        .without(map::ressourceType::linemate)
+        .without(map::ressourceType::deraumere)
+        .without(map::ressourceType::sibur)
+        .without(map::ressourceType::mendiane)
+        .without(map::ressourceType::phiras)
+        .without(map::ressourceType::thystame)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const tilesPosition)
             {
@@ -133,7 +133,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all food and draw it
     ecs.system<raylib::Matrix>("drawFood")
         .kind(flecs::OnUpdate)
-        .with<map::food>()
+        .with(map::ressourceType::food)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const foodPosition)
             {
@@ -143,7 +143,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all linemate and draw it
     ecs.system<raylib::Matrix>("drawLinemate")
         .kind(flecs::OnUpdate)
-        .with<map::linemate>()
+        .with(map::ressourceType::linemate)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const linematePosition)
             {
@@ -163,7 +163,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all deraumere and draw it
     ecs.system<raylib::Matrix>("drawDeraumere")
         .kind(flecs::OnUpdate)
-        .with<map::deraumere>()
+        .with(map::ressourceType::deraumere)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const deraumerePosition)
             {
@@ -183,7 +183,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all sibur and draw it
     ecs.system<raylib::Matrix>("drawSibur")
         .kind(flecs::OnUpdate)
-        .with<map::sibur>()
+        .with(map::ressourceType::sibur)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const siburPosition)
             {
@@ -203,7 +203,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all mendiane and draw it
     ecs.system<raylib::Matrix>("drawMendiane")
         .kind(flecs::OnUpdate)
-        .with<map::mendiane>()
+        .with(map::ressourceType::mendiane)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const mendianePosition)
             {
@@ -223,7 +223,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all phiras and draw it
     ecs.system<raylib::Matrix>("drawPhiras")
         .kind(flecs::OnUpdate)
-        .with<map::phiras>()
+        .with(map::ressourceType::phiras)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const phirasPosition)
             {
@@ -243,7 +243,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all thystame and draw it
     ecs.system<raylib::Matrix>("drawThystame")
         .kind(flecs::OnUpdate)
-        .with<map::thystame>()
+        .with(map::ressourceType::thystame)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const ThystamePosition)
             {
@@ -278,13 +278,13 @@ static void registerPostUpdateSystems(const flecs::world &ecs)
                 ::EndDrawing();
             });
 
-    ecs.system("AskForMapRessourcesUpdate")
-        .kind(flecs::PostUpdate)
-        .iter(
-            []([[maybe_unused]] const flecs::iter &it)
-            {
-                net::GuiToServerQueue.try_push(const_cast<char*>(GUI_MAP_TILES));
-            });
+    // ecs.system("AskForMapRessourcesUpdate")
+    //     .kind(flecs::PostUpdate)
+    //     .iter(
+    //         []([[maybe_unused]] const flecs::iter &it)
+    //         {
+    //             net::GuiToServerQueue.try_push(const_cast<char*>(GUI_MAP_TILES));
+    //         });
 }
 
 void registerSystems(const flecs::world &ecs)

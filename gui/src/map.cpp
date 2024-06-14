@@ -34,11 +34,8 @@ void GenerateMap(const flecs::iter &it)
                 tileHeight,
                 static_cast<float32>(y) * tileSize * verticalSpacing - static_cast<float32>(kMAP_HEIGHT) * tileSize * 0.375f32);
 
-            // printf("position x: %d, y: %d\n", x, y);
-
             it.world().make_alive(y * kMAP_WIDTH + x + 1 + FLECS_HI_ID_RECORD_ID).set<raylib::Matrix>(position).scope([&]
             {
-                // printf("index: %d, tile_id: %ld\n", y * kMAP_WIDTH + x + 1 + FLECS_HI_ID_RECORD_ID, tile.raw_id());
                 raylib::Matrix matrixArray[7];
                 for (int32_t i = 0; i < 7; ++i)
                 {
@@ -50,23 +47,21 @@ void GenerateMap(const flecs::iter &it)
                     matrixArray[i].m14 += position.m14;
                 }
 
-                // ressourceIDs ids;
-
                 // Create the entities for the resources as child of the current tile.
                 // The resources are created with a transform matrix used to draw them, then the quantity as a uint16_t and the ressource tag.
-                it.world().entity().set<const raylib::Matrix>(matrixArray[0]).set<uint16_t>(0).add<food>().disable();
+                it.world().entity().set<const raylib::Matrix>(matrixArray[0]).set<uint16_t>(0).add(ressourceType::food).disable();
 
-                it.world().entity().set<const raylib::Matrix>(matrixArray[1]).set<uint16_t>(0).add<linemate>().disable();
+                it.world().entity().set<const raylib::Matrix>(matrixArray[1]).set<uint16_t>(0).add(ressourceType::linemate).disable();
 
-                it.world().entity().set<const raylib::Matrix>(matrixArray[2]).set<uint16_t>(0).add<deraumere>().disable();
+                it.world().entity().set<const raylib::Matrix>(matrixArray[2]).set<uint16_t>(0).add(ressourceType::deraumere).disable();
 
-                it.world().entity().set<const raylib::Matrix>(matrixArray[3]).set<uint16_t>(0).add<sibur>().disable();
+                it.world().entity().set<const raylib::Matrix>(matrixArray[3]).set<uint16_t>(0).add(ressourceType::sibur).disable();
 
-                it.world().entity().set<const raylib::Matrix>(matrixArray[4]).set<uint16_t>(0).add<mendiane>().disable();
+                it.world().entity().set<const raylib::Matrix>(matrixArray[4]).set<uint16_t>(0).add(ressourceType::mendiane).disable();
 
-                it.world().entity().set<const raylib::Matrix>(matrixArray[5]).set<uint16_t>(0).add<phiras>().disable();
+                it.world().entity().set<const raylib::Matrix>(matrixArray[5]).set<uint16_t>(0).add(ressourceType::phiras).disable();
 
-                it.world().entity().set<const raylib::Matrix>(matrixArray[6]).set<uint16_t>(0).add<thystame>().disable();
+                it.world().entity().set<const raylib::Matrix>(matrixArray[6]).set<uint16_t>(0).add(ressourceType::thystame).disable();
            });
         }
     }

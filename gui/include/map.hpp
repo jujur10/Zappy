@@ -49,16 +49,16 @@ struct ressourceModels
     raylib::Model *crystal;
 };
 
-// struct ressourceIDs
-// {
-//     uint64_t foodID;
-//     uint64_t linemateID;
-//     uint64_t deraumereID;
-//     uint64_t siburID;
-//     uint64_t mendianeID;
-//     uint64_t phirasID;
-//     uint64_t thystameID;
-// };
+enum class ressourceType
+{
+    food,
+    linemate,
+    deraumere,
+    sibur,
+    mendiane,
+    phiras,
+    thystame
+};
 
 /// @brief Tag used to identify the food on the map
 struct food
