@@ -7,6 +7,7 @@
 #include "server.h"
 
 #include "queue/msg_queue.h"
+#include "game_settings.h"
 
 void execute_player_take_command(server_t PTR server, uint16_t player_idx,
     const player_command_t PTR command)
@@ -23,6 +24,7 @@ void execute_player_take_command(server_t PTR server, uint16_t player_idx,
     if (current_tile->arr[resource_idx] > 0) {
         current_tile->arr[resource_idx]--;
         player->inventory.arr[resource_idx]++;
+        add_time_limit_to_player(server->time_units, PLAYER_TAKE_WAIT, player);
         return (void)add_buffer_to_queue(&player->queue,
             &server->generated_buffers.buffers[PRE_OK_RESPONSE]);
     }
