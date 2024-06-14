@@ -77,13 +77,13 @@ typedef enum resources_index_s {
 } PACKED resources_index_t;
 
 /// @brief Macros to represent the resources as array of chars.
-#define R_FOOD_STR "food"
-#define R_LINEMATE_STR "linemate"
-#define R_DERAUMERE_STR "deraumere"
-#define R_SIBUR_STR "sibur"
-#define R_MENDIANE_STR "mendiane"
-#define R_PHIRAS_STR "phiras"
-#define R_THYSTAME_STR "thystame"
+#define FOOD_STR "food"
+#define LINEMATE_STR "linemate"
+#define DERAUMERE_STR "deraumere"
+#define SIBUR_STR "sibur"
+#define MENDIANE_STR "mendiane"
+#define PHIRAS_STR "phiras"
+#define THYSTAME_STR "thystame"
 
 /// @brief Union representing the resources (accessible by attribute or array).
 ///

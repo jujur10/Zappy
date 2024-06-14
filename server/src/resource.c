@@ -9,19 +9,19 @@
 
 resources_index_t get_resource_index_from_str(const char *string)
 {
-    if (0 == strncmp(string, R_FOOD_STR, sizeof(R_FOOD_STR)))
+    if (0 == strncmp(string, FOOD_STR, sizeof(FOOD_STR)))
         return R_FOOD_IDX;
-    if (0 == strncmp(string, R_LINEMATE_STR, sizeof(R_LINEMATE_STR)))
+    if (0 == strncmp(string, LINEMATE_STR, sizeof(LINEMATE_STR)))
         return R_LINEMATE_IDX;
-    if (0 == strncmp(string, R_DERAUMERE_STR, sizeof(R_DERAUMERE_STR)))
+    if (0 == strncmp(string, DERAUMERE_STR, sizeof(DERAUMERE_STR)))
         return R_DERAUMERE_IDX;
-    if (0 == strncmp(string, R_SIBUR_STR, sizeof(R_SIBUR_STR)))
+    if (0 == strncmp(string, SIBUR_STR, sizeof(SIBUR_STR)))
         return R_SIBUR_IDX;
-    if (0 == strncmp(string, R_MENDIANE_STR, sizeof(R_MENDIANE_STR)))
+    if (0 == strncmp(string, MENDIANE_STR, sizeof(MENDIANE_STR)))
         return R_MENDIANE_IDX;
-    if (0 == strncmp(string, R_PHIRAS_STR, sizeof(R_PHIRAS_STR)))
+    if (0 == strncmp(string, PHIRAS_STR, sizeof(PHIRAS_STR)))
         return R_PHIRAS_IDX;
-    if (0 == strncmp(string, R_THYSTAME_STR, sizeof(R_THYSTAME_STR)))
+    if (0 == strncmp(string, THYSTAME_STR, sizeof(THYSTAME_STR)))
         return R_THYSTAME_IDX;
     return R_STRUCT_SIZE;
 }
