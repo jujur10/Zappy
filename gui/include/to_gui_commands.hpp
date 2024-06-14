@@ -9,18 +9,18 @@
 namespace zappy_gui::net
 {
 // Command types
-struct PlayerNewCommand {
-    // example
-};
-
-struct PlayerPositionCommand {
-    // example
+struct UpdateTileCommand {
+    uint16_t x;
+    uint16_t y;
+    uint16_t resources[7];
 };
 
 // ... define other command types ...
 
 // Command variant
-using Command = std::variant<PlayerNewCommand, PlayerPositionCommand>;
+// This is the type that will be used to store the commands in the queue
+// DON'T CHANGE THE ORDER OF THE TYPES IN THE VARIANT OR YOU WILL BREAK THE PARSING CODE
+using Command = std::variant<UpdateTileCommand, std::monostate>;
 
 // Command queue
 using STGQueue = atomic_queue::AtomicQueueB2<Command>;
