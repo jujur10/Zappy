@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include "Model.hpp"
-
+// #include <cstdint>
 #include <stdfloat>
+
+#include "Model.hpp"
 
 // pre-declaration to prevent circular dependencies
 namespace flecs
@@ -22,22 +23,75 @@ extern int32_t kMAP_HEIGHT;
 
 using float32 = std::float32_t;
 
+extern float32 spacing;
+extern float32 tileSize;
+extern float32 tileHeight;
+extern float32 verticalSpacing;
+
+constexpr Vector2 ressourceOffset[] = {{0 * 0.4, -1 * 0.4},
+                                 {-0.78 * 0.4, -0.62 * 0.4},
+                                 {-0.97 * 0.4, 0.22 * 0.4},
+                                 {-0.43 * 0.4, 0.9 * 0.4},
+                                 {0.43 * 0.4, 0.9 * 0.4},
+                                 {0.97 * 0.4, 0.22 * 0.4},
+                                 {0.78 * 0.4, -0.62 * 0.4}};
+
 /// @brief Tile models
 ///
 /// @note The inner model is the same as the full model but only the top face
 struct tileModels
 {
-    raylib::Model *innerModel;
-    raylib::Model *outerModel;
+    raylib::Model *grassModel;
 };
 
-/// @brief Tag used to identify the inner tiles in the ECS
-struct innerTile
+struct ressourceModels
+{
+    raylib::Model *crystal;
+};
+
+// struct ressourceIDs
+// {
+//     uint64_t foodID;
+//     uint64_t linemateID;
+//     uint64_t deraumereID;
+//     uint64_t siburID;
+//     uint64_t mendianeID;
+//     uint64_t phirasID;
+//     uint64_t thystameID;
+// };
+
+/// @brief Tag used to identify the food on the map
+struct food
 {
 };
 
-/// @brief Tag used to identify the outer tiles in the ECS
-struct outerTile
+/// @brief Tag used to identify linemate on the map
+struct linemate // GREEN
+{
+};
+
+/// @brief Tag used to identify deraumere on the map
+struct deraumere // RED
+{
+};
+
+/// @brief Tag used to identify sibur on the map
+struct sibur // BLUE
+{
+};
+
+/// @brief Tag used to identify mendiane on the map
+struct mendiane // ORANGE
+{
+};
+
+/// @brief Tag used to identify phiras on the map
+struct phiras // YELLOW
+{
+};
+
+/// @brief Tag used to identify thystame on the map
+struct thystame // PURPLE
 {
 };
 
@@ -46,4 +100,4 @@ struct outerTile
 /// @param it The ECS query iterator
 void GenerateMap(const flecs::iter &it);
 
-} // namespace zappy_gui::map
+}  // namespace zappy_gui::map
