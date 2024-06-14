@@ -52,14 +52,16 @@ target_include_directories(atomic_queue INTERFACE
 ###### Zappy GUI ######
 #######################
 add_executable(zappy_gui
-    src/sockets.cpp
-    src/main.cpp
     src/argv_parser.cpp
-    src/systems.cpp
+    src/main.cpp
     src/map.cpp
-    src/raylib_utils.cpp
+    src/map_utils.cpp
     src/network_main_loop.cpp
+    src/raylib_utils.cpp
     src/server_command_parsing.cpp
+    src/sockets.cpp
+    src/systems.cpp
+    src/gui_command_parsing.cpp
 )
 
 target_include_directories(zappy_gui PRIVATE
