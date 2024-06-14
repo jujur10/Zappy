@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/rand"
 	"strconv"
-	"strings"
 	"time"
 	"zappy_ai/network"
 )
@@ -180,40 +179,6 @@ func EndGame(game *Game) {
 	close(game.Socket.ResponseFeedbackChannel)
 	close(game.MessageManager.levelUpMessageChannel)
 	log.Println("Channels closed")
-}
-
-// parsedKeyToInvKey converts the strings to tileItems
-var parsedKeyToInvKey = map[string]TileItem{"food": Food, "linemate": Linemate,
-	"deraumere": Deraumere, "sibur": Sibur, "mendiane": Mendiane, "phiras": Phiras, "thystame": Thystame}
-
-// CreateViewMap creates a ViewMap from a parsed double array of strings
-func CreateViewMap(parsedList [][]string) (ViewMap, error) {
-	size := 0
-	counter := 1
-	for len(parsedList) > size {
-		size += counter
-		counter += 2
-	}
-	if len(parsedList) != size {
-		return nil, fmt.Errorf("invalid number of items in view map")
-	}
-	viewMap := make(ViewMap, len(parsedList))
-	for idx, tile := range parsedList {
-		viewMap[idx] = make([]TileItem, len(tile))
-		for itemIdx, tileItem := range tile {
-			tileItem = strings.ToLower(tileItem)
-			var item TileItem
-			if tileItem == "player" {
-				item = Player
-			} else if val, ok := parsedKeyToInvKey[tileItem]; ok {
-				item = val
-			} else {
-				return nil, fmt.Errorf("invalid item in view map")
-			}
-			viewMap[idx][itemIdx] = item
-		}
-	}
-	return viewMap, nil
 }
 
 // createInventory creates a new inventory from a parsed double array of strings

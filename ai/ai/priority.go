@@ -1,5 +1,10 @@
 package ai
 
+import (
+	"container/heap"
+	"zappy_ai/network"
+)
+
 // levelUpResources is a map of TileItem -> ints maps containing the necessary resources for level ups
 // This is a pre-initialized placeholder for creating the game struct
 var levelUpResources = map[int]Inventory{
@@ -130,4 +135,54 @@ func Abs(x int) int {
 // ManhattanDistance returns the Manhattan / taxicab distance between two points
 func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates) int {
 	return Abs(pos2[0]-pos1[0]) + Abs(pos2[1]-pos1[1])
+}
+
+// collectTileResources collects all the resources of a tile that are useful to the player
+func (game Game) collectTileResources(pqTileIndex int) {
+	item := game.Movement.TilesQueue[pqTileIndex]
+	nbPlayers := 0
+	for _, resource := range (*item).usefulObjects {
+		if resource == Player {
+			nbPlayers++
+		}
+	}
+	if nbPlayers > 1 {
+		return
+	}
+	for _, resource := range (*item).usefulObjects {
+		if game.isResourceRequired(resource) {
+			game.Socket.SendCommand(network.TakeObject, itemToString[resource])
+			status := awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+			if status {
+				game.resourceCollected(resource)
+			}
+		}
+	}
+}
+
+// updatePriorityQueueAfterCollection updates all the priorities in the PQueue after that a tile was harvested
+// If a tile is no longer useful, it is removed from the queue
+func (game Game) updatePriorityQueueAfterCollection() {
+	positions := make(map[*Item]Item)
+	for _, item := range game.Movement.TilesQueue {
+		if item.action == ResourceCollection {
+			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
+			usefulObjs := make([]TileItem, 0)
+			for _, obj := range item.usefulObjects {
+				if game.isResourceRequired(obj) {
+					usefulObjs = append(usefulObjs, obj)
+				}
+			}
+			newOriginalPrio := game.getTilePriority(usefulObjs)
+			positions[item] = Item{value: item.value, priority: max(0, newOriginalPrio-distance),
+				originalPriority: newOriginalPrio, index: item.index, usefulObjects: usefulObjs}
+		}
+	}
+	for originalItem, newItem := range positions {
+		if newItem.originalPriority == 0 {
+			heap.Remove(&game.Movement.TilesQueue, originalItem.index)
+		} else {
+			game.Movement.TilesQueue.Update(originalItem, newItem.value, newItem.priority)
+		}
+	}
 }

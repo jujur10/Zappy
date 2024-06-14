@@ -5,29 +5,29 @@ import (
 	"testing"
 )
 
-func TestCreateViewMap(t *testing.T) {
+func Test_createInventory(t *testing.T) {
 	type args struct {
-		parsedList [][]string
+		parsedInv map[string]int
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    ViewMap
+		want    Inventory
 		wantErr bool
 	}{
-		{"Valid view map", args{[][]string{{"player"}, {"linemate", "food"}, {}, {"sibur"}, {"thystame"}, {}, {}, {"deraumere"}, {"mendiane"}}}, ViewMap{{Player}, {Linemate, Food}, {}, {Sibur}, {Thystame}, {}, {}, {Deraumere}, {Mendiane}}, false},
-		{"Invalid argument", args{[][]string{{"player"}, {"linemate"}, {"phiras"}, {"sibure"}, {}, {}, {}, {"deraumere"}, {"mendiane"}}}, nil, true},
-		{"Invalid number of tiles", args{[][]string{{"player"}, {"linemate"}, {}, {"sibur"}, {}, {}, {"deraumere"}, {"mendiane"}}}, nil, true},
+		{"Test empty inv", args{parsedInv: map[string]int{}}, map[TileItem]int{}, false},
+		{"Basic test", args{parsedInv: map[string]int{"food": 5, "linemate": 2, "deraumere": 3, "sibur": 1, "mendiane": 2, "phiras": 1, "thystame": 0}},
+			map[TileItem]int{Food: 5, Linemate: 2, Deraumere: 3, Sibur: 1, Mendiane: 2, Phiras: 1, Thystame: 0}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := CreateViewMap(tt.args.parsedList)
+			got, err := createInventory(tt.args.parsedInv)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CreateViewMap() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("createInventory() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CreateViewMap() got = %v, want %v", got, tt.want)
+				t.Errorf("createInventory() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

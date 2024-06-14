@@ -3,6 +3,7 @@ package network
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"net/textproto"
 	"os"
@@ -85,7 +86,6 @@ func GetIdAndDims(reader *textproto.Reader) (int, int, int, error) {
 func InitServerConnection(fullAddress string, teamName string, context *net.Dialer) (net.Conn, error) {
 	conn, connErr := context.Dial("tcp4", fullAddress)
 	if connErr != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Failed to connect to remote server at %s: %s\n", fullAddress, connErr.Error())
 		return nil, connErr
 	}
 
@@ -99,6 +99,7 @@ func InitServerConnection(fullAddress string, teamName string, context *net.Dial
 		_ = conn.Close()
 		return nil, fmt.Errorf("Invalid welcome message\n")
 	}
+	log.Println("Welcome message received")
 
 	_, teamNameErr := fmt.Fprintf(conn, "%s\n", teamName)
 	if teamNameErr != nil {
@@ -106,5 +107,6 @@ func InitServerConnection(fullAddress string, teamName string, context *net.Dial
 		_, _ = fmt.Fprintf(os.Stderr, "Failed to send to remote server at %s: %s\n", fullAddress, teamNameErr.Error())
 		return nil, teamNameErr
 	}
+	log.Println("Sent team name", teamName)
 	return conn, nil
 }

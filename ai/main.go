@@ -55,13 +55,17 @@ func parseArguments() (string, string) {
 // It ignores any other messages coming before this one
 func getFrequencyFromServer(conn network.ServerConn) int {
 	conn.GetFrequency()
-	respType := network.Nil
-	for respType != network.Int {
+	for {
 		rType, value, err := conn.GetAndParseResponse()
-		if rType == network.Int && err == nil {
+		if err != nil {
+			log.Fatal("Failed to get frequency from server: ", err)
+		}
+		if rType == network.Boolean && value == false {
+			log.Fatal("Failed to get frequency from server; exiting")
+		}
+		if rType == network.Int {
 			return value.(int)
 		}
-		respType = rType
 	}
 	return 0
 }
@@ -79,7 +83,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Get id and dims: ", err)
 	}
-	log.Printf("Slots left: %d\ndimX %d\ndimY %d\n", slotsLeft, dimX, dimY)
+	log.Printf("Slots left: %d; dimX %d; dimY %d\n", slotsLeft, dimX, dimY)
+	log.Println("Handshake complete")
 	timeStep := getFrequencyFromServer(serverConn)
 	if timeStep == 0 {
 		log.Fatal("Failed to get timestep: Time step cannot be zero")

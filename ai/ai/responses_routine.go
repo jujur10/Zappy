@@ -14,16 +14,16 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 	case network.Broadcast:
 		game.InterpretPlayerMessage(message.(network.BroadcastData))
 	case network.Int:
-		feedbackChannel <- true
 		if game.Socket.LastCommandType == network.GetUnusedSlots {
 			game.SlotsLeft = message.(int)
 		}
+		feedbackChannel <- true
 	case network.Direction:
-		feedbackChannel <- true
 		game.Coordinates.Direction = message.(network.PlayerDirection)
-	case network.Frequency:
 		feedbackChannel <- true
+	case network.Frequency:
 		game.TimeStep = time.Second / time.Duration(message.(int))
+		feedbackChannel <- true
 		game.FoodManager.TimeStepChannel <- game.TimeStep
 	case network.Boolean:
 		feedbackChannel <- message.(bool)
@@ -34,21 +34,22 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 			log.Println("Error on previous (invalid?) command: Server returned 'ko'")
 		}
 	case network.Inventory:
-		feedbackChannel <- true
 		inv, invErr := createInventory(message.(map[string]int))
 		if invErr != nil {
 			log.Println("Error: invalid inventory", invErr)
+			feedbackChannel <- false
 			break
 		}
 		game.Inventory = inv
+		feedbackChannel <- true
 		game.FoodManager.FoodChannel <- -game.Inventory[Food]
 	case network.View:
-		feedbackChannel <- true
 		view, viewErr := CreateViewMap(message.([][]string))
 		if viewErr != nil {
 			log.Println("Error: invalid view", viewErr)
 		}
 		game.View = view
+		feedbackChannel <- viewErr == nil
 	case network.Elevation:
 		feedbackChannel <- true
 		level := message.(int)

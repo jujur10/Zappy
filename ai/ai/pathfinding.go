@@ -2,6 +2,7 @@ package ai
 
 import (
 	"container/heap"
+	"fmt"
 	"log"
 	"math"
 	"slices"
@@ -27,6 +28,12 @@ type graphNode struct {
 	paths         []graphPath
 	isOrigin      bool
 	isDestination bool
+}
+
+// The Path struct is a container for a destination item and the path of coords to reach it
+type Path struct {
+	destination Item
+	path        []RelativeCoordinates
 }
 
 // updatePosition updates a position in a given direction, absolute modulo worldSize
@@ -160,20 +167,36 @@ func computeBasicPath(origin, destination RelativeCoordinates,
 }
 
 // computePath to the tile with the highest priority and passing through as many prioritized tiles as possible
-func (game Game) computePath() []RelativeCoordinates {
+func (game Game) computePath() (Path, error) {
 	poppedDest := heap.Pop(&game.Movement.TilesQueue)
 	if poppedDest == nil {
-		return nil
+		return Path{}, fmt.Errorf("no more items in priority queue")
 	}
-	destination := poppedDest.(RelativeCoordinates)
+	destinationItem := poppedDest.(*Item)
+	destination := destinationItem.value
 	origin := game.Coordinates.CoordsFromOrigin
+	worldSize := game.Coordinates.WorldSize
+
 	xDistance := Abs(destination[0] - origin[0])
-	yDistance := Abs(destination[1] - origin[1])
+	xDistanceWrap := Abs(destination[0] - origin[0] + worldSize[0])
 	xSign := (destination[0] - origin[0]) / xDistance
+	if xDistanceWrap < xDistance { // If wrapping around in X is shorter
+		xDistance = xDistanceWrap
+		xSign = (destination[0] - origin[0] + worldSize[0]) / xDistance
+	}
+
+	yDistance := Abs(destination[1] - origin[1])
+	yDistanceWrap := Abs(destination[1] - origin[1] + worldSize[1])
 	ySign := (destination[1] - origin[1]) / yDistance
+	if yDistanceWrap < yDistance { // If wrapping around in Y is shorter
+		yDistance = yDistanceWrap
+		ySign = (destination[1] - origin[1] + worldSize[1]) / yDistance
+	}
+
 	middlePoints := getMiddlePoints(origin, destination, game.Movement.TilesQueue)
 	if len(middlePoints) == 0 { // If there are no intermediate points to go through, make a basic path
-		return computeBasicPath(origin, destination, xDistance, yDistance, xSign, ySign)
+		return Path{destination: *destinationItem,
+			path: computeBasicPath(origin, destination, xDistance, yDistance, xSign, ySign)}, nil
 	} // Else generate the most optimal path
 	selectedMiddlePoints := computeOptimalPath(origin, destination, middlePoints) // Get the middle points to go through
 	path := make([]RelativeCoordinates, 0)
@@ -182,7 +205,7 @@ func (game Game) computePath() []RelativeCoordinates {
 		pathPart := computeBasicPath(lastOrigin, point, xDistance, yDistance, xSign, ySign)
 		path = append(path, pathPart...)
 	}
-	return path
+	return Path{destination: *destinationItem, path: path}, nil
 }
 
 // movePlayerForward moves the player and updates its position, and updates the movement priority queue
@@ -231,7 +254,6 @@ func (game Game) updateMovementQueueOnMove() {
 	}
 }
 
-// TODO TEST
 // getTileDirection returns the direction in which the given tile is from the current position
 // Returns -1 in case of error
 func getTileDirection(pos RelativeCoordinates, tile RelativeCoordinates) network.PlayerDirection {
@@ -282,14 +304,21 @@ func (game Game) moveToTile(tile RelativeCoordinates) {
 }
 
 // followPath follows the given path while collecting all useful resources on the visited tiles
-func (game Game) followPath(path []RelativeCoordinates) {
-	for _, tile := range path {
+func (game Game) followPath(path Path) {
+	for _, tile := range path.path {
 		game.moveToTile(tile)
-		// TODO Implement vision, update ViewMap and collect tile resources
+		game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
+		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+		game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
 		pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(tile)
 		if pqTileIndex != -1 { // Remove tile if it was in the queue
-			game.Movement.TilesQueue = append(game.Movement.TilesQueue[:pqTileIndex],
-				game.Movement.TilesQueue[pqTileIndex+1:]...)
+			game.collectTileResources(pqTileIndex)
+			heap.Remove(&game.Movement.TilesQueue, pqTileIndex)
+			game.updatePriorityQueueAfterCollection()
+		}
+		if game.Movement.TilesQueue[0].originalPriority > path.destination.originalPriority &&
+			game.Movement.TilesQueue[0].action == ResourceCollection {
+			return // Check for a higher priority task
 		}
 	}
 }
