@@ -33,6 +33,10 @@ typedef enum {
     PRE_GENERATED_RESOURCE_COUNTER,
     PRE_TNA_RESPONSE,
     PRE_MAP_BUFFER,
+    PRE_TOP_INDEXES,
+    PRE_RIGHT_INDEXES,
+    PRE_BOTTOM_INDEXES,
+    PRE_LEFT_INDEXES,
     PRE_GENERATED_ARR_LEN
 } generated_enum_t;
 
@@ -73,3 +77,9 @@ void set_tna_response(server_t PTR server);
 ///
 /// @param server The server structure.
 void set_mct_buffer(server_t PTR server);
+
+/// @brief Function which generates arrays of sorted indexes in order to
+/// obtain the look tiles blazingly fast.
+///
+/// @param pre_generated_buffers The pre generated buffers structure.
+void pre_generate_look_indexes(generated_buffers_t PTR pre_generated_buffers);

@@ -14,6 +14,7 @@ void init_buffer(buffer_t *buffer, uint32_t max_size)
 {
     buffer->ptr = malloc(sizeof(char) * (max_size + 1));
     buffer->max_size = max_size;
+    buffer->len = 0;
 }
 
 void init_buffer_from_chars(buffer_t *buffer, uint32_t max_size,

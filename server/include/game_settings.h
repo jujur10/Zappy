@@ -30,3 +30,6 @@
 
 /// @brief The cooldown delay for MCT in ns.
 #define GUI_MCT_REQUEST_COOLDOWN 100000000
+
+/// @brief The maximal level of an AI. (8 by default).
+#define MAX_AI_LVL 8

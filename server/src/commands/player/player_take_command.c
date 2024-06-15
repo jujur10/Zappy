@@ -30,4 +30,5 @@ void execute_player_take_command(server_t PTR server, uint16_t player_idx,
     }
     add_buffer_to_queue(&player->queue, &server->generated_buffers
         .buffers[PRE_KO_RESPONSE]);
+    server->map.has_been_modified = true;
 }

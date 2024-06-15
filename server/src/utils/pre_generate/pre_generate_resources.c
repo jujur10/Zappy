@@ -16,7 +16,7 @@ static void copy_resources_counter_into_buffer(
         &pre_generated_buffers->buffers[PRE_GENERATED_RESOURCE_COUNTER],
         sizeof(*total_required_resources) + 1,
         (const char *)total_required_resources,
-        sizeof(*total_required_resources) + 1
+        sizeof(*total_required_resources)
     );
 }
 

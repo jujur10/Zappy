@@ -76,6 +76,7 @@ status_t pre_generate_buffers(server_t PTR server)
     pre_generate_resources_counter(server->args, &server->generated_buffers);
     set_tna_response(server);
     set_mct_buffer(server);
+    pre_generate_look_indexes(&server->generated_buffers);
     server->generated_buffers.nb_of_buffer = PRE_GENERATED_ARR_LEN;
     return SUCCESS;
 }

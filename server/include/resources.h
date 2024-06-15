@@ -137,3 +137,18 @@ typedef enum {
 /// @return The resource index representing the string or R_STRUCT_SIZE on
 /// failure.
 resources_index_t get_resource_index_from_str(const char *string);
+
+/// @brief Calculate the number of required tiles for a depth.
+/// Sequence un+1 : n (n + 1) = n + 2
+/// Sequence un : n (n) = (n * 2) + 1
+///
+/// @param depth The depth.
+/// @return The number of required tiles for the depth.
+uint32_t get_nb_of_tiles_for_a_depth(uint32_t depth);
+
+/// @brief Calculate the total number of tiles required for a level.
+/// ((U0 + Un) * (n + 1)) / 2
+///
+/// @param level The actual level.
+/// @return The total number of tiles.
+uint32_t get_total_nb_of_tiles_required(uint8_t level);
