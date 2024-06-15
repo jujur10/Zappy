@@ -1,21 +1,19 @@
-#include <flecs.h>
-
-#include <Camera3D.hpp>
-#include <Window.hpp>
 #include <cstring>
-#include <gui_commands.hpp>
-#include <networking.hpp>
 #include <thread>
 
+#include "Camera3D.hpp"
+#include "Window.hpp"
+#include "flecs.h"
+#include "gui_to_server_cmd_structs.hpp"
 #include "map.hpp"
 #include "my_exit.hpp"
 #include "my_write.hpp"
-#include "server_commands.hpp"
+#include "networking.hpp"
+#include "server_to_gui_cmd_structs.hpp"
+#include "server_to_gui_cmd_value.hpp"
 #include "sockets.hpp"
 #include "string_utils.hpp"
 #include "systems.hpp"
-#include "to_gui_commands.hpp"
-#include "to_server_command.hpp"
 
 namespace zappy_gui
 {
@@ -26,7 +24,7 @@ namespace zappy_gui
 constexpr const char *const help = "USAGE: ./zappy_gui -p port -h machine\n";
 constexpr int32_t screenWidth = 1'280;
 constexpr int32_t screenHeight = 720;
-constexpr uint32_t serverToGuiQueueCapacity = 4096; // 4096 is the minimum size for the queues
+constexpr uint32_t serverToGuiQueueCapacity = 4096;  // 4096 is the minimum size for the queues
 constexpr uint32_t GuiToServerQueueCapacity = 4096;
 
 namespace map
@@ -74,11 +72,9 @@ void Handshake(const Socket &serverSocket)
     };
 
     // Lambda to read a line from the server and check for errors
-    auto readLineAndCheck =
-        [&serverSocket, &responseBuffer, &errorMsg, &exitWithError]
+    auto readLineAndCheck = [&serverSocket, &responseBuffer, &errorMsg, &exitWithError]
     {
-        std::string line =
-            serverSocket.ReadLineTimeout(responseBuffer, 1'000000000, errorMsg);
+        std::string line = serverSocket.ReadLineTimeout(responseBuffer, 1'000000000, errorMsg);
         if (line.empty())
         {
             exitWithError(errorMsg);
@@ -116,10 +112,8 @@ void Handshake(const Socket &serverSocket)
 
         int32_t mapWidth = 0;
         int32_t mapHeight = 0;
-        if (!string_utils::convertFromString(
-                static_cast<std::string_view>(args).substr(0, mapWidthIdx), mapWidth) ||
-            !string_utils::convertFromString(
-                static_cast<std::string_view>(args).substr(mapWidthIdx + 1), mapHeight))
+        if (!string_utils::convertFromString(static_cast<std::string_view>(args).substr(0, mapWidthIdx), mapWidth) ||
+            !string_utils::convertFromString(static_cast<std::string_view>(args).substr(mapWidthIdx + 1), mapHeight))
         {
             exitWithError("Failed to convert map dimensions from string");
         }
@@ -152,12 +146,8 @@ void Handshake(const Socket &serverSocket)
 
     int32_t mapWidth = 0;
     int32_t mapHeight = 0;
-    if (!string_utils::convertFromString(
-            static_cast<std::string_view>(responseLine).substr(0, mapWidthIdx),
-            mapWidth) ||
-        !string_utils::convertFromString(
-            static_cast<std::string_view>(responseLine).substr(mapWidthIdx + 1),
-            mapHeight))
+    if (!string_utils::convertFromString(static_cast<std::string_view>(responseLine).substr(0, mapWidthIdx), mapWidth) ||
+        !string_utils::convertFromString(static_cast<std::string_view>(responseLine).substr(mapWidthIdx + 1), mapHeight))
     {
         exitWithError("Failed to convert map dimensions from string");
     }
@@ -194,7 +184,7 @@ int32_t main(const int32_t argc, char *argv[])
     Handshake(serverSocket);
 
     flecs::world ecs;
-    ecs.set_entity_range(4'269'420, 0); // Allow flecs to only genereate entity ids starting from 4'269'420
+    ecs.set_entity_range(4'269'420, 0);  // Allow flecs to only genereate entity ids starting from 4'269'420
 
     ecs.import <flecs::monitor>();
     ecs.import <flecs::metrics>();
@@ -203,16 +193,10 @@ int32_t main(const int32_t argc, char *argv[])
     ecs.set<flecs::Rest>({});
 
     ::SetConfigFlags(FLAG_MSAA_4X_HINT);
-    raylib::Window window(zappy_gui::screenWidth,
-                          zappy_gui::screenHeight,
-                          "raylib-cpp - basic window");
+    raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
     window.SetTargetFPS(60);
 
-    raylib::Camera3D camera({10.0f, 10.0f, 10.0f},
-                            {0.0f, 0.0f, 0.0f},
-                            {0.0f, 1.0f, 0.0f},
-                            45.f,
-                            CAMERA_PERSPECTIVE);
+    raylib::Camera3D camera({10.0f, 10.0f, 10.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, 45.f, CAMERA_PERSPECTIVE);
     ecs.set<raylib::Camera3D>(camera);
 
     auto grassMod = raylib::Model("gui/resources/assets/grass2.glb");
@@ -231,8 +215,7 @@ int32_t main(const int32_t argc, char *argv[])
     //--------------------------------------------------------------------------------------
     // Main game loop
 
-    while (!window.ShouldClose() &&
-           ecs.progress())  // Detect window close button or ESC key
+    while (!window.ShouldClose() && ecs.progress())  // Detect window close button or ESC key
     {
     }
 
@@ -243,5 +226,5 @@ int32_t main(const int32_t argc, char *argv[])
     ::UnloadShader(tileModels->grass->GetMaterials()[0].shader);
 
     const auto *ressourceModels = ecs.get_mut<zappy_gui::map::resourceModels>();
-        ::UnloadShader(ressourceModels->crystal->GetMaterials()[0].shader);
+    ::UnloadShader(ressourceModels->crystal->GetMaterials()[0].shader);
 }

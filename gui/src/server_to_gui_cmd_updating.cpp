@@ -2,16 +2,16 @@
 // Created by quentinf on 14/06/24.
 //
 
-#include "gui_command_update_handling.hpp"
+#include "server_to_gui_cmd_updating.hpp"
 
 #include "map.hpp"
 #include "map_utils.hpp"
 
 namespace zappy_gui::net
 {
-void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand &updateTile)
+void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand *const updateTile)
 {
-    const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(updateTile.x, updateTile.y));
+    const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(updateTile->x, updateTile->y));
     const auto *const currentResourceIds = tile.get<map::resourceIds>();
     if (nullptr == currentResourceIds)
     {
@@ -23,7 +23,7 @@ void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand 
     {
         auto resourceEntity = world.entity(currentResourceIds->array[i]);
         auto &currentResourceVal = resourceEntity.ensure<uint16_t>();
-        const uint16_t newResourceVal = updateTile.resources[i];
+        const uint16_t newResourceVal = updateTile->resources[i];
 
         if (currentResourceVal == newResourceVal)
         {

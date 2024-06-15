@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <flecs.h>
+#include "flecs.h"
 
 namespace zappy_gui::net
 {

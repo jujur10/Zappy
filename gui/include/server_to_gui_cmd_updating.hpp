@@ -3,9 +3,8 @@
 //
 
 #pragma once
-#include <flecs.h>
-
-#include "to_gui_commands.hpp"
+#include "flecs.h"
+#include "server_to_gui_cmd_structs.hpp"
 
 namespace zappy_gui::net
 {
@@ -15,5 +14,5 @@ namespace zappy_gui::net
  * @param world The ecs world
  * @param updateTile The received UpdateTileCommand command
  */
-void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand &updateTile);
-}
+void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand *updateTile);
+}  // namespace zappy_gui::net

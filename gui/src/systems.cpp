@@ -9,12 +9,9 @@
 #include <Matrix.hpp>
 #include <Camera3D.hpp>  // Must be included after Matrix.hpp, if not project will not compile
 
-
-#include "gui_command_parsing.hpp"
-#include "gui_commands.hpp"
 #include "map.hpp"
 #include "raylib_utils.hpp"
-#include "to_server_command.hpp"
+#include "server_to_gui_cmd_handling.hpp"
 
 namespace zappy_gui::systems
 {

@@ -3,7 +3,7 @@
 //
 
 #include "string_utils.hpp"
-#include "to_gui_commands.hpp"
+#include "server_to_gui_cmd_structs.hpp"
 
 namespace zappy_gui::net
 {

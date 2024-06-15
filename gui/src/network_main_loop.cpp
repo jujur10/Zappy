@@ -3,12 +3,12 @@
 //
 
 #include <cstring>
-#include <my_write.hpp>
 
+#include "my_write.hpp"
 #include "networking.hpp"
-#include "server_commands.hpp"
-#include "to_gui_commands.hpp"
-#include "to_server_command.hpp"
+#include "server_to_gui_cmd_structs.hpp"
+#include "server_to_gui_cmd_value.hpp"
+#include "gui_to_server_cmd_structs.hpp"
 
 namespace zappy_gui::net
 {
@@ -23,15 +23,13 @@ void HandleGuiCommand(const Socket& serverSocket)
 
 void HandleServerCommand(const std::string& line)
 {
-    const uint32_t command =
-        *std::bit_cast<const uint32_t*>(line.c_str()) & 0x00'FF'FF'FFu;
+    const uint32_t command = *std::bit_cast<const uint32_t*>(line.c_str()) & 0x00'FF'FF'FFu;
 
     switch (static_cast<ServerCommands>(command))
     {
         case ServerCommands::MAP_TILE:
         {
-            ParseTileUpdateCommand(
-                static_cast<std::string_view>(line).data() + 4);
+            ParseTileUpdateCommand(static_cast<std::string_view>(line).data() + 4);
         }
         default:
             return;
