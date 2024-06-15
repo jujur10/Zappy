@@ -10,6 +10,11 @@
 
 namespace zappy_gui::net
 {
-void NetworkTreadLoop(const std::stop_token& stoken,
-                      const Socket& serverSocket);
-}
+/**
+ * @brief Network thread main loop
+ *
+ * @param stoken Thread stop token
+ * @param serverSocket Server socket
+ */
+void NetworkTreadLoop(const std::stop_token& stoken, const Socket& serverSocket);
+}  // namespace zappy_gui::net

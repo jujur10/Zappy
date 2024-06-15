@@ -17,7 +17,7 @@
 //        render glyphs to one-channel bitmaps with antialiasing (box filter)
 //        render glyphs to one-channel SDF bitmaps (signed-distance field/function)
 //
-//   Todo:
+//   :
 //        non-MS cmaps
 //        crashproof on bad data
 //        hinting? (no longer patented)
@@ -1462,7 +1462,7 @@ static int stbtt_InitFont_internal(stbtt_fontinfo *info, unsigned char *data, in
    info->svg = -1;
 
    // find a cmap encoding table we understand *now* to avoid searching
-   // later. (todo: could make this installable)
+   // later. (: could make this installable)
    // the same regardless of glyph.
    numTables = ttUSHORT(data + cmap + 2);
    info->index_map = 0;

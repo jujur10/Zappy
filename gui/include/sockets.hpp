@@ -1,11 +1,12 @@
 #pragma once
 
-#include <arpa/inet.h>
 #include <sys/socket.h>
-
+#include <netinet/in.h>
+#include <sys/types.h>
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <exception>
 
 namespace zappy_gui
 {
@@ -94,8 +95,7 @@ class Socket
      * @param clientAddressLength The length of the client address.
      * @return The file descriptor of the client socket.
      */
-    int32_t Accept(sockaddr_in *clientAddress,
-                   socklen_t *clientAddressLength) const;
+    int32_t Accept(sockaddr_in *clientAddress, socklen_t *clientAddressLength) const;
 
     /**
      * Connects the socket to a server.
@@ -133,7 +133,8 @@ class Socket
     ssize_t ReadWithTimeout(char *buffer, size_t length, int timeoutMs) const;
 
     /**
-     * Reads data from the socket until a specific delimiter is encountered.
+     * Reads data from the socket until a specific delimiter is encountered. You
+     * are responsible for clearing the buffer after processing the line.
      * @param buffer The buffer to store the read data.
      * @param delimiter The delimiter character to stop reading at.
      * @return The number of bytes read, or -1 if an error occurs.
@@ -142,16 +143,25 @@ class Socket
 
     /**
      * Reads data from the socket until a specific delimiter is encountered or a
-     * timeout occurs.
+     * timeout occurs. You are responsible for clearing the buffer after
+     * processing the line.
      * @param buffer The buffer to store the read data.
      * @param delimiter The delimiter character to stop reading at.
      * @param timeoutMs The timeout value in milliseconds.
      * @return The number of bytes read, or -1 if an error occurs or timeout is
      * reached.
      */
-    ssize_t ReadUntilTimeout(std::vector<char> &buffer,
-                             char delimiter,
-                             int timeoutMs) const;
+    ssize_t ReadUntilTimeout(std::vector<char> &buffer, char delimiter, int timeoutMs) const;
+
+    /**
+     * Reads data from the socket until a specific delimiter is encountered.
+     * Using non blocking recv.
+     * You are responsible for clearing the buffer after processing the line.
+     * @param buffer The buffer to store the read data.
+     * @param delimiter The delimiter character to stop reading at.
+     * @return The number of bytes read, or -1 if an error occurs.
+     */
+    ssize_t ReadUntilFast(std::vector<char> &buffer, char delimiter) const;
 
     /**
      * @brief Reads a line from the socket until a newline character ('\n') is
@@ -171,28 +181,41 @@ class Socket
      * @return The extracted line from the buffer, excluding the newline
      * character. If an error occurs, an empty string is returned.
      */
-    std::string ReadLineTimeout(std::vector<char> &buffer,
-                         int timeout,
-                         std::string &errorMsg) const;
+    std::string ReadLineTimeout(std::vector<char> &buffer, int timeout, std::string &errorMsg) const;
 
-   /**
-       * @brief Reads a line from the socket until a newline character ('\n') is
-       * encountered or a timeout occurs.
-       *
-       * This method reads data from the socket and appends it to the provided
-       * buffer until a newline character ('\n') is found or the specified timeout
-       * is reached. If the buffer already contains a complete line, it extracts
-       * and returns that line without reading from the socket.
-       *
-       * @param buffer A reference to the buffer where the data read from the
-       * socket will be stored.
-       * @param errorMsg A reference to a string where an error message will be
-       * stored if the read operation fails.
-       * @return The extracted line from the buffer, excluding the newline
-       * character. If an error occurs, an empty string is returned.
-       */
-   std::string ReadLine(std::vector<char> &buffer,
-                        std::string &errorMsg) const;
+    /**
+     * @brief Reads a line from the socket until a newline character ('\n') is
+     * encountered or a timeout occurs.
+     *
+     * This method reads data from the socket and appends it to the provided
+     * buffer until a newline character ('\n') is found or the specified timeout
+     * is reached. If the buffer already contains a complete line, it extracts
+     * and returns that line without reading from the socket.
+     *
+     * @param buffer A reference to the buffer where the data read from the
+     * socket will be stored.
+     * @param errorMsg A reference to a string where an error message will be
+     * stored if the read operation fails.
+     * @return The extracted line from the buffer, excluding the newline
+     * character. If an error occurs, an empty string is returned.
+     */
+    std::string ReadLine(std::vector<char> &buffer, std::string &errorMsg) const;
+
+    /**
+     * @brief Reads a line using recv from the socket until a newline character
+     * ('\n') is encountered or no more data is available.
+     *
+     * This method reads data from the socket and appends it to the provided
+     * buffer until a newline character ('\n') is found or the specified timeout
+     * is reached. If the buffer already contains a complete line, it extracts
+     * and returns that line without reading from the socket.
+     *
+     * @param buffer A reference to the buffer where the data read from the
+     * socket will be stored.
+     * @return The extracted line from the buffer, excluding the newline
+     * character. If an error occurs, an empty string is returned.
+     */
+    std::string ReadLineFast(std::vector<char> &buffer) const;
 
     /**
      * Sets a socket option.
@@ -202,10 +225,7 @@ class Socket
      * @param optlen The length of the option value.
      * @throw SocketException If setting the socket option fails.
      */
-    void SetSocketOption(int level,
-                         int optname,
-                         const void *optval,
-                         socklen_t optlen) const;
+    void SetSocketOption(int level, int optname, const void *optval, socklen_t optlen) const;
 
     /**
      * Gets a socket option.
@@ -215,10 +235,7 @@ class Socket
      * @param optlen The length of the option value buffer.
      * @throw SocketException If getting the socket option fails.
      */
-    void GetSocketOption(int level,
-                         int optname,
-                         void *optval,
-                         socklen_t *optlen) const;
+    void GetSocketOption(int level, int optname, void *optval, socklen_t *optlen) const;
 
    private:
     int32_t _sockFd;

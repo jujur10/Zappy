@@ -5,6 +5,7 @@
 #pragma once
 
 #include <charconv>
+#include <string_view>
 
 namespace zappy_gui::string_utils
 {
@@ -19,9 +20,10 @@ namespace zappy_gui::string_utils
  * @param value A reference to the variable where the converted value will be stored.
  * @return `true` if the conversion is successful, `false` otherwise.
  */
-template <typename T> bool convertFromString(const std::string_view &str, T &value)
+template <typename T>
+bool convertFromString(const std::string_view &str, T &value)
 {
     auto result = std::from_chars(str.data(), str.data() + str.size(), value);
     return result.ec == std::errc();
 }
-} // namespace zappy_gui::string_utils
+}  // namespace zappy_gui::string_utils

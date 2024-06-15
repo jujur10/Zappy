@@ -10,7 +10,6 @@ if (NOT DEFINED BUILD_PACKAGE)
 endif ()
 
 
-
 #######################
 ###### Add Flecs ######
 #######################
@@ -21,7 +20,6 @@ target_include_directories(flecs INTERFACE
     resources/flecs
 )
 set_target_properties(flecs PROPERTIES C_STANDARD 99)
-
 
 
 #######################
@@ -39,7 +37,6 @@ add_subdirectory(resources/raylib/ resources/raylib/src)
 add_subdirectory(resources/raylib_cpp/include)
 
 
-
 #######################
 ###### Add Queue ######
 #######################
@@ -52,14 +49,18 @@ target_include_directories(atomic_queue INTERFACE
 ###### Zappy GUI ######
 #######################
 add_executable(zappy_gui
-    src/sockets.cpp
-    src/main.cpp
     src/argv_parser.cpp
-    src/systems.cpp
+    src/main.cpp
     src/map.cpp
-    src/raylib_utils.cpp
+    src/map_utils.cpp
     src/network_main_loop.cpp
-    include/commands.hpp
+    src/raylib_utils.cpp
+    src/server_to_gui_cmd_dispatching.cpp
+    src/server_to_gui_cmd_parsing.cpp
+    src/server_to_gui_cmd_updating.cpp
+    src/sockets.cpp
+    src/systems.cpp
+    src/server_handshake.cpp
 )
 
 target_include_directories(zappy_gui PRIVATE
