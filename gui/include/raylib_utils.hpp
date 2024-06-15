@@ -5,10 +5,12 @@
 #pragma once
 #include <cstdint>
 
+struct Color; // Forward declaration to improve compile time and avoid circular dependency
+
 namespace raylib
 {
-class Matrix;  // Forward declaration to avoid circular dependency
-class Model;   // Forward declaration to avoid circular dependency
+class Matrix;  // Forward declaration to improve compile time and avoid circular dependency
+class Model;   // Forward declaration to improve compile time and avoid circular dependency
 }  // namespace raylib
 
 namespace zappy_gui::utils
@@ -26,6 +28,14 @@ void SetupModel(const raylib::Model *model, const char *vertShaderPath, const ch
 /// @param matrixArray Array of transform matrices for the models
 /// @param count Number of matrices in the array
 void DrawModelInstanced(const raylib::Model *model, const raylib::Matrix *matrixArray, int32_t count);
+
+/// @brief Draw the crystals with the given color
+///
+/// @param crystalModel Pointer to the model of the crystals
+/// @param matrixArray Array of transform matrices for the crystals
+/// @param count Number of matrices in the array
+/// @param color Color of the crystals
+void DrawCrystals(const raylib::Model *crystalModel, const raylib::Matrix *matrixArray, int32_t count, Color color);
 
 /// @brief Unload the shaders of the model
 ///

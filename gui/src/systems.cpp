@@ -50,7 +50,7 @@ static void registerOnStartSystems(const flecs::world &ecs)
                 utils::SetupModel(models->grass, "gui/resources/shaders/tile_instancing.vs", nullptr);
             });
 
-    ecs.system<map::resourceModels>("loadRessourceInstancingShader")
+    ecs.system<map::resourceModels>("loadResourceInstancingShader")
         .kind(flecs::OnStart)
         .iter(
             []([[maybe_unused]] const flecs::iter &it, const map::resourceModels *const models)
@@ -115,13 +115,13 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all the grass tiles and draw them
     ecs.system<raylib::Matrix>("drawTiles")
         .kind(flecs::OnUpdate)
-        .without(map::ressourceType::food)
-        .without(map::ressourceType::linemate)
-        .without(map::ressourceType::deraumere)
-        .without(map::ressourceType::sibur)
-        .without(map::ressourceType::mendiane)
-        .without(map::ressourceType::phiras)
-        .without(map::ressourceType::thystame)
+        .without(map::resourceType::food)
+        .without(map::resourceType::linemate)
+        .without(map::resourceType::deraumere)
+        .without(map::resourceType::sibur)
+        .without(map::resourceType::mendiane)
+        .without(map::resourceType::phiras)
+        .without(map::resourceType::thystame)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const tilesPosition)
             {
@@ -131,7 +131,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all food and draw it
     ecs.system<raylib::Matrix>("drawFood")
         .kind(flecs::OnUpdate)
-        .with(map::ressourceType::food)
+        .with(map::resourceType::food)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const foodPosition)
             {
@@ -141,121 +141,91 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
     /// Query all linemate and draw it
     ecs.system<raylib::Matrix>("drawLinemate")
         .kind(flecs::OnUpdate)
-        .with(map::ressourceType::linemate)
+        .with(map::resourceType::linemate)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const linematePosition)
             {
-                auto model = it.world().get<map::resourceModels>()->crystal;
-                auto originalColor = model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color; // TODO: find better way to set color
-                const auto tint = GRAY;
-                Color colorTint = WHITE;
-                colorTint.r = (unsigned char)((((float)originalColor.r / 255.0f) * ((float)tint.r / 255.0f)) * 255.0f);
-                colorTint.g = (unsigned char)((((float)originalColor.g / 255.0f) * ((float)tint.g / 255.0f)) * 255.0f);
-                colorTint.b = (unsigned char)((((float)originalColor.b / 255.0f) * ((float)tint.b / 255.0f)) * 255.0f);
-                colorTint.a = (unsigned char)((((float)originalColor.a / 255.0f) * ((float)tint.a / 255.0f)) * 255.0f);
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = colorTint;
-                utils::DrawModelInstanced(it.world().get<map::resourceModels>()->crystal, linematePosition, static_cast<int32_t>(it.count()));
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = originalColor;
+                utils::DrawCrystals(
+                    it.world().get<map::resourceModels>()->crystal,
+                    linematePosition,
+                    static_cast<int32_t>(it.count()),
+                    map::resourceColors[static_cast<int32_t>(map::resourceType::linemate) - 1]
+                );
             });
 
     /// Query all deraumere and draw it
     ecs.system<raylib::Matrix>("drawDeraumere")
         .kind(flecs::OnUpdate)
-        .with(map::ressourceType::deraumere)
+        .with(map::resourceType::deraumere)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const deraumerePosition)
             {
-                auto model = it.world().get<map::resourceModels>()->crystal;
-                auto originalColor = model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color;
-                const auto tint = GREEN;
-                Color colorTint = WHITE;
-                colorTint.r = (unsigned char)((((float)originalColor.r / 255.0f) * ((float)tint.r / 255.0f)) * 255.0f);
-                colorTint.g = (unsigned char)((((float)originalColor.g / 255.0f) * ((float)tint.g / 255.0f)) * 255.0f);
-                colorTint.b = (unsigned char)((((float)originalColor.b / 255.0f) * ((float)tint.b / 255.0f)) * 255.0f);
-                colorTint.a = (unsigned char)((((float)originalColor.a / 255.0f) * ((float)tint.a / 255.0f)) * 255.0f);
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = colorTint;
-                utils::DrawModelInstanced(it.world().get<map::resourceModels>()->crystal, deraumerePosition, static_cast<int32_t>(it.count()));
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = originalColor;
+                utils::DrawCrystals(
+                    it.world().get<map::resourceModels>()->crystal,
+                    deraumerePosition,
+                    static_cast<int32_t>(it.count()),
+                    map::resourceColors[static_cast<int32_t>(map::resourceType::deraumere) - 1]
+                );
             });
 
     /// Query all sibur and draw it
     ecs.system<raylib::Matrix>("drawSibur")
         .kind(flecs::OnUpdate)
-        .with(map::ressourceType::sibur)
+        .with(map::resourceType::sibur)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const siburPosition)
             {
-                auto model = it.world().get<map::resourceModels>()->crystal;
-                auto originalColor = model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color;
-                const auto tint = SKYBLUE;
-                Color colorTint = WHITE;
-                colorTint.r = (unsigned char)((((float)originalColor.r / 255.0f) * ((float)tint.r / 255.0f)) * 255.0f);
-                colorTint.g = (unsigned char)((((float)originalColor.g / 255.0f) * ((float)tint.g / 255.0f)) * 255.0f);
-                colorTint.b = (unsigned char)((((float)originalColor.b / 255.0f) * ((float)tint.b / 255.0f)) * 255.0f);
-                colorTint.a = (unsigned char)((((float)originalColor.a / 255.0f) * ((float)tint.a / 255.0f)) * 255.0f);
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = colorTint;
-                utils::DrawModelInstanced(it.world().get<map::resourceModels>()->crystal, siburPosition, static_cast<int32_t>(it.count()));
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = originalColor;
+                utils::DrawCrystals(
+                    it.world().get<map::resourceModels>()->crystal,
+                    siburPosition,
+                    static_cast<int32_t>(it.count()),
+                    map::resourceColors[static_cast<int32_t>(map::resourceType::sibur) - 1]
+                );
             });
 
     /// Query all mendiane and draw it
     ecs.system<raylib::Matrix>("drawMendiane")
         .kind(flecs::OnUpdate)
-        .with(map::ressourceType::mendiane)
+        .with(map::resourceType::mendiane)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const mendianePosition)
             {
-                auto model = it.world().get<map::resourceModels>()->crystal;
-                auto originalColor = model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color;
-                const auto tint = DARKPURPLE;
-                Color colorTint = WHITE;
-                colorTint.r = (unsigned char)((((float)originalColor.r / 255.0f) * ((float)tint.r / 255.0f)) * 255.0f);
-                colorTint.g = (unsigned char)((((float)originalColor.g / 255.0f) * ((float)tint.g / 255.0f)) * 255.0f);
-                colorTint.b = (unsigned char)((((float)originalColor.b / 255.0f) * ((float)tint.b / 255.0f)) * 255.0f);
-                colorTint.a = (unsigned char)((((float)originalColor.a / 255.0f) * ((float)tint.a / 255.0f)) * 255.0f);
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = colorTint;
-                utils::DrawModelInstanced(it.world().get<map::resourceModels>()->crystal, mendianePosition, static_cast<int32_t>(it.count()));
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = originalColor;
+                utils::DrawCrystals(
+                    it.world().get<map::resourceModels>()->crystal,
+                    mendianePosition,
+                    static_cast<int32_t>(it.count()),
+                    map::resourceColors[static_cast<int32_t>(map::resourceType::mendiane) - 1]
+                );
             });
 
     /// Query all phiras and draw it
     ecs.system<raylib::Matrix>("drawPhiras")
         .kind(flecs::OnUpdate)
-        .with(map::ressourceType::phiras)
+        .with(map::resourceType::phiras)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const phirasPosition)
             {
-                auto model = it.world().get<map::resourceModels>()->crystal;
-                auto originalColor = model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color;
-                const auto tint = MAROON;
-                Color colorTint = WHITE;
-                colorTint.r = (unsigned char)((((float)originalColor.r / 255.0f) * ((float)tint.r / 255.0f)) * 255.0f);
-                colorTint.g = (unsigned char)((((float)originalColor.g / 255.0f) * ((float)tint.g / 255.0f)) * 255.0f);
-                colorTint.b = (unsigned char)((((float)originalColor.b / 255.0f) * ((float)tint.b / 255.0f)) * 255.0f);
-                colorTint.a = (unsigned char)((((float)originalColor.a / 255.0f) * ((float)tint.a / 255.0f)) * 255.0f);
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = colorTint;
-                utils::DrawModelInstanced(it.world().get<map::resourceModels>()->crystal, phirasPosition, static_cast<int32_t>(it.count()));
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = originalColor;
+                utils::DrawCrystals(
+                    it.world().get<map::resourceModels>()->crystal,
+                    phirasPosition,
+                    static_cast<int32_t>(it.count()),
+                    map::resourceColors[static_cast<int32_t>(map::resourceType::phiras) - 1]
+                );
             });
 
     /// Query all thystame and draw it
     ecs.system<raylib::Matrix>("drawThystame")
         .kind(flecs::OnUpdate)
-        .with(map::ressourceType::thystame)
+        .with(map::resourceType::thystame)
         .iter(
-            [](const flecs::iter &it, const raylib::Matrix *const ThystamePosition)
+            [](const flecs::iter &it, const raylib::Matrix *const thystamePosition)
             {
-                auto model = it.world().get<map::resourceModels>()->crystal;
-                auto originalColor = model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color;
-                const auto tint = YELLOW;
-                Color colorTint = WHITE;
-                colorTint.r = (unsigned char)((((float)originalColor.r / 255.0f) * ((float)tint.r / 255.0f)) * 255.0f);
-                colorTint.g = (unsigned char)((((float)originalColor.g / 255.0f) * ((float)tint.g / 255.0f)) * 255.0f);
-                colorTint.b = (unsigned char)((((float)originalColor.b / 255.0f) * ((float)tint.b / 255.0f)) * 255.0f);
-                colorTint.a = (unsigned char)((((float)originalColor.a / 255.0f) * ((float)tint.a / 255.0f)) * 255.0f);
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = colorTint;
-                utils::DrawModelInstanced(it.world().get<map::resourceModels>()->crystal, ThystamePosition, static_cast<int32_t>(it.count()));
-                model->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = originalColor;
+                utils::DrawCrystals(
+                    it.world().get<map::resourceModels>()->crystal,
+                    thystamePosition,
+                    static_cast<int32_t>(it.count()),
+                    map::resourceColors[static_cast<int32_t>(map::resourceType::thystame) - 1]
+                );
             });
 }
 
@@ -276,8 +246,8 @@ static void registerPostUpdateSystems(const flecs::world &ecs)
                 ::EndDrawing();
             });
 
-    // TODO: Send a request to the server to update the map ressources if map has not be updated for a while
-    // ecs.system("AskForMapRessourcesUpdate")
+    // TODO: Send a request to the server to update the map resources if map has not be updated for a while
+    // ecs.system("AskForMapResourcesUpdate")
     //     .kind(flecs::PostUpdate)
     //     .iter(
     //         []([[maybe_unused]] const flecs::iter &it)

@@ -19,7 +19,7 @@ void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand 
     }
 
     // Iterate over the all the tile resources and update their values
-    for (uint8_t i = 0; i < static_cast<uint8_t>(map::ressourceType::total); ++i)
+    for (uint8_t i = 0; i < static_cast<uint8_t>(map::resourceType::total); ++i)
     {
         auto resourceEntity = world.entity(currentResourceIds->array[i]);
         auto &currentResourceVal = resourceEntity.ensure<uint16_t>();

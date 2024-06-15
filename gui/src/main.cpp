@@ -117,7 +117,7 @@ int32_t main(const int32_t argc, char *argv[])
     const auto *tileModels = ecs.get_mut<zappy_gui::map::tileModels>();
     zappy_gui::utils::UnloadShaders(tileModels->grass);
 
-    const auto *ressourceModels = ecs.get_mut<zappy_gui::map::resourceModels>();
-    zappy_gui::utils::UnloadShaders(ressourceModels->food);
-    zappy_gui::utils::UnloadShaders(ressourceModels->crystal);
+    const auto *resourceModels = ecs.get_mut<zappy_gui::map::resourceModels>();
+    zappy_gui::utils::UnloadShaders(resourceModels->food);
+    zappy_gui::utils::UnloadShaders(resourceModels->crystal);
 }

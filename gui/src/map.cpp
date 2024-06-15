@@ -38,33 +38,33 @@ void GenerateMap(const flecs::iter &it)
 
             raylib::Matrix matrixArray[7];
             matrixArray[0].m13 = 0.3f;  // y position
-            matrixArray[0].m12 = ressourceOffset[0].x * 1.25;
-            matrixArray[0].m14 = ressourceOffset[0].y * 1.25;
+            matrixArray[0].m12 = resourceOffset[0].x * 1.25;
+            matrixArray[0].m14 = resourceOffset[0].y * 1.25;
             matrixArray[0] = matrixArray[0] + raylib::Matrix::Scale(0.2f, 0.2f, 0.2f);
             matrixArray[0].m12 += position.m12;
             matrixArray[0].m14 += position.m14;
             for (int32_t i = 1; i < 7; ++i)
             {
                 matrixArray[i].m13 = 0.17f;  // y position
-                matrixArray[i].m12 = ressourceOffset[i].x;
-                matrixArray[i].m14 = ressourceOffset[i].y;
+                matrixArray[i].m12 = resourceOffset[i].x;
+                matrixArray[i].m14 = resourceOffset[i].y;
                 matrixArray[i] = matrixArray[i] + raylib::Matrix::Scale(0.15f, 0.15f, 0.15f);
                 matrixArray[i].m12 += position.m12;
                 matrixArray[i].m14 += position.m14;
             }
 
             // Create the entities for the resources as child of the current tile.
-            // The resources are created with a transform matrix used to draw them, then the quantity as a uint16_t and the ressource tag.
-            resourceIds tileRessourceIds;
-            flecs::entity ressource;
+            // The resources are created with a transform matrix used to draw them, then the quantity as a uint16_t and the resource tag.
+            resourceIds tileResourceIds;
+            flecs::entity resource;
 
-            for (auto i = static_cast<int>(ressourceType::food); i < static_cast<int>(ressourceType::total); ++i)
+            for (auto i = static_cast<int>(resourceType::food); i < static_cast<int>(resourceType::total); ++i)
             {
-                ressource = it.world().entity().set<const raylib::Matrix>(matrixArray[i]).set<uint16_t>(0).add(static_cast<ressourceType>(i)).disable();
-                tileRessourceIds.array[i] = ressource.id();
+                resource = it.world().entity().set<const raylib::Matrix>(matrixArray[i]).set<uint16_t>(0).add(static_cast<resourceType>(i)).disable();
+                tileResourceIds.array[i] = resource.id();
             }
 
-            tileEntity.set<resourceIds>(tileRessourceIds);
+            tileEntity.set<resourceIds>(tileResourceIds);
         }
     }
 }

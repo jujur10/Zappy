@@ -30,11 +30,22 @@ void DrawModelInstanced(const raylib::Model *const model, const raylib::Matrix *
     }
 }
 
+void DrawCrystals(const raylib::Model *const crystalModel, const raylib::Matrix *const matrixArray, const int32_t count, const Color color)
+{
+    const auto originalColor = crystalModel->materials[1].maps[MATERIAL_MAP_DIFFUSE].color;
+
+    crystalModel->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = color;
+
+    for (int32_t i = 0; i < crystalModel->meshCount; ++i)
+    {
+        ::DrawMeshInstanced(crystalModel->meshes[i], crystalModel->materials[crystalModel->meshMaterial[i]], matrixArray, count);
+    }
+
+    crystalModel->materials[1].maps[MATERIAL_MAP_DIFFUSE].color = originalColor;
+}
+
 void UnloadShaders(const raylib::Model *const model)
 {
-    for (int32_t i = 0; i < model->materialCount; ++i)
-    {
-        ::UnloadShader(model->materials[i].shader);
-    }
+    ::UnloadShader(model->materials[0].shader);
 }
 }  // namespace zappy_gui::utils
