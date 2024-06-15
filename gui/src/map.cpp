@@ -34,35 +34,37 @@ void GenerateMap(const flecs::iter &it)
                 tileHeight,
                 static_cast<float32>(y) * tileSize * verticalSpacing - static_cast<float32>(kMAP_HEIGHT) * tileSize * 0.375f32);
 
-            it.world().make_alive(y * kMAP_WIDTH + x + 1 + FLECS_HI_ID_RECORD_ID).set<raylib::Matrix>(position).scope([&]
+            auto tileEntity = it.world().make_alive(y * kMAP_WIDTH + x + 1 + FLECS_HI_ID_RECORD_ID).set<raylib::Matrix>(position);
+
+            raylib::Matrix matrixArray[7];
+            matrixArray[0].m13 = 0.3f;  // y position
+            matrixArray[0].m12 = ressourceOffset[0].x * 1.25;
+            matrixArray[0].m14 = ressourceOffset[0].y * 1.25;
+            matrixArray[0] = matrixArray[0] + raylib::Matrix::Scale(0.2f, 0.2f, 0.2f);
+            matrixArray[0].m12 += position.m12;
+            matrixArray[0].m14 += position.m14;
+            for (int32_t i = 1; i < 7; ++i)
             {
-                raylib::Matrix matrixArray[7];
-                for (int32_t i = 0; i < 7; ++i)
-                {
-                    matrixArray[i].m13 = 0.17f;  // y position
-                    matrixArray[i].m12 = ressourceOffset[i].x;
-                    matrixArray[i].m14 = ressourceOffset[i].y;
-                    matrixArray[i] = matrixArray[i] + raylib::Matrix::Scale(0.15f, 0.15f, 0.15f);
-                    matrixArray[i].m12 += position.m12;
-                    matrixArray[i].m14 += position.m14;
-                }
+                matrixArray[i].m13 = 0.17f;  // y position
+                matrixArray[i].m12 = ressourceOffset[i].x;
+                matrixArray[i].m14 = ressourceOffset[i].y;
+                matrixArray[i] = matrixArray[i] + raylib::Matrix::Scale(0.15f, 0.15f, 0.15f);
+                matrixArray[i].m12 += position.m12;
+                matrixArray[i].m14 += position.m14;
+            }
 
-                // Create the entities for the resources as child of the current tile.
-                // The resources are created with a transform matrix used to draw them, then the quantity as a uint16_t and the ressource tag.
-                it.world().entity().set<const raylib::Matrix>(matrixArray[0]).set<uint16_t>(0).add(ressourceType::food).disable();
+            // Create the entities for the resources as child of the current tile.
+            // The resources are created with a transform matrix used to draw them, then the quantity as a uint16_t and the ressource tag.
+            resourceIds tileRessourceIds;
+            flecs::entity ressource;
 
-                it.world().entity().set<const raylib::Matrix>(matrixArray[1]).set<uint16_t>(0).add(ressourceType::linemate).disable();
+            for (auto i = static_cast<int>(ressourceType::food); i < static_cast<int>(ressourceType::total); ++i)
+            {
+                ressource = it.world().entity().set<const raylib::Matrix>(matrixArray[i]).set<uint16_t>(0).add(static_cast<ressourceType>(i)).disable();
+                tileRessourceIds.array[i] = ressource.id();
+            }
 
-                it.world().entity().set<const raylib::Matrix>(matrixArray[2]).set<uint16_t>(0).add(ressourceType::deraumere).disable();
-
-                it.world().entity().set<const raylib::Matrix>(matrixArray[3]).set<uint16_t>(0).add(ressourceType::sibur).disable();
-
-                it.world().entity().set<const raylib::Matrix>(matrixArray[4]).set<uint16_t>(0).add(ressourceType::mendiane).disable();
-
-                it.world().entity().set<const raylib::Matrix>(matrixArray[5]).set<uint16_t>(0).add(ressourceType::phiras).disable();
-
-                it.world().entity().set<const raylib::Matrix>(matrixArray[6]).set<uint16_t>(0).add(ressourceType::thystame).disable();
-           });
+            tileEntity.set<resourceIds>(tileRessourceIds);
         }
     }
 }

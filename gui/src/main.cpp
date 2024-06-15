@@ -218,9 +218,10 @@ int32_t main(const int32_t argc, char *argv[])
     auto grassMod = raylib::Model("gui/resources/assets/grass2.glb");
     ecs.set<zappy_gui::map::tileModels>({&grassMod});
 
-    auto res1 = raylib::Model("gui/resources/assets/crystal1_optimized.glb");
+    auto food = raylib::Model("gui/resources/assets/food.glb");
+    auto crystal = raylib::Model("gui/resources/assets/crystal1_optimized.glb");
 
-    ecs.set<zappy_gui::map::ressourceModels>({&res1});
+    ecs.set<zappy_gui::map::resourceModels>({&food, &crystal});
 
     zappy_gui::systems::registerSystems(ecs);
 
@@ -237,9 +238,10 @@ int32_t main(const int32_t argc, char *argv[])
 
     networkThread.request_stop();
 
+    // TODO: unload all shaders, do a function ?
     const auto *tileModels = ecs.get_mut<zappy_gui::map::tileModels>();
-    ::UnloadShader(tileModels->grassModel->GetMaterials()[0].shader);
+    ::UnloadShader(tileModels->grass->GetMaterials()[0].shader);
 
-    const auto *ressourceModels = ecs.get_mut<zappy_gui::map::ressourceModels>();
+    const auto *ressourceModels = ecs.get_mut<zappy_gui::map::resourceModels>();
         ::UnloadShader(ressourceModels->crystal->GetMaterials()[0].shader);
 }

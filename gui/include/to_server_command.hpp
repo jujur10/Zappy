@@ -7,8 +7,9 @@
 
 namespace zappy_gui::net
 {
-// Command queue
+// Command queue gui -> server
 using GTSQueue = atomic_queue::AtomicQueueB2<char*>;
+/// @var Thread-safe queue to send commands from the GUI to the server
 extern GTSQueue GuiToServerQueue;
 
-}
+}  // namespace zappy_gui::net

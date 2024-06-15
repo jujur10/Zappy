@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <cstdint>
 #include <unistd.h>
+
+#include <cstdint>
 
 namespace zappy_gui
 {
@@ -15,7 +16,7 @@ namespace zappy_gui
  */
 class FileWriter
 {
-public:
+   public:
     /**
      * Constructs a FileWriter object with the specified file descriptor.
      * @param fd The file descriptor to write to.
@@ -43,7 +44,7 @@ public:
         ::write(fileDescriptor, buffer, size);
     }
 
-private:
+   private:
     uint16_t fileDescriptor; /**< The file descriptor to write to. */
 };
-} // namespace zappy_gui
+}  // namespace zappy_gui

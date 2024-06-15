@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <Matrix.hpp>
+#include <cstdint>
 
 namespace zappy_gui::utils
 {

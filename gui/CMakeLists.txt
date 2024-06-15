@@ -62,6 +62,7 @@ add_executable(zappy_gui
     src/sockets.cpp
     src/systems.cpp
     src/gui_command_parsing.cpp
+    src/gui_command_update_handling.cpp
 )
 
 target_include_directories(zappy_gui PRIVATE
