@@ -1,11 +1,12 @@
 #pragma once
 
-#include <arpa/inet.h>
 #include <sys/socket.h>
-
+#include <netinet/in.h>
+#include <sys/types.h>
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <exception>
 
 namespace zappy_gui
 {

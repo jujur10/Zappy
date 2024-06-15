@@ -17747,7 +17747,7 @@ MA_API ma_result ma_job_queue_next(ma_job_queue* pQueue, ma_job* pJob)
     #endif
     {
         /*
-        BUG: In lock-free mode, multiple threads can be in this section of code. The "head" variable in the loop below
+        bug: In lock-free mode, multiple threads can be in this section of code. The "head" variable in the loop below
         is stored. One thread can fall through to the freeing of this item while another is still using "head" for the
         retrieval of the "next" variable.
 

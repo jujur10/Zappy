@@ -2,12 +2,12 @@
 // Created by quentinf on 13/06/24.
 //
 
+#include <variant>
+
+#include "flecs.h"
 #include "server_to_gui_cmd_handling.hpp"
-
-#include <flecs.h>
-
-#include "server_to_gui_cmd_updating.hpp"
 #include "server_to_gui_cmd_structs.hpp"
+#include "server_to_gui_cmd_updating.hpp"
 
 namespace zappy_gui::net
 {

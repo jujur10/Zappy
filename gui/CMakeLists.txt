@@ -60,6 +60,7 @@ add_executable(zappy_gui
     src/server_to_gui_cmd_updating.cpp
     src/sockets.cpp
     src/systems.cpp
+    src/server_handshake.cpp
 )
 
 target_include_directories(zappy_gui PRIVATE

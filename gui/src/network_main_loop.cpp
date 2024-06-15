@@ -2,13 +2,20 @@
 // Created by quentinf on 10/06/24.
 //
 
+#include <cstdint>
 #include <cstring>
+#include <bit>
+#include <stop_token>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "my_write.hpp"
 #include "networking.hpp"
 #include "server_to_gui_cmd_structs.hpp"
 #include "server_to_gui_cmd_value.hpp"
 #include "gui_to_server_cmd_structs.hpp"
+#include "sockets.hpp"
 
 namespace zappy_gui::net
 {

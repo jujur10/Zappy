@@ -24,7 +24,7 @@
 #ifndef TINOBJ_LOADER_C_H_
 #define TINOBJ_LOADER_C_H_
 
-/* @todo { Remove stddef dependency. unsigned int? } ---> RAY: DONE. */
+/* @ { Remove stddef dependency. unsigned int? } ---> RAY: DONE. */
 //#include <stddef.h>
 
 typedef struct {
@@ -945,7 +945,7 @@ static int tinyobj_parse_and_index_mtl_file(tinyobj_material_t **materials_out,
       continue;
     }
 
-    /* @todo { unknown parameter } */
+    /*  { unknown parameter } */
   }
 
   fclose(fp);
@@ -991,7 +991,7 @@ typedef struct {
   float nx, ny, nz;
   float tx, ty;
 
-  /* @todo { Use dynamic array } */
+  /*  { Use dynamic array } */
   tinyobj_vertex_index_t f[TINYOBJ_MAX_FACES_PER_F_LINE];
   unsigned int num_f;
 
@@ -1162,7 +1162,7 @@ static int parseLine(Command *command, const char *p, unsigned int p_len,
 
   /* group name */
   if (token[0] == 'g' && IS_SPACE((token[1]))) {
-    /* @todo { multiple group name. } */
+    /*  { multiple group name. } */
     token += 2;
 
     command->group_name = p + (token - linebuf);
@@ -1176,7 +1176,7 @@ static int parseLine(Command *command, const char *p, unsigned int p_len,
 
   /* object name */
   if (token[0] == 'o' && IS_SPACE((token[1]))) {
-    /* @todo { multiple object name? } */
+    /*  { multiple object name? } */
     token += 2;
 
     command->object_name = p + (token - linebuf);
@@ -1364,7 +1364,7 @@ int tinyobj_parse_obj(tinyobj_attrib_t *attrib, tinyobj_shape_t **shapes,
       if (commands[i].type == COMMAND_EMPTY) {
         continue;
       } else if (commands[i].type == COMMAND_USEMTL) {
-        /* @todo
+        /*
            if (commands[t][i].material_name &&
            commands[t][i].material_name_len > 0) {
            std::string material_name(commands[t][i].material_name,

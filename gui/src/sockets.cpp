@@ -4,10 +4,15 @@
 
 #include "sockets.hpp"
 
-#include <sys/poll.h>
 #include <unistd.h>
-
+#include <arpa/inet.h>
+#include <cerrno>
+#include <poll.h>
 #include <algorithm>
+#include <bit>
+#include <functional>
+#include <ranges>
+#include <utility>
 
 namespace zappy_gui
 {

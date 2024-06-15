@@ -26,4 +26,9 @@ void SetupModel(const raylib::Model *model, const char *vertShaderPath, const ch
 /// @param matrixArray Array of transform matrices for the models
 /// @param count Number of matrices in the array
 void DrawModelInstanced(const raylib::Model *model, const raylib::Matrix *matrixArray, int32_t count);
+
+/// @brief Unload the shaders of the model
+///
+/// @param model Pointer to the model to unload the shaders from
+void UnloadShaders(const raylib::Model *model);
 }  // namespace zappy_gui::utils
