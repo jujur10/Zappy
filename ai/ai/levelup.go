@@ -100,6 +100,8 @@ func (game Game) startLevelUpHost() {
 		levelUpComplete(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
 		log.Println("Successfully leveled up as host, new level ", game.Level+1)
+		game.Level += 1
+		game.forkPlayer()
 	} else {
 		levelUpFailed(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
@@ -107,7 +109,7 @@ func (game Game) startLevelUpHost() {
 	}
 }
 
-// startLevelUpHost starts the level up leeching process
+// startLevelUpLeech starts the level up leeching process
 func (game Game) startLevelUpLeech() {
 	log.Println("Starting level up as leech, target level ", game.Level+1)
 	game.Socket.SendCommand(network.LevelUp, network.EmptyBody)
@@ -123,6 +125,8 @@ func (game Game) startLevelUpLeech() {
 		log.Println("Successfully leveled up as leech, new level ", game.Level+1)
 		levelUpComplete(game, game.Level+1)
 		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+		game.Level += 1
+		game.forkPlayer()
 	} else {
 		log.Println("Failed to level up as leech, target level ", game.Level+1)
 		levelUpFailed(game, game.Level+1)
@@ -198,4 +202,18 @@ func (game Game) levelUpLeechLoop() {
 	log.Println("Not enough food to standby and leech, leaving")
 	announceDepartureLevelUp(game, targetLevel)
 	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+}
+
+// forkPlayer if there are no slots left in the team, to ensure that the team can reach level 8 eventually
+func (game Game) forkPlayer() {
+	if game.Level != 2 {
+		return
+	}
+	game.Socket.SendCommand(network.GetUnusedSlots, network.EmptyBody)
+	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+	if game.SlotsLeft == 0 && game.FoodManager.FoodPriority < 8 {
+		log.Println("No slots left in team ", game.TeamName, ", forking player")
+		game.Socket.SendCommand(network.Fork, network.EmptyBody)
+		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+	}
 }
