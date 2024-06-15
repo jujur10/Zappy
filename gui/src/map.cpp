@@ -34,23 +34,23 @@ void GenerateMap(const flecs::iter &it)
                 tileHeight,
                 static_cast<float32>(y) * tileSize * verticalSpacing - static_cast<float32>(kMAP_HEIGHT) * tileSize * 0.375f32);
 
-            auto tileEntity = it.world().make_alive(y * kMAP_WIDTH + x + 1 + FLECS_HI_ID_RECORD_ID).set<raylib::Matrix>(position);
+            auto tileEntity = it.world().make_alive((y * kMAP_WIDTH) + x + 1 + FLECS_HI_ID_RECORD_ID).set<raylib::Matrix>(position);
 
-            raylib::Matrix matrixArray[7];
-            matrixArray[0].m13 = 0.3f;  // y position
-            matrixArray[0].m12 = resourceOffset[0].x * 1.25;
-            matrixArray[0].m14 = resourceOffset[0].y * 1.25;
-            matrixArray[0] = matrixArray[0] + raylib::Matrix::Scale(0.2f, 0.2f, 0.2f);
-            matrixArray[0].m12 += position.m12;
-            matrixArray[0].m14 += position.m14;
+            raylib::Matrix matrices[7];
+            matrices[0].m13 = 0.3f;  // y position
+            matrices[0].m12 = resourceOffset[0].x * 1.25f;
+            matrices[0].m14 = resourceOffset[0].y * 1.25f;
+            matrices[0] = matrices[0] + raylib::Matrix::Scale(0.2f, 0.2f, 0.2f);
+            matrices[0].m12 += position.m12;
+            matrices[0].m14 += position.m14;
             for (int32_t i = 1; i < 7; ++i)
             {
-                matrixArray[i].m13 = 0.17f;  // y position
-                matrixArray[i].m12 = resourceOffset[i].x;
-                matrixArray[i].m14 = resourceOffset[i].y;
-                matrixArray[i] = matrixArray[i] + raylib::Matrix::Scale(0.15f, 0.15f, 0.15f);
-                matrixArray[i].m12 += position.m12;
-                matrixArray[i].m14 += position.m14;
+                matrices[i].m13 = 0.17f;  // y position
+                matrices[i].m12 = resourceOffset[i].x;
+                matrices[i].m14 = resourceOffset[i].y;
+                matrices[i] = matrices[i] + raylib::Matrix::Scale(0.15f, 0.15f, 0.15f);
+                matrices[i].m12 += position.m12;
+                matrices[i].m14 += position.m14;
             }
 
             // Create the entities for the resources as child of the current tile.
@@ -60,7 +60,11 @@ void GenerateMap(const flecs::iter &it)
 
             for (auto i = static_cast<int>(resourceType::food); i < static_cast<int>(resourceType::total); ++i)
             {
-                resource = it.world().entity().set<const raylib::Matrix>(matrixArray[i]).set<uint16_t>(0).add(static_cast<resourceType>(i)).disable();
+                resource = it.world().entity()
+                    .set<const raylib::Matrix>(matrices[i])
+                    .set<uint16_t>(0)
+                    .add(static_cast<resourceType>(i))
+                    .disable();
                 tileResourceIds.array[i] = resource.id();
             }
 
