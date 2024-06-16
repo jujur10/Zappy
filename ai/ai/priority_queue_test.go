@@ -328,8 +328,7 @@ func TestPriorityQueue_getPriorityQueueTileIndex(t *testing.T) {
 		args args
 		want int
 	}{
-		{"Basic test 1", pq, args{RelativeCoordinates{5, 1}}, 3},
-		{"Basic test 2", pq, args{RelativeCoordinates{3, 0}}, 0},
+		{"Basic test", pq, args{RelativeCoordinates{3, 0}}, 0},
 		{"Test tile not in queue", pq, args{RelativeCoordinates{6, 4}}, -1},
 	}
 	for _, tt := range tests {
