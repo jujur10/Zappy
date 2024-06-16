@@ -152,7 +152,7 @@ func (game Game) collectTileResources(pqTileIndex int) {
 	for _, resource := range (*item).usefulObjects {
 		if game.isResourceRequired(resource) {
 			game.Socket.SendCommand(network.TakeObject, itemToString[resource])
-			status := awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+			status := game.awaitResponseToCommand()
 			if status {
 				game.resourceCollected(resource)
 			}

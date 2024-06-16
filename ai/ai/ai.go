@@ -1,9 +1,11 @@
 package ai
 
-import (
-	"log"
-)
+import "zappy_ai/network"
 
-func MainLoop() {
-	log.Println("Hello from AI")
+func (game Game) MainLoop() {
+	game.Socket.SendCommand(network.LookAround, network.EmptyBody)
+	_ = game.awaitResponseToCommand()
+	for game.FoodManager.FoodPriority > 0 && game.Level < 8 {
+
+	}
 }

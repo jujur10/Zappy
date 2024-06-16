@@ -211,7 +211,7 @@ func (game Game) computePath() (Path, error) {
 // movePlayerForward moves the player and updates its position, and updates the movement priority queue
 func (game Game) movePlayerForward() {
 	game.Socket.SendCommand(network.GoForward, network.EmptyBody)
-	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+	_ = game.awaitResponseToCommand()
 	game.Coordinates.CoordsFromOrigin =
 		updatePosition(game.Coordinates.CoordsFromOrigin, game.Coordinates.WorldSize, game.Coordinates.Direction)
 	game.updateMovementQueueOnMove()
@@ -220,14 +220,14 @@ func (game Game) movePlayerForward() {
 // turnLeft turns the player 90° left, and updates its direction
 func (game Game) turnLeft() {
 	game.Socket.SendCommand(network.RotateLeft, network.EmptyBody)
-	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+	_ = game.awaitResponseToCommand()
 	game.Coordinates.Direction += network.Left % 4 // (N + 3) % 4 = N - 1
 }
 
 // turnRight turns the player 90° right, and updates its direction
 func (game Game) turnRight() {
 	game.Socket.SendCommand(network.RotateRight, network.EmptyBody)
-	_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+	_ = game.awaitResponseToCommand()
 	game.Coordinates.Direction += network.Right % 4 // (N + 1) % 4
 }
 
@@ -308,7 +308,7 @@ func (game Game) followPath(path Path) {
 	for _, tile := range path.path {
 		game.moveToTile(tile)
 		game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
-		_ = awaitResponseToCommand(game.Socket.ResponseFeedbackChannel)
+		_ = game.awaitResponseToCommand()
 		game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
 		pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(tile)
 		if pqTileIndex != -1 { // Remove tile if it was in the queue

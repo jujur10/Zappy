@@ -87,12 +87,21 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 }
 
 // awaitResponseToCommand is used to wait until the server returns a response to the command
-func awaitResponseToCommand(feedbackChannel <-chan bool) bool {
+func (game Game) awaitResponseToCommand() bool {
+	responseValue := false
 	select {
-	case value, ok := <-feedbackChannel:
+	case value, ok := <-game.Socket.ResponseFeedbackChannel:
 		if ok {
-			return value
+			responseValue = value
 		}
 	}
-	return false
+	select {
+	case priority, ok := <-game.FoodManager.FoodChannel: // Check if there is an update of the food priority
+		if ok {
+			game.FoodManager.FoodPriority = priority
+			game.updatePrioritiesFromViewMap() // Recompute priorities
+		}
+	default:
+	}
+	return responseValue
 }
