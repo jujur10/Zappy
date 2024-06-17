@@ -38,6 +38,10 @@ void HandleServerCommand(const std::string& line)
         {
             ParseTileUpdateCommand(static_cast<std::string_view>(line).data() + 4);
         }
+        case ServerCommands::NEW_PLAYER:
+        {
+            ParseNewPlayerCommand(static_cast<std::string_view>(line).data() + 4);
+        }
         default:
             return;
     }

@@ -15,4 +15,12 @@ namespace zappy_gui::net
  * @param updateTile The received UpdateTileCommand command
  */
 void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand *updateTile);
+
+/**
+ * @brief Process the NewPlayerCommand command
+ * Create a new player entity and set its position, orientation, level and team name
+ * @param world The ecs world
+ * @param newPlayer The received NewPlayerCommand command
+ */
+void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *newPlayer);
 }  // namespace zappy_gui::net

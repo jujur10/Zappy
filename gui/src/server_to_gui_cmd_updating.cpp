@@ -6,6 +6,8 @@
 
 #include "map.hpp"
 #include "map_utils.hpp"
+#include "player.hpp"
+#include "raylib.h"
 
 namespace zappy_gui::net
 {
@@ -42,5 +44,20 @@ void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand 
             resourceEntity.enable();
         }
     }
+}
+
+void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *const newPlayer)
+{
+    flecs::entity player = world.entity(newPlayer->id + PLAYER_STARTING_IDX);
+    raylib::ModelAnimation * const idle = &world.get<player::playerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
+    const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(newPlayer->x, newPlayer->y));
+    const auto tileMatrix = *tile.get<raylib::Matrix>();
+
+    player.set<Vector3>({Vector3{tileMatrix.m12, 0.0f, tileMatrix.m14}});
+    player.set<player::Orientation>(static_cast<player::Orientation>(newPlayer->orientation));
+    player.set<uint8_t>(newPlayer->level);
+    player.set<player::playerAnimationData>({idle, 0});
+    player.set<std::unique_ptr<raylib::Model>>(std::make_unique<raylib::Model>("gui/resources/assets/cactoro.m3d"));
+    player.set<const char *>(newPlayer->teamName); // TODO: Don't forget this when implementing team
 }
 }  // namespace zappy_gui::net

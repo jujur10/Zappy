@@ -28,6 +28,13 @@ void ParseGuiCommands(const flecs::iter &it)
                     HandleUpdateTileCommand(world, updateTile);
                 }
             }
+            case 1:
+            {
+                if (auto const *const newPlayer = std::get_if<NewPlayerCommand>(&cmd))
+                {
+                    HandleNewPlayerCommand(world, newPlayer);
+                }
+            }
             // Other command cases to be added here
             default:;
         }

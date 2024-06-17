@@ -17,12 +17,26 @@ struct UpdateTileCommand
     uint16_t resources[7];
 };
 
+struct NewPlayerCommand
+{
+    uint16_t id;
+    uint16_t x;
+    uint16_t y;
+    uint8_t orientation;
+    uint8_t level;
+    const char *teamName;
+};
+
+struct DeadPlayerCommand
+{
+    uint16_t id;
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
 // DON'T CHANGE THE ORDER OF THE TYPES IN THE VARIANT OR YOU WILL BREAK THE PARSING CODE
-using Command = std::variant<UpdateTileCommand, std::monostate>;
-
+using Command = std::variant<UpdateTileCommand, NewPlayerCommand, DeadPlayerCommand>;
 
 
 // Command queue server -> gui
@@ -39,4 +53,8 @@ extern STGQueue ServerToGuiQueue;
 /// @param line The bct command received from the server
 void ParseTileUpdateCommand(const std::string_view& line);
 
+/// @brief Parse the pnw command received as text from the server.
+/// This function will parse the pnw command and push the corresponding NewPlayerCommand in the ServerToGuiQueue
+/// @param line The pnw command received from the server
+void ParseNewPlayerCommand(const std::string_view& line);
 }  // namespace zappy_gui::net
