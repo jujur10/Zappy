@@ -37,6 +37,7 @@ typedef enum {
     PRE_RIGHT_INDEXES,
     PRE_BOTTOM_INDEXES,
     PRE_LEFT_INDEXES,
+    PRE_LOOK_RESPONSE_BUFFER,
     PRE_GENERATED_ARR_LEN
 } generated_enum_t;
 

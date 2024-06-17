@@ -28,8 +28,10 @@ add_executable(zappy_server
     src/commands/player/player_command.c
     src/commands/player/player_command_parsing.c
     src/commands/player/player_connect_nbr_command.c
+    src/commands/player/player_direction_command.c
     src/commands/player/player_fork_command.c
     src/commands/player/player_forward_command.c
+    src/commands/player/player_frequency_command.c
     src/commands/player/player_inventory_command.c
     src/commands/player/player_look_command.c
     src/commands/player/player_none_command.c
@@ -115,6 +117,8 @@ if (DEFINED RUN_TESTS)
         src/commands/gui/gui_sgt_command.c
         src/commands/gui/gui_sst_command.c
         src/commands/player/player_command_parsing.c
+        src/commands/player/player_direction_command.c
+        src/commands/player/player_frequency_command.c
         src/commands/player/player_inventory_command.c
         src/commands/player/player_look_command.c
         src/commands/player/player_responses.c
@@ -138,6 +142,8 @@ if (DEFINED RUN_TESTS)
         src/utils/string/string.c
         tests/commands/gui/tests_gui_bct_command.c
         tests/commands/gui/tests_gui_msz_command.c
+        tests/commands/player/tests_player_direction_command.c
+        tests/commands/player/tests_player_frequency_command.c
         tests/commands/player/tests_player_inventory_command.c
         tests/commands/player/tests_player_look_command.c
         tests/tests_clock.c

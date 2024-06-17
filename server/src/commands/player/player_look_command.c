@@ -10,6 +10,21 @@
 #include "utils/arrays/arrays_virtual.h"
 #include "game_settings.h"
 
+/// @brief Array representing the resources strings in order to be able to
+// iterate over it.
+static const char *const resources_strings[] = {
+    FOOD_STR, LINEMATE_STR, DERAUMERE_STR, SIBUR_STR, MENDIANE_STR,
+    PHIRAS_STR, THYSTAME_STR, PLAYER_STR
+};
+
+/// @brief Array representing the resources strings lengths in order to be
+/// able to iterate over it.
+static const uint32_t resources_strings_lengths[] = {
+    sizeof(FOOD_STR) - 1, sizeof(LINEMATE_STR) - 1, sizeof(DERAUMERE_STR) - 1,
+    sizeof(SIBUR_STR) - 1, sizeof(MENDIANE_STR) - 1, sizeof(PHIRAS_STR) - 1,
+    sizeof(THYSTAME_STR) - 1, sizeof(PLAYER_STR) - 1
+};
+
 /// @brief Function used to obtain the sorted array of tile when the player
 /// is looking to the "top" direction.
 ///
@@ -181,12 +196,45 @@ void get_sorted_resources(const server_t PTR server,
     }
 }
 
+/// @brief Function which write the tile content into the buffer.
+///
+/// @param buffer The buffer we want to write to.
+/// @param tile The tile we want to transform in string.
+static void write_tile_content_to_buffer(buffer_t PTR buffer,
+    const resources_t PTR tile)
+{
+    bool wrote = false;
+
+    for (uint32_t i = 0; i < R_STRUCT_SIZE; i++) {
+        if (0 == tile->arr[i])
+            continue;
+        if (true == wrote)
+            append_to_buffer_from_chars(buffer, " ", 1);
+        append_to_buffer_from_chars(buffer, resources_strings[i],
+            resources_strings_lengths[i]);
+        wrote = true;
+    }
+}
+
 void execute_player_look_command(server_t PTR server, uint16_t player_idx,
     UNUSED const player_command_t PTR command)
 {
     player_t *player = &server->players[player_idx];
     uint32_t nb_of_tile = get_total_nb_of_tiles_required(player->level + 1);
-    resources_t sorted_resources[nb_of_tile];
+    resources_t sorted_resources[nb_of_tile] = {};
+    buffer_t *buffer = &server->generated_buffers
+        .buffers[PRE_LOOK_RESPONSE_BUFFER];
+    msg_t message;
 
+    REINITIALIZE_BUFFER(buffer);
     get_sorted_resources(server, player, sorted_resources, nb_of_tile);
+    append_to_buffer_from_chars(buffer, "[", 1);
+    for (uint32_t i = 0; i < nb_of_tile; i++) {
+        write_tile_content_to_buffer(buffer, &sorted_resources[i]);
+        if (i != nb_of_tile - 1)
+            append_to_buffer_from_chars(buffer, ",", 1);
+    }
+    append_to_buffer_from_chars(buffer, "]", 1);
+    create_message(buffer->ptr, buffer->len, &message);
+    add_msg_to_queue(&player->queue, &message);
 }

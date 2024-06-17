@@ -84,6 +84,7 @@ typedef enum resources_index_s {
 #define MENDIANE_STR "mendiane"
 #define PHIRAS_STR "phiras"
 #define THYSTAME_STR "thystame"
+#define PLAYER_STR "player"
 
 /// @brief Union representing the resources (accessible by attribute or array).
 ///
