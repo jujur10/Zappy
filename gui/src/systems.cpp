@@ -6,8 +6,9 @@
 
 #include <flecs.h>
 
-#include <Matrix.hpp>
 #include <Camera3D.hpp>  // Must be included after Matrix.hpp, if not project will not compile
+#include <Matrix.hpp>
+#include <player.hpp>
 
 #include "map.hpp"
 #include "raylib_utils.hpp"
@@ -47,7 +48,9 @@ static void registerOnStartSystems(const flecs::world &ecs)
         .iter(
             []([[maybe_unused]] const flecs::iter &it, const map::tileModels *const models)
             {
-                utils::SetupModel(models->grass, "gui/resources/shaders/tile_instancing.vs", nullptr);
+                utils::SetupModel(models->sand, "gui/resources/shaders/tile_instancing.vs", nullptr);
+                utils::SetupModel(models->sandRock, "gui/resources/shaders/tile_instancing.vs", nullptr);
+                utils::SetupModel(models->sandCactus, "gui/resources/shaders/tile_instancing.vs", nullptr);
             });
 
     ecs.system<map::resourceModels>("loadResourceInstancingShader")
@@ -62,7 +65,7 @@ static void registerOnStartSystems(const flecs::world &ecs)
 
 static void registerOnLoadSystems(const flecs::world &ecs)
 {
-    ecs.system("parseGuiCommand").kind(flecs::PreUpdate).iter(net::ParseGuiCommands);
+    ecs.system("parseGuiCommand").kind(flecs::OnLoad).iter(net::ParseGuiCommands);
 }
 
 static void registerPreUpdateSystems(const flecs::world &ecs)
@@ -112,9 +115,10 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                 ::GetMouseWheelMove() * 2.0f);   // Move to target (zoom)
         });
 
-    /// Query all the grass tiles and draw them
-    ecs.system<raylib::Matrix>("drawTiles")
+    /// Query all the sand Type1 tiles and draw them
+    ecs.system<raylib::Matrix>("drawType1Tiles")
         .kind(flecs::OnUpdate)
+        .with<map::tileType1>()
         .without(map::resourceType::food)
         .without(map::resourceType::linemate)
         .without(map::resourceType::deraumere)
@@ -125,7 +129,41 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
         .iter(
             [](const flecs::iter &it, const raylib::Matrix *const tilesPosition)
             {
-                utils::DrawModelInstanced(it.world().get<map::tileModels>()->grass, tilesPosition, static_cast<int32_t>(it.count()));
+                utils::DrawModelInstanced(it.world().get<map::tileModels>()->sand, tilesPosition, static_cast<int32_t>(it.count()));
+            });
+
+    /// Query all the sand Type2 tiles and draw them
+    ecs.system<raylib::Matrix>("drawType2Tiles")
+        .kind(flecs::OnUpdate)
+        .with<map::tileType2>()
+        .without(map::resourceType::food)
+        .without(map::resourceType::linemate)
+        .without(map::resourceType::deraumere)
+        .without(map::resourceType::sibur)
+        .without(map::resourceType::mendiane)
+        .without(map::resourceType::phiras)
+        .without(map::resourceType::thystame)
+        .iter(
+            [](const flecs::iter &it, const raylib::Matrix *const tilesPosition)
+            {
+                utils::DrawModelInstanced(it.world().get<map::tileModels>()->sandRock, tilesPosition, static_cast<int32_t>(it.count()));
+            });
+
+    /// Query all the sand Type3 tiles and draw them
+    ecs.system<raylib::Matrix>("drawType3Tiles")
+        .kind(flecs::OnUpdate)
+        .with<map::tileType3>()
+        .without(map::resourceType::food)
+        .without(map::resourceType::linemate)
+        .without(map::resourceType::deraumere)
+        .without(map::resourceType::sibur)
+        .without(map::resourceType::mendiane)
+        .without(map::resourceType::phiras)
+        .without(map::resourceType::thystame)
+        .iter(
+            [](const flecs::iter &it, const raylib::Matrix *const tilesPosition)
+            {
+                utils::DrawModelInstanced(it.world().get<map::tileModels>()->sandCactus, tilesPosition, static_cast<int32_t>(it.count()));
             });
 
     /// Query all food and draw it
@@ -239,6 +277,7 @@ static void registerPostUpdateSystems(const flecs::world &ecs)
         .iter(
             []([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera)
             {
+                // it.world().lookup("player").get<raylib::Model>()->Draw(raylib::Vector3{0.0f, 0.0f, 0.0f}, 0.5f, WHITE);
                 camera->EndMode();
 
                 ::DrawFPS(10, 10);
