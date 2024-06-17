@@ -27,6 +27,21 @@ var itemToString = map[TileItem]string{
 	Thystame:  "thystame",
 }
 
+// getLevelUpLeechIndex returns the index of the message containing the possible level leech
+func (game Game) getLevelUpLeechIndex() int {
+	if game.MessageManager.waitingForLevelUp {
+		return -1
+	}
+	for idx, message := range game.MessageManager.messageStatusList {
+		if message.msgType == missingPlayers &&
+			message.uuid != game.MessageManager.UUID &&
+			message.targetLevel == game.Level+1 {
+			return idx
+		}
+	}
+	return -1
+}
+
 // isLevelUpLeechAvailable checks if a hosted level up is available to leech from
 func (game Game) isLevelUpLeechAvailable() bool {
 	if game.MessageManager.waitingForLevelUp {

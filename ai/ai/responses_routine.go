@@ -103,5 +103,9 @@ func (game Game) awaitResponseToCommand() bool {
 		}
 	default:
 	}
+	game.Socket.SendCommand(network.GetFrequency, network.EmptyBody)
+	select {
+	case _ = <-game.Socket.ResponseFeedbackChannel:
+	}
 	return responseValue
 }

@@ -304,21 +304,83 @@ func (game Game) moveToTile(tile RelativeCoordinates) {
 }
 
 // followPath follows the given path while collecting all useful resources on the visited tiles
-func (game Game) followPath(path Path) {
-	for _, tile := range path.path {
-		game.moveToTile(tile)
-		game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
+func (game Game) followPath(path Path) Path {
+	tile := path.path[0]
+	path.path = path.path[1:]
+	game.moveToTile(tile)
+	game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
+	_ = game.awaitResponseToCommand()
+	game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
+	pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(tile)
+	if pqTileIndex != -1 { // Remove tile if it was in the queue
+		game.collectTileResources(pqTileIndex)
+		heap.Remove(&game.Movement.TilesQueue, pqTileIndex)
+		game.updatePriorityQueueAfterCollection()
+	}
+	if game.Movement.TilesQueue[0].originalPriority > path.destination.originalPriority &&
+		game.Movement.TilesQueue[0].action == ResourceCollection {
+		newPath, err := game.computePath() // Check for a higher priority task
+		if err != nil {
+			return path
+		}
+		heap.Push(&game.Movement.TilesQueue, &path.destination)
+		return newPath
+	}
+	return path
+}
+
+func (game Game) followMessageDirection(direction network.EventDirection) {
+	worldSize := game.Coordinates.WorldSize
+	pos := game.Coordinates.CoordsFromOrigin
+	directionsVectors := map[network.PlayerDirection]RelativeCoordinates{Up: {0, 1},
+		Down: {0, worldSize[1] - 1}, Right: {1, 0}, Left: {worldSize[0] - 1, 0}}
+	frontVec := directionsVectors[game.Coordinates.Direction]
+	leftVec := directionsVectors[(game.Coordinates.Direction+3)%4]
+	rearVec := directionsVectors[(game.Coordinates.Direction+2)%4]
+	rightVec := directionsVectors[(game.Coordinates.Direction+1)%4]
+	pathToFollow := make([]RelativeCoordinates, 0)
+	switch direction {
+	case 0:
+		return
+	case 1:
+		frontPos := RelativeCoordinates{frontVec[0] + pos[0], frontVec[1] + pos[1]}
+		pathToFollow = append(pathToFollow, frontPos)
+	case 2:
+		frontPos := RelativeCoordinates{frontVec[0] + pos[0], frontVec[1] + pos[1]}
+		pathToFollow = append(pathToFollow, frontPos)
+		frontLeftPost := RelativeCoordinates{frontPos[0] + leftVec[0], frontPos[1] + leftVec[1]}
+		pathToFollow = append(pathToFollow, frontLeftPost)
+	case 3:
+		leftPos := RelativeCoordinates{leftVec[0] + pos[0], leftVec[1] + pos[1]}
+		pathToFollow = append(pathToFollow, leftPos)
+	case 4:
+		leftPos := RelativeCoordinates{leftVec[0] + pos[0], leftVec[1] + pos[1]}
+		pathToFollow = append(pathToFollow, leftPos)
+		rearLeftPos := RelativeCoordinates{leftPos[0] + rearVec[0], leftPos[1] + rearVec[1]}
+		pathToFollow = append(pathToFollow, rearLeftPos)
+	case 5:
+		rearPos := RelativeCoordinates{rearVec[0] + pos[0], rearVec[1] + pos[1]}
+		pathToFollow = append(pathToFollow, rearPos)
+	case 6:
+		rightPos := RelativeCoordinates{rightVec[0] + pos[0], rightVec[1] + pos[1]}
+		pathToFollow = append(pathToFollow, rightPos)
+		rightRearPos := RelativeCoordinates{rightPos[0] + rearVec[0], rightPos[1] + rearVec[1]}
+		pathToFollow = append(pathToFollow, rightRearPos)
+	case 7:
+		rightPos := RelativeCoordinates{rightVec[0] + pos[0], rightVec[1] + pos[1]}
+		pathToFollow = append(pathToFollow, rightPos)
+	case 8:
+		frontPos := RelativeCoordinates{frontVec[0] + pos[0], frontVec[1] + pos[1]}
+		pathToFollow = append(pathToFollow, frontPos)
+		frontRight := RelativeCoordinates{frontPos[0] + rightVec[0], frontPos[1] + rightVec[1]}
+		pathToFollow = append(pathToFollow, frontRight)
+	default:
+		log.Println("Invalid message direction:", direction)
+	}
+	for _, point := range pathToFollow {
+		game.moveToTile(point)
+		game.Socket.SendCommand(network.LookAround, network.EmptyBody)
 		_ = game.awaitResponseToCommand()
-		game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
-		pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(tile)
-		if pqTileIndex != -1 { // Remove tile if it was in the queue
-			game.collectTileResources(pqTileIndex)
-			heap.Remove(&game.Movement.TilesQueue, pqTileIndex)
-			game.updatePriorityQueueAfterCollection()
-		}
-		if game.Movement.TilesQueue[0].originalPriority > path.destination.originalPriority &&
-			game.Movement.TilesQueue[0].action == ResourceCollection {
-			return // Check for a higher priority task
-		}
+		game.updatePrioritiesFromViewMap()
 	}
 }

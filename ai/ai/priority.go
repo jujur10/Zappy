@@ -105,7 +105,7 @@ func (game Game) getTilePriority(tile []TileItem) int {
 
 // getLevelUpPriority returns the priority at which the level up process should be started
 func (game Game) getLevelUpPriority() int {
-	if game.FoodManager.FoodPriority > 8 {
+	if game.FoodManager.FoodPriority > 6 {
 		return 0
 	}
 	if game.isLevelUpLeechAvailable() {
