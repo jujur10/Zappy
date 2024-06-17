@@ -8,6 +8,8 @@
 
 #include <Camera3D.hpp>  // Must be included after Matrix.hpp, if not project will not compile
 #include <Matrix.hpp>
+#include <map_utils.hpp>
+#include <memory>
 #include <player.hpp>
 
 #include "map.hpp"
@@ -264,6 +266,32 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                     static_cast<int32_t>(it.count()),
                     map::resourceColors[static_cast<int32_t>(map::resourceType::thystame) - 1]
                 );
+            });
+
+    /// Query the players and draw them
+    ecs.system<Vector3, std::unique_ptr<raylib::Model>, player::Orientation>("drawPlayers")
+        .kind(flecs::OnUpdate)
+        .each([](const Vector3 &position, const std::unique_ptr<raylib::Model> &model, const player::Orientation &orientation)
+            {
+            float rotationAngle = 0.0f; // Default rotation angle
+            switch (orientation) {
+                using enum player::Orientation;
+                case NORTH:
+                    rotationAngle = utils::IsTileInOffsetRow(position.z) ? 210.f : 120.f;
+                    break;
+                case EAST:
+                    rotationAngle = 90.0f;
+                    break;
+                case SOUTH:
+                    rotationAngle = utils::IsTileInOffsetRow(position.z) ? 330.f : 30.f;
+                    break;
+                case WEST:
+                    rotationAngle = 270.0f;
+                    break;
+                default:
+                    break;
+                }
+                model->Draw(position,{0.f, 1.f, 0.f}, rotationAngle, {1.f, 1.f, 1.f}, WHITE);
             });
 }
 
