@@ -4,9 +4,10 @@
 
 #include "map.hpp"
 
-#include <flecs.h>
+#include <random>
 
-#include <Matrix.hpp>
+#include "Matrix.hpp"
+#include "flecs.h"
 
 namespace zappy_gui::map
 {
@@ -18,6 +19,11 @@ float32 verticalSpacing;
 
 void GenerateMap(const flecs::iter &it)
 {
+    // Define the subtract_with_carry_engine with 24 bits of state, 10 bits of shift, and 24 bits of output with a random device
+    std::subtract_with_carry_engine<std::uint_fast32_t, 24, 10, 24> engine(std::random_device{}());
+
+    // Define a discrete distribution with weights for each tile type
+    std::discrete_distribution<uint_fast32_t> distribution({3, 2, 1});
     spacing = 1.2f32;
     tileSize = 1.f32;
     tileHeight = 0.f32;
@@ -60,17 +66,30 @@ void GenerateMap(const flecs::iter &it)
 
             for (auto i = static_cast<int>(resourceType::food); i < static_cast<int>(resourceType::total); ++i)
             {
-                resource = it.world().entity()
-                    .set<const raylib::Matrix>(matrices[i])
-                    .set<uint16_t>(0)
-                    .add(static_cast<resourceType>(i))
-                    .disable();
+                resource =
+                    it.world().entity().set<const raylib::Matrix>(matrices[i]).set<uint16_t>(0).add(static_cast<resourceType>(i)).disable();
                 tileResourceIds.array[i] = resource.id();
             }
 
             tileEntity.set<resourceIds>(tileResourceIds);
+
+            // Randomly assign a tile type to the tile to have different models
+            switch (distribution(engine))
+            {
+                case 0:
+                    tileEntity.add<tileType1>();
+                break;
+                case 1:
+                    tileEntity.add<tileType2>();
+                break;
+                case 2:
+                    tileEntity.add<tileType3>();
+                break;
+                default:
+                    tileEntity.add<tileType1>();
+                break;
+            }
         }
     }
 }
-
 }  // namespace zappy_gui::map

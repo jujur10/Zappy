@@ -61,7 +61,27 @@ constexpr Color resourceColors[] = {
 /// @brief Store the 3d models for tiles
 struct tileModels
 {
-    raylib::Model *grass;
+    raylib::Model *sand;
+    raylib::Model *sandRock;
+    raylib::Model *sandCactus;
+};
+
+/// @brief Tag component for the tile type used to apply different models
+struct tileType1
+{
+
+};
+
+/// @brief Tag component for the tile type used to apply different models
+struct tileType2
+{
+
+};
+
+/// @brief Tag component for the tile type used to apply different models
+struct tileType3
+{
+
 };
 
 /// @brief Store the 3d models for resource
