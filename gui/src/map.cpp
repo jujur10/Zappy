@@ -33,9 +33,9 @@ void GenerateMap(const flecs::iter &it)
     {
         for (int32_t x = 0; x < kMAP_WIDTH; ++x)
         {
-            const float offsetX = y % 2 == 0 ? 0.f : tileSize * 0.5f;  // Offset for odd rows
+            const float offsetX = 0 == y % 2 ? 0.f : tileSize * 0.5f;  // Offset for odd rows
 
-            auto position = raylib::Matrix::Translate(
+            const auto position = raylib::Matrix::Translate(
                 (static_cast<float>(x) * tileSize + offsetX - static_cast<float>(kMAP_WIDTH) * tileSize * 0.5f) * spacing,
                 tileHeight,
                 static_cast<float>(y) * tileSize * verticalSpacing - static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f);

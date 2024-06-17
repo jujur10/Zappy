@@ -13,7 +13,7 @@ namespace zappy_gui::player
 #define PLAYER_STARTING_IDX 1'100'000
 
 /// @brief The index of the idle animation
-#define IDLE_ANIMATION_IDX 12
+#define IDLE_ANIMATION_IDX 3
 
 enum class Orientation
 {
