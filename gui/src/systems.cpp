@@ -268,6 +268,16 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                 );
             });
 
+    /// Query the players animations and update them
+    ecs.system<std::unique_ptr<raylib::Model>, player::playerAnimationData>("updatePlayerAnimations")
+        .kind(flecs::OnUpdate)
+        .each([](std::unique_ptr<raylib::Model> const &model, player::playerAnimationData &animations)
+        {
+            model->UpdateAnimation(*animations.currentAnimation, animations.currentFrame);
+            animations.currentFrame =
+                animations.currentAnimation->frameCount - 1 == animations.currentFrame ? 0 : animations.currentFrame + 1;
+        });
+
     /// Query the players and draw them
     ecs.system<Vector3, std::unique_ptr<raylib::Model>, player::Orientation>("drawPlayers")
         .kind(flecs::OnUpdate)
