@@ -15,12 +15,12 @@ namespace zappy_gui::player
 /// @brief The index of the idle animation
 #define IDLE_ANIMATION_IDX 12
 
-enum class Orientation : uint8_t
+enum class Orientation
 {
-    NORTH = 0,
-    EAST = 1,
-    SOUTH = 2,
-    WEST = 3,
+    NORTH = 1,
+    EAST = 2,
+    SOUTH = 3,
+    WEST = 4,
 };
 
 struct playerAnimations
