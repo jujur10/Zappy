@@ -28,16 +28,16 @@ extern int32_t kMAP_WIDTH;
 extern int32_t kMAP_HEIGHT;
 
 /// @var represent the additional spacing between each tile
-extern float32 spacing;
+extern float spacing;
 
 /// @var represent the tile size
-extern float32 tileSize;
+extern float tileSize;
 
 /// @var represent the tile width
-extern float32 tileHeight;
+extern float tileHeight;
 
 /// @var represent the tile vertical spacing (offset because of the hexagon shape)
-extern float32 verticalSpacing;
+extern float verticalSpacing;
 
 /// @var represent the coordinates offset based on the tile origin point for each resource
 constexpr Vector2 resourceOffset[] = {{0 * 0.4, -1 * 0.4},

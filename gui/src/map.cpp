@@ -12,10 +12,10 @@
 namespace zappy_gui::map
 {
 
-float32 spacing;
-float32 tileSize;
-float32 tileHeight;
-float32 verticalSpacing;
+float spacing;
+float tileSize;
+float tileHeight;
+float verticalSpacing;
 
 void GenerateMap(const flecs::iter &it)
 {
@@ -24,21 +24,21 @@ void GenerateMap(const flecs::iter &it)
 
     // Define a discrete distribution with weights for each tile type
     std::discrete_distribution<uint_fast32_t> distribution({3, 2, 1});
-    spacing = 1.2f32;
-    tileSize = 1.f32;
-    tileHeight = 0.f32;
+    spacing = 1.2f;
+    tileSize = 1.f;
+    tileHeight = 0.f;
     verticalSpacing = std::sqrtf(3) / 2 * tileSize * spacing;
 
     for (int32_t y = 0; y < kMAP_HEIGHT; ++y)
     {
         for (int32_t x = 0; x < kMAP_WIDTH; ++x)
         {
-            const float32 offsetX = y % 2 == 0 ? 0.f32 : tileSize * 0.5f32;  // Offset for odd rows
+            const float offsetX = y % 2 == 0 ? 0.f : tileSize * 0.5f;  // Offset for odd rows
 
             auto position = raylib::Matrix::Translate(
-                (static_cast<float32>(x) * tileSize + offsetX - static_cast<float32>(kMAP_WIDTH) * tileSize * 0.5f32) * spacing,
+                (static_cast<float>(x) * tileSize + offsetX - static_cast<float>(kMAP_WIDTH) * tileSize * 0.5f) * spacing,
                 tileHeight,
-                static_cast<float32>(y) * tileSize * verticalSpacing - static_cast<float32>(kMAP_HEIGHT) * tileSize * 0.375f32);
+                static_cast<float>(y) * tileSize * verticalSpacing - static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f);
 
             auto tileEntity = it.world().make_alive((y * kMAP_WIDTH) + x + 1 + FLECS_HI_ID_RECORD_ID).set<raylib::Matrix>(position);
 
