@@ -16,6 +16,8 @@
 #include "sockets.hpp"
 #include "systems.hpp"
 #include "player.hpp"
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
 namespace zappy_gui
 {
