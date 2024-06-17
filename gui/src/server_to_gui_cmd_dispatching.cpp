@@ -27,6 +27,7 @@ void ParseGuiCommands(const flecs::iter &it)
                 {
                     HandleUpdateTileCommand(world, updateTile);
                 }
+                break;
             }
             case 1:
             {
@@ -34,6 +35,7 @@ void ParseGuiCommands(const flecs::iter &it)
                 {
                     HandleNewPlayerCommand(world, newPlayer);
                 }
+                break;
             }
             // Other command cases to be added here
             default:;
