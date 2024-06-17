@@ -37,6 +37,14 @@ void ParseGuiCommands(const flecs::iter &it)
                 }
                 break;
             }
+            case 2:
+            {
+                if (auto const *const deadPlayer = std::get_if<DeadPlayerCommand>(&cmd))
+                {
+                    HandleDeadPlayerCommand(world, deadPlayer);
+                }
+                break;
+            }
             // Other command cases to be added here
             default:;
         }

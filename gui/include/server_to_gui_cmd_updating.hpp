@@ -23,4 +23,12 @@ void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand 
  * @param newPlayer The received NewPlayerCommand command
  */
 void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *newPlayer);
+
+/**
+ * @brief Process the DeadPlayerCommand command
+ * Remove the player entity from the world
+ * @param world The ecs world
+ * @param deadPlayer The received DeadPlayerCommand command
+ */
+void HandleDeadPlayerCommand(const flecs::world &world, const DeadPlayerCommand *deadPlayer);
 }  // namespace zappy_gui::net

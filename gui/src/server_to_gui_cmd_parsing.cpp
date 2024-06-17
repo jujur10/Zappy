@@ -60,6 +60,15 @@ void ParseNewPlayerCommand(const std::string_view& line)
     paramPos = line.find_first_of(' ', paramPos) + 1;
 
     ServerToGuiQueue.try_push(NewPlayerCommand{
-        .id = id, .x = x, .y = y, .orientation = orientation, .level = level, .teamName = line.data() + paramPos});
+        .id = id, .x = x, .y = y, .orientation = orientation, .level = level, .teamName = line.substr(paramPos)});
+}
+
+void ParseDeathOfPlayerCommand(const std::string_view& line)
+{
+    uint16_t id = 0;
+
+    string_utils::convertFromString(line, id);
+
+    ServerToGuiQueue.try_push(DeadPlayerCommand{.id = id});
 }
 }  // namespace zappy_gui::net

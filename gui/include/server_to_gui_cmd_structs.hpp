@@ -24,7 +24,7 @@ struct NewPlayerCommand
     uint16_t y;
     uint8_t orientation;
     uint8_t level;
-    const char *teamName;
+    std::string_view teamName;
 };
 
 struct DeadPlayerCommand
@@ -57,4 +57,9 @@ void ParseTileUpdateCommand(const std::string_view& line);
 /// This function will parse the pnw command and push the corresponding NewPlayerCommand in the ServerToGuiQueue
 /// @param line The pnw command received from the server
 void ParseNewPlayerCommand(const std::string_view& line);
+
+/// @brief Parse the pdi command received as text from the server.
+/// This function will parse the pdi command and push the corresponding DeadPlayerCommand in the ServerToGuiQueue
+/// @param line The pdi command received from the server
+void ParseDeathOfPlayerCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

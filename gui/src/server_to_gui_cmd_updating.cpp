@@ -60,4 +60,13 @@ void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *c
     player.set<std::unique_ptr<raylib::Model>>(std::make_unique<raylib::Model>("gui/resources/assets/cactoro.m3d"));
     player.set<std::string_view>(newPlayer->teamName); // TODO: Don't forget this when implementing teams
 }
+
+void HandleDeadPlayerCommand(const flecs::world &world, const DeadPlayerCommand *const deadPlayer)
+{
+    if (world.entity(deadPlayer->id + PLAYER_STARTING_IDX).is_alive())
+    {
+        world.entity(deadPlayer->id + PLAYER_STARTING_IDX).destruct();
+    }
+}
+
 }  // namespace zappy_gui::net

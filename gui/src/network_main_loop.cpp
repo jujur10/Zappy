@@ -44,6 +44,11 @@ void HandleServerCommand(const std::string& line)
             ParseNewPlayerCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::DEATH_OF_PLAYER:
+        {
+            ParseDeathOfPlayerCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         default:
             return;
     }
