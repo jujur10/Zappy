@@ -277,13 +277,13 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             switch (orientation) {
                 using enum player::Orientation;
                 case NORTH:
-                    rotationAngle = utils::IsTileInOffsetRow(position.z) ? 210.f : 120.f;
+                    rotationAngle = utils::IsTileInOddRow(position.z) ? 210.f : 150.f;
                     break;
                 case EAST:
                     rotationAngle = 90.0f;
                     break;
                 case SOUTH:
-                    rotationAngle = utils::IsTileInOffsetRow(position.z) ? 330.f : 30.f;
+                    rotationAngle = utils::IsTileInOddRow(position.z) ? 330.f : 30.f;
                     break;
                 case WEST:
                     rotationAngle = 270.0f;

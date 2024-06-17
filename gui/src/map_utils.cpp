@@ -16,19 +16,19 @@ namespace zappy_gui::utils
 {
 Vector2 GetCoordsFromTileMatrix(const raylib::Matrix &transformMatrix)
 {
-    float32 offsetX = (static_cast<float32>(kMAP_WIDTH) * tileSize * 0.5f32) * spacing;
-    float32 offsetY = static_cast<float32>(kMAP_WIDTH) * tileSize * 0.375f32;
+    float offsetX = (static_cast<float>(kMAP_WIDTH) * tileSize * 0.5f) * spacing;
+    float offsetY = static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f;
 
-    float32 x = (transformMatrix.m12 + offsetX) / (tileSize * spacing);
-    float32 y = (transformMatrix.m14 + offsetY) / (tileSize * verticalSpacing);
+    float x = (transformMatrix.m12 + offsetX) / (tileSize * spacing);
+    float y = (transformMatrix.m14 + offsetY) / (tileSize * verticalSpacing);
 
     auto tileX = static_cast<uint32_t>(std::round(x));
     auto tileY = static_cast<uint32_t>(std::round(y));
 
     if (tileY % 2 != 0)
     {
-        float32 offsetOddRow = x - static_cast<float32>(tileX);
-        if (offsetOddRow < 0.5f32)
+        float offsetOddRow = x - static_cast<float>(tileX);
+        if (offsetOddRow < 0.5f)
         {
             --tileX;
         }
@@ -37,17 +37,13 @@ Vector2 GetCoordsFromTileMatrix(const raylib::Matrix &transformMatrix)
     return Vector2{static_cast<float>(tileX), static_cast<float>(tileY)};
 }
 
-bool IsTileInOffsetRow(const float y)
+bool IsTileInOddRow(const float y)
 {
-    auto offsetY = static_cast<float32>(kMAP_WIDTH) * tileSize * 0.375f32;
-    float32 tileY = (y + offsetY) / (tileSize * verticalSpacing);
-    auto tileYRounded = static_cast<uint32_t>(std::round(y));
+    auto offsetY = static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f;
+    float tileY = (y + offsetY) / (tileSize * verticalSpacing);
+    auto tileYRounded = static_cast<uint32_t>(std::round(tileY));
 
-    if (tileYRounded % 2 != 0)
-    {
-        return true;
-    }
-    return false;
+    return tileYRounded % 2;
 }
 
 uint64_t GetTileIndexFromCoords(const Vector2 &coords)
