@@ -48,16 +48,16 @@ void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand 
 
 void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *const newPlayer)
 {
-    flecs::entity player = world.entity(newPlayer->id + PLAYER_STARTING_IDX);
+    flecs::entity player = world.make_alive(newPlayer->id + PLAYER_STARTING_IDX);
     raylib::ModelAnimation * const idle = &world.get<player::playerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
     const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(newPlayer->x, newPlayer->y));
-    const auto tileMatrix = *tile.get<raylib::Matrix>();
+    const auto& tileMatrix = tile.ensure<raylib::Matrix>();
 
-    player.set<Vector3>({Vector3{tileMatrix.m12, 0.0f, tileMatrix.m14}});
+    player.set<Vector3>({Vector3{tileMatrix.m12, 0.2f, tileMatrix.m14}});
     player.set<player::Orientation>(static_cast<player::Orientation>(newPlayer->orientation));
     player.set<uint8_t>(newPlayer->level);
     player.set<player::playerAnimationData>({idle, 0});
     player.set<std::unique_ptr<raylib::Model>>(std::make_unique<raylib::Model>("gui/resources/assets/cactoro.m3d"));
-    player.set<const char *>(newPlayer->teamName); // TODO: Don't forget this when implementing team
+    player.set<std::string_view>(newPlayer->teamName); // TODO: Don't forget this when implementing teams
 }
 }  // namespace zappy_gui::net
