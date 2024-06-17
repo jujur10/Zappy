@@ -212,6 +212,7 @@ func (game Game) computePath() (Path, error) {
 func (game Game) movePlayerForward() {
 	game.Socket.SendCommand(network.GoForward, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
+	game.updateFrequency()
 	game.Coordinates.CoordsFromOrigin =
 		updatePosition(game.Coordinates.CoordsFromOrigin, game.Coordinates.WorldSize, game.Coordinates.Direction)
 	game.updateMovementQueueOnMove()
@@ -221,6 +222,7 @@ func (game Game) movePlayerForward() {
 func (game Game) turnLeft() {
 	game.Socket.SendCommand(network.RotateLeft, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
+	game.updateFrequency()
 	game.Coordinates.Direction += network.Left % 4 // (N + 3) % 4 = N - 1
 }
 
@@ -228,6 +230,7 @@ func (game Game) turnLeft() {
 func (game Game) turnRight() {
 	game.Socket.SendCommand(network.RotateRight, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
+	game.updateFrequency()
 	game.Coordinates.Direction += network.Right % 4 // (N + 1) % 4
 }
 
@@ -310,6 +313,7 @@ func (game Game) followPath(path Path) Path {
 	game.moveToTile(tile)
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
 	_ = game.awaitResponseToCommand()
+	game.updateFrequency()
 	game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
 	pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(tile)
 	if pqTileIndex != -1 { // Remove tile if it was in the queue
@@ -381,6 +385,7 @@ func (game Game) followMessageDirection(direction network.EventDirection) {
 		game.moveToTile(point)
 		game.Socket.SendCommand(network.LookAround, network.EmptyBody)
 		_ = game.awaitResponseToCommand()
+		game.updateFrequency()
 		game.updatePrioritiesFromViewMap()
 	}
 }

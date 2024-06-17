@@ -10,6 +10,7 @@ func (game Game) defaultAction() {
 	game.movePlayerForward()
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
+	game.updateFrequency()
 	game.updatePrioritiesFromViewMap()
 }
 
@@ -17,9 +18,13 @@ func (game Game) defaultAction() {
 func (game Game) MainLoop() {
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
+	game.updateFrequency()
 	game.updatePrioritiesFromViewMap()
 	var path = Path{path: nil}
 	for game.FoodManager.FoodPriority > 0 && game.Level < 8 {
+		game.Socket.SendCommand(network.GetInventory, network.EmptyBody) // Fetch the inventory to update food level
+		_ = game.awaitResponseToCommand()
+		game.updateFrequency()
 		if game.isLevelUpLeechAvailable() { // Leeching is always easier, so it's more important
 			leechIdx := game.getLevelUpLeechIndex()
 			if leechIdx == -1 {

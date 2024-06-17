@@ -86,6 +86,14 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 	}
 }
 
+// updateFrequency by requesting it from the server
+func (game Game) updateFrequency() {
+	game.Socket.SendCommand(network.GetFrequency, network.EmptyBody)
+	select {
+	case _ = <-game.Socket.ResponseFeedbackChannel:
+	}
+}
+
 // awaitResponseToCommand is used to wait until the server returns a response to the command
 func (game Game) awaitResponseToCommand() bool {
 	responseValue := false
@@ -102,10 +110,6 @@ func (game Game) awaitResponseToCommand() bool {
 			game.updatePrioritiesFromViewMap() // Recompute priorities
 		}
 	default:
-	}
-	game.Socket.SendCommand(network.GetFrequency, network.EmptyBody)
-	select {
-	case _ = <-game.Socket.ResponseFeedbackChannel:
 	}
 	return responseValue
 }

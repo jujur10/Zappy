@@ -328,11 +328,15 @@ func TestPriorityQueue_getPriorityQueueTileIndex(t *testing.T) {
 		args args
 		want int
 	}{
-		{"Basic test", pq, args{RelativeCoordinates{3, 0}}, 0},
+		{"Basic test 1", pq, args{RelativeCoordinates{5, 1}}, 3},
+		{"Basic test 2", pq, args{RelativeCoordinates{3, 0}}, 0},
 		{"Test tile not in queue", pq, args{RelativeCoordinates{6, 4}}, -1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			//for idx, it := range tt.pq {
+			//	fmt.Println(idx, *it)
+			//}
 			if got := tt.pq.getPriorityQueueTileIndex(tt.args.tilePos); got != tt.want {
 				t.Errorf("getPriorityQueueTileIndex() = %v, want %v", got, tt.want)
 			}

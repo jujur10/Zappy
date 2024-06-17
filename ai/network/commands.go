@@ -25,7 +25,7 @@ const (
 	// Fork command
 	Fork
 	// EjectPlayers command
-	EjectPlayers
+	EjectPlayers // UNUSED
 	// TakeObject command
 	TakeObject
 	// SetObject command
