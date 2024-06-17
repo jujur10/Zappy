@@ -19,6 +19,7 @@ func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
 	lifeTime := 1260
 	consumptionCounter := 0
 	timeStep := time.Duration(0)
+	log.Println("Starting food management routine")
 	for { // While true
 		select {
 		case newFood, ok := <-food:
@@ -42,6 +43,7 @@ func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
 				return
 			}
 			timeStep = ts
+			log.Printf("Timestep updated, new timestep is %dms\n", ts.Milliseconds())
 		default:
 
 		}

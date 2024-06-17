@@ -65,6 +65,7 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 
 // serverResponseRoutine is the goroutine that manages the server's responses
 func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
+	log.Println("Starting server response routine")
 	for {
 		select {
 		case _, ok := <-feedbackChannel:
@@ -85,13 +86,30 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 	}
 }
 
-// awaitResponseToCommand is used to wait until the server returns a response to the command
-func awaitResponseToCommand(feedbackChannel <-chan bool) bool {
+// updateFrequency by requesting it from the server
+func (game Game) updateFrequency() {
+	game.Socket.SendCommand(network.GetFrequency, network.EmptyBody)
 	select {
-	case value, ok := <-feedbackChannel:
+	case _ = <-game.Socket.ResponseFeedbackChannel:
+	}
+}
+
+// awaitResponseToCommand is used to wait until the server returns a response to the command
+func (game Game) awaitResponseToCommand() bool {
+	responseValue := false
+	select {
+	case value, ok := <-game.Socket.ResponseFeedbackChannel:
 		if ok {
-			return value
+			responseValue = value
 		}
 	}
-	return false
+	select {
+	case priority, ok := <-game.FoodManager.FoodChannel: // Check if there is an update of the food priority
+		if ok {
+			game.FoodManager.FoodPriority = priority
+			game.updatePrioritiesFromViewMap() // Recompute priorities
+		}
+	default:
+	}
+	return responseValue
 }

@@ -334,6 +334,9 @@ func TestPriorityQueue_getPriorityQueueTileIndex(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			//for idx, it := range tt.pq {
+			//	fmt.Println(idx, *it)
+			//}
 			if got := tt.pq.getPriorityQueueTileIndex(tt.args.tilePos); got != tt.want {
 				t.Errorf("getPriorityQueueTileIndex() = %v, want %v", got, tt.want)
 			}
