@@ -8,6 +8,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "style/macros.h"
 
@@ -33,3 +34,11 @@ typedef enum orientation_s {
     LOOK_LEFT,
     NB_OF_ORIENTATION
 } PACKED orientation_t;
+
+/// @brief Function which verify if the coordinates are equal or not.
+///
+/// @param coordinates_1 The first coordinates to verify.
+/// @param coordinates_2 The second coordinates to verify.
+/// @return True if coordinates equal, False if not.
+bool is_coordinates_equal(const coordinates_t PTR coordinates_1,
+    const coordinates_t PTR coordinates_2);

@@ -29,6 +29,7 @@ add_executable(zappy_server
     src/commands/player/player_command_parsing.c
     src/commands/player/player_connect_nbr_command.c
     src/commands/player/player_direction_command.c
+    src/commands/player/player_eject_command.c
     src/commands/player/player_fork_command.c
     src/commands/player/player_forward_command.c
     src/commands/player/player_frequency_command.c
@@ -39,6 +40,7 @@ add_executable(zappy_server
     src/commands/player/player_right_left_command.c
     src/commands/player/player_set_command.c
     src/commands/player/player_take_command.c
+    src/coordinates.c
     src/gui_handling.c
     src/main.c
     src/map.c

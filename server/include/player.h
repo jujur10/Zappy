@@ -69,4 +69,21 @@ int32_t get_player_by_socket(const server_t PTR server, uint16_t sock);
 /// @param time_limit The time limit to set.
 /// @param player The player we want to add the time limit to.
 void add_time_limit_to_player(double server_time_units,
-    uint32_t time_limit, player_t *player);
+    uint32_t time_limit, player_t PTR player);
+
+/// @brief Function which sets the next coordinates of the player in
+/// new_coordinates.
+///
+/// @param map The map of the game.
+/// @param player The concerned player.
+/// @param new_coordinates A pointer on a coordinate structure to overwrite.
+void get_next_player_coordinates(const map_t PTR map,
+    const player_t PTR player, coordinates_t PTR new_coordinates);
+
+/// @brief Function used to teleport a player to given coordinates.
+///
+/// @param map The player's map.
+/// @param player The player we want to teleport.
+/// @param new_coordinates The target coordinates.
+void teleport_player(map_t PTR map, player_t PTR player,
+    const coordinates_t PTR new_coordinates);
