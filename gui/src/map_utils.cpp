@@ -37,6 +37,19 @@ Vector2 GetCoordsFromTileMatrix(const raylib::Matrix &transformMatrix)
     return Vector2{static_cast<float>(tileX), static_cast<float>(tileY)};
 }
 
+bool IsTileInOffsetRow(const float y)
+{
+    auto offsetY = static_cast<float32>(kMAP_WIDTH) * tileSize * 0.375f32;
+    float32 tileY = (y + offsetY) / (tileSize * verticalSpacing);
+    auto tileYRounded = static_cast<uint32_t>(std::round(y));
+
+    if (tileYRounded % 2 != 0)
+    {
+        return true;
+    }
+    return false;
+}
+
 uint64_t GetTileIndexFromCoords(const Vector2 &coords)
 {
     return (static_cast<uint64_t>(coords.y) * static_cast<uint64_t>(kMAP_WIDTH)) + static_cast<uint64_t>(coords.x)
