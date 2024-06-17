@@ -38,6 +38,7 @@ typedef enum {
     PRE_BOTTOM_INDEXES,
     PRE_LEFT_INDEXES,
     PRE_LOOK_RESPONSE_BUFFER,
+    PRE_BROADCAST_MSG,
     PRE_GENERATED_ARR_LEN
 } generated_enum_t;
 
@@ -49,6 +50,10 @@ typedef enum {
 
 /// @brief KO response.
 #define KO_RESPONSE "ko\n"
+
+/// @brief Max broadcast message limit.
+#define MESSAGE_STR "message K, "
+#define MAX_BROADCAST_MSG_LENGTH (sizeof(MESSAGE_STR) + 512)
 
 /// @brief Function to pre-generate responses.
 ///

@@ -25,6 +25,7 @@ add_executable(zappy_server
     src/commands/gui/gui_sgt_command.c
     src/commands/gui/gui_sst_command.c
     src/commands/gui/gui_tna_command.c
+    src/commands/player/player_broadcast_command.c
     src/commands/player/player_command.c
     src/commands/player/player_command_parsing.c
     src/commands/player/player_connect_nbr_command.c
@@ -76,6 +77,7 @@ target_include_directories(zappy_server PRIVATE
 
 target_link_libraries(zappy_server PRIVATE
     build_configs
+    m
 )
 
 set_target_properties(zappy_server PROPERTIES
@@ -118,12 +120,14 @@ if (DEFINED RUN_TESTS)
         src/commands/gui/gui_ppo_command.c
         src/commands/gui/gui_sgt_command.c
         src/commands/gui/gui_sst_command.c
+        src/commands/player/player_broadcast_command.c
         src/commands/player/player_command_parsing.c
         src/commands/player/player_direction_command.c
         src/commands/player/player_frequency_command.c
         src/commands/player/player_inventory_command.c
         src/commands/player/player_look_command.c
         src/commands/player/player_responses.c
+        src/coordinates.c
         src/gui_handling.c
         src/map.c
         src/map_buffer.c
@@ -144,6 +148,7 @@ if (DEFINED RUN_TESTS)
         src/utils/string/string.c
         tests/commands/gui/tests_gui_bct_command.c
         tests/commands/gui/tests_gui_msz_command.c
+        tests/commands/player/tests_player_broadcast_command.c
         tests/commands/player/tests_player_direction_command.c
         tests/commands/player/tests_player_frequency_command.c
         tests/commands/player/tests_player_inventory_command.c
@@ -165,6 +170,7 @@ if (DEFINED RUN_TESTS)
     target_link_libraries(test_zappy_server PRIVATE
         criterion
         gcov
+        m
     )
 
     target_compile_options(test_zappy_server PRIVATE

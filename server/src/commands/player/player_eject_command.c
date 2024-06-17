@@ -6,6 +6,7 @@
 */
 #include "server.h"
 #include "utils/arrays/arrays_virtual.h"
+#include "game_settings.h"
 
 /// @brief Function which execute the eject behavior on the selected player.
 ///
@@ -25,6 +26,17 @@ static void eject_player(map_t PTR map, player_t PTR player_to_eject,
     create_message(msg_content, sizeof(msg_content) - 1, &message);
 }
 
+/// @brief Function which returns the direction of the ejection.
+///
+/// @param player The player who eject the others players.
+/// @return The direction where the ejection come from.
+static orientation_t get_direction_of_ejection(const player_t PTR player)
+{
+    return ((int32_t)player->orientation - 2
+        + NB_OF_ORIENTATION)
+        % NB_OF_ORIENTATION;
+}
+
 void execute_player_eject_command(server_t PTR server, uint16_t player_idx,
     UNUSED const player_command_t PTR command)
 {
@@ -32,8 +44,7 @@ void execute_player_eject_command(server_t PTR server, uint16_t player_idx,
     const coordinates_t *player_coordinates = &player->coordinates;
     map_t *map = &server->map;
     coordinates_t new_coordinates;
-    orientation_t direction_of_ejection = ((int32_t)player->orientation - 2
-        + NB_OF_ORIENTATION) % NB_OF_ORIENTATION;
+    orientation_t direction_of_ejection = get_direction_of_ejection(player);
     const resources_t *current_tile = &map->tiles
         [(map->width * player_coordinates->y) + player_coordinates->x];
 
@@ -47,5 +58,6 @@ void execute_player_eject_command(server_t PTR server, uint16_t player_idx,
             eject_player(map, &server->players[i], &new_coordinates,
                 direction_of_ejection);
     }
+    add_time_limit_to_player(server->time_units, PLAYER_EJECT_WAIT, player);
     return player_ok_response(server, player);
 }

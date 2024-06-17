@@ -85,6 +85,15 @@ static void set_look_response_buffer(
         (uint32_t)max);
 }
 
+/// @brief Allocate the response buffer for the broadcast command.
+///
+/// @param pre_generated_buffers The buffer container structure.
+static void set_broadcast_buffer(generated_buffers_t PTR pre_generated_buffers)
+{
+    init_buffer_from_chars(&pre_generated_buffers->buffers[PRE_BROADCAST_MSG],
+        MAX_BROADCAST_MSG_LENGTH, MESSAGE_STR, sizeof(MESSAGE_STR) - 1);
+}
+
 status_t pre_generate_buffers(server_t PTR server)
 {
     server->generated_buffers.buffers = malloc(sizeof(buffer_t) *
@@ -99,6 +108,7 @@ status_t pre_generate_buffers(server_t PTR server)
     set_mct_buffer(server);
     pre_generate_look_indexes(&server->generated_buffers);
     set_look_response_buffer(&server->generated_buffers);
+    set_broadcast_buffer(&server->generated_buffers);
     server->generated_buffers.nb_of_buffer = PRE_GENERATED_ARR_LEN;
     return SUCCESS;
 }

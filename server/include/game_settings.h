@@ -28,6 +28,9 @@
 ///@brief The cooldown delay for the fork action.
 #define PLAYER_FORK_WAIT 42
 
+///@brief The cooldown delay for the eject action.
+#define PLAYER_EJECT_WAIT 7
+
 /// @brief The cooldown delay for MCT in ns.
 #define GUI_MCT_REQUEST_COOLDOWN 100000000
 
