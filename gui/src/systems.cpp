@@ -292,33 +292,65 @@ namespace zappy_gui::systems {
                             animations.currentFrame + 1;
                 });
 
-        /// Query the players and draw them
-        ecs.system<Vector3, std::unique_ptr<raylib::Model>, player::Orientation>("drawPlayers")
-                .kind(flecs::OnUpdate)
-                .each([](const Vector3 &position, const std::unique_ptr<raylib::Model> &model,
-                         const player::Orientation &orientation) {
-                    float rotationAngle = 0.0f; // Default rotation angle
-                    switch (orientation) {
-                        using
-                        enum player::Orientation;
-                        case NORTH:
-                            rotationAngle = utils::IsTileInOddRow(position.z) ? 210.f : 150.f;
-                            break;
-                        case EAST:
-                            rotationAngle = 90.0f;
-                            break;
-                        case SOUTH:
-                            rotationAngle = utils::IsTileInOddRow(position.z) ? 330.f : 30.f;
-                            break;
-                        case WEST:
-                            rotationAngle = 270.0f;
-                            break;
-                        default:
-                            break;
+    /// Query the players and update their position if they are moving
+    ecs.system<Vector2, player::playerTargetInfo>("updatePlayerPosition")
+        .kind(flecs::OnUpdate)
+        .each([](flecs::entity player, Vector2 &position, player::playerTargetInfo const &targetInfo)
+        {
+            if (Vector2Distance(position, targetInfo.target) < 0.1f)
+            {
+                player.disable<player::playerTargetInfo>();
+                auto * const playerAnimData = player.get_mut<player::playerAnimationData>();
+                playerAnimData->currentAnimation = &player.world().get<player::playerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
+                playerAnimData->currentFrame = 0;
+                return;
+            }
+            position.x += targetInfo.normalizedDirection.x * 0.01f;
+            position.y += targetInfo.normalizedDirection.y * 0.01f;
+        });
+
+    /// Query the players and draw them
+    ecs.system<Vector2, std::unique_ptr<raylib::Model>, player::Orientation>("drawPlayers")
+        .kind(flecs::OnUpdate)
+        .each([](
+            const flecs::entity player,
+            const Vector2 &position,
+            const std::unique_ptr<raylib::Model> &model,
+            const player::Orientation &orientation)
+            {
+            float rotationAngle = 0.0f; // Default rotation angle
+            switch (orientation) {
+                using enum player::Orientation;
+                case NORTH:
+                    if (player.enabled<player::playerTargetInfo>())
+                    {
+                        rotationAngle = !utils::IsTileInOddRow(player.get_ref<player::playerTargetInfo>()->target.y) ? 330.f : 30.f;
+                    } else
+                    {
+                        rotationAngle = utils::IsTileInOddRow(position.y) ? 210.f : 150.f;
                     }
-                    model->Draw(position, {0.f, 1.f, 0.f}, rotationAngle, {1.f, 1.f, 1.f}, WHITE);
-                });
-    }
+                    break;
+                case EAST:
+                    rotationAngle = 90.0f;
+                    break;
+                case SOUTH:
+                    if (player.enabled<player::playerTargetInfo>())
+                    {
+                        rotationAngle = !utils::IsTileInOddRow(player.get_ref<player::playerTargetInfo>()->target.y) ? 210.f : 150.f;
+                    } else
+                    {
+                        rotationAngle = utils::IsTileInOddRow(position.y) ? 330.f : 30.f;
+                    }
+                    break;
+                case WEST:
+                    rotationAngle = 270.0f;
+                    break;
+                default:
+                    break;
+                }
+                model->Draw({position.x, 0.2f, position.y}, {0.f, 1.f, 0.f}, rotationAngle, {1.f, 1.f, 1.f}, WHITE);
+            });
+}
 
     static void registerPostUpdateSystems(flecs::world const &ecs) {
         /// Query the camera, end the drawing and display the FPS
