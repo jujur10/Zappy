@@ -3,6 +3,7 @@
 
 #include "Camera3D.hpp"
 #include "Window.hpp"
+#include "Rectangle.hpp"
 #include "ModelAnimation.hpp"
 #include "flecs.h"
 #include "gui_to_server_cmd_structs.hpp"
@@ -16,6 +17,9 @@
 #include "sockets.hpp"
 #include "systems.hpp"
 #include "player.hpp"
+#include "raygui.h"
+#include "style_bluish.h"
+#include "gui.hpp"
 
 namespace zappy_gui
 {
@@ -63,6 +67,8 @@ static void InitializeECS(flecs::world &ecs,
     zappy_gui::systems::registerSystems(ecs);
 
     ecs.progress();  // Progress through OnStart pipeline // NOLINT
+
+    zappy_gui::gui::createGuiEntities(ecs, zappy_gui::screenWidth, zappy_gui::screenHeight);
 }
 
 //----------------------------------------------------------------------------------
@@ -86,13 +92,14 @@ int32_t main(const int32_t argc, char *argv[])
     // Connect to the server and perform the handshake
     const zappy_gui::Socket serverSocket = zappy_gui::ConnectToServer(argv);
     Handshake(serverSocket);
-
     //--------------------------------------------------------------------------------------
     // Setup the window with anti-aliasing and a target of 60 FPS
     ::SetConfigFlags(FLAG_MSAA_4X_HINT);
     raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
     window.SetTargetFPS(60);
     // ::DisableCursor(); // Hides cursor and locks it to the window
+    raygui::GuiLoadStyleBluish();
+    raygui::GuiUnlock();
 
     //--------------------------------------------------------------------------------------
     // Create the 3D camera
@@ -121,7 +128,12 @@ int32_t main(const int32_t argc, char *argv[])
     // Main game loop
     while (!window.ShouldClose() && ecs.progress())  // Detect window close button or ESC key
     {
+        // Main loop
     }
+
+    //--------------------------------------------------------------------------------------
+    // Destroy the menu entities
+    zappy_gui::gui::destroyGuiEntities(ecs);
 
     //--------------------------------------------------------------------------------------
     // Stop the network thread
