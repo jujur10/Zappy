@@ -5,12 +5,26 @@
 ** team.c.
 */
 #include <stdint.h>
-#include <malloc.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "arguments.h"
 #include "team.h"
+
+/// @brief Function which set random coordinates to eggs.
+///
+/// @param team The team we want to set eggs coordinates to.
+/// @param map_width The map width.
+/// @param map_height The map height.
+static void set_random_coordinates_to_eggs(team_t PTR team,
+    uint32_t map_width, uint32_t map_height)
+{
+    for (uint16_t i = 0; i < team->nb_of_eggs; i++) {
+        team->eggs_coordinates[i].x = (uint16_t)rand() % map_width;
+        team->eggs_coordinates[i].y = (uint16_t)rand() % map_height;
+    }
+}
 
 uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams)
 {
@@ -26,6 +40,8 @@ uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams)
         (*teams)[i].nb_of_allocated_eggs = args->clients_nb;
         (*teams)[i].eggs_coordinates = calloc(args->clients_nb,
         sizeof(*((*teams)->eggs_coordinates)));
+        set_random_coordinates_to_eggs(&(*teams)[i], args->width,
+            args->height);
     }
     return 0;
 }
