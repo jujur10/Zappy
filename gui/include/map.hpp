@@ -58,6 +58,12 @@ constexpr Color resourceColors[] = {
     {230, 41, 55, 255}     // thystame: RED
 };
 
+/// @brief Store the 3d model for the skybox
+struct skybox
+{
+    raylib::Model *model;
+};
+
 /// @brief Store the 3d models for tiles
 struct tileModels
 {

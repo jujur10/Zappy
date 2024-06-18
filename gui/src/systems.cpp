@@ -6,11 +6,12 @@
 
 #include <flecs.h>
 
-#include <Camera3D.hpp>  // Must be included after Matrix.hpp, if not project will not compile
 #include <Matrix.hpp>
 #include <map_utils.hpp>
 #include <memory>
 #include <player.hpp>
+#include <rlgl.h>        // Must be included after Matrix.hpp, if not project will not compile
+#include <Camera3D.hpp>  // Must be included after Matrix.hpp, if not project will not compile
 
 #include "map.hpp"
 #include "raylib_utils.hpp"
@@ -85,6 +86,22 @@ static void registerPreUpdateSystems(const flecs::world &ecs)
                 ::ClearBackground(BLACK);
 
                 camera->BeginMode();
+            });
+
+    /// Query the skybox and draw it
+    ecs.system<map::skybox, raylib::Camera3D>("drawSkybox")
+        .term_at(1)
+        .singleton()
+        .kind(flecs::PreUpdate)
+        .iter(
+            [](const flecs::iter &it, map::skybox *const skybox, raylib::Camera3D *const camera)
+            {
+                (void)it;
+                // We deactivate writing to the depth buffer when drawing the
+                // skybox so that the skybox is always drawn behind everything
+                ::rlDisableDepthMask();
+                ::DrawModel(*skybox->model, camera->position, 1.0f, WHITE);
+                ::rlEnableDepthMask();
             });
 }
 
