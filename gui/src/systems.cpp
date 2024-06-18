@@ -63,7 +63,7 @@ namespace zappy_gui::systems {
     }
 
     static void registerOnLoadSystems(const flecs::world &ecs) {
-        ecs.system("parseGuiCommand").kind(flecs::OnLoad).iter(net::ParseGuiCommands);
+        ecs.system("parseGuiCommand").kind(flecs::OnLoad).write<player::Orientation>().iter(net::ParseGuiCommands);
         ecs.system("registerClickPosition").kind(flecs::OnLoad)
                 .iter([](const flecs::iter &it) {
                     const auto pos = raylib::Mouse::GetPosition();
@@ -300,6 +300,7 @@ namespace zappy_gui::systems {
             if (Vector2Distance(position, targetInfo.target) < 0.1f)
             {
                 player.disable<player::playerTargetInfo>();
+                player.enable<player::Orientation>();
                 auto * const playerAnimData = player.get_mut<player::playerAnimationData>();
                 playerAnimData->currentAnimation = &player.world().get<player::playerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
                 playerAnimData->currentFrame = 0;
@@ -309,45 +310,48 @@ namespace zappy_gui::systems {
             position.y += targetInfo.normalizedDirection.y * 0.01f;
         });
 
-    /// Query the players and draw them
-    ecs.system<Vector2, std::unique_ptr<raylib::Model>, player::Orientation>("drawPlayers")
+    /// Query the players and update their rotation angle
+    ecs.system<Vector2, player::Orientation, float>("updatePlayersRotation")
         .kind(flecs::OnUpdate)
-        .each([](
-            const flecs::entity player,
-            const Vector2 &position,
-            const std::unique_ptr<raylib::Model> &model,
-            const player::Orientation &orientation)
-            {
-            float rotationAngle = 0.0f; // Default rotation angle
+        .read<player::Orientation>()
+        .each([](const Vector2 &position, player::Orientation const &orientation, float &rotationAngle)
+        {
+            // printf("Player position %f %f with %f rotation", position.x, position.y, rotationAngle);
+            char dir;
             switch (orientation) {
                 using enum player::Orientation;
                 case NORTH:
-                    if (player.enabled<player::playerTargetInfo>())
-                    {
-                        rotationAngle = !utils::IsTileInOddRow(player.get_ref<player::playerTargetInfo>()->target.y) ? 330.f : 30.f;
-                    } else
-                    {
-                        rotationAngle = utils::IsTileInOddRow(position.y) ? 210.f : 150.f;
-                    }
+                    rotationAngle = utils::IsTileInOddRow(position.y) ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
+                    dir = 'N';
                     break;
                 case EAST:
-                    rotationAngle = 90.0f;
+                    rotationAngle = EAST_ANGLE;
+                    dir = 'E';
                     break;
                 case SOUTH:
-                    if (player.enabled<player::playerTargetInfo>())
-                    {
-                        rotationAngle = !utils::IsTileInOddRow(player.get_ref<player::playerTargetInfo>()->target.y) ? 210.f : 150.f;
-                    } else
-                    {
-                        rotationAngle = utils::IsTileInOddRow(position.y) ? 330.f : 30.f;
-                    }
+                    rotationAngle = utils::IsTileInOddRow(position.y) ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
+                    dir = 'S';
                     break;
                 case WEST:
-                    rotationAngle = 270.0f;
+                    rotationAngle = WEST_ANGLE;
+                    dir = 'W';
                     break;
                 default:
+                    dir = 'U';
                     break;
                 }
+            // printf("and %c orientation\n", dir);
+        });
+
+    /// Query the players and draw them
+    ecs.system<Vector2, std::unique_ptr<raylib::Model>, float>("drawPlayers")
+        .kind(flecs::OnUpdate)
+        .each([](
+            const Vector2 &position,
+            const std::unique_ptr<raylib::Model> &model,
+            const float &rotationAngle)
+            {
+            // printf("Drawing player at %f %f with rotation %f\n", position.x, position.y, rotationAngle);
                 model->Draw({position.x, 0.2f, position.y}, {0.f, 1.f, 0.f}, rotationAngle, {1.f, 1.f, 1.f}, WHITE);
             });
 }

@@ -41,7 +41,7 @@ void GenerateMap(const flecs::iter &it)
                 static_cast<float>(y) * tileSize * verticalSpacing - static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f);
 
             auto tileEntity = it.world().make_alive((y * kMAP_WIDTH) + x + 1 + FLECS_HI_ID_RECORD_ID).set<raylib::Matrix>(position);
-
+            printf("Tile n°%d => x: %d, y: %d => x: %f, y: %f, z: %f\n", (y * kMAP_WIDTH) + x + 1, x, y, position.m12, position.m13, position.m14);
             raylib::Matrix matrices[7];
             matrices[0].m13 = 0.3f;  // y position
             matrices[0].m12 = resourceOffset[0].x * 1.25f;

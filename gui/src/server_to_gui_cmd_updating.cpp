@@ -59,6 +59,7 @@ void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *c
     };
 
     player.set<Vector2>({tileMatrix.m12, tileMatrix.m14});
+    player.set<float>(0.f);
     player.set<player::playerTargetInfo>(playerPosInfo);
     player.disable<player::playerTargetInfo>();
     player.set<player::Orientation>(static_cast<player::Orientation>(newPlayer->orientation));
@@ -86,18 +87,27 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(playerPosition->x, playerPosition->y));
     const auto &tileMatrix = tile.ensure<raylib::Matrix>();
 
+    auto &playerOrientation = player.ensure<player::Orientation>();
+    playerOrientation = static_cast<player::Orientation>(playerPosition->orientation);
+
+    auto playerPos = player.get_ref<Vector2>();
+
+    // if player just changed it's orientation skip rest of the code
+    if (::Vector2Distance(*playerPos.get(), {tileMatrix.m12, tileMatrix.m14}) <= 0.1f)
+    {
+        player.disable<player::playerTargetInfo>();
+        player.enable<player::Orientation>();
+        return;
+    }
+
+    auto *const playerTargetInfo = player.get_mut<player::playerTargetInfo>();
+    playerTargetInfo->target = {tileMatrix.m12, tileMatrix.m14};
+
     raylib::ModelAnimation *const run = &world.get<player::playerAnimations>()->animations->at(RUN_ANIMATION_IDX);
     auto *const playerAnimData = player.get_mut<player::playerAnimationData>();
     playerAnimData->currentAnimation = run;
     playerAnimData->currentFrame = 0;
 
-    auto &playerOrientation = player.ensure<player::Orientation>();
-    playerOrientation = static_cast<player::Orientation>(playerPosition->orientation);
-
-    auto *const playerTargetInfo = player.get_mut<player::playerTargetInfo>();
-    playerTargetInfo->target = {tileMatrix.m12, tileMatrix.m14};
-
-    auto playerPos = player.get_ref<Vector2>();
     Vector2 direction = {tileMatrix.m12 - playerPos->x, tileMatrix.m14 - playerPos->y};
 
     // Normalize the direction vector
@@ -109,6 +119,34 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     }
     playerTargetInfo->normalizedDirection = direction;
     player.enable<player::playerTargetInfo>();
+
+    auto * const rotationAngle = player.get_mut<float>();
+
+    switch (playerOrientation)
+    {
+        using enum player::Orientation;
+        case NORTH:
+            // Make the player face the right direction while running (which is the opposite of the real orientation)
+            // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
+            *rotationAngle = !utils::IsTileInOddRow(tileMatrix.m14) ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
+            player.disable<player::Orientation>();
+            break;
+        case EAST:
+            *rotationAngle = EAST_ANGLE;
+            break;
+        case SOUTH:
+            // Make the player face the right direction while running (which is the opposite of the real orientation)
+            // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
+            *rotationAngle = !utils::IsTileInOddRow(tileMatrix.m14) ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
+            player.disable<player::Orientation>();
+            break;
+        case WEST:
+            *rotationAngle = WEST_ANGLE;
+            break;
+        default:
+            break;
+    }
+
     char dir;
     switch (playerPosition->orientation)
     {
