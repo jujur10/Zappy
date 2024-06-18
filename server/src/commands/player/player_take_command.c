@@ -8,6 +8,26 @@
 
 #include "queue/msg_queue.h"
 #include "game_settings.h"
+#include "utils/itoa/fast_itoa.h"
+
+/// @brief Function which sends to GUIs the events of pgt.
+///
+/// @param server The server structure.
+/// @param player The player.
+/// @param resource_index The resource index.
+static void send_pgt_to_guis(server_t PTR server, const player_t PTR player,
+    resources_index_t resource_index)
+{
+    msg_t message;
+    char msg_content[8] = "pgt X X\n";
+
+    for (uint16_t i = 0; i < server->nb_guis; i++) {
+        create_message(msg_content, 8, &message);
+        fast_itoa_u32(player->sock, message.ptr + 4);
+        fast_itoa_u32(resource_index, message.ptr + 6);
+        add_msg_to_queue(&server->guis[i].queue, &message);
+    }
+}
 
 void execute_player_take_command(server_t PTR server, uint16_t player_idx,
     const player_command_t PTR command)
@@ -24,6 +44,7 @@ void execute_player_take_command(server_t PTR server, uint16_t player_idx,
     if (current_tile->arr[resource_idx] > 0) {
         current_tile->arr[resource_idx]--;
         player->inventory.arr[resource_idx]++;
+        send_pgt_to_guis(server, player, resource_idx);
         add_time_limit_to_player(server->time_units, PLAYER_TAKE_WAIT, player);
         return (void)add_buffer_to_queue(&player->queue,
             &server->generated_buffers.buffers[PRE_OK_RESPONSE]);
