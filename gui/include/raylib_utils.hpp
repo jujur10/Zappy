@@ -5,6 +5,8 @@
 #pragma once
 #include <cstdint>
 
+#include "Vector2.hpp"
+
 struct Color; // Forward declaration to improve compile time and avoid circular dependency
 
 namespace raylib
@@ -41,4 +43,19 @@ void DrawCrystals(const raylib::Model *crystalModel, const raylib::Matrix *matri
 ///
 /// @param model Pointer to the model to unload the shaders from
 void UnloadShaders(const raylib::Model *model);
+
+enum class MouseButton {
+    LeftButton,
+    RightButton,
+    MiddleButton,
+    SideButton,
+    ExtraButton,
+    ForwardButton,
+    BackButton,
+};
+
+enum class MenuLabels {
+    MenuExpandArrow,
+    MenuRestractArrow,
+};
 }  // namespace zappy_gui::utils

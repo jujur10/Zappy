@@ -3,6 +3,7 @@
 
 #include "Camera3D.hpp"
 #include "Window.hpp"
+#include "Rectangle.hpp"
 #include "ModelAnimation.hpp"
 #include "flecs.h"
 #include "gui_to_server_cmd_structs.hpp"
@@ -18,6 +19,7 @@
 #include "player.hpp"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+#include "style_bluish.h"
 
 namespace zappy_gui
 {
@@ -65,6 +67,11 @@ static void InitializeECS(flecs::world &ecs,
     zappy_gui::systems::registerSystems(ecs);
 
     ecs.progress();  // Progress through OnStart pipeline // NOLINT
+
+    zappy_gui::systems::createGuiEntities(ecs, zappy_gui::screenWidth);
+
+    ecs.lookup("drawMenu").disable();
+    ecs.lookup("drawMenuRetractArrow").disable();
 }
 
 //----------------------------------------------------------------------------------
@@ -95,6 +102,8 @@ int32_t main(const int32_t argc, char *argv[])
     raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
     window.SetTargetFPS(60);
     // ::DisableCursor(); // Hides cursor and locks it to the window
+    raygui::GuiLoadStyleBluish();
+    raygui::GuiUnlock();
 
     //--------------------------------------------------------------------------------------
     // Create the 3D camera
@@ -123,6 +132,7 @@ int32_t main(const int32_t argc, char *argv[])
     // Main game loop
     while (!window.ShouldClose() && ecs.progress())  // Detect window close button or ESC key
     {
+        // Main loop
     }
 
     //--------------------------------------------------------------------------------------

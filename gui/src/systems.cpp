@@ -12,39 +12,42 @@
 #include <player.hpp>
 #include <rlgl.h>        // Must be included after Matrix.hpp, if not project will not compile
 #include <Camera3D.hpp>  // Must be included after Matrix.hpp, if not project will not compile
+#include <Mouse.hpp>
+#include <Rectangle.hpp>
 
 #include "map.hpp"
 #include "raylib_utils.hpp"
+#include "raygui.h"
 #include "server_to_gui_cmd_handling.hpp"
 
-namespace zappy_gui::systems
-{
+namespace zappy_gui::systems {
 
 //----------------------------------------------------------------------------------
 // Disables and Enables menu interactions
 //----------------------------------------------------------------------------------
-void HandleMenuInteraction(bool &menuInteraction)
-{
-    if (::IsKeyPressed(KEY_I))
-    {
-        menuInteraction = !menuInteraction;
-        if (menuInteraction)
-        {
-            ::EnableCursor();
-        }
-        else
-        {
-            ::DisableCursor();
+    void HandleMenuInteraction(bool &menuInteraction) {
+        if (::IsKeyPressed(KEY_I)) {
+            menuInteraction = !menuInteraction;
+            if (menuInteraction) {
+                ::EnableCursor();
+            } else {
+                ::DisableCursor();
+            }
         }
     }
-}
 
 /// @brief Register systems that will be executed in the OnStart pipeline
-static void registerOnStartSystems(const flecs::world &ecs)
-{
-    /// Generate the map
-    ecs.system("GenerateMap").kind(flecs::OnStart).iter(map::GenerateMap);
+    static void registerOnStartSystems(const flecs::world &ecs) {
+        /// Generate the map
+        ecs.system("GenerateMap").kind(flecs::OnStart).iter(map::GenerateMap);
 
+        /// Query the tile models and load the instancing shader into them
+        ecs.system<map::tileModels>("loadTileInstancingShader")
+                .kind(flecs::OnStart)
+                .iter(
+                        []([[maybe_unused]] const flecs::iter &it, const map::tileModels *const models) {
+                            utils::SetupModel(models->grass, "gui/resources/shaders/tile_instancing.vs", nullptr);
+                        });
     /// Query the tile models and load the instancing shader into them
     ecs.system<map::tileModels>("loadTileInstancingShader")
         .kind(flecs::OnStart)
@@ -56,34 +59,41 @@ static void registerOnStartSystems(const flecs::world &ecs)
                 utils::SetupModel(models->sandCactus, "gui/resources/shaders/tile_instancing.vs", nullptr);
             });
 
-    ecs.system<map::resourceModels>("loadResourceInstancingShader")
-        .kind(flecs::OnStart)
-        .iter(
-            []([[maybe_unused]] const flecs::iter &it, const map::resourceModels *const models)
-            {
-                utils::SetupModel(models->food, "gui/resources/shaders/tile_instancing.vs", nullptr);
-                utils::SetupModel(models->crystal, "gui/resources/shaders/tile_instancing.vs", nullptr);
-            });
-}
+        ecs.system<map::resourceModels>("loadResourceInstancingShader")
+                .kind(flecs::OnStart)
+                .iter(
+                        []([[maybe_unused]] const flecs::iter &it, const map::resourceModels *const models) {
+                            utils::SetupModel(models->food, "gui/resources/shaders/tile_instancing.vs", nullptr);
+                            utils::SetupModel(models->crystal, "gui/resources/shaders/tile_instancing.vs", nullptr);
+                        });
+    }
 
 static void registerOnLoadSystems(const flecs::world &ecs)
 {
     ecs.system("parseGuiCommand").kind(flecs::OnLoad).iter(net::ParseGuiCommands);
+    ecs.system("registerClickPosition").kind(flecs::OnLoad)
+                .iter([](const flecs::iter &it) {
+                    const auto pos = raylib::Mouse::GetPosition();
+                    for (int buttonType = 0; buttonType <= 6; ++buttonType) { // Iterate over all button types
+                        if (raylib::Mouse::IsButtonReleased(buttonType)) {
+                            it.world().entity().set<raylib::Vector2>(pos).add(
+                                    static_cast<utils::MouseButton>(buttonType));
+                        }
+                    }
+                });
 }
 
-static void registerPreUpdateSystems(const flecs::world &ecs)
-{
-    /// Query the camera and setup the drawing
-    ecs.system<raylib::Camera3D>("setupDrawing")
-        .term_at(1)
-        .singleton()
-        .kind(flecs::PreUpdate)
-        .iter(
-            []([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera)
-            {
-                ::BeginDrawing();
+    static void registerPreUpdateSystems(const flecs::world &ecs) {
+        /// Query the camera and setup the drawing
+        ecs.system<raylib::Camera3D>("setupDrawing")
+                .term_at(1)
+                .singleton()
+                .kind(flecs::PreUpdate)
+                .iter(
+                        []([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera) {
+                            ::BeginDrawing();
 
-                ::ClearBackground(BLACK);
+                            ::ClearBackground(BLACK);
 
                 camera->BeginMode();
             });
@@ -105,34 +115,34 @@ static void registerPreUpdateSystems(const flecs::world &ecs)
             });
 }
 
-static void registerOnUpdateSystems(const flecs::world &ecs)
-{
-    /// Query the camera and update it using the keyboard and mouse inputs
-    ecs.system<raylib::Camera3D>("updateCamera")
-        .term_at(1)
-        .singleton()
-        .kind(flecs::OnUpdate)
-        .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D * const camera) {
-            static bool menuInteraction = false;
-            const static Vector3 nullVector = {0.0f, 0.0f, 0.0f}; // Is set as static so that it doesn't get deleted and recreated every frame
-            HandleMenuInteraction(menuInteraction);
-            camera->Update(
-                Vector3{
-                    (::IsKeyDown(KEY_W) || ::IsKeyDown(KEY_UP)) * 0.1f -    // Move forward-backward
-                        (::IsKeyDown(KEY_S) || ::IsKeyDown(KEY_DOWN)) * 0.1f,
-                    (::IsKeyDown(KEY_D) || ::IsKeyDown(KEY_RIGHT)) * 0.1f - // Move right-left
-                        (::IsKeyDown(KEY_A) || ::IsKeyDown(KEY_LEFT)) * 0.1f,
-                    0.0f                                                    // Move up-down
-                },
-                menuInteraction ? nullVector :
-                Vector3{
-                    ::GetMouseDelta().x * 0.05f, // Rotation: yaw
-                    ::GetMouseDelta().y * 0.05f, // Rotation: pitch
-                    0.0f                         // Rotation: roll
-                },
-                menuInteraction ? 0.0f :
-                ::GetMouseWheelMove() * 2.0f);   // Move to target (zoom)
-        });
+    static void registerOnUpdateSystems(const flecs::world &ecs) {
+        /// Query the camera and update it using the keyboard and mouse inputs
+        ecs.system<raylib::Camera3D>("updateCamera")
+                .term_at(1)
+                .singleton()
+                .kind(flecs::OnUpdate)
+                .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera) {
+                    static bool menuInteraction = false;
+                    const static Vector3 nullVector = {0.0f, 0.0f,
+                                                       0.0f}; // Is set as static so that it doesn't get deleted and recreated every frame
+                    HandleMenuInteraction(menuInteraction);
+                    camera->Update(
+                            Vector3{
+                                    (::IsKeyDown(KEY_W) || ::IsKeyDown(KEY_UP)) * 0.1f -    // Move forward-backward
+                                    (::IsKeyDown(KEY_S) || ::IsKeyDown(KEY_DOWN)) * 0.1f,
+                                    (::IsKeyDown(KEY_D) || ::IsKeyDown(KEY_RIGHT)) * 0.1f - // Move right-left
+                                    (::IsKeyDown(KEY_A) || ::IsKeyDown(KEY_LEFT)) * 0.1f,
+                                    0.0f                                                    // Move up-down
+                            },
+                            menuInteraction ? nullVector :
+                            Vector3{
+                                    ::GetMouseDelta().x * 0.05f, // Rotation: yaw
+                                    ::GetMouseDelta().y * 0.05f, // Rotation: pitch
+                                    0.0f                         // Rotation: roll
+                            },
+                            menuInteraction ? 0.0f :
+                            ::GetMouseWheelMove() * 2.0f);   // Move to target (zoom)
+                });
 
     /// Query all the sand Type1 tiles and draw them
     ecs.system<raylib::Matrix>("drawType1Tiles")
@@ -185,90 +195,85 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                 utils::DrawModelInstanced(it.world().get<map::tileModels>()->sandCactus, tilesPosition, static_cast<int32_t>(it.count()));
             });
 
-    /// Query all food and draw it
-    ecs.system<raylib::Matrix>("drawFood")
-        .kind(flecs::OnUpdate)
-        .with(map::resourceType::food)
-        .iter(
-            [](const flecs::iter &it, const raylib::Matrix *const foodPosition)
-            {
-                utils::DrawModelInstanced(it.world().get<map::resourceModels>()->food, foodPosition, static_cast<int32_t>(it.count()));
-            });
+        /// Query all food and draw it
+        ecs.system<raylib::Matrix>("drawFood")
+                .kind(flecs::OnUpdate)
+                .with(map::resourceType::food)
+                .iter(
+                        [](const flecs::iter &it, const raylib::Matrix *const foodPosition) {
+                            utils::DrawModelInstanced(it.world().get<map::resourceModels>()->food, foodPosition,
+                                                      static_cast<int32_t>(it.count()));
+                        });
 
-    /// Query all linemate and draw it
-    ecs.system<raylib::Matrix>("drawLinemate")
-        .kind(flecs::OnUpdate)
-        .with(map::resourceType::linemate)
-        .iter(
-            [](const flecs::iter &it, const raylib::Matrix *const linematePosition)
-            {
-                utils::DrawCrystals(
-                    it.world().get<map::resourceModels>()->crystal,
-                    linematePosition,
-                    static_cast<int32_t>(it.count()),
-                    map::resourceColors[static_cast<int32_t>(map::resourceType::linemate) - 1]
-                );
-            });
+        /// Query all linemate and draw it
+        ecs.system<raylib::Matrix>("drawLinemate")
+                .kind(flecs::OnUpdate)
+                .with(map::resourceType::linemate)
+                .iter(
+                        [](const flecs::iter &it, const raylib::Matrix *const linematePosition) {
+                            utils::DrawCrystals(
+                                    it.world().get<map::resourceModels>()->crystal,
+                                    linematePosition,
+                                    static_cast<int32_t>(it.count()),
+                                    map::resourceColors[static_cast<int32_t>(map::resourceType::linemate) - 1]
+                            );
+                        });
 
-    /// Query all deraumere and draw it
-    ecs.system<raylib::Matrix>("drawDeraumere")
-        .kind(flecs::OnUpdate)
-        .with(map::resourceType::deraumere)
-        .iter(
-            [](const flecs::iter &it, const raylib::Matrix *const deraumerePosition)
-            {
-                utils::DrawCrystals(
-                    it.world().get<map::resourceModels>()->crystal,
-                    deraumerePosition,
-                    static_cast<int32_t>(it.count()),
-                    map::resourceColors[static_cast<int32_t>(map::resourceType::deraumere) - 1]
-                );
-            });
+        /// Query all deraumere and draw it
+        ecs.system<raylib::Matrix>("drawDeraumere")
+                .kind(flecs::OnUpdate)
+                .with(map::resourceType::deraumere)
+                .iter(
+                        [](const flecs::iter &it, const raylib::Matrix *const deraumerePosition) {
+                            utils::DrawCrystals(
+                                    it.world().get<map::resourceModels>()->crystal,
+                                    deraumerePosition,
+                                    static_cast<int32_t>(it.count()),
+                                    map::resourceColors[static_cast<int32_t>(map::resourceType::deraumere) - 1]
+                            );
+                        });
 
-    /// Query all sibur and draw it
-    ecs.system<raylib::Matrix>("drawSibur")
-        .kind(flecs::OnUpdate)
-        .with(map::resourceType::sibur)
-        .iter(
-            [](const flecs::iter &it, const raylib::Matrix *const siburPosition)
-            {
-                utils::DrawCrystals(
-                    it.world().get<map::resourceModels>()->crystal,
-                    siburPosition,
-                    static_cast<int32_t>(it.count()),
-                    map::resourceColors[static_cast<int32_t>(map::resourceType::sibur) - 1]
-                );
-            });
+        /// Query all sibur and draw it
+        ecs.system<raylib::Matrix>("drawSibur")
+                .kind(flecs::OnUpdate)
+                .with(map::resourceType::sibur)
+                .iter(
+                        [](const flecs::iter &it, const raylib::Matrix *const siburPosition) {
+                            utils::DrawCrystals(
+                                    it.world().get<map::resourceModels>()->crystal,
+                                    siburPosition,
+                                    static_cast<int32_t>(it.count()),
+                                    map::resourceColors[static_cast<int32_t>(map::resourceType::sibur) - 1]
+                            );
+                        });
 
-    /// Query all mendiane and draw it
-    ecs.system<raylib::Matrix>("drawMendiane")
-        .kind(flecs::OnUpdate)
-        .with(map::resourceType::mendiane)
-        .iter(
-            [](const flecs::iter &it, const raylib::Matrix *const mendianePosition)
-            {
-                utils::DrawCrystals(
-                    it.world().get<map::resourceModels>()->crystal,
-                    mendianePosition,
-                    static_cast<int32_t>(it.count()),
-                    map::resourceColors[static_cast<int32_t>(map::resourceType::mendiane) - 1]
-                );
-            });
+        /// Query all mendiane and draw it
+        ecs.system<raylib::Matrix>("drawMendiane")
+                .kind(flecs::OnUpdate)
+                .with(map::resourceType::mendiane)
+                .iter(
+                        [](const flecs::iter &it, const raylib::Matrix *const mendianePosition) {
+                            utils::DrawCrystals(
+                                    it.world().get<map::resourceModels>()->crystal,
+                                    mendianePosition,
+                                    static_cast<int32_t>(it.count()),
+                                    map::resourceColors[static_cast<int32_t>(map::resourceType::mendiane) - 1]
+                            );
+                        });
 
-    /// Query all phiras and draw it
-    ecs.system<raylib::Matrix>("drawPhiras")
-        .kind(flecs::OnUpdate)
-        .with(map::resourceType::phiras)
-        .iter(
-            [](const flecs::iter &it, const raylib::Matrix *const phirasPosition)
-            {
-                utils::DrawCrystals(
-                    it.world().get<map::resourceModels>()->crystal,
-                    phirasPosition,
-                    static_cast<int32_t>(it.count()),
-                    map::resourceColors[static_cast<int32_t>(map::resourceType::phiras) - 1]
-                );
-            });
+        /// Query all phiras and draw it
+        ecs.system<raylib::Matrix>("drawPhiras")
+                .kind(flecs::OnUpdate)
+                .with(map::resourceType::phiras)
+                .iter(
+                        [](const flecs::iter &it, const raylib::Matrix *const phirasPosition) {
+                            utils::DrawCrystals(
+                                    it.world().get<map::resourceModels>()->crystal,
+                                    phirasPosition,
+                                    static_cast<int32_t>(it.count()),
+                                    map::resourceColors[static_cast<int32_t>(map::resourceType::phiras) - 1]
+                            );
+                        });
 
     /// Query all thystame and draw it
     ecs.system<raylib::Matrix>("drawThystame")
@@ -322,41 +327,95 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             });
 }
 
-static void registerPostUpdateSystems(const flecs::world &ecs)
-{
-    /// Query the camera, end the drawing and display the FPS
-    ecs.system<raylib::Camera3D>("endDrawing")
-        .term_at(1)
-        .singleton()
+    static void registerPostUpdateSystems(const flecs::world &ecs) {
+        /// Query the camera, end the drawing and display the FPS
+        ecs.system<raylib::Camera3D>("endCamera")
+                .term_at(1)
+                .singleton()
+                .kind(flecs::PostUpdate)
+                .iter(
+                        []([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera) {
+                            camera->EndMode();
+                            ::DrawFPS(10, 10);
+                        });
+
+        ecs.system<raylib::Rectangle>("drawMenuExpandArrow")
         .kind(flecs::PostUpdate)
-        .iter(
-            []([[maybe_unused]] const flecs::iter &it, raylib::Camera3D *const camera)
+        .with(utils::MenuLabels::MenuExpandArrow)
+        .each([]([[maybe_unused]]const flecs::entity &entity, const raylib::Rectangle &rectangle)
+        {
+            const auto squareSideSize = static_cast<uint16_t>(rectangle.GetSize().GetX());
+            const uint16_t positionOffset = squareSideSize / 10;
+            const raylib::Vector2 iconPos = rectangle.GetPosition();
+            const auto iconPosX = static_cast<uint16_t>(iconPos.GetX());
+            const auto iconPosY = static_cast<uint16_t>(iconPos.GetY());
+            rectangle.Draw(GRAY);
+            raygui::GuiDrawIcon(raygui::ICON_ARROW_LEFT, iconPosX + positionOffset,
+                                iconPosY + positionOffset, positionOffset / 2, BLUE);
+        });
+
+        ecs.system<raylib::Rectangle>("drawMenuRetractArrow")
+        .kind(flecs::PostUpdate)
+        .with(utils::MenuLabels::MenuRestractArrow)
+        .each([]([[maybe_unused]]const flecs::entity &entity, const raylib::Rectangle &rectangle)
+        {
+            const auto squareSideSize = static_cast<uint16_t>(rectangle.GetSize().GetX());
+            const uint16_t positionOffset = squareSideSize / 10;
+            const raylib::Vector2 iconPos = rectangle.GetPosition();
+            const auto iconPosX = static_cast<uint16_t>(iconPos.GetX());
+            const auto iconPosY = static_cast<uint16_t>(iconPos.GetY());
+            rectangle.Draw(GRAY);
+            raygui::GuiDrawIcon(raygui::ICON_ARROW_RIGHT, iconPosX + positionOffset,
+                                iconPosY + positionOffset, positionOffset / 2, BLUE);
+        });
+
+        ecs.system("drawMenu").kind(flecs::PostUpdate)//.term_at(1).singleton()
+        .iter([]([[maybe_unused]]const flecs::iter &it)
+        {
+            raygui::GuiGroupBox(Rectangle{50, 50, 500, 500}, "Zappy Menu");
+        });
+
+
+        ecs.system<raylib::Vector2>("mouseClicks").kind(flecs::OnUpdate)
+        .with(utils::MouseButton::LeftButton)
+        .each([]([[maybe_unused]] const flecs::entity &entity, const raylib::Vector2 &mousePos)
+        {
+            if (!entity.world().lookup("drawMenuExpandArrow").has_flags(flecs::Disabled)
+            && entity.world().entity().get<raylib::Rectangle>())
             {
-                // it.world().lookup("player").get<raylib::Model>()->Draw(raylib::Vector3{0.0f, 0.0f, 0.0f}, 0.5f, WHITE);
-                camera->EndMode();
 
-                ::DrawFPS(10, 10);
+            }
+        });
 
-                ::EndDrawing();
-            });
+        ecs.system("endDrawing").kind(flecs::PostUpdate)
+        .iter([]([[maybe_unused]]const flecs::iter &it)
+        {
+            ::EndDrawing();
+        });
 
-    // TODO: Send a request to the server to update the map resources if map has not be updated for a while
-    // ecs.system("AskForMapResourcesUpdate")
-    //     .kind(flecs::PostUpdate)
-    //     .iter(
-    //         []([[maybe_unused]] const flecs::iter &it)
-    //         {
-    //             net::GuiToServerQueue.try_push(const_cast<char*>(GUI_MAP_TILES));
-    //         });
-}
+        // TODO: Send a request to the server to update the map resources if map has not be updated for a while
+        // ecs.system("AskForMapResourcesUpdate")
+        //     .kind(flecs::PostUpdate)
+        //     .iter(
+        //         []([[maybe_unused]] const flecs::iter &it)
+        //         {
+        //             net::GuiToServerQueue.try_push(const_cast<char*>(GUI_MAP_TILES));
+        //         });
+    }
 
-void registerSystems(const flecs::world &ecs)
-{
-    registerOnStartSystems(ecs);
-    registerOnLoadSystems(ecs);
-    registerPreUpdateSystems(ecs);
-    registerOnUpdateSystems(ecs);
-    registerPostUpdateSystems(ecs);
-}
+    void registerSystems(const flecs::world &ecs) {
+        registerOnStartSystems(ecs);
+        registerOnLoadSystems(ecs);
+        registerPreUpdateSystems(ecs);
+        registerOnUpdateSystems(ecs);
+        registerPostUpdateSystems(ecs);
+    }
 
+
+    void createGuiEntities(const flecs::world &ecs, const uint16_t screenWidth) {
+        const auto menuExpandArrowRect = raylib::Rectangle(static_cast<float>(screenWidth) - 40, 10, 40, 40);
+        const auto menuRetractArrowRect = raylib::Rectangle(static_cast<float>(screenWidth) - 350, 10, 40, 40);
+        ecs.entity().set<raylib::Rectangle>(menuExpandArrowRect).add(utils::MenuLabels::MenuExpandArrow);
+        ecs.entity().set<raylib::Rectangle>(menuRetractArrowRect).add(utils::MenuLabels::MenuRestractArrow);
+    }
 }  // namespace zappy_gui::systems
