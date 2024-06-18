@@ -41,6 +41,7 @@ static void InitializeECS(flecs::world &ecs,
                           raylib::Model &sandCactus,
                           raylib::Model &food,
                           raylib::Model &crystal,
+                          raylib::Model &skybox,
                           std::vector<raylib::ModelAnimation> &playerAnimations)
 {
     ecs.set_entity_range(4'269'420, 0);  // Allow flecs to only generate entity ids starting from 4'269'420
@@ -56,6 +57,8 @@ static void InitializeECS(flecs::world &ecs,
     ecs.set<zappy_gui::map::resourceModels>({&food, &crystal});
 
     ecs.set<zappy_gui::player::playerAnimations>({&playerAnimations});
+
+    ecs.set<zappy_gui::map::skybox>({&skybox});
 
     zappy_gui::systems::registerSystems(ecs);
 
@@ -102,12 +105,13 @@ int32_t main(const int32_t argc, char *argv[])
     auto sandCactus = raylib::Model("gui/resources/assets/sand_cactus.glb");
     auto food = raylib::Model("gui/resources/assets/food.glb");
     auto crystal = raylib::Model("gui/resources/assets/crystal.glb");
+    auto skybox = raylib::Model("gui/resources/assets/skybox.glb");
     std::vector<raylib::ModelAnimation> playerAnimations = raylib::ModelAnimation::Load("gui/resources/assets/cactoro.m3d");
 
     //--------------------------------------------------------------------------------------
     // Create the ECS and initialize it
     flecs::world ecs;
-    ::InitializeECS(ecs, camera, sand, sandRock, sandCactus, food, crystal, playerAnimations);
+    ::InitializeECS(ecs, camera, sand, sandRock, sandCactus, food, crystal, skybox, playerAnimations);
 
     //--------------------------------------------------------------------------------------
     // Start the network main loop on another thread
