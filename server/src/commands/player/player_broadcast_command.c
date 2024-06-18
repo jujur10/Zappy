@@ -88,7 +88,7 @@ static void broadcast_message_to_player(player_t PTR player,
     msg_t message = {};
 
     fast_itoa_u32(direction, message_buffer->ptr + 8);
-    create_message_from_ptr(message_buffer->ptr, message_buffer->len,
+    create_message(message_buffer->ptr, message_buffer->len,
         &message);
     add_msg_to_queue(&player->queue, &message);
 }
