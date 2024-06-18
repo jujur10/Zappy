@@ -1,11 +1,14 @@
 #include "Mouse.hpp"
 #include "Rectangle.hpp"
 #include "raylib.h"
-#include "Text.hpp"
 #include "Color.hpp"
 #include <cstdint>
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+#include "raylib_utils.hpp"
+#include <flecs.h>
+#include "gui_to_server_cmd_structs.hpp"
+#include "gui.hpp"
 
 namespace zappy_gui::gui {
     static bool GuiSliderProOwning(raylib::Rectangle bounds, const char *textLeft, const char *textRight,
@@ -136,5 +139,43 @@ namespace zappy_gui::gui {
         const float minValue, const float maxValue, const bool editMode) {
         return GuiSliderProOwning(bounds, textLeft, textRight, value, minValue, maxValue,
             raygui::GuiGetStyle(SLIDER, SLIDER_WIDTH), editMode);
+    }
+
+    void timeStepSliderAction(const float value) {
+        std::string sstString = "sst ";
+        sstString += std::to_string(static_cast<int>(value));
+        sstString += "\n";
+        net::GuiToServerQueue.try_push(sstString.data());
+    }
+
+    void createGuiEntities(const flecs::world &ecs, const uint16_t screenWidth, const uint16_t screenHeight) {
+        const float menuWidth = 350.f;
+        const float arrowRectSize = 40.f;
+        const auto menuExpandArrowRect = raylib::Rectangle(static_cast<float>(screenWidth) - arrowRectSize,
+                                                           10, arrowRectSize, arrowRectSize);
+        const auto menuRetractArrowRect = raylib::Rectangle(static_cast<float>(screenWidth) - menuWidth - arrowRectSize,
+                                                            10, arrowRectSize, arrowRectSize);
+        const auto menuRect = raylib::Rectangle(static_cast<float>(screenWidth) - menuWidth, 0, menuWidth, screenHeight);
+        ecs.entity().set<raylib::Rectangle>(menuExpandArrowRect).add(utils::MenuLabels::MenuExpandArrow);
+        ecs.entity().set<raylib::Rectangle>(menuRetractArrowRect).add(utils::MenuLabels::MenuRetractArrow);
+        ecs.entity().set<raylib::Rectangle>(menuRect).add(utils::MenuLabels::Menu);
+        ecs.entity().set<Slider>(Slider{
+            .bounds = Rectangle{static_cast<float>(screenWidth) - menuWidth + 80, 15, menuWidth - 100, 32},
+            .minValue = 1.f, .maxValue = 200.f, .value = 1.f, .formatTextLeft = "TimeStep %.0f",
+            .formatTextRight = nullptr, .editMode = false, .releaseAction = timeStepSliderAction});
+        disableMenuSystems(ecs);
+    }
+
+    void disableMenuSystems(const flecs::world &ecs) {
+        ecs.lookup("drawMenu").disable();
+        ecs.lookup("drawMenuRetractArrow").disable();
+        ecs.lookup("drawMenuSliders").disable();
+    }
+
+    void destroyGuiEntities(const flecs::world &ecs) {
+        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::MenuExpandArrow).build().destruct();
+        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::MenuRetractArrow).build().destruct();
+        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::Menu).build().destruct();
+        ecs.query_builder<Slider>().build().destruct();
     }
 }

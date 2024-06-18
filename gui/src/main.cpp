@@ -19,6 +19,7 @@
 #include "player.hpp"
 #include "raygui.h"
 #include "style_bluish.h"
+#include "gui.hpp"
 
 namespace zappy_gui
 {
@@ -67,10 +68,7 @@ static void InitializeECS(flecs::world &ecs,
 
     ecs.progress();  // Progress through OnStart pipeline // NOLINT
 
-    zappy_gui::systems::createGuiEntities(ecs, zappy_gui::screenWidth, zappy_gui::screenHeight);
-
-    ecs.lookup("drawMenu").disable();
-    ecs.lookup("drawMenuRetractArrow").disable();
+    zappy_gui::gui::createGuiEntities(ecs, zappy_gui::screenWidth, zappy_gui::screenHeight);
 }
 
 //----------------------------------------------------------------------------------
@@ -132,6 +130,10 @@ int32_t main(const int32_t argc, char *argv[])
     {
         // Main loop
     }
+
+    //--------------------------------------------------------------------------------------
+    // Destroy the menu entities
+    zappy_gui::gui::destroyGuiEntities(ecs);
 
     //--------------------------------------------------------------------------------------
     // Stop the network thread

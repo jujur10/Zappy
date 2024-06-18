@@ -21,7 +21,6 @@
 #include "raylib_utils.hpp"
 #include "raygui.h"
 #include "server_to_gui_cmd_handling.hpp"
-#include "gui_to_server_cmd_structs.hpp"
 #include "gui.hpp"
 
 namespace zappy_gui::systems {
@@ -367,37 +366,43 @@ namespace zappy_gui::systems {
                 .each([]([[maybe_unused]]const flecs::entity &entity, const raylib::Rectangle &rectangle) {
                     rectangle.Draw(raylib::Color(raygui::GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
                     raygui::GuiGroupBox(rectangle, "Zappy Menu");
-                    const auto position = rectangle.GetPosition();
-                    const auto size = rectangle.GetSize();
-                    const auto sliderRect = raylib::Rectangle(raylib::Vector2(position.GetX() + 80, position.GetY() + 15),
-                                      raylib::Vector2(size.GetX() - 100, 32));
-                    static float value = 1.f;
-                    static bool sliderEditMode = false;
-                    if (zappy_gui::gui::GuiSlider(sliderRect, TextFormat("TimeStep %.0f", value),
-                                                  nullptr, &value, 1, 200, sliderEditMode))
-                    {
-                        if (sliderEditMode) {
-                            std::string sstString = "sst ";
-                            sstString += std::to_string(static_cast<int>(value));
-                            sstString += "\n";
-                            net::GuiToServerQueue.try_push(sstString.data());
-                        }
-                        sliderEditMode = !sliderEditMode;
-                    }
                 });
 
+            ecs.system<gui::Slider>("drawMenuSliders").kind(flecs::PostUpdate)
+            .each([]([[maybe_unused]]const flecs::entity &entity, gui::Slider &slider)
+            {
+                const char *textLeft = nullptr;
+                const char *textRight = nullptr;
+                if (slider.formatTextLeft != nullptr)
+                {
+                    textLeft = ::TextFormat(slider.formatTextLeft, slider.value);
+                }
+                if (slider.formatTextRight != nullptr)
+                {
+                    textRight = ::TextFormat(slider.formatTextRight, slider.value);
+                }
+                if (gui::GuiSlider(slider.bounds, textLeft, textRight, &slider.value,
+                    slider.minValue, slider.maxValue, slider.editMode))
+                {
+                    if (slider.editMode)
+                    {
+                        slider.releaseAction(slider.value);
+                    }
+                    slider.editMode = !slider.editMode;
+                }
+            });
 
-        ecs.system<raylib::Vector2>("mouseClicks").kind(flecs::OnUpdate).no_readonly(true)
-                .with(utils::MouseButton::LeftButton)
-                .each([]([[maybe_unused]]flecs::entity const &entity, raylib::Vector2 const &mousePos) {
-                    if (!entity.world().lookup("drawMenuExpandArrow").has_flags(flecs::Disabled)) {
-                        entity.world().query_builder<raylib::Rectangle>().with(
-                                        utils::MenuLabels::MenuExpandArrow).build()
-                                .each([&mousePos]([[maybe_unused]]flecs::entity const &e,
-                                                  raylib::Rectangle const &rectangle) {
+            ecs.system<raylib::Vector2>("mouseClicks").kind(flecs::OnUpdate).no_readonly(true)
+            .with(utils::MouseButton::LeftButton)
+            .each([]([[maybe_unused]]flecs::entity const &entity, raylib::Vector2 const &mousePos) {
+                if (!entity.world().lookup("drawMenuExpandArrow").has_flags(flecs::Disabled)) {
+                    entity.world().query_builder<raylib::Rectangle>().with(utils::MenuLabels::MenuExpandArrow).build()
+                    .each([&mousePos]([[maybe_unused]]flecs::entity const &e, raylib::Rectangle const &rectangle)
+                    {
                                     if (rectangle.CheckCollision(mousePos)) {
                                         e.world().lookup("drawMenuExpandArrow").disable();
                                         e.world().lookup("drawMenu").enable();
+                                        e.world().lookup("drawMenuSliders").enable();
                                         e.world().lookup("drawMenuRetractArrow").enable();
                                     }
                                 });
@@ -410,6 +415,7 @@ namespace zappy_gui::systems {
                                     if (rectangle.CheckCollision(mousePos)) {
                                         e.world().lookup("drawMenuExpandArrow").enable();
                                         e.world().lookup("drawMenu").disable();
+                                        e.world().lookup("drawMenuSliders").disable();
                                         e.world().lookup("drawMenuRetractArrow").disable();
                                     }
                                 });
@@ -437,19 +443,5 @@ namespace zappy_gui::systems {
         registerPreUpdateSystems(ecs);
         registerOnUpdateSystems(ecs);
         registerPostUpdateSystems(ecs);
-    }
-
-
-    void createGuiEntities(const flecs::world &ecs, const uint16_t screenWidth, const uint16_t screenHeight) {
-        const float menuWidth = 350.f;
-        const float arrowRectSize = 40.f;
-        const auto menuExpandArrowRect = raylib::Rectangle(static_cast<float>(screenWidth) - arrowRectSize,
-                                                           10, arrowRectSize, arrowRectSize);
-        const auto menuRetractArrowRect = raylib::Rectangle(static_cast<float>(screenWidth) - menuWidth - arrowRectSize,
-                                                            10, arrowRectSize, arrowRectSize);
-        const auto menuRect = raylib::Rectangle(static_cast<float>(screenWidth) - menuWidth, 0, menuWidth, screenHeight);
-        ecs.entity().set<raylib::Rectangle>(menuExpandArrowRect).add(utils::MenuLabels::MenuExpandArrow);
-        ecs.entity().set<raylib::Rectangle>(menuRetractArrowRect).add(utils::MenuLabels::MenuRetractArrow);
-        ecs.entity().set<raylib::Rectangle>(menuRect).add(utils::MenuLabels::Menu);
     }
 }  // namespace zappy_gui::systems
