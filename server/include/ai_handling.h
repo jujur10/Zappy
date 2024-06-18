@@ -12,8 +12,9 @@
 /// @brief Function which initializes an ai (players).
 /// @param server The server pointer.
 /// @param sock The client's socket.
+/// @param team_idx The team index of the player.
 /// @return The ai index in the ai array of -1 if not enough slot.
-int32_t init_ai(server_t PTR server, int sock);
+int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx);
 
 /// @brief Function which destroys an ai.
 /// @param server The server pointer.

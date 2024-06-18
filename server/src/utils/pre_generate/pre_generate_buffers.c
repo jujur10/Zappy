@@ -13,10 +13,18 @@
 #include "server.h"
 #include "style/status.h"
 #include "utils/string/buffer.h"
+#include "game_settings.h"
 
-/// @brief Set the message and returns the new offset of pre-generated array.
-/// @param offset The offset of the pre-generated array to copy to.
-/// @return The new offset.
+/// @brief Constant representing the max size in byte for a string
+// representation of a tile.
+static const uint64_t MAX_SIZE_FOR_A_TILE = sizeof(FOOD_STR) +
+sizeof(LINEMATE_STR) + sizeof(DERAUMERE_STR) + sizeof(SIBUR_STR) +
+sizeof(MENDIANE_STR) + sizeof(PHIRAS_STR) + sizeof(THYSTAME_STR) +
+sizeof(PLAYER_STR) + 1;
+
+/// @brief Set the welcome message into the welcome message buffer.
+///
+/// @param pre_generated_buffers The server buffers.
 static void set_welcome(generated_buffers_t PTR pre_generated_buffers)
 {
     init_buffer_from_chars(
@@ -25,10 +33,25 @@ static void set_welcome(generated_buffers_t PTR pre_generated_buffers)
     );
 }
 
-/// @brief Set the message and returns the new offset of pre-generated array.
-/// @param offset The offset of the pre-generated array to copy to.
+/// @brief Set the ok and ko messages into their respective buffers.
+///
+/// @param pre_generated_buffers The server buffers.
+static void set_ok_ko(generated_buffers_t PTR pre_generated_buffers)
+{
+    init_buffer_from_chars(
+        &pre_generated_buffers->buffers[PRE_OK_RESPONSE],
+        sizeof(OK_RESPONSE), OK_RESPONSE, sizeof(OK_RESPONSE) - 1
+    );
+    init_buffer_from_chars(
+        &pre_generated_buffers->buffers[PRE_KO_RESPONSE],
+        sizeof(KO_RESPONSE), KO_RESPONSE, sizeof(KO_RESPONSE) - 1
+    );
+}
+
+/// @brief Set the pre-calculated world dimensions buffer.
+///
 /// @param server The server structure in order to obtain the world dimensions.
-/// @return The new offset.
+/// @param pre_generated_buffers The buffer container structure.
 static void set_world_dimensions(const server_t PTR server,
     generated_buffers_t PTR pre_generated_buffers)
 {
@@ -49,6 +72,28 @@ static void set_world_dimensions(const server_t PTR server,
     );
 }
 
+/// @brief Allocate the response buffer for the look command.
+///
+/// @param pre_generated_buffers The buffer container structure.
+static void set_look_response_buffer(
+    generated_buffers_t PTR pre_generated_buffers)
+{
+    uint32_t max_nb_of_tiles = get_total_nb_of_tiles_required(MAX_AI_LVL);
+    uint64_t max = (MAX_SIZE_FOR_A_TILE * max_nb_of_tiles) + 2;
+
+    init_buffer(&pre_generated_buffers->buffers[PRE_LOOK_RESPONSE_BUFFER],
+        (uint32_t)max);
+}
+
+/// @brief Allocate the response buffer for the broadcast command.
+///
+/// @param pre_generated_buffers The buffer container structure.
+static void set_broadcast_buffer(generated_buffers_t PTR pre_generated_buffers)
+{
+    init_buffer_from_chars(&pre_generated_buffers->buffers[PRE_BROADCAST_MSG],
+        MAX_BROADCAST_MSG_LENGTH, MESSAGE_STR, sizeof(MESSAGE_STR) - 1);
+}
+
 status_t pre_generate_buffers(server_t PTR server)
 {
     server->generated_buffers.buffers = malloc(sizeof(buffer_t) *
@@ -56,10 +101,14 @@ status_t pre_generate_buffers(server_t PTR server)
     if (NULL == server->generated_buffers.buffers)
         return FAILURE;
     set_welcome(&server->generated_buffers);
+    set_ok_ko(&server->generated_buffers);
     set_world_dimensions(server, &server->generated_buffers);
     pre_generate_resources_counter(server->args, &server->generated_buffers);
     set_tna_response(server);
     set_mct_buffer(server);
+    pre_generate_look_indexes(&server->generated_buffers);
+    set_look_response_buffer(&server->generated_buffers);
+    set_broadcast_buffer(&server->generated_buffers);
     server->generated_buffers.nb_of_buffer = PRE_GENERATED_ARR_LEN;
     return SUCCESS;
 }

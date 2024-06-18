@@ -27,15 +27,33 @@ typedef struct generated_buffers_s {
 
 typedef enum {
     PRE_WELCOME_BUFFER,
+    PRE_OK_RESPONSE,
+    PRE_KO_RESPONSE,
     PRE_WORLD_DIM_BUFFER,
     PRE_GENERATED_RESOURCE_COUNTER,
     PRE_TNA_RESPONSE,
     PRE_MAP_BUFFER,
+    PRE_TOP_INDEXES,
+    PRE_RIGHT_INDEXES,
+    PRE_BOTTOM_INDEXES,
+    PRE_LEFT_INDEXES,
+    PRE_LOOK_RESPONSE_BUFFER,
+    PRE_BROADCAST_MSG,
     PRE_GENERATED_ARR_LEN
 } generated_enum_t;
 
 /// @brief Welcome message.
 #define WELCOME_MSG "WELCOME\n"
+
+/// @brief OK response.
+#define OK_RESPONSE "ok\n"
+
+/// @brief KO response.
+#define KO_RESPONSE "ko\n"
+
+/// @brief Max broadcast message limit.
+#define MESSAGE_STR "message K, "
+#define MAX_BROADCAST_MSG_LENGTH (sizeof(MESSAGE_STR) + 512)
 
 /// @brief Function to pre-generate responses.
 ///
@@ -65,3 +83,9 @@ void set_tna_response(server_t PTR server);
 ///
 /// @param server The server structure.
 void set_mct_buffer(server_t PTR server);
+
+/// @brief Function which generates arrays of sorted indexes in order to
+/// obtain the look tiles blazingly fast.
+///
+/// @param pre_generated_buffers The pre generated buffers structure.
+void pre_generate_look_indexes(generated_buffers_t PTR pre_generated_buffers);

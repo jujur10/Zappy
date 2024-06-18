@@ -38,6 +38,23 @@ void destroy_gui(server_t PTR server, uint32_t gui_idx)
     memset(&server->guis[server->nb_guis], 0, sizeof(gui_t));
 }
 
+/// @brief Function which execute command if available.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+static void execute_command_if_available(server_t PTR server, uint32_t gui_idx)
+{
+    gui_command_t next_command;
+
+    if (false == is_timeout_exceed(&server->clock, &server->guis[gui_idx]
+    .blocking_time))
+        return;
+    if (SUCCESS == get_next_gui_command(&server->guis[gui_idx].command_buffer,
+    &next_command)) {
+        execute_gui_command(server, (uint16_t)gui_idx, &next_command);
+    }
+}
+
 /// @brief Function called when the server receive data from a gui_t.\n
 /// - Put the client's message into a buffer.\n
 /// - If EOF reached, destroy the gui.\n
@@ -57,7 +74,7 @@ static void on_gui_rcv(server_t PTR server, uint32_t gui_idx)
     }
     LOGF("Gui received : %.*s", (int32_t)bytes_received, buffer)
     gui_command_handling(server, buffer, (uint32_t)bytes_received, gui_idx);
-    if (SUCCESS == get_next_command(&server->guis[gui_idx].command_buffer,
+    if (SUCCESS == get_next_gui_command(&server->guis[gui_idx].command_buffer,
     &next_command)) {
         execute_gui_command(server, (uint16_t)gui_idx, &next_command);
     }
@@ -75,12 +92,28 @@ static uint8_t is_ready(server_t PTR server, gui_t PTR gui,
     const fd_set PTR fd_set)
 {
     if (FD_ISSET(gui->sock, fd_set)) {
-        if (false == has_blocking_time_expired(&server->clock,
-        &gui->blocking_time))
+        if (false == is_timeout_exceed(&server->clock, &gui->blocking_time))
             return 0;
         return 1;
     }
     return 2;
+}
+
+static void blocking_time_not_respected(server_t PTR server,
+    uint32_t gui_idx, int32_t PTR select_ret)
+{
+    msg_t message;
+    char buffer[10];
+    uint64_t bytes_received = read(server->guis[gui_idx].sock, buffer,
+        sizeof(buffer));
+
+    if (bytes_received < 1) {
+        LOG("Player closed connection")
+        return destroy_gui(server, gui_idx);
+    }
+    create_message("ko\n", 4, &message);
+    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    (*select_ret)--;
 }
 
 /// @brief Function which check and handle if the gui's socket waiting to
@@ -94,14 +127,10 @@ static uint8_t is_ready(server_t PTR server, gui_t PTR gui,
 static uint8_t handle_guis_rfds(server_t PTR server, uint32_t gui_idx,
     const fd_set PTR rfds, int32_t PTR select_ret)
 {
-    msg_t message;
-
     LOG("Start handle GUI rfds");
     switch (is_ready(server, &server->guis[gui_idx], rfds)) {
         case 0:
-            create_message("ko\n", 4, &message);
-            add_msg_to_queue(&server->guis[gui_idx].queue, &message);
-            (*select_ret)--;
+            blocking_time_not_respected(server, gui_idx, select_ret);
             LOG("Stop handle GUI rfds 1")
             return 1;
         case 1:
@@ -162,13 +191,14 @@ void handle_guis(server_t PTR server, const fd_set PTR rfds,
     LOG("Start handling GUIs");
     for (int32_t i = 0; count_guis < server->nb_guis && *select_ret > 0
     && i < MAX_CLIENTS; i++) {
-        LOGF("Actual GUI %i", i)
         if (0 == server->guis[i].sock)
             continue;
         count_guis++;
         if (FAILURE == queue_empty(&server->guis[i].queue)) {
             handle_guis_wfds(server, i, wfds, select_ret);
             continue;
+        } else {
+            execute_command_if_available(server, i);
         }
         if (1 == handle_guis_rfds(server, i, rfds, select_ret))
             continue;

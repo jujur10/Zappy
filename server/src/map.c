@@ -15,14 +15,15 @@
 #include "utils/pre_generate/pre_generate.h"
 #include "game_settings.h"
 #include "logging.h"
+#include "coordinates.h"
 
 status_t init_map(const argument_t ARRAY args, map_t PTR map)
 {
     map->tiles = calloc(args->height * args->width, sizeof(resources_t));
     if (NULL == map->tiles)
         return FAILURE;
-    map->height = args->height;
-    map->width = args->width;
+    map->height = (uint16_t)args->height;
+    map->width = (uint16_t)args->width;
     map->has_been_modified = true;
     return SUCCESS;
 }
@@ -68,4 +69,10 @@ void update_map(double current_time, map_t PTR map,
         next_update = current_time + MAP_UPDATE_WAIT;
         LOG("Map updated")
     }
+}
+
+resources_t *get_resource_tile_by_coordinates(const map_t PTR map,
+    const coordinates_t PTR coordinates)
+{
+    return &map->tiles[coordinates->y * map->height + coordinates->x];
 }

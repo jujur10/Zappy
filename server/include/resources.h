@@ -76,6 +76,16 @@ typedef enum resources_index_s {
     R_STRUCT_SIZE
 } PACKED resources_index_t;
 
+/// @brief Macros to represent the resources as array of chars.
+#define FOOD_STR "food"
+#define LINEMATE_STR "linemate"
+#define DERAUMERE_STR "deraumere"
+#define SIBUR_STR "sibur"
+#define MENDIANE_STR "mendiane"
+#define PHIRAS_STR "phiras"
+#define THYSTAME_STR "thystame"
+#define PLAYER_STR "player"
+
 /// @brief Union representing the resources (accessible by attribute or array).
 ///
 /// @var attr In order to access the resources by attribute.
@@ -120,3 +130,47 @@ typedef enum {
 
 /// @brief Macro to calculate the resource ratio.
 #define GET_RES_PROPORTION(x) (((double)(x)) / RES_PROPORTION_MULTIPLIER)
+
+/// @brief Function which returns the resource index resulting of the string
+/// comparison.
+///
+/// @param string The string to convert.
+/// @return The resource index representing the string or R_STRUCT_SIZE on
+/// failure.
+resources_index_t get_resource_index_from_str(const char *string);
+
+/// @brief Calculate the number of required tiles for a depth.
+/// Sequence un+1 : n (n + 1) = n + 2
+/// Sequence un : n (n) = (n * 2) + 1
+///
+/// @param depth The depth.
+/// @return The number of required tiles for the depth.
+uint32_t get_nb_of_tiles_for_a_depth(uint32_t depth);
+
+/// @brief Calculate the total number of tiles required for a level.
+/// ((U0 + Un) * (n + 1)) / 2
+///
+/// @param level The actual level.
+/// @return The total number of tiles.
+uint32_t get_total_nb_of_tiles_required(uint8_t level);
+
+/// @brief Enumeration representing the elevation level changes.
+///
+/// @var LEVEL_1_TO_2 Representing the action to pass from level 1 to level 2.
+/// @var LEVEL_2_TO_3 Representing the action to pass from level 2 to level 3.
+/// @var LEVEL_3_TO_4 Representing the action to pass from level 3 to level 4.
+/// @var LEVEL_4_TO_5 Representing the action to pass from level 4 to level 5.
+/// @var LEVEL_5_TO_6 Representing the action to pass from level 5 to level 6.
+/// @var LEVEL_6_TO_7 Representing the action to pass from level 6 to level 7.
+/// @var LEVEL_7_TO_8 Representing the action to pass from level 7 to level 8.
+/// @var NB_OF_LEVELS Representing total number of level changes possible.
+typedef enum {
+    LEVEL_1_TO_2,
+    LEVEL_2_TO_3,
+    LEVEL_3_TO_4,
+    LEVEL_4_TO_5,
+    LEVEL_5_TO_6,
+    LEVEL_6_TO_7,
+    LEVEL_7_TO_8,
+    NB_OF_LEVELS
+} PACKED elevation_requirements_t;

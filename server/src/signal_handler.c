@@ -32,4 +32,5 @@ void register_signals(void)
     sigaction(SIGQUIT, &act, NULL);
     sigaction(SIGHUP, &act, NULL);
     sigaction(SIGKILL, &act, NULL);
+    signal(SIGPIPE, SIG_IGN);
 }

@@ -25,7 +25,24 @@ add_executable(zappy_server
     src/commands/gui/gui_sgt_command.c
     src/commands/gui/gui_sst_command.c
     src/commands/gui/gui_tna_command.c
+    src/commands/player/player_broadcast_command.c
+    src/commands/player/player_command.c
     src/commands/player/player_command_parsing.c
+    src/commands/player/player_connect_nbr_command.c
+    src/commands/player/player_direction_command.c
+    src/commands/player/player_eject_command.c
+    src/commands/player/player_fork_command.c
+    src/commands/player/player_forward_command.c
+    src/commands/player/player_frequency_command.c
+    src/commands/player/player_incantation_command.c
+    src/commands/player/player_inventory_command.c
+    src/commands/player/player_look_command.c
+    src/commands/player/player_none_command.c
+    src/commands/player/player_responses.c
+    src/commands/player/player_right_left_command.c
+    src/commands/player/player_set_command.c
+    src/commands/player/player_take_command.c
+    src/coordinates.c
     src/gui_handling.c
     src/main.c
     src/map.c
@@ -34,6 +51,7 @@ add_executable(zappy_server
     src/new_clients_handling.c
     src/player.c
     src/queue/queue_utils_msg.c
+    src/resource.c
     src/server.c
     src/server_events.c
     src/server_update.c
@@ -43,9 +61,11 @@ add_executable(zappy_server
     src/team.c
     src/utils/arrays/arrays_u32.c
     src/utils/arrays/arrays_u64.c
+    src/utils/arrays/arrays_virtual.c
     src/utils/itoa/fast_itoa_u32.c
     src/utils/pre_generate/gui/gui_pre_generate_mct.c
     src/utils/pre_generate/gui/gui_pre_generate_tna.c
+    src/utils/pre_generate/player/pre_generate_look_indexes.c
     src/utils/pre_generate/pre_generate_buffers.c
     src/utils/pre_generate/pre_generate_resources.c
     src/utils/string/buffer.c
@@ -58,6 +78,7 @@ target_include_directories(zappy_server PRIVATE
 
 target_link_libraries(zappy_server PRIVATE
     build_configs
+    m
 )
 
 set_target_properties(zappy_server PROPERTIES
@@ -100,24 +121,39 @@ if (DEFINED RUN_TESTS)
         src/commands/gui/gui_ppo_command.c
         src/commands/gui/gui_sgt_command.c
         src/commands/gui/gui_sst_command.c
+        src/commands/player/player_broadcast_command.c
         src/commands/player/player_command_parsing.c
+        src/commands/player/player_direction_command.c
+        src/commands/player/player_frequency_command.c
+        src/commands/player/player_inventory_command.c
+        src/commands/player/player_look_command.c
+        src/commands/player/player_responses.c
+        src/coordinates.c
         src/gui_handling.c
         src/map.c
         src/map_buffer.c
         src/msg.c
         src/player.c
         src/queue/queue_utils_msg.c
+        src/team.c
         src/utils/arrays/arrays_u32.c
         src/utils/arrays/arrays_u64.c
+        src/utils/arrays/arrays_virtual.c
         src/utils/itoa/fast_itoa_u32.c
         src/utils/pre_generate/gui/gui_pre_generate_mct.c
         src/utils/pre_generate/gui/gui_pre_generate_tna.c
+        src/utils/pre_generate/player/pre_generate_look_indexes.c
         src/utils/pre_generate/pre_generate_buffers.c
         src/utils/pre_generate/pre_generate_resources.c
         src/utils/string/buffer.c
         src/utils/string/string.c
         tests/commands/gui/tests_gui_bct_command.c
         tests/commands/gui/tests_gui_msz_command.c
+        tests/commands/player/tests_player_broadcast_command.c
+        tests/commands/player/tests_player_direction_command.c
+        tests/commands/player/tests_player_frequency_command.c
+        tests/commands/player/tests_player_inventory_command.c
+        tests/commands/player/tests_player_look_command.c
         tests/tests_clock.c
         tests/tests_gui_command_handling.c
         tests/tests_itoa.c
@@ -135,6 +171,7 @@ if (DEFINED RUN_TESTS)
     target_link_libraries(test_zappy_server PRIVATE
         criterion
         gcov
+        m
     )
 
     target_compile_options(test_zappy_server PRIVATE

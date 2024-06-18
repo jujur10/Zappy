@@ -33,11 +33,10 @@ bool is_timeout_exceed(timespec_t PTR server_clock,
     timespec_t PTR clock_to_inspect);
 
 /// @brief Function that verify if the blocking time is expired.
-/// @param server_clock The server's clock (reference).
-/// @param clock_to_inspect The clock to verify.
+/// @param server_clock The server's actual blocking time (reference).
+/// @param clock_to_inspect The blocking time to verify.
 /// @return True if blocking time has expired, false if not.
-bool has_blocking_time_expired(timespec_t PTR server_clock,
-    timespec_t PTR clock_to_inspect);
+bool has_blocking_time_expired(double server_clock, double clock_to_inspect);
 
 /// @brief Function that calculate the difference between two clocks.
 /// @param clock_1 The first clock.

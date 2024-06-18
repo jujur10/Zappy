@@ -11,6 +11,7 @@
 
 #include "utils/string/string.h"
 #include "style/macros.h"
+#include "resources.h"
 
 /// @brief Read buffer size in byte.
 #define READ_BUFFER_SIZE 256
@@ -45,6 +46,7 @@ typedef enum {
     PLAYER_INCANTATION_CMD,
     PLAYER_FREQUENCY_CMD,
     PLAYER_DIRECTION_CMD,
+    PLAYER_NB_OF_CMD
 } PACKED player_command_base_t;
 
 /// @brief Macros representing the PLAYER's commands as text.
@@ -92,3 +94,168 @@ typedef struct player_command_buffer_s {
 /// @param player_index The index of the player in the player array.
 void player_command_handling(server_t PTR server, char ARRAY buffer,
     uint32_t len, uint32_t player_index);
+
+/// @brief Function which pop the next command in the next_command variable.
+///
+/// @param player_command_buffer The player command buffer.
+/// @param next_command The command popped.
+status_t get_next_player_command(
+    player_command_buffer_t PTR player_command_buffer,
+    player_command_t PTR next_command);
+
+/// @brief The player's commands.
+
+/// @brief Function which execute a given player's command.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_command(server_t PTR server, uint16_t player_idx,
+    const player_command_t PTR command);
+
+/// @brief Function called when an unknown command has been made.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_none_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "forward" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_forward_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "right" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_right_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "left" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_left_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "inventory" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_inventory_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "broadcast" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_broadcast_command(server_t PTR server, uint16_t player_idx,
+    const player_command_t PTR command);
+
+/// @brief The "connect_nbr" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_connect_nbr_command(server_t PTR server,
+    uint16_t player_idx, UNUSED const player_command_t PTR command);
+
+/// @brief The "fork" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_fork_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "eject" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_eject_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "take" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_take_command(server_t PTR server, uint16_t player_idx,
+    const player_command_t PTR command);
+
+/// @brief The "set" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_set_command(server_t PTR server, uint16_t player_idx,
+    const player_command_t PTR command);
+
+/// @brief The "look" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_look_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "incantation" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_incantation_command(server_t PTR server,
+    uint16_t player_idx, UNUSED const player_command_t PTR command);
+
+/// @brief The "frequency" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_frequency_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief The "direction" command implementation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @param command The command to execute.
+void execute_player_direction_command(server_t PTR server, uint16_t player_idx,
+    UNUSED const player_command_t PTR command);
+
+/// @brief Fast responses.
+
+/// @brief Function which adds to the player queue the ok response.
+///
+/// @param server The server structure.
+/// @param player The player to send the message to.
+void player_ok_response(const server_t PTR server, player_t PTR player);
+
+/// @brief Function which adds to the player queue the ko response.
+///
+/// @param server The server structure.
+/// @param player The player to send the message to.
+void player_ko_response(const server_t PTR server, player_t PTR player);
+
+/// @brief Utils functions.
+
+/// @brief Function used to obtain the sorted array of tiles representing
+/// the player's view.
+///
+/// @param server The server structure.
+/// @param player The current player.
+/// @param sorted_resources The already allocated output array.
+/// @param nb_of_tile The size of the output array.
+void get_sorted_resources(const server_t PTR server,
+    player_t PTR player,
+    resources_t ARRAY sorted_resources, uint32_t nb_of_tile);
