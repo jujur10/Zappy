@@ -34,6 +34,7 @@ add_executable(zappy_server
     src/commands/player/player_fork_command.c
     src/commands/player/player_forward_command.c
     src/commands/player/player_frequency_command.c
+    src/commands/player/player_incantation_command.c
     src/commands/player/player_inventory_command.c
     src/commands/player/player_look_command.c
     src/commands/player/player_none_command.c

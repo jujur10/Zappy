@@ -153,3 +153,24 @@ uint32_t get_nb_of_tiles_for_a_depth(uint32_t depth);
 /// @param level The actual level.
 /// @return The total number of tiles.
 uint32_t get_total_nb_of_tiles_required(uint8_t level);
+
+/// @brief Enumeration representing the elevation level changes.
+///
+/// @var LEVEL_1_TO_2 Representing the action to pass from level 1 to level 2.
+/// @var LEVEL_2_TO_3 Representing the action to pass from level 2 to level 3.
+/// @var LEVEL_3_TO_4 Representing the action to pass from level 3 to level 4.
+/// @var LEVEL_4_TO_5 Representing the action to pass from level 4 to level 5.
+/// @var LEVEL_5_TO_6 Representing the action to pass from level 5 to level 6.
+/// @var LEVEL_6_TO_7 Representing the action to pass from level 6 to level 7.
+/// @var LEVEL_7_TO_8 Representing the action to pass from level 7 to level 8.
+/// @var NB_OF_LEVELS Representing total number of level changes possible.
+typedef enum {
+    LEVEL_1_TO_2,
+    LEVEL_2_TO_3,
+    LEVEL_3_TO_4,
+    LEVEL_4_TO_5,
+    LEVEL_5_TO_6,
+    LEVEL_6_TO_7,
+    LEVEL_7_TO_8,
+    NB_OF_LEVELS
+} PACKED elevation_requirements_t;

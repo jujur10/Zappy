@@ -25,11 +25,14 @@
 /// @brief The cooldown delay for a set action of the player.
 #define PLAYER_SET_WAIT 7
 
-///@brief The cooldown delay for the fork action.
+/// @brief The cooldown delay for the fork action.
 #define PLAYER_FORK_WAIT 42
 
-///@brief The cooldown delay for the eject action.
+/// @brief The cooldown delay for the eject action.
 #define PLAYER_EJECT_WAIT 7
+
+/// @brief The cooldown for the incantation command.
+#define PLAYER_INCANTATION_WAIT 300
 
 /// @brief The cooldown delay for MCT in ns.
 #define GUI_MCT_REQUEST_COOLDOWN 100000000
