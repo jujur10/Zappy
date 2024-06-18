@@ -49,6 +49,11 @@ void HandleServerCommand(const std::string& line)
             ParseDeathOfPlayerCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::PLAYER_POSITION:
+        {
+            ParsePlayerPositionCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         default:
             return;
     }

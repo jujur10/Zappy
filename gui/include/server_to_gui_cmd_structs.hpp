@@ -32,11 +32,19 @@ struct DeadPlayerCommand
     uint16_t id;
 };
 
+struct PlayerPositionCommand
+{
+    uint16_t id;
+    uint16_t x;
+    uint16_t y;
+    uint8_t orientation;
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
 // DON'T CHANGE THE ORDER OF THE TYPES IN THE VARIANT OR YOU WILL BREAK THE PARSING CODE
-using Command = std::variant<UpdateTileCommand, NewPlayerCommand, DeadPlayerCommand>;
+using Command = std::variant<UpdateTileCommand, NewPlayerCommand, DeadPlayerCommand, PlayerPositionCommand>;
 
 
 // Command queue server -> gui
@@ -62,4 +70,10 @@ void ParseNewPlayerCommand(const std::string_view& line);
 /// This function will parse the pdi command and push the corresponding DeadPlayerCommand in the ServerToGuiQueue
 /// @param line The pdi command received from the server
 void ParseDeathOfPlayerCommand(const std::string_view& line);
+
+/**
+ * @brief Parse the ppo received from the server and push the corresponding command in the ServerToGuiQueue
+ * @param line The command received from the server
+ */
+void ParsePlayerPositionCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

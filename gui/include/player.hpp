@@ -9,11 +9,17 @@
 namespace zappy_gui::player
 {
 
-/// @brief The starting index used in flecs for the player entities
+/// @var The starting index used in flecs for the player entities
 #define PLAYER_STARTING_IDX 1'100'000
 
-/// @brief The index of the idle animation
+/// @var The index of the idle animation
 #define IDLE_ANIMATION_IDX 3
+
+/// @var The index of the run animation
+#define RUN_ANIMATION_IDX 9
+
+/// @var The index of the walk animation
+#define WALK_ANIMATION_IDX 10
 
 enum class Orientation
 {
@@ -31,6 +37,13 @@ struct playerAnimations
 struct playerAnimationData
 {
     raylib::ModelAnimation *currentAnimation;
-    uint8_t currentFrame;
+    int32_t currentFrame;
 };
+
+struct playerTargetInfo
+{
+    Vector2 target;
+    Vector2 normalizedDirection;
+};
+
 }  // namespace zappy_gui::player
