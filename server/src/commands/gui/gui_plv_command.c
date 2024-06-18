@@ -15,7 +15,7 @@ void execute_gui_plv_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command)
 {
     char buffer[50] = "plv ";
-    msg_t message;
+    msg_t message = {};
     uint32_t count = 4;
     int32_t player_idx = get_player_by_socket(server, command->args[0]);
     const player_t *current_player;

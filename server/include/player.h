@@ -50,7 +50,7 @@ typedef struct player_s {
     orientation_t orientation;
     coordinates_t coordinates;
     inventory_t inventory;
-    uint32_t time_to_live;
+    double time_to_eat;
     double blocking_time;
     player_command_buffer_t command_buffer;
     msg_queue_head_t queue;

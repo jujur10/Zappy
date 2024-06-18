@@ -102,7 +102,7 @@ static uint8_t is_ready(server_t PTR server, gui_t PTR gui,
 static void blocking_time_not_respected(server_t PTR server,
     uint32_t gui_idx, int32_t PTR select_ret)
 {
-    msg_t message;
+    msg_t message = {};
     char buffer[10];
     uint64_t bytes_received = read(server->guis[gui_idx].sock, buffer,
         sizeof(buffer));

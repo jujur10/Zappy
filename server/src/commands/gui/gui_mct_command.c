@@ -13,7 +13,7 @@
 void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
     UNUSED const gui_command_t PTR command)
 {
-    msg_t message;
+    msg_t message = {};
 
     create_message_from_buffer(&server->generated_buffers
     .buffers[PRE_MAP_BUFFER], &message);

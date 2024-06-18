@@ -12,7 +12,7 @@ void execute_gui_sst_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command)
 {
     char buffer[50] = "sst ";
-    msg_t message;
+    msg_t message = {};
     uint32_t count = 4;
 
     server->frequency = command->args[0];

@@ -10,7 +10,7 @@
 void execute_gui_tna_command(server_t PTR server, uint16_t gui_idx,
     UNUSED const gui_command_t PTR command)
 {
-    msg_t message;
+    msg_t message = {};
     const buffer_t *tna_buffer = &server->generated_buffers
         .buffers[PRE_TNA_RESPONSE];
 

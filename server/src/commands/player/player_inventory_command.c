@@ -75,7 +75,7 @@ void execute_player_inventory_command(server_t PTR server, uint16_t player_idx,
     char buffer[INVENTORY_STRING_MAX_LENGTH];
     const inventory_t *inventory = &server->players[player_idx].inventory;
     uint32_t wrote;
-    msg_t message;
+    msg_t message = {};
 
     wrote = write_inventory_as_chars(buffer, inventory);
     create_message(buffer, wrote - 1, &message);

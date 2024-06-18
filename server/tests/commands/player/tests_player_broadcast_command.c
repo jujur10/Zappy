@@ -19,7 +19,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_pdf_exemple)
     string_t string;
     argument_t args;
     char msg_content[50];
-    msg_t message;
+    msg_t message = {};
 
     TAILQ_INIT(&server.players[0].queue);
     TAILQ_INIT(&server.players[1].queue);
@@ -52,7 +52,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_out_of_map)
     string_t string;
     argument_t args;
     char msg_content[50];
-    msg_t message;
+    msg_t message = {};
 
     TAILQ_INIT(&server.players[0].queue);
     TAILQ_INIT(&server.players[1].queue);
@@ -85,7 +85,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_same_tile)
     string_t string;
     argument_t args;
     char msg_content[50];
-    msg_t message;
+    msg_t message = {};
 
     TAILQ_INIT(&server.players[0].queue);
     TAILQ_INIT(&server.players[1].queue);
@@ -118,7 +118,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_left)
     string_t string;
     argument_t args;
     char msg_content[50];
-    msg_t message;
+    msg_t message = {};
 
     TAILQ_INIT(&server.players[0].queue);
     TAILQ_INIT(&server.players[1].queue);
@@ -151,7 +151,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_right)
     string_t string;
     argument_t args;
     char msg_content[50];
-    msg_t message;
+    msg_t message = {};
 
     TAILQ_INIT(&server.players[0].queue);
     TAILQ_INIT(&server.players[1].queue);
@@ -184,7 +184,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_top)
     string_t string;
     argument_t args;
     char msg_content[50];
-    msg_t message;
+    msg_t message = {};
 
     TAILQ_INIT(&server.players[0].queue);
     TAILQ_INIT(&server.players[1].queue);
@@ -217,7 +217,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_bottom)
     string_t string;
     argument_t args;
     char msg_content[50];
-    msg_t message;
+    msg_t message = {};
 
     TAILQ_INIT(&server.players[0].queue);
     TAILQ_INIT(&server.players[1].queue);

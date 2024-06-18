@@ -12,14 +12,18 @@
 
 #include "style/status.h"
 #include "utils/string/buffer.h"
+#include "events.h"
 
 /// @brief Structure representing message.
 ///
 /// @var len The message len.
 /// @var ptr The pointer on message data.
+/// @var event The event.
+/// @var to_free Boolean indicating if the pointer (ptr) is to free.
 typedef struct msg_s {
     uint32_t len;
     char ARRAY ptr;
+    event_t event;
     bool to_free;
 } msg_t;
 

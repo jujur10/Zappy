@@ -19,7 +19,7 @@ static void eject_player(map_t PTR map, player_t PTR player_to_eject,
     orientation_t original_direction)
 {
     char msg_content[] = "eject : K\n";
-    msg_t message;
+    msg_t message = {};
 
     teleport_player(map, player_to_eject, new_coordinates);
     msg_content[8] = (char)('0' + original_direction);

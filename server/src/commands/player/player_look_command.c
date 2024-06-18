@@ -224,7 +224,7 @@ void execute_player_look_command(server_t PTR server, uint16_t player_idx,
     resources_t sorted_resources[nb_of_tile] = {};
     buffer_t *buffer = &server->generated_buffers
         .buffers[PRE_LOOK_RESPONSE_BUFFER];
-    msg_t message;
+    msg_t message = {};
 
     REINITIALIZE_BUFFER(buffer);
     get_sorted_resources(server, player, sorted_resources, nb_of_tile);

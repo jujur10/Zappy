@@ -18,7 +18,7 @@
 
 void init_new_client(server_t PTR server, new_client_t PTR client)
 {
-    msg_t message;
+    msg_t message = {};
 
     server->nb_clients++;
     TAILQ_INIT(&client->queue);

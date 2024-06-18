@@ -12,7 +12,7 @@ void execute_gui_bct_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command)
 {
     char buffer[105] = "bct ";
-    msg_t message;
+    msg_t message = {};
     const resources_t *current_tile;
     uint32_t count = 4;
 

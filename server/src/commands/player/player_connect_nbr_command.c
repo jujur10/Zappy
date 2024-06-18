@@ -18,7 +18,7 @@ void execute_player_connect_nbr_command(server_t PTR server,
     const team_t *team = &server->teams[player->team_idx];
     uint16_t nb_of_remaining_slot = get_nb_of_unused_slot(team);
     uint64_t wrote;
-    msg_t message;
+    msg_t message = {};
 
     wrote = fast_itoa_u32(nb_of_remaining_slot, buffer);
     buffer[wrote] = '\n';

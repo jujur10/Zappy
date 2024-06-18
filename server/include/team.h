@@ -11,6 +11,10 @@
 
 #include "arguments.h"
 #include "coordinates.h"
+#include "style/status.h"
+
+/// @brief Redefinition.
+typedef struct server_s server_t;
 
 /// @brief Structure representing teams.
 ///
@@ -53,3 +57,18 @@ int32_t get_team_index_by_name(const team_t ARRAY teams, uint32_t nb_of_teams,
 /// @param team The team.
 /// @return The number of unused slots for the team.
 uint16_t get_nb_of_unused_slot(const team_t PTR team);
+
+/// @brief Function which adds a player to a team (if possible).
+///
+/// @param server The server structure.
+/// @param team_idx The team we want to assign the player to.
+/// @param player_idx The player to add to the team.
+/// @return SUCCESS if the player has been added successfully, FAILURE if not.
+status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
+    uint16_t player_idx);
+
+/// @brief Function used to remove a player from a team.
+///
+/// @param server The server structure.
+/// @param player_idx The player to add to the team.
+void remove_player_from_team(server_t PTR server, uint16_t player_idx);

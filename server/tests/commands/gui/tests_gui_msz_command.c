@@ -15,7 +15,7 @@ Test(TEST_GUI_MSZ_COMMAND, test_gui_msz_command_1)
 {
     server_t server = {};
     argument_t args;
-    msg_t message;
+    msg_t message = {};
     char buffer[200];
 
     TAILQ_INIT(&server.guis[0].queue);

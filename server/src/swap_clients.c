@@ -17,7 +17,7 @@ status_t transform_new_client_to_gui(server_t *server, uint32_t client_idx)
 {
     static char buffer[12];
     uint64_t msg_length;
-    msg_t message;
+    msg_t message = {};
     int32_t gui_index;
 
     msg_length = fast_itoa_u32(MAX_CLIENTS - server->nb_guis, buffer);
@@ -40,7 +40,7 @@ status_t transform_new_client_to_ai(server_t *server, uint32_t client_idx,
 {
     static char buffer[12];
     uint64_t msg_length;
-    msg_t message;
+    msg_t message = {};
     int32_t ai_index = init_ai(server, server->clients[client_idx].sock,
         (uint16_t)team_index);
 

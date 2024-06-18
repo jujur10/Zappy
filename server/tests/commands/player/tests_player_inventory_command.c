@@ -13,7 +13,7 @@
 Test(TEST_PLAYER_INVENTORY_COMMAND, test_player_inventory_command_1)
 {
     server_t server = {};
-    msg_t message;
+    msg_t message = {};
     char buffer[1 + (sizeof(FOOD_STR) + sizeof(LINEMATE_STR) + sizeof
     (DERAUMERE_STR) + sizeof(SIBUR_STR) + sizeof(MENDIANE_STR) +
     sizeof(PHIRAS_STR) + sizeof(THYSTAME_STR) + (7 * 11)) + 2 + 2];

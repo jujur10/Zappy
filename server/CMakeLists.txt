@@ -43,6 +43,10 @@ add_executable(zappy_server
     src/commands/player/player_set_command.c
     src/commands/player/player_take_command.c
     src/coordinates.c
+    src/events/player/player_death_event.c
+    src/events/player/player_events.c
+    src/events/player/player_events.c
+    src/events/player/player_none_event.c
     src/gui_handling.c
     src/main.c
     src/map.c
@@ -59,6 +63,7 @@ add_executable(zappy_server
     src/socket/create_socket.c
     src/swap_clients.c
     src/team.c
+    src/team_management.c
     src/utils/arrays/arrays_u32.c
     src/utils/arrays/arrays_u64.c
     src/utils/arrays/arrays_virtual.c
@@ -129,6 +134,9 @@ if (DEFINED RUN_TESTS)
         src/commands/player/player_look_command.c
         src/commands/player/player_responses.c
         src/coordinates.c
+        src/events/player/player_death_event.c
+        src/events/player/player_events.c
+        src/events/player/player_none_event.c
         src/gui_handling.c
         src/map.c
         src/map_buffer.c
@@ -136,6 +144,7 @@ if (DEFINED RUN_TESTS)
         src/player.c
         src/queue/queue_utils_msg.c
         src/team.c
+        src/team_management.c
         src/utils/arrays/arrays_u32.c
         src/utils/arrays/arrays_u64.c
         src/utils/arrays/arrays_virtual.c

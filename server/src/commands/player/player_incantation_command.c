@@ -109,7 +109,7 @@ static bool verify_requirements(server_t PTR server,
 void execute_player_incantation_command(server_t PTR server,
     uint16_t player_idx, UNUSED const player_command_t PTR command)
 {
-    msg_t message;
+    msg_t message = {};
     player_t *player = &server->players[player_idx];
 
     if (true == verify_requirements(server, player_idx)) {

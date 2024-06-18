@@ -85,7 +85,7 @@ static int32_t get_shortest_direction(const map_t PTR map,
 static void broadcast_message_to_player(player_t PTR player,
     const buffer_t PTR message_buffer, int32_t direction)
 {
-    msg_t message;
+    msg_t message = {};
 
     fast_itoa_u32(direction, message_buffer->ptr + 8);
     create_message_from_ptr(message_buffer->ptr, message_buffer->len,
