@@ -11,12 +11,16 @@
 status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
     uint16_t player_idx)
 {
-    if (0 == get_nb_of_unused_slot(&server->teams[team_idx]))
+    player_t *player = &server->players[player_idx];
+    team_t *team = &server->teams[team_idx];
+
+    if (team->nb_of_players == team->max_nb_of_players ||
+    0 == team->nb_of_eggs)
         return FAILURE;
-    server->teams[team_idx].nb_of_eggs--;
-    server->teams[team_idx].players_idx[server->teams[team_idx]
-        .nb_of_players] = player_idx;
-    server->teams[team_idx].nb_of_players++;
+    team->nb_of_eggs--;
+    player->coordinates = team->eggs_coordinates[team->nb_of_eggs];
+    team->players_idx[team->nb_of_players] = player_idx;
+    team->nb_of_players++;
     server->players[player_idx].team_idx = team_idx;
     return SUCCESS;
 }

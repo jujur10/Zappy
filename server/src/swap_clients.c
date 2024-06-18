@@ -44,8 +44,8 @@ status_t transform_new_client_to_ai(server_t *server, uint32_t client_idx,
     int32_t ai_index = init_ai(server, server->clients[client_idx].sock,
         (uint16_t)team_index);
 
-    msg_length = fast_itoa_u32(server->teams[team_index].max_nb_of_players -
-    server->teams[team_index].nb_of_players, buffer);
+    msg_length = fast_itoa_u32((-1 == ai_index) ? 0 : get_nb_of_unused_slot
+        (&server->teams[team_index]) + 1, buffer);
     buffer[msg_length] = '\n';
     create_message(buffer, (uint32_t)msg_length + 1, &message);
     if (-1 == ai_index)
