@@ -58,6 +58,7 @@ target_include_directories(raygui INTERFACE
 #######################
 add_executable(zappy_gui
     src/argv_parser.cpp
+    src/gui.cpp
     src/main.cpp
     src/map.cpp
     src/map_utils.cpp

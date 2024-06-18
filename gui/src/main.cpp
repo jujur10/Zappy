@@ -17,7 +17,6 @@
 #include "sockets.hpp"
 #include "systems.hpp"
 #include "player.hpp"
-#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include "style_bluish.h"
 
@@ -68,7 +67,7 @@ static void InitializeECS(flecs::world &ecs,
 
     ecs.progress();  // Progress through OnStart pipeline // NOLINT
 
-    zappy_gui::systems::createGuiEntities(ecs, zappy_gui::screenWidth);
+    zappy_gui::systems::createGuiEntities(ecs, zappy_gui::screenWidth, zappy_gui::screenHeight);
 
     ecs.lookup("drawMenu").disable();
     ecs.lookup("drawMenuRetractArrow").disable();
@@ -95,7 +94,6 @@ int32_t main(const int32_t argc, char *argv[])
     // Connect to the server and perform the handshake
     const zappy_gui::Socket serverSocket = zappy_gui::ConnectToServer(argv);
     Handshake(serverSocket);
-
     //--------------------------------------------------------------------------------------
     // Setup the window with anti-aliasing and a target of 60 FPS
     ::SetConfigFlags(FLAG_MSAA_4X_HINT);

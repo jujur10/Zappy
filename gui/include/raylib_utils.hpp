@@ -56,6 +56,7 @@ enum class MouseButton {
 
 enum class MenuLabels {
     MenuExpandArrow,
-    MenuRestractArrow,
+    MenuRetractArrow,
+    Menu,
 };
 }  // namespace zappy_gui::utils

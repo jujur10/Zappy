@@ -22,6 +22,6 @@ void registerSystems(const flecs::world &ecs);
 ///
 /// @param ecs The ECS to register the entities in
 /// @param screenWidth The width of the screen
-void createGuiEntities(const flecs::world &ecs, uint16_t screenWidth);
+void createGuiEntities(const flecs::world &ecs, uint16_t screenWidth, uint16_t screenHeight);
 
 }  // namespace zappy_gui::systems
