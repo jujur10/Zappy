@@ -117,9 +117,9 @@ func (pq *graphPriorityQueue) Update(item *graphItem, value *graphNode, priority
 
 // getPriorityQueueTileIndex returns the index of the tile in the priority queue, -1 if not found
 func (pq *PriorityQueue) getPriorityQueueTileIndex(tilePos RelativeCoordinates) int {
-	for i, item := range *pq {
+	for _, item := range *pq {
 		if item.value == tilePos {
-			return i
+			return item.index
 		}
 	}
 	return -1
