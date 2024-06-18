@@ -21,8 +21,7 @@ void create_player_death_event(player_t PTR player)
 /// @brief Function which sends to GUIs the events of pdi.
 ///
 /// @param server The server structure.
-/// @param player The player.
-/// @param resource_index The resource index.
+/// @param player_idx The player index.
 static void send_pdi_to_guis(server_t PTR server, uint32_t player_idx)
 {
     msg_t message;

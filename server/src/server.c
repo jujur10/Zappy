@@ -118,6 +118,24 @@ static uint8_t select_error(void)
     return (EINTR == errno) ? 0 : 84;
 }
 
+/// @brief Function which handle every sockets (new clients, players and GUIs).
+///
+/// @param server The server structure.
+/// @param rfds The read file descriptor set.
+/// @param wfds The write file descriptor set.
+/// @param select_ret The select returns value.
+static void handle_sockets(server_t PTR server, const fd_set PTR rfds,
+    const fd_set PTR wfds, int32_t PTR select_ret)
+{
+    if (FD_ISSET(server->sock, rfds))
+        on_connection(server);
+    else {
+        handle_new_clients(server, rfds, wfds, select_ret);
+        handle_guis(server, rfds, wfds, select_ret);
+        handle_players(server, rfds, wfds, select_ret);
+    }
+}
+
 /// @brief Function which runs the server main's loop.
 /// @param server The server structure.
 /// @return Returns 0 when the server quited properly, 84 if not (undefined
@@ -136,13 +154,7 @@ static uint8_t server_main_loop(server_t PTR server)
         update_server(server);
         if (FD_ISSET(pipe_signals[0], &rfds))
             return close(pipe_signals[0]), 0;
-        if (FD_ISSET(server->sock, &rfds))
-            on_connection(server);
-        else {
-            handle_new_clients(server, &rfds, &wfds, &select_ret);
-            handle_guis(server, &rfds, &wfds, &select_ret);
-            handle_players(server, &rfds, &wfds, &select_ret);
-        }
+        handle_sockets(server, &rfds, &wfds, &select_ret);
     }
 }
 
