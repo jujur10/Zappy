@@ -4,35 +4,41 @@
 
 #include "map.hpp"
 
-#include <flecs.h>
+#include <random>
 
-#include <Matrix.hpp>
+#include "Matrix.hpp"
+#include "flecs.h"
 
 namespace zappy_gui::map
 {
 
-float32 spacing;
-float32 tileSize;
-float32 tileHeight;
-float32 verticalSpacing;
+float spacing;
+float tileSize;
+float tileHeight;
+float verticalSpacing;
 
 void GenerateMap(const flecs::iter &it)
 {
-    spacing = 1.2f32;
-    tileSize = 1.f32;
-    tileHeight = 0.f32;
+    // Define the subtract_with_carry_engine with 24 bits of state, 10 bits of shift, and 24 bits of output with a random device
+    std::subtract_with_carry_engine<std::uint_fast32_t, 24, 10, 24> engine(std::random_device{}());
+
+    // Define a discrete distribution with weights for each tile type
+    std::discrete_distribution<uint_fast32_t> distribution({3, 2, 1});
+    spacing = 1.2f;
+    tileSize = 1.f;
+    tileHeight = 0.f;
     verticalSpacing = std::sqrtf(3) / 2 * tileSize * spacing;
 
     for (int32_t y = 0; y < kMAP_HEIGHT; ++y)
     {
         for (int32_t x = 0; x < kMAP_WIDTH; ++x)
         {
-            const float32 offsetX = y % 2 == 0 ? 0.f32 : tileSize * 0.5f32;  // Offset for odd rows
+            const float offsetX = 0 == y % 2 ? 0.f : tileSize * 0.5f;  // Offset for odd rows
 
-            auto position = raylib::Matrix::Translate(
-                (static_cast<float32>(x) * tileSize + offsetX - static_cast<float32>(kMAP_WIDTH) * tileSize * 0.5f32) * spacing,
+            const auto position = raylib::Matrix::Translate(
+                (static_cast<float>(x) * tileSize + offsetX - static_cast<float>(kMAP_WIDTH) * tileSize * 0.5f) * spacing,
                 tileHeight,
-                static_cast<float32>(y) * tileSize * verticalSpacing - static_cast<float32>(kMAP_HEIGHT) * tileSize * 0.375f32);
+                static_cast<float>(y) * tileSize * verticalSpacing - static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f);
 
             auto tileEntity = it.world().make_alive((y * kMAP_WIDTH) + x + 1 + FLECS_HI_ID_RECORD_ID).set<raylib::Matrix>(position);
 
@@ -60,17 +66,30 @@ void GenerateMap(const flecs::iter &it)
 
             for (auto i = static_cast<int>(resourceType::food); i < static_cast<int>(resourceType::total); ++i)
             {
-                resource = it.world().entity()
-                    .set<const raylib::Matrix>(matrices[i])
-                    .set<uint16_t>(0)
-                    .add(static_cast<resourceType>(i))
-                    .disable();
+                resource =
+                    it.world().entity().set<const raylib::Matrix>(matrices[i]).set<uint16_t>(0).add(static_cast<resourceType>(i)).disable();
                 tileResourceIds.array[i] = resource.id();
             }
 
             tileEntity.set<resourceIds>(tileResourceIds);
+
+            // Randomly assign a tile type to the tile to have different models
+            switch (distribution(engine))
+            {
+                case 0:
+                    tileEntity.add<tileType1>();
+                break;
+                case 1:
+                    tileEntity.add<tileType2>();
+                break;
+                case 2:
+                    tileEntity.add<tileType3>();
+                break;
+                default:
+                    tileEntity.add<tileType1>();
+                break;
+            }
         }
     }
 }
-
 }  // namespace zappy_gui::map

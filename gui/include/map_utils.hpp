@@ -51,4 +51,9 @@ uint64_t GetTileIndexFromCoords(float x, float y);
 /// @param transformMatrix A tile transformation matrix to compute the index from
 [[nodiscard]]
 uint64_t GetTileIndexFromCoords(const raylib::Matrix &transformMatrix);
+
+/// @brief Check if the tile is in an offset row with the drawing y coordinate of the tile
+/// The y coordinate is the one gound in the tile transformation matrix
+/// @param y The y coordinate corresponding to the z coordinate in the 3D space
+bool IsTileInOddRow(float y);
 }  // namespace zappy_gui::utils

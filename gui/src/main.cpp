@@ -3,6 +3,7 @@
 
 #include "Camera3D.hpp"
 #include "Window.hpp"
+#include "ModelAnimation.hpp"
 #include "flecs.h"
 #include "gui_to_server_cmd_structs.hpp"
 #include "map.hpp"
@@ -14,6 +15,7 @@
 #include "server_to_gui_cmd_structs.hpp"
 #include "sockets.hpp"
 #include "systems.hpp"
+#include "player.hpp"
 
 namespace zappy_gui
 {
@@ -34,9 +36,12 @@ net::GTSQueue net::GuiToServerQueue{GuiToServerQueueCapacity};
 
 static void InitializeECS(flecs::world &ecs,
                           raylib::Camera3D const &camera,
-                          raylib::Model &grass,
+                          raylib::Model &sand,
+                          raylib::Model &sandRock,
+                          raylib::Model &sandCactus,
                           raylib::Model &food,
-                          raylib::Model &crystal)
+                          raylib::Model &crystal,
+                          std::vector<raylib::ModelAnimation> &playerAnimations)
 {
     ecs.set_entity_range(4'269'420, 0);  // Allow flecs to only generate entity ids starting from 4'269'420
 
@@ -46,9 +51,11 @@ static void InitializeECS(flecs::world &ecs,
 
     ecs.set<raylib::Camera3D>(camera);
 
-    ecs.set<zappy_gui::map::tileModels>({&grass});
+    ecs.set<zappy_gui::map::tileModels>({&sand, &sandRock, &sandCactus});
 
     ecs.set<zappy_gui::map::resourceModels>({&food, &crystal});
+
+    ecs.set<zappy_gui::player::playerAnimations>({&playerAnimations});
 
     zappy_gui::systems::registerSystems(ecs);
 
@@ -82,6 +89,7 @@ int32_t main(const int32_t argc, char *argv[])
     ::SetConfigFlags(FLAG_MSAA_4X_HINT);
     raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
     window.SetTargetFPS(60);
+    // ::DisableCursor(); // Hides cursor and locks it to the window
 
     //--------------------------------------------------------------------------------------
     // Create the 3D camera
@@ -89,14 +97,17 @@ int32_t main(const int32_t argc, char *argv[])
 
     //--------------------------------------------------------------------------------------
     // Load the 3D models for tiles and resources
-    auto grassMod = raylib::Model("gui/resources/assets/grass2.glb");
+    auto sand = raylib::Model("gui/resources/assets/sand.glb");
+    auto sandRock = raylib::Model("gui/resources/assets/sand_rocks.glb");
+    auto sandCactus = raylib::Model("gui/resources/assets/sand_cactus.glb");
     auto food = raylib::Model("gui/resources/assets/food.glb");
-    auto crystal = raylib::Model("gui/resources/assets/crystal1_optimized.glb");
+    auto crystal = raylib::Model("gui/resources/assets/crystal.glb");
+    std::vector<raylib::ModelAnimation> playerAnimations = raylib::ModelAnimation::Load("gui/resources/assets/cactoro.m3d");
 
     //--------------------------------------------------------------------------------------
     // Create the ECS and initialize it
     flecs::world ecs;
-    ::InitializeECS(ecs, camera, grassMod, food, crystal);
+    ::InitializeECS(ecs, camera, sand, sandRock, sandCactus, food, crystal, playerAnimations);
 
     //--------------------------------------------------------------------------------------
     // Start the network main loop on another thread
@@ -115,7 +126,9 @@ int32_t main(const int32_t argc, char *argv[])
     //--------------------------------------------------------------------------------------
     // Unload the shaders
     const auto *tileModels = ecs.get_mut<zappy_gui::map::tileModels>();
-    zappy_gui::utils::UnloadShaders(tileModels->grass);
+    zappy_gui::utils::UnloadShaders(tileModels->sand);
+    zappy_gui::utils::UnloadShaders(tileModels->sandRock);
+    zappy_gui::utils::UnloadShaders(tileModels->sandCactus);
 
     const auto *resourceModels = ecs.get_mut<zappy_gui::map::resourceModels>();
     zappy_gui::utils::UnloadShaders(resourceModels->food);
