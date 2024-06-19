@@ -7,6 +7,7 @@
 #include <flecs.h>
 
 #include <Matrix.hpp>
+#include <cfloat>
 #include <map_utils.hpp>
 #include <memory>
 #include <string>
@@ -63,7 +64,7 @@ namespace zappy_gui::systems {
     }
 
     static void registerOnLoadSystems(const flecs::world &ecs) {
-        ecs.system("parseGuiCommand").kind(flecs::OnLoad).write<player::Orientation>().iter(net::ParseGuiCommands);
+        ecs.system("parseGuiCommand").kind(flecs::OnLoad).no_readonly().iter(net::ParseGuiCommands);
         ecs.system("registerClickPosition").kind(flecs::OnLoad)
                 .iter([](const flecs::iter &it) {
                     const auto pos = raylib::Mouse::GetPosition();
@@ -295,7 +296,7 @@ namespace zappy_gui::systems {
     /// Query the players and update their position if they are moving
     ecs.system<Vector2, player::playerTargetInfo>("updatePlayerPosition")
         .kind(flecs::OnUpdate)
-        .each([](flecs::entity player, Vector2 &position, player::playerTargetInfo const &targetInfo)
+        .each([](flecs::entity player, Vector2 &position, player::playerTargetInfo &targetInfo)
         {
             if (Vector2Distance(position, targetInfo.target) < 0.1f)
             {
@@ -306,64 +307,78 @@ namespace zappy_gui::systems {
                 playerAnimData->currentFrame = 0;
                 return;
             }
-            position.x += targetInfo.normalizedDirection.x * 0.01f;
-            position.y += targetInfo.normalizedDirection.y * 0.01f;
+            position.x += targetInfo.normalizedDirection.x * 0.02f;
+            position.y += targetInfo.normalizedDirection.y * 0.02f;
 
-            // const float yTopLimit = map::tileSize * map::verticalSpacing - static_cast<float>(map::kMAP_HEIGHT) * map::tileSize * 0.375f;
-            // const float yBottomLimit = (map::kMAP_HEIGHT - 1) * map::tileSize * map::verticalSpacing - static_cast<float>(map::kMAP_HEIGHT) * map::tileSize * 0.375f;
-            // const float offsetX = utils::IsTileInOddRow(position.y) ? 0.f : map::tileSize * 0.5f;
-            // const float xLeftLimit = (map::tileSize + offsetX - static_cast<float>(map::kMAP_WIDTH) * map::tileSize * 0.5f) * map::spacing;
-            // const float xRightLimit = ((map::kMAP_WIDTH - 1) * map::tileSize + offsetX - static_cast<float>(map::kMAP_WIDTH) * map::tileSize * 0.5f) * map::spacing;
-            //
-            // if (std::abs(position.y - yTopLimit) <= 0.1f)
-            // {
-            //     position.y = yBottomLimit;
-            // }
-            // else if (std::abs(position.y - yBottomLimit) <= 0.1f)
-            // {
-            //     position.y = yTopLimit;
-            // }
-            // if (std::abs(position.x - xLeftLimit) <= 0.1f)
-            // {
-            //         position.x = xRightLimit;
-            // }
-            // else if (std::abs(position.x - xRightLimit) <= 0.1f)
-            // {
-            //         position.x = xLeftLimit;
-            // }
+            const float halfTileSize = map::tileSize * 0.5f;
+
+            const float yTopLimit = - static_cast<float>(map::kMAP_HEIGHT) * map::tileSize * 0.375f;
+            const float yBottomLimit = static_cast<float>(map::kMAP_HEIGHT - 1) * map::tileSize * map::verticalSpacing
+                - static_cast<float>(map::kMAP_HEIGHT) * map::tileSize * 0.375f;
+
+            const float offsetX = utils::IsTileInOddRow(position.y) ? halfTileSize : 0.0f;
+            const float xLeftLimit = (offsetX - static_cast<float>(map::kMAP_WIDTH) * halfTileSize) * map::spacing;
+            const float xRightLimit = (static_cast<float>(map::kMAP_WIDTH - 1) * map::tileSize + offsetX
+                - static_cast<float>(map::kMAP_WIDTH) * halfTileSize) * map::spacing;
+
+            bool wrapAround = false;
+            if (std::abs(position.y - (yTopLimit - halfTileSize)) <= 0.1f)
+            {
+                position.y = yBottomLimit;
+                wrapAround = true;
+            }
+            else if (std::abs(position.y - (yBottomLimit + halfTileSize)) <= 0.1f)
+            {
+                position.y = yTopLimit;
+                wrapAround = true;
+            }
+
+            if (std::abs(position.x - (xLeftLimit - halfTileSize)) <= 0.1f)
+            {
+                position.x = xRightLimit;
+                wrapAround = true;
+            }
+            else if (std::abs(position.x - (xRightLimit + halfTileSize)) <= 0.1f)
+            {
+                position.x = xLeftLimit;
+                wrapAround = true;
+            }
+            if (wrapAround)
+            {
+                Vector2 direction = {targetInfo.target.x - position.x, targetInfo.target.y - position.y};
+                // Normalize the direction vector
+                const float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+                if (std::fabsf(length) > FLT_EPSILON)
+                {
+                    direction.x /= length;
+                    direction.y /= length;
+                }
+                targetInfo.normalizedDirection = direction;
+            }
         });
 
     /// Query the players and update their rotation angle
     ecs.system<Vector2, player::Orientation, float>("updatePlayersRotation")
         .kind(flecs::OnUpdate)
-        .read<player::Orientation>()
         .each([](const Vector2 &position, player::Orientation const &orientation, float &rotationAngle)
         {
-            // printf("Player position %f %f with %f rotation", position.x, position.y, rotationAngle);
-            char dir;
             switch (orientation) {
                 using enum player::Orientation;
                 case NORTH:
                     rotationAngle = utils::IsTileInOddRow(position.y) ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
-                    dir = 'N';
                     break;
                 case EAST:
                     rotationAngle = EAST_ANGLE;
-                    dir = 'E';
                     break;
                 case SOUTH:
                     rotationAngle = utils::IsTileInOddRow(position.y) ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
-                    dir = 'S';
                     break;
                 case WEST:
                     rotationAngle = WEST_ANGLE;
-                    dir = 'W';
                     break;
                 default:
-                    dir = 'U';
                     break;
                 }
-            // printf("and %c orientation\n", dir);
         });
 
     /// Query the players and draw them
@@ -374,7 +389,6 @@ namespace zappy_gui::systems {
             const std::unique_ptr<raylib::Model> &model,
             const float &rotationAngle)
             {
-            // printf("Drawing player at %f %f with rotation %f\n", position.x, position.y, rotationAngle);
                 model->Draw({position.x, 0.2f, position.y}, {0.f, 1.f, 0.f}, rotationAngle, {1.f, 1.f, 1.f}, WHITE);
             });
 }
