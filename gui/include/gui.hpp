@@ -26,18 +26,14 @@ namespace zappy_gui::gui {
     /// @param maxValue The maximum value of the slider
     /// @param editMode Can the value be changed
     /// @return True if the slider was pressed
-    bool GuiSlider(const Rectangle bounds, const char *const textLeft, const char *const textRight, float *const value,
-                   const float minValue, const float maxValue, const bool editMode);
+    bool GuiSlider(Rectangle bounds, const char *textLeft, const char *textRight, float *value,
+        float minValue, float maxValue, bool editMode);
 
     /// @brief Create the GUI clickable entities
     ///
     /// @param ecs The ECS to register the entities in
     /// @param screenWidth The width of the screen
     void createGuiEntities(const flecs::world &ecs, uint16_t screenWidth, uint16_t screenHeight);
-
-    /// Destroy the GUI clickable entities
-    /// @param ecs The ECS to destroy the entities from
-    void destroyGuiEntities(const flecs::world &ecs);
 
     /// Release action for the time step slider
     /// @param value the value of the slider

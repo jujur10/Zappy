@@ -171,11 +171,4 @@ namespace zappy_gui::gui {
         ecs.lookup("drawMenuRetractArrow").disable();
         ecs.lookup("drawMenuSliders").disable();
     }
-
-    void destroyGuiEntities(const flecs::world &ecs) {
-        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::MenuExpandArrow).build().destruct();
-        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::MenuRetractArrow).build().destruct();
-        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::Menu).build().destruct();
-        ecs.query_builder<Slider>().build().destruct();
-    }
 }
