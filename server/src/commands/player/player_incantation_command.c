@@ -7,9 +7,10 @@
 #include "server.h"
 #include "resources.h"
 #include "game_settings.h"
+#include "commands/player_commands.h"
 
 /// @brief Array of resources_t representing the needed elements for elevation.
-static const resources_t elevation_requirements[] = {
+const resources_t elevation_requirements[] = {
     {{0, 1, 0, 0, 0, 0, 0, 1}},
     {{0, 1, 1, 1, 0, 0, 0, 2}},
     {{0, 2, 0, 1, 0, 2, 0, 2}},

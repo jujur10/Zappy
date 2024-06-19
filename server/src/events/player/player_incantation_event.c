@@ -7,6 +7,7 @@
 #include "commands/command_utils.h"
 #include "server.h"
 #include "game_settings.h"
+#include "commands/player_commands.h"
 
 /// @brief Function which sends to GUIs the events of pie.
 ///
@@ -59,16 +60,30 @@ static void elevate_players(player_t ARRAY players, uint16_t nb_of_players,
     }
 }
 
+/// @brief Function which remove the items needed for incantation.
+///
+/// @param tile The tile where the incantation is produced.
+/// @param player_level The level (in order to remove the right number of
+/// resources).
+static void remove_items_from_tile(resources_t PTR tile, uint16_t player_level)
+{
+    for (uint32_t i = 0; i < R_STRUCT_SIZE - 1; i++)
+        tile->arr[i] -= elevation_requirements[player_level].arr[i];
+}
+
 void execute_player_incantation_event(server_t PTR server, uint32_t player_idx)
 {
     player_t *player = &server->players[player_idx];
 
     if (true == verify_requirements(server, (uint16_t)player_idx)) {
+        remove_items_from_tile(get_resource_tile_by_coordinates
+        (&server->map, &player->coordinates), player->level + 1);
         if (player->level < MAX_AI_LVL - 1)
             player->level++;
         elevate_players(server->players, server->nb_players,
             (uint16_t)player_idx);
         send_pie_to_guis(server, &player->coordinates, SUCCESS);
+        server->map.has_been_modified = true;
         return;
     }
     send_pie_to_guis(server, &player->coordinates, FAILURE);

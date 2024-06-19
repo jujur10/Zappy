@@ -86,6 +86,9 @@ typedef struct player_command_buffer_s {
     player_command_t commands[MAX_NB_OF_COMMAND_FOR_BUFFER];
 } player_command_buffer_t;
 
+/// @brief Array of resources_t representing the needed elements for elevation.
+extern const resources_t elevation_requirements[];
+
 /// @brief Function which effectuate message parsing.
 ///
 /// @param server The server structure.
