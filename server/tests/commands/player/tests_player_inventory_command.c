@@ -26,5 +26,5 @@ Test(TEST_PLAYER_INVENTORY_COMMAND, test_player_inventory_command_1)
     memcpy(buffer, message.ptr, message.len);
     buffer[message.len] = '\0';
     cr_assert_str_eq(buffer, "[food 65535, linemate 65535, deraumere 65535, "
-    "sibur 65535, mendiane 65535, phiras 65535, thystame 65535]");
+    "sibur 65535, mendiane 65535, phiras 65535, thystame 65535]\n");
 }

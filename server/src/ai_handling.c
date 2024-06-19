@@ -5,6 +5,7 @@
 ** ai_handling.c.
 */
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
@@ -20,6 +21,7 @@
 int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
 {
     player_t *player = &server->players[server->nb_players];
+    const map_t *map = &server->map;
 
     if (MAX_CLIENTS == server->nb_players ||
     FAILURE == add_player_to_team(server, team_idx, server->nb_players))
@@ -27,18 +29,25 @@ int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
     LOGF("Swapped to AI %i", server->nb_players)
     player->sock = (uint16_t)sock;
     TAILQ_INIT(&player->queue);
-    player->time_to_eat = LIFE_UNITS_TO_TIME_UNITS(BEGINNING_LIFE_UNITS);
+    player->inventory.attr.food = BEGINNING_LIFE_UNITS;
     player->team_idx = team_idx;
+    player->orientation = (uint8_t)rand() % 4;
     server->nb_players++;
+    get_resource_tile_by_coordinates(map, &player->coordinates)->attr
+        .players++;
     return server->nb_players - 1;
 }
 
 void destroy_ai(server_t PTR server, uint32_t ai_idx)
 {
+    const map_t *map = &server->map;
+
     LOGF("Destroying player (player idx: %u)", ai_idx)
     FD_CLR(server->players[ai_idx].sock, &server->current_socks);
     remove_player_from_team(server, (uint16_t)ai_idx);
     close(server->players[ai_idx].sock);
+    get_resource_tile_by_coordinates(map, &server->players[ai_idx]
+    .coordinates)->attr.players--;
     clear_msg_queue(&server->players[ai_idx].queue);
     server->nb_players--;
     memmove(&server->players[ai_idx], &server->players[server->nb_players],
@@ -54,9 +63,10 @@ void destroy_ai(server_t PTR server, uint32_t ai_idx)
 /// @param player_idx The player index of the player who sent the message.
 static void on_ai_rcv(server_t PTR server, uint32_t player_idx)
 {
-    char buffer[READ_BUFFER_SIZE];
+    char buffer[READ_BUFFER_SIZE] = {};
     int64_t bytes_received = read(server->players[player_idx].sock, buffer,
     sizeof(buffer) - 1);
+    player_command_t next_command;
 
     if (bytes_received < 1) {
         LOG("Player closed connection")
@@ -65,6 +75,10 @@ static void on_ai_rcv(server_t PTR server, uint32_t player_idx)
     LOGF("Player received : %.*s", (int32_t)bytes_received, buffer)
     player_command_handling(server, buffer, (uint32_t)bytes_received,
         player_idx);
+    if (SUCCESS == get_next_player_command(&server->players[player_idx]
+    .command_buffer, &next_command)) {
+        execute_player_command(server, (uint16_t)player_idx, &next_command);
+    }
 }
 
 /// @brief Check the status of the player.
@@ -163,13 +177,15 @@ static uint8_t handle_players_wfds(server_t PTR server, uint32_t player_idx,
     LOG("Start handle PLAYER wfds")
     switch (is_ready(server, &server->players[player_idx], wfds)) {
         case 0:
+            LOG("Stop handle PLAYER rfds 1")
+            return 1;
         case 1:
             send_next_message_from_queue(server, player_idx);
             (*select_ret)--;
-            LOG("Stop handle PLAYER wfds 1")
+            LOG("Stop handle PLAYER wfds 2")
             return 1;
         default:
-            LOG("Stop handle PLAYER wfds 2")
+            LOG("Stop handle PLAYER wfds 3")
             return 0;
     }
 }

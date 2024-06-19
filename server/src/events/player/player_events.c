@@ -11,7 +11,8 @@
 
 static void (* const event_functions[PLAYER_NB_EVENT])(server_t PTR server,
     uint32_t player_idx) = {
-    execute_player_none_event, execute_player_death_event
+    execute_player_none_event, execute_player_death_event,
+    execute_player_incantation_event
 };
 
 /// @brief Function used to handle the player health and kill him if he has

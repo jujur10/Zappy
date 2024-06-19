@@ -92,8 +92,7 @@ static bool verify_player_requirements(const player_t ARRAY players,
 /// @param player_idx The player index of the player at the origin of
 /// incantation.
 /// @return True for success, False for failure.
-static bool verify_requirements(server_t PTR server,
-    uint16_t player_idx)
+bool verify_requirements(server_t PTR server, uint16_t player_idx)
 {
     const player_t *player = &server->players[player_idx];
     const resources_t *current_tile = &server->map.tiles[(player->coordinates
@@ -113,9 +112,10 @@ void execute_player_incantation_command(server_t PTR server,
     player_t *player = &server->players[player_idx];
 
     if (true == verify_requirements(server, player_idx)) {
-        create_message_from_ptr("Elevation underway\n", 19, &message);
+        create_message("Elevation underway\n", 19, &message);
+        message.event.player_event = PLAYER_EVENT_INCANTATION;
         add_msg_to_queue(&player->queue, &message);
-        add_time_limit_to_player(server->time_units,
+        return add_time_limit_to_player(server->time_units,
             PLAYER_INCANTATION_WAIT, player);
     }
     return player_ko_response(server, player);

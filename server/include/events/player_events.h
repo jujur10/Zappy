@@ -19,6 +19,7 @@ typedef struct server_s server_t;
 typedef enum {
     PLAYER_EVENT_NONE,
     PLAYER_EVENT_KILL,
+    PLAYER_EVENT_INCANTATION,
     PLAYER_NB_EVENT
 } PACKED player_event_t;
 
@@ -55,3 +56,17 @@ void create_player_death_event(player_t PTR player);
 /// @param server The server structure.
 /// @param player_idx The player's index.
 void execute_player_death_event(server_t PTR server, uint32_t player_idx);
+
+/// @brief Function used to verify the requirements for incantation.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+/// @return True if ok for incantation, False if not.
+bool verify_requirements(server_t PTR server, uint16_t player_idx);
+
+/// @brief Function called when a incantation event is raised.
+///
+/// @param server The server structure.
+/// @param player_idx The player's index.
+void execute_player_incantation_event(server_t PTR server,
+    uint32_t player_idx);

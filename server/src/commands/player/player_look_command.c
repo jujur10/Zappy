@@ -196,6 +196,18 @@ void get_sorted_resources(const server_t PTR server,
     }
 }
 
+static void write_resources_to_buffer(buffer_t PTR buffer,
+    const resources_t PTR tile, uint32_t tile_index)
+{
+    for (uint32_t i = 0; i < tile->arr[tile_index] &&
+    i < MAX_RESOURCES_BY_TILE; i++) {
+        append_to_buffer_from_chars(buffer, resources_strings[tile_index],
+            resources_strings_lengths[tile_index]);
+        if (i != tile->arr[tile_index] - 1 && i < MAX_RESOURCES_BY_TILE - 1)
+            append_to_buffer_from_chars(buffer, " ", 1);
+    }
+}
+
 /// @brief Function which write the tile content into the buffer.
 ///
 /// @param buffer The buffer we want to write to.
@@ -205,13 +217,12 @@ static void write_tile_content_to_buffer(buffer_t PTR buffer,
 {
     bool wrote = false;
 
-    for (uint32_t i = 0; i < R_STRUCT_SIZE; i++) {
-        if (0 == tile->arr[i])
+    for (uint32_t tile_index = 0; tile_index < R_STRUCT_SIZE; tile_index++) {
+        if (0 == tile->arr[tile_index])
             continue;
         if (true == wrote)
             append_to_buffer_from_chars(buffer, " ", 1);
-        append_to_buffer_from_chars(buffer, resources_strings[i],
-            resources_strings_lengths[i]);
+        write_resources_to_buffer(buffer, tile, tile_index);
         wrote = true;
     }
 }
@@ -234,7 +245,8 @@ void execute_player_look_command(server_t PTR server, uint16_t player_idx,
         if (i != nb_of_tile - 1)
             append_to_buffer_from_chars(buffer, ",", 1);
     }
-    append_to_buffer_from_chars(buffer, "]", 1);
+    append_to_buffer_from_chars(buffer, "]\n", 2);
     create_message(buffer->ptr, buffer->len, &message);
     add_msg_to_queue(&player->queue, &message);
+    add_time_limit_to_player(server->time_units, PLAYER_LOOK_WAIT, player);
 }

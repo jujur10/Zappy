@@ -16,6 +16,15 @@
 /// @brief Redefinition.
 typedef struct server_s server_t;
 
+/// @brief Structure representing an egg.
+///
+/// @var index The index of the egg.
+/// @var egg_coordinates The egg coordinates.
+typedef struct egg_s {
+    uint16_t index;
+    coordinates_t egg_coordinates;
+} egg_t;
+
 /// @brief Structure representing teams.
 ///
 /// @var name The team's name.
@@ -31,7 +40,8 @@ typedef struct team_s {
     uint16_t max_nb_of_players;
     uint16_t nb_of_eggs;
     uint16_t nb_of_allocated_eggs;
-    coordinates_t ARRAY eggs_coordinates;
+    egg_t ARRAY eggs;
+    uint16_t egg_counter;
 } team_t;
 
 /// @brief Function which initializes teams.
@@ -72,3 +82,11 @@ status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
 /// @param server The server structure.
 /// @param player_idx The player to add to the team.
 void remove_player_from_team(server_t PTR server, uint16_t player_idx);
+
+/// @brief Function used to destroy an egg properly with a notification to
+/// the guis.
+///
+/// @param server The server structure.
+/// @param team The concerned team.
+/// @param egg_index The egg index in the team structure to destroy.
+void destroy_egg(server_t PTR server, team_t PTR team, uint16_t egg_index);

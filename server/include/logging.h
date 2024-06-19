@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-#ifdef DEBUG
+#ifdef LOG
 
     #define CYAN "\033[96m"
     #define YELLOW "\033[93m"

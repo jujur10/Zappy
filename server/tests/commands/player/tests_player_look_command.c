@@ -176,3 +176,29 @@ Test(TEST_PLAYER_LOOK_COMMAND, test_player_look_command_5)
     player->orientation = LOOK_RIGHT;
     execute_5(&server, 0, NULL);
 }
+
+Test(TEST_PLAYER_LOOK_COMMAND, test_player_look_command_6)
+{
+    server_t server = {};
+    argument_t args;
+    char msg_content[500];
+    msg_t message;
+
+    args.width = 7;
+    args.height = 4;
+    server.args = &args;
+    init_map(&args, &server.map);
+    pre_generate_buffers(&server);
+    spread_resources_on_map(&server.map, &server.generated_buffers);
+    server.players[0].coordinates.x = 6;
+    server.players[0].coordinates.y = 3;
+    TAILQ_INIT(&server.players[0].queue);
+    for (uint32_t i = 0; i < R_STRUCT_SIZE; i++) {
+        server.map.tiles[server.players[0].coordinates.y * 7 +
+            server.players[0].coordinates.x].arr[i] = 50;
+    }
+    execute_player_look_command(&server, 0, NULL);
+    pop_msg(&server.players[0].queue, &message);
+    memcpy(msg_content, message.ptr, message.len);
+    msg_content[message.len + 1] = '\0';
+}

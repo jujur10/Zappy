@@ -21,8 +21,10 @@ static void set_random_coordinates_to_eggs(team_t PTR team,
     uint32_t map_width, uint32_t map_height)
 {
     for (uint16_t i = 0; i < team->nb_of_eggs; i++) {
-        team->eggs_coordinates[i].x = (uint16_t)rand() % map_width;
-        team->eggs_coordinates[i].y = (uint16_t)rand() % map_height;
+        team->eggs[i].index = team->egg_counter;
+        team->eggs[i].egg_coordinates.x = (uint16_t)rand() % map_width;
+        team->eggs[i].egg_coordinates.y = (uint16_t)rand() % map_height;
+        team->egg_counter++;
     }
 }
 
@@ -38,10 +40,11 @@ uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams)
         sizeof(*((*teams)->players_idx)));
         (*teams)[i].nb_of_eggs = args->clients_nb;
         (*teams)[i].nb_of_allocated_eggs = args->clients_nb;
-        (*teams)[i].eggs_coordinates = calloc(args->clients_nb,
-        sizeof(*((*teams)->eggs_coordinates)));
+        (*teams)[i].eggs = calloc(args->clients_nb,
+        sizeof(*((*teams)->eggs)));
         set_random_coordinates_to_eggs(&(*teams)[i], args->width,
             args->height);
+        (*teams)[i].egg_counter = 0;
     }
     return 0;
 }
@@ -50,7 +53,7 @@ void destroy_teams(const argument_t PTR args, team_t ARRAY teams)
 {
     for (uint32_t i = 0; i < args->nb_of_teams; i++) {
         free(teams[i].players_idx);
-        free(teams[i].eggs_coordinates);
+        free(teams[i].eggs);
     }
     free(teams);
 }

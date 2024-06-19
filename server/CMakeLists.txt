@@ -46,6 +46,7 @@ add_executable(zappy_server
     src/events/player/player_death_event.c
     src/events/player/player_events.c
     src/events/player/player_events.c
+    src/events/player/player_incantation_event.c
     src/events/player/player_none_event.c
     src/gui_handling.c
     src/main.c
@@ -127,22 +128,44 @@ if (DEFINED RUN_TESTS)
         src/commands/gui/gui_sgt_command.c
         src/commands/gui/gui_sst_command.c
         src/commands/player/player_broadcast_command.c
+        src/commands/player/player_broadcast_command.c
+        src/commands/player/player_command.c
+        src/commands/player/player_command.c
         src/commands/player/player_command_parsing.c
+        src/commands/player/player_command_parsing.c
+        src/commands/player/player_connect_nbr_command.c
         src/commands/player/player_direction_command.c
+        src/commands/player/player_direction_command.c
+        src/commands/player/player_eject_command.c
+        src/commands/player/player_fork_command.c
+        src/commands/player/player_forward_command.c
         src/commands/player/player_frequency_command.c
+        src/commands/player/player_frequency_command.c
+        src/commands/player/player_incantation_command.c
+        src/commands/player/player_incantation_command.c
+        src/commands/player/player_inventory_command.c
         src/commands/player/player_inventory_command.c
         src/commands/player/player_look_command.c
+        src/commands/player/player_look_command.c
+        src/commands/player/player_none_command.c
         src/commands/player/player_responses.c
+        src/commands/player/player_responses.c
+        src/commands/player/player_right_left_command.c
+        src/commands/player/player_set_command.c
+        src/commands/player/player_take_command.c
         src/coordinates.c
         src/events/player/player_death_event.c
         src/events/player/player_events.c
+        src/events/player/player_incantation_event.c
         src/events/player/player_none_event.c
         src/gui_handling.c
         src/map.c
         src/map_buffer.c
         src/msg.c
         src/player.c
+        src/player.c
         src/queue/queue_utils_msg.c
+        src/resource.c
         src/team.c
         src/team_management.c
         src/utils/arrays/arrays_u32.c
