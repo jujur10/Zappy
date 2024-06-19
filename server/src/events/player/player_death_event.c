@@ -25,7 +25,7 @@ void create_player_death_event(player_t PTR player)
 static void send_pdi_to_guis(server_t PTR server, uint32_t player_idx)
 {
     msg_t message;
-    char msg_content[4 + UINT32_MAX_DIGITS + 1] = "pdi X\n";
+    char msg_content[4 + UINT32_MAX_DIGITS + 1] = "pdi ";
     uint32_t count = 4;
 
     write_nb_to_buffer(server->players[player_idx].sock, msg_content, &count);
