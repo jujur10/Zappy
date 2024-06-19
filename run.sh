@@ -2,9 +2,9 @@
 
 cleanup() {
     echo "Terminating executables..."
-    pkill zappy_server
     pkill zappy_gui
     pkill zappy_ai
+    pkill zappy_server
 }
 
 if [ "$1" == "clean" ]; then
@@ -12,18 +12,23 @@ if [ "$1" == "clean" ]; then
     exit 0
 fi
 
-./zappy_server -p 4242 -x 100 -y 100 -n red green blue -c 34 -f 100 &
+if [ "$1" == "--help" ]; then
+    echo "Usage: ./run.sh [map_size] [frequency] [nb_teams] [nb_players_per_teams]"
+    echo "Optional argument: clean (terminates all executables)"
+    exit 0
+fi
+
+teams=()
+for ((i=1; i<=$3; i++)); do
+    teams+=("team$i")
+done
+
+./zappy_server -p 4242 -x $1 -y $1 -n ${teams[@]} -c $4 -f $2 &
 
 ./zappy_gui -p 4242 -h 127.0.0.1 &
 
-for i in {1..33}; do
-    ./zappy_ai -p 4242 -n red -h 127.0.0.1 &
-done
-
-for i in {1..33}; do
-    ./zappy_ai -p 4242 -n green -h 127.0.0.1 &
-done
-
-for i in {1..34}; do
-    ./zappy_ai -p 4242 -n blue -h 127.0.0.1 &
+for ((i=1; i<=$3; i++)); do
+    for ((j=1; j<=$4; j++)); do
+        ./zappy_ai -p 4242 -n team$i -h 127.0.0.1 &
+    done
 done
