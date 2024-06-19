@@ -46,10 +46,19 @@ target_include_directories(atomic_queue INTERFACE
 )
 
 #######################
+###### Add Raygui #####
+#######################
+add_library(raygui INTERFACE)
+target_include_directories(raygui INTERFACE
+    resources/raygui
+)
+
+#######################
 ###### Zappy GUI ######
 #######################
 add_executable(zappy_gui
     src/argv_parser.cpp
+    src/gui.cpp
     src/main.cpp
     src/map.cpp
     src/map_utils.cpp
@@ -71,6 +80,7 @@ target_link_libraries(zappy_gui PRIVATE
     build_configs
     raylib
     raylib_cpp
+    raygui
     flecs
     atomic_queue
 )
