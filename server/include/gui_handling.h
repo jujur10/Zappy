@@ -29,3 +29,9 @@ void destroy_gui(server_t PTR server, uint32_t gui_idx);
 /// @param select_ret The return value of select.
 void handle_guis(server_t PTR server, const fd_set PTR rfds,
     const fd_set PTR wfds, int32_t PTR select_ret);
+
+/// @brief Function which executes the commands to initialize the gui.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+void send_starting_guis_events(server_t PTR server, uint16_t gui_idx);

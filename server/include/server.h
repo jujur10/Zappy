@@ -63,6 +63,7 @@ typedef struct server_s {
     gui_t guis[MAX_CLIENTS];
     uint16_t nb_guis;
     team_t ARRAY teams;
+    uint16_t egg_counter;
     map_t map;
 } server_t;
 

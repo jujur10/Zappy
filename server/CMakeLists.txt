@@ -48,6 +48,7 @@ add_executable(zappy_server
     src/events/player/player_events.c
     src/events/player/player_incantation_event.c
     src/events/player/player_none_event.c
+    src/gui.c
     src/gui_handling.c
     src/main.c
     src/map.c

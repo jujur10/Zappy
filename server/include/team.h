@@ -41,14 +41,15 @@ typedef struct team_s {
     uint16_t nb_of_eggs;
     uint16_t nb_of_allocated_eggs;
     egg_t ARRAY eggs;
-    uint16_t egg_counter;
 } team_t;
 
 /// @brief Function which initializes teams.
 /// @param args The parsed program parameters.
 /// @param teams The teams to initialize.
+/// @param egg_counter The egg counter of the server.
 /// @return 0 on success, 1 on failure.
-uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams);
+uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams,
+    uint16_t PTR egg_counter);
 
 /// @brief Function which destroys teams.
 /// @param args The parsed program parameters.

@@ -52,9 +52,9 @@ static void add_egg_to_team(server_t PTR server, team_t PTR team,
         team->eggs = new_egg_array;
     }
     team->eggs[team->nb_of_eggs].egg_coordinates = *egg_coordinates;
-    team->eggs[team->nb_of_eggs].index = team->egg_counter;
+    team->eggs[team->nb_of_eggs].index = server->egg_counter;
     send_enw_to_guis(server, &team->eggs[team->nb_of_eggs], player);
-    team->egg_counter++;
+    server->egg_counter++;
     team->nb_of_eggs++;
 }
 

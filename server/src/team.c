@@ -18,17 +18,18 @@
 /// @param map_width The map width.
 /// @param map_height The map height.
 static void set_random_coordinates_to_eggs(team_t PTR team,
-    uint32_t map_width, uint32_t map_height)
+    uint32_t map_width, uint32_t map_height, uint16_t PTR egg_counter)
 {
     for (uint16_t i = 0; i < team->nb_of_eggs; i++) {
-        team->eggs[i].index = team->egg_counter;
+        team->eggs[i].index = *egg_counter;
         team->eggs[i].egg_coordinates.x = (uint16_t)rand() % map_width;
         team->eggs[i].egg_coordinates.y = (uint16_t)rand() % map_height;
-        team->egg_counter++;
+        (*egg_counter)++;
     }
 }
 
-uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams)
+uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams,
+    uint16_t PTR egg_counter)
 {
     *teams = calloc(args->nb_of_teams, sizeof(team_t));
     if (NULL == *teams)
@@ -43,8 +44,7 @@ uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams)
         (*teams)[i].eggs = calloc(args->clients_nb,
         sizeof(*((*teams)->eggs)));
         set_random_coordinates_to_eggs(&(*teams)[i], args->width,
-            args->height);
-        (*teams)[i].egg_counter = 0;
+            args->height, egg_counter);
     }
     return 0;
 }

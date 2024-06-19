@@ -22,6 +22,7 @@
 /// @brief Redefinition of structures.
 typedef struct player_s player_t;
 typedef struct server_s server_t;
+typedef struct egg_s egg_t;
 
 /// @brief Max number of commands into the buffer for PLAYER's.
 #define MAX_NB_OF_COMMAND_FOR_BUFFER 10

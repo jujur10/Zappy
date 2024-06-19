@@ -31,6 +31,7 @@ status_t transform_new_client_to_gui(server_t *server, uint32_t client_idx)
     add_msg_to_queue(&server->guis[gui_index].queue, &message);
     add_buffer_to_queue(&server->guis[gui_index].queue,
         &server->generated_buffers.buffers[PRE_WORLD_DIM_BUFFER]);
+    send_starting_guis_events(server, (uint16_t)gui_index);
     destroy_new_client(server, client_idx, true);
     return SUCCESS;
 }

@@ -65,7 +65,7 @@ static uint8_t init_server(const argument_t PTR args, server_t PTR server)
         ERROR("Map initialization failed") return close(server->sock), 1;
     }
     LOG("Map initialized")
-    if (1 == init_teams(args, &server->teams)) {
+    if (1 == init_teams(args, &server->teams, &server->egg_counter)) {
         ERROR("Teams initialization failed")
         return free(server->map.tiles), close(server->sock), 1;
     }
