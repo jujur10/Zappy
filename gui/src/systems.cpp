@@ -313,7 +313,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
         .each(
             [](flecs::entity player, Vector2 &position, player::playerTargetInfo &targetInfo)
             {
-                if (Vector2Distance(position, targetInfo.target) < 0.1f)
+                if (::Vector2Distance(position, targetInfo.target) < 0.1f)
                 {
                     player.disable<player::playerTargetInfo>();
                     player.enable<player::Orientation>();

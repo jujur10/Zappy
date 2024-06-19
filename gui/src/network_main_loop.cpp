@@ -25,6 +25,7 @@ void HandleGuiCommand(const Socket& serverSocket)
     while (GuiToServerQueue.try_pop(request) && request != nullptr)
     {
         serverSocket.Write(request, std::strlen(request));
+        delete[] request;
     }
 }
 
