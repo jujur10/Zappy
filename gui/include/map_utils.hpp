@@ -18,6 +18,16 @@ namespace zappy_gui::utils
 [[nodiscard]]
 Vector2 GetCoordsFromTileMatrix(const raylib::Matrix &transformMatrix);
 
+/// @brief Get the integer coordinates (x, y) from a vector
+/// Get the tile x, y coordinates/indices from a vector where the vector coordinates are the one used to draw
+/// @param positionVector The vector containing the "drawing" coordinates
+Vector2 GetCoordsFromVector(const Vector2 &positionVector);
+
+/// @brief Get the integer coordinates (x, y) from a vector
+/// Get the tile x, y coordinates/indices from a vector where the vector coordinates are the one used to draw
+/// @param positionVector The vector containing the "drawing" coordinates
+Vector2 GetCoordsFromVector(const Vector3 &positionVector);
+
 /// @brief Get the tile index from the coordinates
 /// @param coords The coordinates of the tile in the 2D space (x, y)
 /// @return The index of the corresponding tile entity in the world

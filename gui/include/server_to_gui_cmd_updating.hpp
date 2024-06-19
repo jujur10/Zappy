@@ -31,4 +31,12 @@ void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *n
  * @param deadPlayer The received DeadPlayerCommand command
  */
 void HandleDeadPlayerCommand(const flecs::world &world, const DeadPlayerCommand *deadPlayer);
+
+/**
+ * @brief Process the PlayerPositionCommand command
+ * Update the player entity position and orientation
+ * @param world The ecs world
+ * @param playerPosition The received PlayerPositionCommand command
+ */
+void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPositionCommand *playerPosition);
 }  // namespace zappy_gui::net

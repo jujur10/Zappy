@@ -5,10 +5,13 @@
 #include <cstdint>
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
-#include "raylib_utils.hpp"
 #include <flecs.h>
-#include "gui_to_server_cmd_structs.hpp"
+
 #include "gui.hpp"
+#include "gui_to_server_cmd_structs.hpp"
+#include "gui_to_server_cmd_value.hpp"
+
+#include "raylib_utils.hpp"
 
 namespace zappy_gui::gui {
     static bool GuiSliderProOwning(raylib::Rectangle bounds, const char *textLeft, const char *textRight,
@@ -141,11 +144,23 @@ namespace zappy_gui::gui {
             raygui::GuiGetStyle(SLIDER, SLIDER_WIDTH), editMode);
     }
 
-    void timeStepSliderAction(const float value) {
-        std::string sstString = "sst ";
-        sstString += std::to_string(static_cast<int>(value));
-        sstString += "\n";
-        net::GuiToServerQueue.try_push(sstString.data());
+    void timeStepSliderAction(float value)
+{
+        auto *sstString = new char[17];
+
+        ::memcpy(sstString, GUI_SET_TIME_UNIT, 4); // NOLINT
+
+        value = std::round(value);
+
+        const auto [ptr, ec] = std::to_chars(sstString + 4, sstString + 14, static_cast<uint32_t>(value));
+        if (ec != std::errc()) {
+            return;
+        }
+
+        *ptr = '\n';
+        *(ptr + 1) = '\0';
+
+        net::GuiToServerQueue.try_push(sstString);
     }
 
     void createGuiEntities(const flecs::world &ecs, const uint16_t screenWidth, const uint16_t screenHeight) {
@@ -170,12 +185,5 @@ namespace zappy_gui::gui {
         ecs.lookup("drawMenu").disable();
         ecs.lookup("drawMenuRetractArrow").disable();
         ecs.lookup("drawMenuSliders").disable();
-    }
-
-    void destroyGuiEntities(const flecs::world &ecs) {
-        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::MenuExpandArrow).build().destruct();
-        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::MenuRetractArrow).build().destruct();
-        ecs.query_builder<raylib::Rectangle>().with(zappy_gui::utils::MenuLabels::Menu).build().destruct();
-        ecs.query_builder<Slider>().build().destruct();
     }
 }

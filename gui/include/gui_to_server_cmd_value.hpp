@@ -8,3 +8,4 @@
 #define GUI_MAP_TILES "mct\n"
 #define GUI_TEAMS_NAME "tna\n"
 #define GUI_TIME_UNIT "sgt\n"
+#define GUI_SET_TIME_UNIT "sst "

@@ -45,6 +45,14 @@ void ParseGuiCommands(const flecs::iter &it)
                 }
                 break;
             }
+            case 3:
+            {
+                if (auto const *const playerMove = std::get_if<PlayerPositionCommand>(&cmd))
+                {
+                    HandlePlayerPositionCommand(world, playerMove);
+                }
+                break;
+            }
             // Other command cases to be added here
             default:;
         }

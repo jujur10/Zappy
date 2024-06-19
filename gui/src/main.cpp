@@ -130,11 +130,6 @@ int32_t main(const int32_t argc, char *argv[])
     {
         // Main loop
     }
-
-    //--------------------------------------------------------------------------------------
-    // Destroy the menu entities
-    zappy_gui::gui::destroyGuiEntities(ecs);
-
     //--------------------------------------------------------------------------------------
     // Stop the network thread
     networkThread.request_stop();

@@ -25,6 +25,7 @@ void HandleGuiCommand(const Socket& serverSocket)
     while (GuiToServerQueue.try_pop(request) && request != nullptr)
     {
         serverSocket.Write(request, std::strlen(request));
+        delete[] request;
     }
 }
 
@@ -47,6 +48,11 @@ void HandleServerCommand(const std::string& line)
         case ServerCommands::DEATH_OF_PLAYER:
         {
             ParseDeathOfPlayerCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::PLAYER_POSITION:
+        {
+            ParsePlayerPositionCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
         default:

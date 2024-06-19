@@ -71,4 +71,26 @@ void ParseDeathOfPlayerCommand(const std::string_view& line)
 
     ServerToGuiQueue.try_push(DeadPlayerCommand{.id = id});
 }
+
+void ParsePlayerPositionCommand(const std::string_view& line)
+{
+    uint16_t id = 0;
+    uint16_t x = 0;
+    uint16_t y = 0;
+    uint8_t orientation = 0;
+    size_t paramPos = 0;
+
+    string_utils::convertFromString(line, id);
+
+    paramPos = line.find_first_of(' ') + 1;
+    string_utils::convertFromString(line.data() + paramPos, x);
+
+    paramPos = line.find_first_of(' ', paramPos) + 1;
+    string_utils::convertFromString(line.data() + paramPos, y);
+
+    paramPos = line.find_first_of(' ', paramPos) + 1;
+    string_utils::convertFromString(line.data() + paramPos, orientation);
+
+    ServerToGuiQueue.try_push(PlayerPositionCommand{.id = id, .x = x, .y = y, .orientation = orientation});
+}
 }  // namespace zappy_gui::net
