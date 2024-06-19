@@ -32,3 +32,21 @@ for ((i=1; i<=$3; i++)); do
         ./zappy_ai -p 4242 -n team$i -h 127.0.0.1 &
     done
 done
+
+# We sleep in a subprocess to echo the desired message after the logs from the other executables appear
+# Echo is used twice because it first sends the message as a command to the shell, and not a text to display
+$(sleep 1; echo echo Press 'Ctrl-D' or 'q' to exit) &
+
+stty -echo -icanon time 0 min 1
+while true; do
+    char=$(dd bs=1 count=1 2>/dev/null)
+    if [ -z "$char" ]; then
+        break
+    fi
+    if [ "$char" == "q" ]; then
+        break
+    fi
+done
+stty sane
+
+cleanup
