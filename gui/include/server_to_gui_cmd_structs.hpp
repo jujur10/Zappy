@@ -40,11 +40,16 @@ struct PlayerPositionCommand
     uint8_t orientation;
 };
 
+struct TimeUnitUpdateCommand
+{
+    uint32_t timeUnit;
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
 // DON'T CHANGE THE ORDER OF THE TYPES IN THE VARIANT OR YOU WILL BREAK THE PARSING CODE
-using Command = std::variant<UpdateTileCommand, NewPlayerCommand, DeadPlayerCommand, PlayerPositionCommand>;
+using Command = std::variant<UpdateTileCommand, NewPlayerCommand, DeadPlayerCommand, PlayerPositionCommand, TimeUnitUpdateCommand>;
 
 
 // Command queue server -> gui
@@ -76,4 +81,8 @@ void ParseDeathOfPlayerCommand(const std::string_view& line);
  * @param line The command received from the server
  */
 void ParsePlayerPositionCommand(const std::string_view& line);
+
+/// @brief Parse the sgt command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The sgt command received from the server
+void ParseTimeUnitUpdatedCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

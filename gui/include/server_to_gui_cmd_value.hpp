@@ -14,6 +14,7 @@ enum class ServerCommands: uint32_t {
     MAP_TILE = 7627618, // bct
     NEW_PLAYER = 7827056, // pnw
     DEATH_OF_PLAYER = 6906992, // pdi
-    PLAYER_POSITION = 7303280  // ppo
+    PLAYER_POSITION = 7303280,  // ppo
+    TIME_UNIT_UPDATED = 7628659, // sgt
 };
 }

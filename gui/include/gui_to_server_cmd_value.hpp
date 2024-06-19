@@ -9,3 +9,4 @@
 #define GUI_TEAMS_NAME "tna\n"
 #define GUI_TIME_UNIT "sgt\n"
 #define GUI_SET_TIME_UNIT "sst "
+#define GUI_GET_TIME_UNIT "sgt\n"

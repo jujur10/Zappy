@@ -39,4 +39,12 @@ void HandleDeadPlayerCommand(const flecs::world &world, const DeadPlayerCommand 
  * @param playerPosition The received PlayerPositionCommand command
  */
 void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPositionCommand *playerPosition);
+
+/**
+ * @brief Process the TimeUnitUpdateCommand command
+ * Update the time unit value
+ * @param world The ecs world
+ * @param timeUnit The received TimeUnitUpdateCommand command
+ */
+void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdateCommand *timeUnitUpdate);
 }  // namespace zappy_gui::net

@@ -55,7 +55,13 @@ void HandleServerCommand(const std::string& line)
             ParsePlayerPositionCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::TIME_UNIT_UPDATED:
+        {
+            ParseTimeUnitUpdatedCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         default:
+            printf("Unknown command: %s\n", line.c_str());
             return;
     }
 }
