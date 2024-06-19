@@ -79,6 +79,32 @@ void HandleDeadPlayerCommand(const flecs::world &world, const DeadPlayerCommand 
 
 void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPositionCommand *const playerPosition)
 {
+    char dir;
+    switch (playerPosition->orientation)
+    {
+        case 1:
+            dir = 'N';
+        break;
+        case 2:
+            dir = 'E';
+        break;
+        case 3:
+            dir = 'S';
+        break;
+        case 4:
+            dir = 'W';
+        break;
+        default:
+            dir = 'U';
+        break;
+    }
+
+    printf("Player %d moved to %d %d with %c orientation\n",
+           playerPosition->id,
+           playerPosition->x,
+           playerPosition->y,
+           dir);
+
     flecs::entity player = world.entity(playerPosition->id + PLAYER_STARTING_IDX);
     if (!player.is_alive())
     {
@@ -103,11 +129,6 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     auto *const playerTargetInfo = player.get_mut<player::playerTargetInfo>();
     playerTargetInfo->target = {tileMatrix.m12, tileMatrix.m14};
 
-    raylib::ModelAnimation *const run = &world.get<player::playerAnimations>()->animations->at(RUN_ANIMATION_IDX);
-    auto *const playerAnimData = player.get_mut<player::playerAnimationData>();
-    playerAnimData->currentAnimation = run;
-    playerAnimData->currentFrame = 0;
-
     Vector2 direction = {tileMatrix.m12 - playerPos->x, tileMatrix.m14 - playerPos->y};
 
     // Normalize the direction vector
@@ -118,10 +139,33 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
         direction.y /= length;
     }
     playerTargetInfo->normalizedDirection = direction;
+
+    // Check if the player go around the map
+    // Current player position (x,y)
+    const Vector2 playerPosIndices = utils::GetCoordsFromVector(Vector2{playerPos->x, playerPos->y});
+
+    // Get the difference between the current player position and the new one
+    const float diffX = std::fabsf(playerPosIndices.x - playerPosition->x);
+    const float diffY = std::fabsf(playerPosIndices.y - playerPosition->y);
+
+    printf("Normalized direction: %f %f\n", direction.x, direction.y);
+    // If the player moved more than one in X or Y, it means he went around the map
+    if (diffX > 1 || diffY > 1)
+    {
+        auto *const playerCoords = player.get_mut<Vector2>();
+        playerCoords->x = tileMatrix.m12;
+        playerCoords->y = tileMatrix.m14;
+        player.disable<player::playerTargetInfo>();
+        player.enable<player::Orientation>();
+        printf("Player %d went around the map, position: %d %d, target: %d %d, diff: %d %d\n", playerPosition->id,
+               static_cast<int>(playerPosIndices.x), static_cast<int>(playerPosIndices.y), playerPosition->x,
+               playerPosition->y, static_cast<int>(diffX), static_cast<int>(diffY));
+        return;
+    }
+
     player.enable<player::playerTargetInfo>();
 
     auto * const rotationAngle = player.get_mut<float>();
-
     switch (playerOrientation)
     {
         using enum player::Orientation;
@@ -147,30 +191,11 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
             break;
     }
 
-    char dir;
-    switch (playerPosition->orientation)
-    {
-        case 1:
-            dir = 'N';
-            break;
-        case 2:
-            dir = 'E';
-            break;
-        case 3:
-            dir = 'S';
-            break;
-        case 4:
-            dir = 'W';
-            break;
-        default:
-            dir = 'U';
-            break;
-    }
-    printf("Player %d moved to %d %d with %c orientation\n",
-           playerPosition->id,
-           playerPosition->x,
-           playerPosition->y,
-           dir);
+
+    raylib::ModelAnimation *const run = &world.get<player::playerAnimations>()->animations->at(RUN_ANIMATION_IDX);
+    auto *const playerAnimData = player.get_mut<player::playerAnimationData>();
+    playerAnimData->currentAnimation = run;
+    playerAnimData->currentFrame = 0;
 }
 
 }  // namespace zappy_gui::net

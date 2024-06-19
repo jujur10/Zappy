@@ -308,6 +308,29 @@ namespace zappy_gui::systems {
             }
             position.x += targetInfo.normalizedDirection.x * 0.01f;
             position.y += targetInfo.normalizedDirection.y * 0.01f;
+
+            // const float yTopLimit = map::tileSize * map::verticalSpacing - static_cast<float>(map::kMAP_HEIGHT) * map::tileSize * 0.375f;
+            // const float yBottomLimit = (map::kMAP_HEIGHT - 1) * map::tileSize * map::verticalSpacing - static_cast<float>(map::kMAP_HEIGHT) * map::tileSize * 0.375f;
+            // const float offsetX = utils::IsTileInOddRow(position.y) ? 0.f : map::tileSize * 0.5f;
+            // const float xLeftLimit = (map::tileSize + offsetX - static_cast<float>(map::kMAP_WIDTH) * map::tileSize * 0.5f) * map::spacing;
+            // const float xRightLimit = ((map::kMAP_WIDTH - 1) * map::tileSize + offsetX - static_cast<float>(map::kMAP_WIDTH) * map::tileSize * 0.5f) * map::spacing;
+            //
+            // if (std::abs(position.y - yTopLimit) <= 0.1f)
+            // {
+            //     position.y = yBottomLimit;
+            // }
+            // else if (std::abs(position.y - yBottomLimit) <= 0.1f)
+            // {
+            //     position.y = yTopLimit;
+            // }
+            // if (std::abs(position.x - xLeftLimit) <= 0.1f)
+            // {
+            //         position.x = xRightLimit;
+            // }
+            // else if (std::abs(position.x - xRightLimit) <= 0.1f)
+            // {
+            //         position.x = xLeftLimit;
+            // }
         });
 
     /// Query the players and update their rotation angle
