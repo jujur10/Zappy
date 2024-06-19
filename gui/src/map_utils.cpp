@@ -16,23 +16,42 @@ namespace zappy_gui::utils
 {
 Vector2 GetCoordsFromTileMatrix(const raylib::Matrix &transformMatrix)
 {
-    const float offsetX = (static_cast<float>(kMAP_WIDTH) * tileSize * 0.5f) * spacing;
     const float offsetY = static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f;
-
-    const float x = (transformMatrix.m12 + offsetX) / (tileSize * spacing);
     const float y = (transformMatrix.m14 + offsetY) / (tileSize * verticalSpacing);
-
-    auto tileX = static_cast<uint32_t>(std::round(x));
     const auto tileY = static_cast<uint32_t>(std::round(y));
 
-    if (tileY % 2 != 0)
-    {
-        const float offsetOddRow = x - static_cast<float>(tileX);
-        if (offsetOddRow < 0.5f)
-        {
-            --tileX;
-        }
-    }
+    const float offsetX = 0 == tileY % 2 ? 0.f : tileSize * 0.5f;
+    const float intermediateX = (transformMatrix.m12 / spacing) + (static_cast<float>(kMAP_WIDTH) * tileSize * 0.5f) - offsetX;
+    const float x = (intermediateX / tileSize);
+    const auto tileX = static_cast<uint32_t>(std::round(x));
+
+    return Vector2{static_cast<float>(tileX), static_cast<float>(tileY)};
+}
+
+Vector2 GetCoordsFromVector(const Vector2 &positionVector)
+{
+    const float offsetY = static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f;
+    const float y = (positionVector.y + offsetY) / (tileSize * verticalSpacing);
+    const auto tileY = static_cast<uint32_t>(std::round(y));
+
+    const float offsetX = 0 == tileY % 2 ? 0.f : tileSize * 0.5f;
+    const float intermediateX = (positionVector.x / spacing) + (static_cast<float>(kMAP_WIDTH) * tileSize * 0.5f) - offsetX;
+    const float x = (intermediateX / tileSize);
+    const auto tileX = static_cast<uint32_t>(std::round(x));
+
+    return Vector2{static_cast<float>(tileX), static_cast<float>(tileY)};
+}
+
+Vector2 GetCoordsFromVector(const Vector3 &positionVector)
+{
+    const float offsetY = static_cast<float>(kMAP_HEIGHT) * tileSize * 0.375f;
+    const float y = (positionVector.z + offsetY) / (tileSize * verticalSpacing);
+    const auto tileY = static_cast<uint32_t>(std::round(y));
+
+    const float offsetX = 0 == tileY % 2 ? 0.f : tileSize * 0.5f;
+    const float intermediateX = (positionVector.x / spacing) + (static_cast<float>(kMAP_WIDTH) * tileSize * 0.5f) - offsetX;
+    const float x = (intermediateX / tileSize);
+    const auto tileX = static_cast<uint32_t>(std::round(x));
 
     return Vector2{static_cast<float>(tileX), static_cast<float>(tileY)};
 }
