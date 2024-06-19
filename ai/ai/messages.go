@@ -187,6 +187,9 @@ func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
 	} else if messageContent.msgType == cancelLvlUp || // Closed level up lobby
 		messageContent.msgType == lvlUpComplete ||
 		messageContent.msgType == lvlUpFailed {
+		if game.MessageManager.waitingForLevelUpLeech {
+			game.MessageManager.levelUpMessageChannel <- messageContent
+		}
 		game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList[:messageIndex],
 			game.MessageManager.messageStatusList[messageIndex+1:]...)
 	}

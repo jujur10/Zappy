@@ -131,33 +131,31 @@ func (game *Game) startLevelUpHost() {
 	}
 }
 
-// startLevelUpLeech starts the level up leeching process
-func (game *Game) startLevelUpLeech() {
-	log.Println("Starting level up as leech, target level ", game.Level+1)
-	game.Socket.SendCommand(network.LevelUp, network.EmptyBody)
-	initialResponse := game.awaitResponseToCommand()
-	game.updateFrequency()
-	if !initialResponse {
-		log.Println("Failed to start level up as leech, target level ", game.Level+1)
-		levelUpFailed(game, game.Level+1)
-		_ = game.awaitResponseToCommand()
-		game.updateFrequency()
-		return
+func awaitLevelUpLeechUpdate(game *Game, uuid string) bool {
+	for {
+		select {
+		case message, ok := <-game.MessageManager.levelUpMessageChannel:
+			if !ok {
+				log.Fatal("Message channel closed")
+				return false
+			}
+			if message.uuid == uuid && (message.msgType == lvlUpComplete || message.msgType == lvlUpFailed) {
+				return message.msgType == lvlUpComplete
+			}
+		}
 	}
-	finalResponse := game.awaitResponseToCommand()
-	game.updateFrequency()
-	if finalResponse {
+}
+
+// startLevelUpLeech starts the level up leeching process
+func (game *Game) startLevelUpLeech(uuid string) {
+	log.Println("Starting level up as leech, target level ", game.Level+1)
+	levelUpStatus := awaitLevelUpLeechUpdate(game, uuid)
+	if levelUpStatus {
 		log.Println("Successfully leveled up as leech, new level ", game.Level+1)
-		levelUpComplete(game, game.Level+1)
-		_ = game.awaitResponseToCommand()
-		game.updateFrequency()
 		game.Level += 1
 		game.forkPlayer()
 	} else {
 		log.Println("Failed to level up as leech, target level ", game.Level+1)
-		levelUpFailed(game, game.Level+1)
-		_ = game.awaitResponseToCommand()
-		game.updateFrequency()
 	}
 }
 
@@ -204,7 +202,7 @@ func (game *Game) levelUpHostLoop() {
 
 // levelUpHostLoop joins a level up "lobby", and waits until there are enough players gathered
 // or until the food reserves are too low to continue
-func (game *Game) levelUpLeechLoop() {
+func (game *Game) levelUpLeechLoop(uuid string) {
 	targetLevel := game.Level + 1
 	log.Println("Joining level up : target level ", targetLevel)
 	announcePresenceLevelUp(game, targetLevel)
@@ -221,7 +219,7 @@ func (game *Game) levelUpLeechLoop() {
 			}
 			switch message.msgType {
 			case startLvlUp:
-				game.startLevelUpLeech()
+				game.startLevelUpLeech(uuid)
 				return
 			case cancelLvlUp:
 				log.Println("Level up leech cancelled")

@@ -85,21 +85,21 @@ func TestGame_getLevelUpPriority(t *testing.T) {
 		want   int
 	}{
 		{"Test not enough food", fields{Level: 1, TotalResourcesRequired: totalResourcesRequired,
-			LevelUpResources: levelUpResources, FoodManager: FoodManagement{FoodPriority: 9, FoodChannel: make(chan int)}},
+			LevelUpResources: levelUpResources, FoodManager: FoodManagement{FoodPriority: 9, InputFoodChannel: make(chan int)}},
 			0},
 
 		{"Test not enough resources", fields{Level: 1, TotalResourcesRequired: totalResourcesRequired,
-			LevelUpResources: levelUpResources, FoodManager: FoodManagement{FoodPriority: 4, FoodChannel: make(chan int)}},
+			LevelUpResources: levelUpResources, FoodManager: FoodManagement{FoodPriority: 4, InputFoodChannel: make(chan int)}},
 			0},
 
 		{"Valid test level 1", fields{Level: 1, TotalResourcesRequired: totalResourcesRequired,
 			LevelUpResources: map[int]Inventory{1: {Player: 1, Linemate: 0, Deraumere: 0, Sibur: 0, Mendiane: 0, Phiras: 0, Thystame: 0}},
-			FoodManager:      FoodManagement{FoodPriority: 4, FoodChannel: make(chan int)}},
+			FoodManager:      FoodManagement{FoodPriority: 4, InputFoodChannel: make(chan int)}},
 			levelUpPriority},
 
 		{"Valid test level 5", fields{Level: 1, TotalResourcesRequired: totalResourcesRequired,
 			LevelUpResources: map[int]Inventory{5: {Player: 4, Linemate: 0, Deraumere: 0, Sibur: 0, Mendiane: 0, Phiras: 0, Thystame: 0}},
-			FoodManager:      FoodManagement{FoodPriority: 4, FoodChannel: make(chan int)}},
+			FoodManager:      FoodManagement{FoodPriority: 4, InputFoodChannel: make(chan int)}},
 			levelUpPriority},
 		{"Level up leech available", fields{Level: 2, FoodManager: FoodManagement{FoodPriority: 5},
 			MessageManager: MessagesManagement{waitingForLevelUp: false, UUID: "azerty1234",
@@ -151,7 +151,7 @@ func TestGame_getResourcePriority(t *testing.T) {
 		args   args
 		want   int
 	}{
-		{"Resource is food", fields{FoodManager: FoodManagement{FoodPriority: 3, FoodChannel: make(chan int)}}, args{Food}, 3},
+		{"Resource is food", fields{FoodManager: FoodManagement{FoodPriority: 3, InputFoodChannel: make(chan int)}}, args{Food}, 3},
 		{"Resource is player", fields{}, args{Player}, 0},
 		{"Resource not needed", fields{Level: 1, LevelUpResources: map[int]Inventory{
 			1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}}, args{Thystame}, 0},
@@ -203,11 +203,11 @@ func TestGame_getTilePriority(t *testing.T) {
 		args   args
 		want   int
 	}{
-		{"Tile with player and food", fields{FoodManager: FoodManagement{FoodPriority: 5, FoodChannel: make(chan int)}}, args{[]TileItem{Player, Food}}, 0},
+		{"Tile with player and food", fields{FoodManager: FoodManagement{FoodPriority: 5, InputFoodChannel: make(chan int)}}, args{[]TileItem{Player, Food}}, 0},
 		{"Tile with only player", fields{}, args{[]TileItem{Player}}, 0},
 		{"Tile with unneeded resource and player", fields{Level: 1, LevelUpResources: map[int]Inventory{
 			1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}}, args{[]TileItem{Player, Thystame}}, 0},
-		{"Tile with unneeded resource and food", fields{FoodManager: FoodManagement{FoodPriority: 4, FoodChannel: make(chan int)},
+		{"Tile with unneeded resource and food", fields{FoodManager: FoodManagement{FoodPriority: 4, InputFoodChannel: make(chan int)},
 			Level: 1, LevelUpResources: map[int]Inventory{1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}},
 			args{[]TileItem{Food, Thystame}}, 4},
 		{"Tile with resource needed at level 3", fields{Level: 1, LevelUpResources: levelUpResources}, args{[]TileItem{Phiras}}, 6},
@@ -361,7 +361,7 @@ func TestGame_resourceCollected(t *testing.T) {
 		args   args
 	}{
 		{"Resource collected is player", fields{}, args{Player}},
-		{"Resource collected is food", fields{FoodManager: FoodManagement{FoodPriority: 0, FoodChannel: foodChannel}}, args{Food}},
+		{"Resource collected is food", fields{FoodManager: FoodManagement{FoodPriority: 0, InputFoodChannel: foodChannel}}, args{Food}},
 		{"Resource collected is required stone", fields{Level: 1, LevelUpResources: levelUpResources, TotalResourcesRequired: totalResourcesRequired}, args{Deraumere}},
 	}
 	for _, tt := range tests {
