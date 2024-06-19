@@ -44,98 +44,98 @@ const EmptyBody = ""
 
 const commandSendFailure = "Failed to send message to server: "
 
-func (conn ServerConn) rotateRight() {
+func (conn *ServerConn) rotateRight() {
 	_, err := fmt.Fprintln(conn.Connection, "Right")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) rotateLeft() {
+func (conn *ServerConn) rotateLeft() {
 	_, err := fmt.Fprintln(conn.Connection, "Left")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) goForward() {
+func (conn *ServerConn) goForward() {
 	_, err := fmt.Fprintln(conn.Connection, "Forward")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) lookAround() {
+func (conn *ServerConn) lookAround() {
 	_, err := fmt.Fprintln(conn.Connection, "Look")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) getInventory() {
+func (conn *ServerConn) getInventory() {
 	_, err := fmt.Fprintln(conn.Connection, "Inventory")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) broadcastText(text string) {
+func (conn *ServerConn) broadcastText(text string) {
 	_, err := fmt.Fprintf(conn.Connection, "Broadcast %s\n", text)
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) getUnusedSlots() {
+func (conn *ServerConn) getUnusedSlots() {
 	_, err := fmt.Fprintln(conn.Connection, "Connect_nbr")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) fork() {
+func (conn *ServerConn) fork() {
 	_, err := fmt.Fprintln(conn.Connection, "Fork")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) ejectPlayers() {
+func (conn *ServerConn) ejectPlayers() {
 	_, err := fmt.Fprintln(conn.Connection, "Eject")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) takeObject(object string) {
+func (conn *ServerConn) takeObject(object string) {
 	_, err := fmt.Fprintf(conn.Connection, "Take %s\n", object)
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) dropObject(object string) {
+func (conn *ServerConn) dropObject(object string) {
 	_, err := fmt.Fprintf(conn.Connection, "Set %s\n", object)
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) levelUp() {
+func (conn *ServerConn) levelUp() {
 	_, err := fmt.Fprintln(conn.Connection, "Incantation")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) GetFrequency() {
+func (conn *ServerConn) GetFrequency() {
 	_, err := fmt.Fprintln(conn.Connection, "Frequency")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
 	}
 }
 
-func (conn ServerConn) GetDirection() {
+func (conn *ServerConn) GetDirection() {
 	_, err := fmt.Fprintln(conn.Connection, "Direction")
 	if err != nil {
 		log.Fatal(commandSendFailure, err)
@@ -143,7 +143,9 @@ func (conn ServerConn) GetDirection() {
 }
 
 // SendCommand sends the specified command to the serv, using the body string if needed
-func (conn ServerConn) SendCommand(cmdType CommandType, body string) {
+func (conn *ServerConn) SendCommand(cmdType CommandType, body string) {
+	log.Println("Sending command", cmdType, body)
+	conn.LastCommandType = cmdType
 	switch cmdType {
 	case RotateRight:
 		conn.rotateRight()
@@ -190,5 +192,5 @@ func (conn ServerConn) SendCommand(cmdType CommandType, body string) {
 	default:
 		break
 	}
-	conn.LastCommandType = cmdType
+	log.Println("Last command type", conn.LastCommandType)
 }

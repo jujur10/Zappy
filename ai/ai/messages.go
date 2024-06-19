@@ -35,21 +35,21 @@ type broadcastMessageContent struct {
 }
 
 // levelUpReadyMissingPlayers sends a formatted missingPlayers message
-func levelUpReadyMissingPlayers(game Game, targetLevel, playersMissing int) {
+func levelUpReadyMissingPlayers(game *Game, targetLevel, playersMissing int) {
 	formatStr := fmt.Sprintf(" Ready %d, missing %d\n", targetLevel, playersMissing)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = true
 }
 
 // cancelLevelUp sends a formatted cancelLvlUp message
-func cancelLevelUp(game Game, targetLevel int) {
+func cancelLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Cancel %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // announcePresenceLevelUp sends a formatted announcePresence message
-func announcePresenceLevelUp(game Game, targetLevel int) {
+func announcePresenceLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Join %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUpLeech = true
@@ -57,28 +57,28 @@ func announcePresenceLevelUp(game Game, targetLevel int) {
 }
 
 // announceDepartureLevelUp sends a formatted announceDeparture message
-func announceDepartureLevelUp(game Game, targetLevel int) {
+func announceDepartureLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Leave %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUpLeech = true
 }
 
 // startLevelUp sends a formatted startLvlUp message
-func startLevelUp(game Game, targetLevel int) {
+func startLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Starting %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // levelUpComplete sends a formatted lvlUpComplete message
-func levelUpComplete(game Game, targetLevel int) {
+func levelUpComplete(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Reached %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // levelUpFailed sends a formatted lvlUpFailed message
-func levelUpFailed(game Game, targetLevel int) {
+func levelUpFailed(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf(" Failed %d\n", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
@@ -166,7 +166,7 @@ func getMessageIndex(content broadcastMessageContent, messageList []broadcastMes
 }
 
 // InterpretPlayerMessage parses the broadcast message and handles its content as necessary
-func (game Game) InterpretPlayerMessage(message network.BroadcastData) {
+func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
 	messageContent, err := parsePlayerMessage(message.Text)
 	if err != nil {
 		log.Println("Error parsing player message:", err)

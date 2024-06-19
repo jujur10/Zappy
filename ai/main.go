@@ -54,7 +54,7 @@ func parseArguments() (string, string) {
 // getFrequencyFromServer fetches the time step / frequency of the AI from the server
 // It ignores any other messages coming before this one
 func getFrequencyFromServer(conn network.ServerConn) int {
-	conn.GetFrequency()
+	conn.SendCommand(network.GetFrequency, network.EmptyBody)
 	for {
 		rType, value, err := conn.GetAndParseResponse()
 		if err != nil {
@@ -63,7 +63,7 @@ func getFrequencyFromServer(conn network.ServerConn) int {
 		if rType == network.Boolean && value == false {
 			log.Fatal("Failed to get frequency from server; exiting")
 		}
-		if rType == network.Int {
+		if rType == network.Frequency {
 			return value.(int)
 		}
 	}
@@ -85,14 +85,14 @@ func main() {
 	}
 	log.Printf("Slots left: %d; dimX %d; dimY %d\n", slotsLeft, dimX, dimY)
 	log.Println("Handshake complete")
-	timeStep := getFrequencyFromServer(serverConn)
+	timeStep := 1 // getFrequencyFromServer(serverConn)
 	if timeStep == 0 {
 		log.Fatal("Failed to get timestep: Time step cannot be zero")
 	}
-	game := ai.InitGame(serverConn, teamName, timeStep, slotsLeft)
+	log.Println("Got timestep:", timeStep)
+	game := ai.InitGame(serverConn, teamName, timeStep, slotsLeft, ai.RelativeCoordinates{dimX, dimY})
 	log.Println("AI initialized")
-
+	game.StartRoutines()
 	game.MainLoop()
-
-	ai.EndGame(&game)
+	game.EndGame()
 }

@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"io"
 	"log"
 	"time"
 	"zappy_ai/network"
@@ -10,6 +11,7 @@ import (
 func switchResponseTypes(msgType network.MessageType, message any, game *Game, feedbackChannel chan<- bool) {
 	switch msgType {
 	case network.Death:
+		log.Fatal("Died of starvation (received from server), exiting...")
 	case network.Nil:
 	case network.Broadcast:
 		game.InterpretPlayerMessage(message.(network.BroadcastData))
@@ -42,7 +44,7 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 		}
 		game.Inventory = inv
 		feedbackChannel <- true
-		game.FoodManager.FoodChannel <- -game.Inventory[Food]
+		game.FoodManager.InputFoodChannel <- -game.Inventory[Food]
 	case network.View:
 		view, viewErr := CreateViewMap(message.([][]string))
 		if viewErr != nil {
@@ -75,9 +77,14 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 			}
 		default:
 		}
+		log.Println("Started ReadAndParseResponse")
 		msgType, message, err := game.Socket.GetAndParseResponse()
+		log.Println("Finished ReadAndParseResponse")
 		if err != nil {
 			log.Println("Error getting response", err)
+			if err == io.EOF {
+				log.Fatal("Got EOF when reading from socket")
+			}
 		}
 		if game.Socket.IsResponseTypeValid(msgType) == false {
 			log.Println("Invalid response type", msgType)
@@ -87,7 +94,7 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 }
 
 // updateFrequency by requesting it from the server
-func (game Game) updateFrequency() {
+func (game *Game) updateFrequency() {
 	game.Socket.SendCommand(network.GetFrequency, network.EmptyBody)
 	select {
 	case _ = <-game.Socket.ResponseFeedbackChannel:
@@ -95,7 +102,7 @@ func (game Game) updateFrequency() {
 }
 
 // awaitResponseToCommand is used to wait until the server returns a response to the command
-func (game Game) awaitResponseToCommand() bool {
+func (game *Game) awaitResponseToCommand() bool {
 	responseValue := false
 	select {
 	case value, ok := <-game.Socket.ResponseFeedbackChannel:
@@ -104,7 +111,7 @@ func (game Game) awaitResponseToCommand() bool {
 		}
 	}
 	select {
-	case priority, ok := <-game.FoodManager.FoodChannel: // Check if there is an update of the food priority
+	case priority, ok := <-game.FoodManager.FoodPriorityChannel: // Check if there is an update of the food priority
 		if ok {
 			game.FoodManager.FoodPriority = priority
 			game.updatePrioritiesFromViewMap() // Recompute priorities

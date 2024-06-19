@@ -15,14 +15,14 @@ const foodMinPriority = 2
 // When a whole food item is consumed, the food priority is updated.
 // When the player collects food, the collected amount is sent through the channel.
 // The lifeTime is incremented by 126 and the priority recomputed.
-func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
+func FoodManagementRoutine(inputFood <-chan int, foodPrio chan<- int, timeStepChan chan time.Duration) {
 	lifeTime := 1260
 	consumptionCounter := 0
 	timeStep := time.Duration(0)
 	log.Println("Starting food management routine")
 	for { // While true
 		select {
-		case newFood, ok := <-food:
+		case newFood, ok := <-inputFood:
 			if !ok {
 				log.Println("Food Management : channel closed, exiting..")
 				return
@@ -31,12 +31,12 @@ func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
 				if -newFood < (lifeTime/foodLifeTimeIncrement) ||
 					-newFood > ((lifeTime+foodLifeTimeIncrement)/foodLifeTimeIncrement) {
 					lifeTime = (-newFood) * foodLifeTimeIncrement
-					food <- computeFoodPriority(lifeTime)
+					foodPrio <- computeFoodPriority(lifeTime)
 				}
 				break
 			}
 			lifeTime += foodLifeTimeIncrement * newFood
-			food <- computeFoodPriority(lifeTime)
+			foodPrio <- computeFoodPriority(lifeTime)
 		case ts, ok := <-timeStepChan:
 			if !ok {
 				log.Println("Food Management : channel closed, exiting..")
@@ -50,13 +50,13 @@ func FoodManagementRoutine(food chan int, timeStepChan chan time.Duration) {
 		lifeTime--
 		consumptionCounter++
 		if lifeTime <= 0 {
-			food <- playerOutOfFood
+			foodPrio <- playerOutOfFood
 			log.Println("Food Management : player out of food, exiting..")
 			return
 		}
 		if consumptionCounter >= foodLifeTimeIncrement {
 			consumptionCounter = 0
-			food <- computeFoodPriority(lifeTime)
+			foodPrio <- computeFoodPriority(lifeTime)
 		}
 		time.Sleep(timeStep)
 	}

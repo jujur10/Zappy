@@ -98,7 +98,7 @@ func getTileUsefulResources(totalResourcesNeeded Inventory, tile []TileItem) []T
 
 // updatePrioritiesFromViewMap updates the PQueue using the generated ViewMap.
 // It adds new useful tiles, updates already existing ones, and removes the useless ones
-func (game Game) updatePrioritiesFromViewMap() {
+func (game *Game) updatePrioritiesFromViewMap() {
 	absoluteMap := buildAbsoluteCoordsMap(game.Coordinates.Direction,
 		game.Coordinates.WorldSize, game.Coordinates.CoordsFromOrigin, len(game.View))
 	for tileIdx, viewedTile := range game.View {

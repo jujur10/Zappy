@@ -167,7 +167,7 @@ func computeBasicPath(origin, destination RelativeCoordinates,
 }
 
 // computePath to the tile with the highest priority and passing through as many prioritized tiles as possible
-func (game Game) computePath() (Path, error) {
+func (game *Game) computePath() (Path, error) {
 	poppedDest := heap.Pop(&game.Movement.TilesQueue)
 	if poppedDest == nil {
 		return Path{}, fmt.Errorf("no more items in priority queue")
@@ -179,18 +179,30 @@ func (game Game) computePath() (Path, error) {
 
 	xDistance := Abs(destination[0] - origin[0])
 	xDistanceWrap := Abs(destination[0] - origin[0] + worldSize[0])
-	xSign := (destination[0] - origin[0]) / xDistance
+	xSign := 1
+	if xDistance != 0 {
+		xSign = (destination[0] - origin[0]) / xDistance
+	}
 	if xDistanceWrap < xDistance { // If wrapping around in X is shorter
 		xDistance = xDistanceWrap
-		xSign = (destination[0] - origin[0] + worldSize[0]) / xDistance
+		xSign = 1
+		if xDistance != 0 {
+			xSign = (destination[0] - origin[0] + worldSize[0]) / xDistance
+		}
 	}
 
 	yDistance := Abs(destination[1] - origin[1])
 	yDistanceWrap := Abs(destination[1] - origin[1] + worldSize[1])
-	ySign := (destination[1] - origin[1]) / yDistance
+	ySign := 1
+	if yDistance != 0 {
+		ySign = (destination[1] - origin[1]) / yDistance
+	}
 	if yDistanceWrap < yDistance { // If wrapping around in Y is shorter
 		yDistance = yDistanceWrap
-		ySign = (destination[1] - origin[1] + worldSize[1]) / yDistance
+		ySign = 1
+		if yDistance != 0 {
+			ySign = (destination[1] - origin[1] + worldSize[1]) / yDistance
+		}
 	}
 
 	middlePoints := getMiddlePoints(origin, destination, game.Movement.TilesQueue)
@@ -209,7 +221,7 @@ func (game Game) computePath() (Path, error) {
 }
 
 // movePlayerForward moves the player and updates its position, and updates the movement priority queue
-func (game Game) movePlayerForward() {
+func (game *Game) movePlayerForward() {
 	game.Socket.SendCommand(network.GoForward, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
@@ -219,7 +231,7 @@ func (game Game) movePlayerForward() {
 }
 
 // turnLeft turns the player 90° left, and updates its direction
-func (game Game) turnLeft() {
+func (game *Game) turnLeft() {
 	game.Socket.SendCommand(network.RotateLeft, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
@@ -227,7 +239,7 @@ func (game Game) turnLeft() {
 }
 
 // turnRight turns the player 90° right, and updates its direction
-func (game Game) turnRight() {
+func (game *Game) turnRight() {
 	game.Socket.SendCommand(network.RotateRight, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
@@ -235,7 +247,7 @@ func (game Game) turnRight() {
 }
 
 // updateMovementQueueOnMove updates the priority of the items in the priority queue
-func (game Game) updateMovementQueueOnMove() {
+func (game *Game) updateMovementQueueOnMove() {
 	positions := make(map[*Item]Item)
 	for _, item := range game.Movement.TilesQueue {
 		switch item.action {
@@ -282,7 +294,7 @@ func getTileDirection(pos RelativeCoordinates, tile RelativeCoordinates) network
 }
 
 // moveToTile moves the player to a given adjacent tile
-func (game Game) moveToTile(tile RelativeCoordinates) {
+func (game *Game) moveToTile(tile RelativeCoordinates) {
 	if ManhattanDistance(game.Coordinates.CoordsFromOrigin, tile) != 1 {
 		log.Println("Error! Cannot move to non adjacent tile ", tile, ", position is ", game.Coordinates.CoordsFromOrigin)
 		return
@@ -307,7 +319,7 @@ func (game Game) moveToTile(tile RelativeCoordinates) {
 }
 
 // followPath follows the given path while collecting all useful resources on the visited tiles
-func (game Game) followPath(path Path) Path {
+func (game *Game) followPath(path Path) Path {
 	tile := path.path[0]
 	path.path = path.path[1:]
 	game.moveToTile(tile)
@@ -333,7 +345,7 @@ func (game Game) followPath(path Path) Path {
 	return path
 }
 
-func (game Game) followMessageDirection(direction network.EventDirection) {
+func (game *Game) followMessageDirection(direction network.EventDirection) {
 	worldSize := game.Coordinates.WorldSize
 	pos := game.Coordinates.CoordsFromOrigin
 	directionsVectors := map[network.PlayerDirection]RelativeCoordinates{Up: {0, 1},

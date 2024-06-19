@@ -28,12 +28,12 @@ const levelUpPriority = 8
 const leechLevelUpPriority = 9
 
 // resourceCollected update the resource tables or the food goroutine when the player collects a resource
-func (game Game) resourceCollected(item TileItem) {
+func (game *Game) resourceCollected(item TileItem) {
 	if item == Player {
 		return
 	}
 	if item == Food {
-		game.FoodManager.FoodChannel <- 1
+		game.FoodManager.InputFoodChannel <- 1
 		return
 	}
 	for i := game.Level; i < 8; i++ {
@@ -49,7 +49,7 @@ func (game Game) resourceCollected(item TileItem) {
 
 // removeLevelUpResources removes the resources required for the previous level up
 // removeLevelUpResources also updates the total resources required to reach level 8
-func (game Game) removeLevelUpResources() {
+func (game *Game) removeLevelUpResources() {
 	for i := 1; i < game.Level; i++ {
 		for key, value := range game.LevelUpResources[i] {
 			if key != Player {
@@ -62,7 +62,7 @@ func (game Game) removeLevelUpResources() {
 
 // isResourceRequired checks if the resource is going to be needed at some point in the future.
 // isResourceRequired always return false for a Player and true for Food
-func (game Game) isResourceRequired(item TileItem) bool {
+func (game *Game) isResourceRequired(item TileItem) bool {
 	if item == Player {
 		return false
 	}
@@ -73,7 +73,7 @@ func (game Game) isResourceRequired(item TileItem) bool {
 }
 
 // getResourcePriority returns the priority for the item based on the resources needed for level-up(s)
-func (game Game) getResourcePriority(item TileItem) int {
+func (game *Game) getResourcePriority(item TileItem) int {
 	if item == Player {
 		return 0
 	}
@@ -91,7 +91,7 @@ func (game Game) getResourcePriority(item TileItem) int {
 }
 
 // getTilePriority returns the max priority of the items on this tile
-func (game Game) getTilePriority(tile []TileItem) int {
+func (game *Game) getTilePriority(tile []TileItem) int {
 	prio := 0
 	for _, item := range tile {
 		if item == Player {
@@ -104,7 +104,7 @@ func (game Game) getTilePriority(tile []TileItem) int {
 }
 
 // getLevelUpPriority returns the priority at which the level up process should be started
-func (game Game) getLevelUpPriority() int {
+func (game *Game) getLevelUpPriority() int {
 	if game.FoodManager.FoodPriority > 6 {
 		return 0
 	}
@@ -138,7 +138,7 @@ func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates) int {
 }
 
 // collectTileResources collects all the resources of a tile that are useful to the player
-func (game Game) collectTileResources(pqTileIndex int) {
+func (game *Game) collectTileResources(pqTileIndex int) {
 	item := game.Movement.TilesQueue[pqTileIndex]
 	nbPlayers := 0
 	for _, resource := range (*item).usefulObjects {
@@ -163,7 +163,7 @@ func (game Game) collectTileResources(pqTileIndex int) {
 
 // updatePriorityQueueAfterCollection updates all the priorities in the PQueue after that a tile was harvested
 // If a tile is no longer useful, it is removed from the queue
-func (game Game) updatePriorityQueueAfterCollection() {
+func (game *Game) updatePriorityQueueAfterCollection() {
 	positions := make(map[*Item]Item)
 	for _, item := range game.Movement.TilesQueue {
 		if item.action == ResourceCollection {

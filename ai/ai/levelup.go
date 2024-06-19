@@ -28,7 +28,7 @@ var itemToString = map[TileItem]string{
 }
 
 // getLevelUpLeechIndex returns the index of the message containing the possible level leech
-func (game Game) getLevelUpLeechIndex() int {
+func (game *Game) getLevelUpLeechIndex() int {
 	if game.MessageManager.waitingForLevelUp {
 		return -1
 	}
@@ -43,7 +43,7 @@ func (game Game) getLevelUpLeechIndex() int {
 }
 
 // isLevelUpLeechAvailable checks if a hosted level up is available to leech from
-func (game Game) isLevelUpLeechAvailable() bool {
+func (game *Game) isLevelUpLeechAvailable() bool {
 	if game.MessageManager.waitingForLevelUp {
 		return false
 	}
@@ -59,7 +59,7 @@ func (game Game) isLevelUpLeechAvailable() bool {
 
 // areLevelUpConditionsMet checks if all the level up conditions are met, i.e., enough food and
 // Enough resources to host a level up OR a level up leeching
-func (game Game) areLevelUpConditionsMet() bool {
+func (game *Game) areLevelUpConditionsMet() bool {
 	if game.FoodManager.FoodPriority >= 7 {
 		return false
 	}
@@ -98,8 +98,8 @@ func dropResources(game *Game) {
 }
 
 // startLevelUpHost starts the level up hosting process
-func (game Game) startLevelUpHost() {
-	dropResources(&game)
+func (game *Game) startLevelUpHost() {
+	dropResources(game)
 	startLevelUp(game, game.Level+1)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
@@ -132,7 +132,7 @@ func (game Game) startLevelUpHost() {
 }
 
 // startLevelUpLeech starts the level up leeching process
-func (game Game) startLevelUpLeech() {
+func (game *Game) startLevelUpLeech() {
 	log.Println("Starting level up as leech, target level ", game.Level+1)
 	game.Socket.SendCommand(network.LevelUp, network.EmptyBody)
 	initialResponse := game.awaitResponseToCommand()
@@ -163,7 +163,7 @@ func (game Game) startLevelUpLeech() {
 
 // levelUpHostLoop starts a level up "lobby", and waits until there are enough players gathered
 // or until the food reserves are too low to continue
-func (game Game) levelUpHostLoop() {
+func (game *Game) levelUpHostLoop() {
 	targetLevel := game.Level + 1
 	nbMissingPlayers := levelUpResources[game.Level][Player] - 1
 	log.Println("Starting level up host : target level ", targetLevel)
@@ -204,7 +204,7 @@ func (game Game) levelUpHostLoop() {
 
 // levelUpHostLoop joins a level up "lobby", and waits until there are enough players gathered
 // or until the food reserves are too low to continue
-func (game Game) levelUpLeechLoop() {
+func (game *Game) levelUpLeechLoop() {
 	targetLevel := game.Level + 1
 	log.Println("Joining level up : target level ", targetLevel)
 	announcePresenceLevelUp(game, targetLevel)
@@ -238,7 +238,7 @@ func (game Game) levelUpLeechLoop() {
 }
 
 // forkPlayer if there are no slots left in the team, to ensure that the team can reach level 8 eventually
-func (game Game) forkPlayer() {
+func (game *Game) forkPlayer() {
 	if game.Level != 2 {
 		return
 	}
