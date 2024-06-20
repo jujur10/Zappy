@@ -1,6 +1,9 @@
 package ai
 
-import "container/heap"
+import (
+	"container/heap"
+	"log"
+)
 
 // Priority queue implementation is from Go stdlib documentation
 
@@ -10,7 +13,6 @@ type Item struct {
 	priority         int                 // The priority of the item in the queue. Diminishes with distance
 	originalPriority int                 // The originalPriority of the tile
 	usefulObjects    []TileItem          // The usefulObjects of the tile
-	action           PlayerAction        // The action to execute
 	// The index is needed by Update and is maintained by the heap.Interface methods.
 	index int // The index of the item in the heap.
 }
@@ -19,6 +21,48 @@ type graphItem struct {
 	node     *graphNode
 	priority int
 	index    int
+}
+
+var priorityQueueLookup = make(map[RelativeCoordinates]*Item)
+
+func PushToPriorityQueue(pq *PriorityQueue, item Item) {
+	_, ok := priorityQueueLookup[item.value]
+	if !ok {
+		heap.Push(pq, &item)
+		priorityQueueLookup[item.value] = &item
+	}
+}
+
+func PopFromPriorityQueue(pq *PriorityQueue) *Item {
+	item := heap.Pop(pq).(*Item)
+	log.Println("==> Popping item from PQueue", *item, "p")
+	delete(priorityQueueLookup, item.value)
+	return item
+}
+
+func RemoveFromPriorityQueue(pq *PriorityQueue, item RelativeCoordinates) {
+	it := GetPriorityQueueItem(pq, item)
+	if it == nil {
+		return
+	}
+	log.Println("==> Removing item from PQueue", *it)
+	heap.Remove(pq, it.index)
+	delete(priorityQueueLookup, it.value)
+}
+
+func UpdatePriorityQueue(pq *PriorityQueue, item RelativeCoordinates, priority int) {
+	it := GetPriorityQueueItem(pq, item)
+	if it == nil {
+		return
+	}
+	pq.Update(it, it.value, priority)
+}
+
+func GetPriorityQueueItem(pq *PriorityQueue, item RelativeCoordinates) *Item {
+	if it, ok := priorityQueueLookup[item]; ok {
+		return it
+	}
+	return nil
 }
 
 // A PriorityQueue implements heap.Interface and holds Items.

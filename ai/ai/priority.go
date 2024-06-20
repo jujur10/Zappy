@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"container/heap"
 	"log"
 	"zappy_ai/network"
 )
@@ -156,11 +155,10 @@ func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates) int {
 }
 
 // collectTileResources collects all the resources of a tile that are useful to the player
-func (game *Game) collectTileResources(pqTileIndex int) {
-	item := game.Movement.TilesQueue[pqTileIndex]
-	log.Println("Collect tile resources function entered, item", *item)
+func (game *Game) collectTileResources(pqTileItem *Item) {
+	log.Println("Collect tile resources function entered, item", *pqTileItem)
 	nbPlayers := 0
-	for _, resource := range (*item).usefulObjects {
+	for _, resource := range (*pqTileItem).usefulObjects {
 		if resource == Player {
 			nbPlayers++
 		}
@@ -168,7 +166,7 @@ func (game *Game) collectTileResources(pqTileIndex int) {
 	if nbPlayers > 1 {
 		return
 	}
-	for _, resource := range (*item).usefulObjects {
+	for _, resource := range (*pqTileItem).usefulObjects {
 		if game.isResourceRequired(resource) {
 			log.Println("Trying to collect ressource", resource)
 			game.Socket.SendCommand(network.TakeObject, itemToString[resource])
@@ -184,26 +182,24 @@ func (game *Game) collectTileResources(pqTileIndex int) {
 // updatePriorityQueueAfterCollection updates all the priorities in the PQueue after that a tile was harvested
 // If a tile is no longer useful, it is removed from the queue
 func (game *Game) updatePriorityQueueAfterCollection() {
-	positions := make(map[*Item]Item)
+	positions := make([]Item, 0)
 	for _, item := range game.Movement.TilesQueue {
-		if item.action == ResourceCollection {
-			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
-			usefulObjs := make([]TileItem, 0)
-			for _, obj := range item.usefulObjects {
-				if game.isResourceRequired(obj) {
-					usefulObjs = append(usefulObjs, obj)
-				}
+		distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
+		usefulObjs := make([]TileItem, 0)
+		for _, obj := range item.usefulObjects {
+			if game.isResourceRequired(obj) {
+				usefulObjs = append(usefulObjs, obj)
 			}
-			newOriginalPrio := game.getTilePriority(usefulObjs)
-			positions[item] = Item{value: item.value, priority: max(0, newOriginalPrio-distance),
-				originalPriority: newOriginalPrio, index: item.index, usefulObjects: usefulObjs}
 		}
+		newOriginalPrio := game.getTilePriority(usefulObjs)
+		positions = append(positions, Item{value: item.value, priority: max(0, newOriginalPrio-distance),
+			originalPriority: newOriginalPrio, index: item.index, usefulObjects: usefulObjs})
 	}
-	for originalItem, newItem := range positions {
+	for _, newItem := range positions {
 		if newItem.originalPriority == 0 {
-			heap.Remove(&game.Movement.TilesQueue, originalItem.index)
+			RemoveFromPriorityQueue(&game.Movement.TilesQueue, newItem.value)
 		} else {
-			game.Movement.TilesQueue.Update(originalItem, newItem.value, newItem.priority)
+			UpdatePriorityQueue(&game.Movement.TilesQueue, newItem.value, newItem.priority)
 		}
 	}
 }

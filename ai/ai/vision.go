@@ -104,26 +104,26 @@ func (game *Game) updatePrioritiesFromViewMap() {
 		game.Coordinates.WorldSize, game.Coordinates.CoordsFromOrigin, len(game.View))
 	for tileIdx, viewedTile := range game.View {
 		tilePrio := game.getTilePriority(viewedTile)
-		pqIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(absoluteMap[tileIdx])
+		pqItem := GetPriorityQueueItem(&game.Movement.TilesQueue, absoluteMap[tileIdx])
 		if absoluteMap[tileIdx] == game.Coordinates.CoordsFromOrigin {
 			tilePrio = game.getCurrentTilePriority(viewedTile)
-			log.Println("Iterated over current tile, tilePrio", tilePrio, "pqIndex", pqIndex)
+			log.Println("Iterated over current tile, tilePrio", tilePrio, "pqItemPtr", pqItem)
 		}
-		if tilePrio > 0 && pqIndex == -1 {
+		if tilePrio > 0 && pqItem == nil {
 			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx])
 			heap.Push(&game.Movement.TilesQueue, &Item{value: absoluteMap[tileIdx], originalPriority: tilePrio,
-				priority: max(0, tilePrio-distance), action: ResourceCollection,
+				priority:      max(0, tilePrio-distance),
 				usefulObjects: getTileUsefulResources(game.TotalResourcesRequired, viewedTile)})
 		}
-		if pqIndex != -1 {
+		if pqItem != nil {
 			if tilePrio == 0 {
-				heap.Remove(&game.Movement.TilesQueue, pqIndex)
+				RemoveFromPriorityQueue(&game.Movement.TilesQueue, pqItem.value)
 				continue
 			}
-			game.Movement.TilesQueue[pqIndex].originalPriority = tilePrio
-			game.Movement.TilesQueue[pqIndex].usefulObjects = getTileUsefulResources(game.TotalResourcesRequired, viewedTile)
+			pqItem.originalPriority = tilePrio
+			pqItem.usefulObjects = getTileUsefulResources(game.TotalResourcesRequired, viewedTile)
 			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx])
-			game.Movement.TilesQueue.Update(game.Movement.TilesQueue[pqIndex], absoluteMap[tileIdx], max(0, tilePrio-distance))
+			UpdatePriorityQueue(&game.Movement.TilesQueue, absoluteMap[tileIdx], max(0, tilePrio-distance))
 		}
 	}
 }

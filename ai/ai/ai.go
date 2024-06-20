@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"container/heap"
 	"log"
 	"zappy_ai/network"
 )
@@ -21,15 +20,15 @@ func (game *Game) MainLoop() {
 	_ = game.awaitResponseToCommand()
 	game.updatePrioritiesFromViewMap()
 	for _, item := range game.Movement.TilesQueue {
-		log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority)
+		log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " index ", item.index)
 		for _, usefulItem := range item.usefulObjects {
 			log.Print(" ", itemToString[usefulItem])
 		}
 	}
-	pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(game.Coordinates.CoordsFromOrigin)
-	if pqTileIndex != -1 { // Remove tile if it was in the queue
-		game.collectTileResources(pqTileIndex)
-		heap.Remove(&game.Movement.TilesQueue, pqTileIndex)
+	pqTileItem := GetPriorityQueueItem(&game.Movement.TilesQueue, game.Coordinates.CoordsFromOrigin)
+	if pqTileItem != nil { // Remove tile if it was in the queue
+		game.collectTileResources(pqTileItem)
+		RemoveFromPriorityQueue(&game.Movement.TilesQueue, pqTileItem.value)
 		game.updatePriorityQueueAfterCollection()
 	}
 	var path = Path{path: nil}
@@ -42,7 +41,7 @@ func (game *Game) MainLoop() {
 		game.updateFrequency()
 		log.Println("Player current position", game.Coordinates.CoordsFromOrigin, "direction", game.Coordinates.Direction)
 		for _, item := range game.Movement.TilesQueue {
-			log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority)
+			log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " index ", item.index)
 			for _, usefulItem := range item.usefulObjects {
 				log.Print(" ", itemToString[usefulItem])
 			}

@@ -107,7 +107,6 @@ func (game *Game) startLevelUpHost() {
 	log.Println("Starting level up process as host, target level", game.Level+1)
 	game.Socket.SendCommand(network.LevelUp, network.EmptyBody)
 	initialResponse := game.awaitResponseToCommand()
-	game.updateFrequency()
 	if !initialResponse {
 		levelUpFailed(game, game.Level+1)
 		_ = game.awaitResponseToCommand()

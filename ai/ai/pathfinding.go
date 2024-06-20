@@ -9,14 +9,6 @@ import (
 	"zappy_ai/network"
 )
 
-type PlayerAction int
-
-const (
-	ResourceCollection PlayerAction = iota
-	LevelUp
-	LevelUpLeech
-)
-
 type graphPath struct {
 	destination *graphNode
 	length      int
@@ -118,6 +110,7 @@ func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []
 	graph := createGraph(origin, destination, middlePoints)
 	queue := make(graphPriorityQueue, 1) // Create priority queue
 	queue[0] = &graphItem{node: &graph[0], priority: 0, index: 0}
+	heap.Init(&queue)
 
 	distanceMap := make(map[RelativeCoordinates]int)           // Create distances map
 	weightsMap := make(map[RelativeCoordinates]int)            // Create weights map
@@ -191,18 +184,17 @@ func computeBasicPath(origin, destination RelativeCoordinates,
 
 // computePath to the tile with the highest priority and passing through as many prioritized tiles as possible
 func (game *Game) computePath() (Path, error) {
-	poppedDest := heap.Pop(&game.Movement.TilesQueue)
+	poppedDest := PopFromPriorityQueue(&game.Movement.TilesQueue)
 	if poppedDest == nil {
 		return Path{}, fmt.Errorf("no more items in priority queue")
 	}
-	destinationItem := poppedDest.(*Item)
-	destination := destinationItem.value
+	destination := poppedDest.value
 	origin := game.Coordinates.CoordsFromOrigin
 	worldSize := game.Coordinates.WorldSize
 	log.Println("Creating new path to", destination)
 
 	xDistance := Abs(destination[0] - origin[0])
-	xDistanceWrap := Abs(destination[0] - origin[0] + worldSize[0])
+	xDistanceWrap := Abs(destination[0]-origin[0]+worldSize[0]) % worldSize[0]
 	xSign := 1
 	if xDistance != 0 {
 		xSign = (destination[0] - origin[0]) / xDistance
@@ -211,14 +203,14 @@ func (game *Game) computePath() (Path, error) {
 		xDistance = xDistanceWrap
 		xSign = 1
 		if xDistance != 0 {
-			xSign = (destination[0] - origin[0] + worldSize[0]) / xDistance
+			xSign = ((destination[0] - origin[0] + worldSize[0]) % worldSize[0]) / xDistance
 		}
 	}
 
 	log.Println("Computing path xDistance", xDistance, "xDistanceWrap", xDistanceWrap, "xSign", xSign)
 
 	yDistance := Abs(destination[1] - origin[1])
-	yDistanceWrap := Abs(destination[1] - origin[1] + worldSize[1])
+	yDistanceWrap := Abs(destination[1]-origin[1]+worldSize[1]) % worldSize[1]
 	ySign := 1
 	if yDistance != 0 {
 		ySign = (destination[1] - origin[1]) / yDistance
@@ -227,14 +219,14 @@ func (game *Game) computePath() (Path, error) {
 		yDistance = yDistanceWrap
 		ySign = 1
 		if yDistance != 0 {
-			ySign = (destination[1] - origin[1] + worldSize[1]) / yDistance
+			ySign = ((destination[1] - origin[1] + worldSize[1]) % worldSize[1]) / yDistance
 		}
 	}
 	log.Println("Computing path yDistance", yDistance, "yDistanceWrap", yDistanceWrap, "ySign", ySign)
 
 	middlePoints := getMiddlePoints(origin, destination, game.Movement.TilesQueue)
 	if len(middlePoints) == 0 { // If there are no intermediate points to go through, make a basic path
-		return Path{destination: *destinationItem,
+		return Path{destination: *poppedDest,
 			path: computeBasicPath(origin, destination, xDistance, yDistance, xSign, ySign)}, nil
 	} // Else generate the most optimal path
 	selectedMiddlePoints := computeOptimalPath(origin, destination, middlePoints) // Get the middle points to go through
@@ -244,7 +236,7 @@ func (game *Game) computePath() (Path, error) {
 		pathPart := computeBasicPath(lastOrigin, point, xDistance, yDistance, xSign, ySign)
 		path = append(path, pathPart...)
 	}
-	return Path{destination: *destinationItem, path: path}, nil
+	return Path{destination: *poppedDest, path: path}, nil
 }
 
 // movePlayerForward moves the player and updates its position, and updates the movement priority queue
@@ -275,24 +267,14 @@ func (game *Game) turnRight() {
 
 // updateMovementQueueOnMove updates the priority of the items in the priority queue
 func (game *Game) updateMovementQueueOnMove() {
-	positions := make(map[*Item]Item)
+	positions := make([]Item, 0)
 	for _, item := range game.Movement.TilesQueue {
-		switch item.action {
-		case LevelUp:
-			positions[item] = Item{value: game.Coordinates.CoordsFromOrigin, priority: levelUpPriority,
-				originalPriority: item.originalPriority, index: item.index, usefulObjects: item.usefulObjects}
-		case LevelUpLeech:
-			positions[item] = Item{value: item.value, priority: leechLevelUpPriority,
-				originalPriority: item.originalPriority, index: item.index, usefulObjects: item.usefulObjects}
-		case ResourceCollection:
-			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
-			positions[item] = Item{value: item.value, priority: max(0, item.originalPriority-distance),
-				originalPriority: item.originalPriority, index: item.index, usefulObjects: item.usefulObjects}
-		default:
-		}
+		distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
+		positions = append(positions, Item{value: item.value, priority: max(0, item.originalPriority-distance),
+			originalPriority: item.originalPriority, index: item.index, usefulObjects: item.usefulObjects})
 	}
-	for originalItem, newItem := range positions {
-		game.Movement.TilesQueue.Update(originalItem, newItem.value, newItem.priority)
+	for _, newItem := range positions {
+		UpdatePriorityQueue(&game.Movement.TilesQueue, newItem.value, newItem.priority)
 	}
 }
 
@@ -359,25 +341,24 @@ func (game *Game) followPath(path Path) Path {
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
 	game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
-	pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(tile)
-	log.Println("Follow path PQ Index for tile", tile, pqTileIndex)
-	if pqTileIndex != -1 { // Remove tile if it was in the queue
-		game.collectTileResources(pqTileIndex)
-		log.Println("Trying to remove tile", tile, "from PQueue at index", pqTileIndex)
+	pqTileItem := GetPriorityQueueItem(&game.Movement.TilesQueue, tile)
+	log.Println("Follow path PQ Index for tile", tile, pqTileItem)
+	if pqTileItem != nil { // Remove tile if it was in the queue
+		game.collectTileResources(pqTileItem)
+		log.Println("Trying to remove tile", tile, "from PQueue at index", pqTileItem.index)
 		for _, elem := range game.Movement.TilesQueue {
 			log.Println("#>", *elem)
 		}
-		heap.Remove(&game.Movement.TilesQueue, pqTileIndex)
+		RemoveFromPriorityQueue(&game.Movement.TilesQueue, pqTileItem.value)
 		game.updatePriorityQueueAfterCollection()
 	}
 	if len(game.Movement.TilesQueue) > 0 &&
-		game.Movement.TilesQueue[0].originalPriority > path.destination.originalPriority &&
-		game.Movement.TilesQueue[0].action == ResourceCollection {
+		game.Movement.TilesQueue[0].originalPriority > path.destination.originalPriority {
 		newPath, err := game.computePath() // Check for a higher priority task
 		if err != nil {
 			return path
 		}
-		heap.Push(&game.Movement.TilesQueue, &path.destination)
+		PushToPriorityQueue(&game.Movement.TilesQueue, path.destination)
 		return newPath
 	}
 	return path
