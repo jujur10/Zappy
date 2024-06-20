@@ -73,7 +73,7 @@ int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
 
 void destroy_ai(server_t PTR server, uint32_t ai_idx)
 {
-    const map_t *map = &server->map;
+    map_t *map = &server->map;
 
     LOGF("Destroying player (player idx: %u)", ai_idx)
     FD_CLR(server->players[ai_idx].sock, &server->current_socks);
@@ -86,6 +86,7 @@ void destroy_ai(server_t PTR server, uint32_t ai_idx)
     memmove(&server->players[ai_idx], &server->players[server->nb_players],
     sizeof(player_t));
     memset(&server->players[server->nb_players], 0, sizeof(player_t));
+    map->has_been_modified = true;
 }
 
 /// @brief Function called when the server receive data from a player_t.\n
