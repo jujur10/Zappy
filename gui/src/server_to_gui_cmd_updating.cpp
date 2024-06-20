@@ -9,6 +9,7 @@
 #include "map_utils.hpp"
 #include "player.hpp"
 #include "raylib.h"
+#include "time_unit.hpp"
 
 namespace zappy_gui::net
 {
@@ -165,4 +166,8 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     playerAnimData->currentFrame = 0;
 }
 
+void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdateCommand *const timeUnitUpdate)
+{
+    world.ensure<TimeUnit>().frequency = timeUnitUpdate->timeUnit;
+}
 }  // namespace zappy_gui::net

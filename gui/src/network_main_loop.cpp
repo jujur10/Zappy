@@ -9,6 +9,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <print>
 
 #include "my_write.hpp"
 #include "networking.hpp"
@@ -55,7 +56,13 @@ void HandleServerCommand(const std::string& line)
             ParsePlayerPositionCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::TIME_UNIT_UPDATED:
+        {
+            ParseTimeUnitUpdatedCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         default:
+            std::print("Unknown command: {}\n", line);
             return;
     }
 }

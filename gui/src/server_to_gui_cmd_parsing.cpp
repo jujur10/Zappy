@@ -93,4 +93,13 @@ void ParsePlayerPositionCommand(const std::string_view& line)
 
     ServerToGuiQueue.try_push(PlayerPositionCommand{.id = id, .x = x, .y = y, .orientation = orientation});
 }
+
+void ParseTimeUnitUpdatedCommand(const std::string_view& line)
+{
+    uint32_t timeUnit = 0;
+
+    string_utils::convertFromString(line, timeUnit);
+
+    ServerToGuiQueue.try_push(TimeUnitUpdateCommand{.timeUnit = timeUnit});
+}
 }  // namespace zappy_gui::net

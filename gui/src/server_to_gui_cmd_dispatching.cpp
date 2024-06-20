@@ -53,6 +53,14 @@ void ParseGuiCommands(const flecs::iter &it)
                 }
                 break;
             }
+            case 4:
+            {
+                if (auto const *const timeUnit = std::get_if<TimeUnitUpdateCommand>(&cmd))
+                {
+                    HandleTimeUnitUpdateCommand(world, timeUnit);
+                }
+                break;
+            }
             // Other command cases to be added here
             default:;
         }
