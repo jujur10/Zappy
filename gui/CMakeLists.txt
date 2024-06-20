@@ -16,7 +16,7 @@ endif ()
 add_library(flecs STATIC
     resources/flecs/flecs.c
 )
-target_include_directories(flecs INTERFACE
+target_include_directories(flecs SYSTEM INTERFACE
     resources/flecs
 )
 set_target_properties(flecs PROPERTIES C_STANDARD 99)
@@ -41,7 +41,7 @@ add_subdirectory(resources/raylib_cpp/include)
 ###### Add Queue ######
 #######################
 add_library(atomic_queue INTERFACE)
-target_include_directories(atomic_queue INTERFACE
+target_include_directories(atomic_queue SYSTEM INTERFACE
     resources/atomic_queue
 )
 
@@ -49,7 +49,7 @@ target_include_directories(atomic_queue INTERFACE
 ###### Add Raygui #####
 #######################
 add_library(raygui INTERFACE)
-target_include_directories(raygui INTERFACE
+target_include_directories(raygui SYSTEM INTERFACE
     resources/raygui
 )
 

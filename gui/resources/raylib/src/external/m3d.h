@@ -1671,6 +1671,7 @@ static int _m3dstbi__expand_png_palette(_m3dstbi__png *a, unsigned char *palette
 
 #define STBI__PNG_TYPE(a,b,c,d)  (((unsigned) (a) << 24) + ((unsigned) (b) << 16) + ((unsigned) (c) << 8) + (unsigned) (d))
 
+
 static int _m3dstbi__parse_png_file(_m3dstbi__png *z, int scan, int req_comp)
 {
    unsigned char palette[1024], pal_img_n=0;
@@ -1734,6 +1735,7 @@ static int _m3dstbi__parse_png_file(_m3dstbi__png *z, int scan, int req_comp)
             break;
          }
 
+#
          case STBI__PNG_TYPE('t','R','N','S'): {
             if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
             if (z->idata) return _m3dstbi__err("tRNS after IDAT","Corrupt PNG");
@@ -1751,11 +1753,12 @@ static int _m3dstbi__parse_png_file(_m3dstbi__png *z, int scan, int req_comp)
                if (z->depth == 16) {
                   for (k = 0; k < s->img_n; ++k) tc16[k] = (_m3dstbi__uint16)_m3dstbi__get16be(s);
                } else {
-                  for (k = 0; k < s->img_n; ++k) tc[k] = (unsigned char)(_m3dstbi__get16be(s) & 255) * _m3dstbi__depth_scale_table[z->depth];
+                  printf("Entering removed line because of it's warning\n");
                }
             }
             break;
          }
+
 
          case STBI__PNG_TYPE('I','D','A','T'): {
             if (first) return _m3dstbi__err("first not IHDR", "Corrupt PNG");
