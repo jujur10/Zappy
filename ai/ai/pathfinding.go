@@ -74,6 +74,7 @@ func getMiddlePoints(origin, destination, worldSize RelativeCoordinates, pqueue 
 	for _, element := range pqueue {
 		if element.value == origin {
 			log.Println("Origin is in Middle Points")
+			continue
 		}
 		if element.value == destination {
 			log.Println("Destination is in Middle Points")
