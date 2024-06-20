@@ -98,6 +98,23 @@ func dropResources(game *Game) {
 	}
 }
 
+func (game *Game) collectResourcesOnFailedLevelUp() {
+	log.Println("Clearing resources after failed level up")
+	game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
+	_ = game.awaitResponseToCommand()
+	game.updateFrequency()
+	game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
+	pqTileItem := GetPriorityQueueItem(&game.Movement.TilesQueue, game.Coordinates.CoordsFromOrigin)
+	if pqTileItem != nil { // Remove tile if it was in the queue
+		game.collectTileResources(pqTileItem)
+		RemoveFromPriorityQueue(&game.Movement.TilesQueue, pqTileItem.value)
+		game.updatePriorityQueueAfterCollection()
+		log.Println("Cleared resources after failed level up")
+		return
+	}
+	log.Println("No resources to collect")
+}
+
 // startLevelUpHost starts the level up hosting process
 func (game *Game) startLevelUpHost() {
 	dropResources(game)
@@ -112,6 +129,7 @@ func (game *Game) startLevelUpHost() {
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()
 		log.Println("Failed to start level up process as host, target level", game.Level+1)
+		game.collectResourcesOnFailedLevelUp()
 		return
 	}
 	finalResponse := game.awaitResponseToCommand()
@@ -128,6 +146,7 @@ func (game *Game) startLevelUpHost() {
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()
 		log.Println("Failed to level up as host, target level", game.Level+1)
+		game.collectResourcesOnFailedLevelUp()
 	}
 }
 
