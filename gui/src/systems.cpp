@@ -6,8 +6,8 @@
 
 #include <flecs.h>
 #include <Matrix.hpp>
+#include <rlgl.h>  // Must be included after Matrix.hpp, if not project will not compile
 #include <Camera3D.hpp>  // Must be included after Matrix.hpp, if not project will not compile
-#include <rlgl.h>
 #include <Color.hpp>
 #include <Mouse.hpp>
 #include <Rectangle.hpp>
@@ -18,10 +18,13 @@
 #include <string>
 
 #include "gui.hpp"
+#include "gui_to_server_cmd_structs.hpp"
+#include "gui_to_server_cmd_value.hpp"
 #include "map.hpp"
 #include "raygui.h"
 #include "raylib_utils.hpp"
 #include "server_to_gui_cmd_handling.hpp"
+#include "time_unit.hpp"
 
 namespace zappy_gui::systems
 {
@@ -68,6 +71,18 @@ static void registerOnStartSystems(const flecs::world &ecs)
             {
                 utils::SetupModel(models->food, "gui/resources/shaders/tile_instancing.vs", nullptr);
                 utils::SetupModel(models->crystal, "gui/resources/shaders/tile_instancing.vs", nullptr);
+            });
+
+    /// Ask server for time unit
+    ecs.system("AskForTimeUnit")
+        .kind(flecs::OnStart)
+        .iter(
+            []([[maybe_unused]] const flecs::iter &it)
+            {
+                char *request = new char[5];
+                ::memcpy(request, GUI_TIME_UNIT, 4); // NOLINT
+                request[4] = '\0';
+                net::GuiToServerQueue.try_push(request);
             });
 }
 
@@ -315,6 +330,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             {
                 if (::Vector2Distance(position, targetInfo.target) < 0.1f)
                 {
+                    END_POSITION_UPDATE:
                     player.disable<player::playerTargetInfo>();
                     player.enable<player::Orientation>();
                     auto *const playerAnimData = player.get_mut<player::playerAnimationData>();
@@ -322,8 +338,15 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                     playerAnimData->currentFrame = 0;
                     return;
                 }
-                position.x += targetInfo.normalizedDirection.x * 0.02f;
-                position.y += targetInfo.normalizedDirection.y * 0.02f;
+                // Calculate the step size per frame
+                const float step = 0.01f * (static_cast<float>(player.world().get<TimeUnit>()->frequency) / 2); // Fixed step size per frame
+                if (step > 0.2f)
+                {
+                    position = targetInfo.target;
+                    goto END_POSITION_UPDATE;
+                }
+                position.x += targetInfo.normalizedDirection.x * step;
+                position.y += targetInfo.normalizedDirection.y * step;
 
                 const float halfTileSize = map::tileSize * 0.5f;
 
@@ -506,31 +529,39 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
                 entity.world().defer_suspend();
                 if (entity.world().lookup("drawMenuExpandArrow").enabled())
                 {
-                    entity.world().filter_builder<raylib::Rectangle>().with(utils::MenuLabels::MenuExpandArrow).build().each(
-                        [&mousePos]([[maybe_unused]] flecs::entity const &e, raylib::Rectangle const &rectangle)
-                        {
-                            if (rectangle.CheckCollision(mousePos))
+                    entity.world()
+                        .filter_builder<raylib::Rectangle>()
+                        .with(utils::MenuLabels::MenuExpandArrow)
+                        .build()
+                        .each(
+                            [&mousePos]([[maybe_unused]] flecs::entity const &e, raylib::Rectangle const &rectangle)
                             {
-                                e.world().lookup("drawMenuExpandArrow").disable();
-                                e.world().lookup("drawMenu").enable();
-                                e.world().lookup("drawMenuSliders").enable();
-                                e.world().lookup("drawMenuRetractArrow").enable();
-                            }
-                        });
+                                if (rectangle.CheckCollision(mousePos))
+                                {
+                                    e.world().lookup("drawMenuExpandArrow").disable();
+                                    e.world().lookup("drawMenu").enable();
+                                    e.world().lookup("drawMenuSliders").enable();
+                                    e.world().lookup("drawMenuRetractArrow").enable();
+                                }
+                            });
                 }
                 if (entity.world().lookup("drawMenuRetractArrow").enabled())
                 {
-                    entity.world().filter_builder<raylib::Rectangle>().with(utils::MenuLabels::MenuRetractArrow).build().each(
-                        [&mousePos]([[maybe_unused]] flecs::entity const &e, raylib::Rectangle const &rectangle)
-                        {
-                            if (rectangle.CheckCollision(mousePos))
+                    entity.world()
+                        .filter_builder<raylib::Rectangle>()
+                        .with(utils::MenuLabels::MenuRetractArrow)
+                        .build()
+                        .each(
+                            [&mousePos]([[maybe_unused]] flecs::entity const &e, raylib::Rectangle const &rectangle)
                             {
-                                e.world().lookup("drawMenuExpandArrow").enable();
-                                e.world().lookup("drawMenu").disable();
-                                e.world().lookup("drawMenuSliders").disable();
-                                e.world().lookup("drawMenuRetractArrow").disable();
-                            }
-                        });
+                                if (rectangle.CheckCollision(mousePos))
+                                {
+                                    e.world().lookup("drawMenuExpandArrow").enable();
+                                    e.world().lookup("drawMenu").disable();
+                                    e.world().lookup("drawMenuSliders").disable();
+                                    e.world().lookup("drawMenuRetractArrow").disable();
+                                }
+                            });
                 }
                 entity.world().defer_resume();
             });
@@ -547,14 +578,21 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
     ecs.system("deleteMouseClicks")
         .kind(flecs::PostUpdate)
         .with<raylib::Vector2>()
-        .with(utils::MouseButton::LeftButton).or_()
-        .with(utils::MouseButton::RightButton).or_()
-        .with(utils::MouseButton::MiddleButton).or_()
-        .with(utils::MouseButton::SideButton).or_()
-        .with(utils::MouseButton::ExtraButton).or_()
-        .with(utils::MouseButton::ForwardButton).or_()
+        .with(utils::MouseButton::LeftButton)
+        .or_()
+        .with(utils::MouseButton::RightButton)
+        .or_()
+        .with(utils::MouseButton::MiddleButton)
+        .or_()
+        .with(utils::MouseButton::SideButton)
+        .or_()
+        .with(utils::MouseButton::ExtraButton)
+        .or_()
+        .with(utils::MouseButton::ForwardButton)
+        .or_()
         .with(utils::MouseButton::BackButton)
-        .each([](flecs::entity const &entity)
+        .each(
+            [](flecs::entity const &entity)
             {
                 entity.destruct();
             });
