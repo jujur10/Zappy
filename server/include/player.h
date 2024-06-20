@@ -87,3 +87,12 @@ void get_next_player_coordinates(const map_t PTR map,
 /// @param new_coordinates The target coordinates.
 void teleport_player(map_t PTR map, player_t PTR player,
     const coordinates_t PTR new_coordinates);
+
+/// @brief Function used to take or set resource to tile.
+///
+/// @param player The player.
+/// @param tile The current tile.
+/// @param resource_index The resource index.
+/// @param action The action (PLAYER_SET_OBJ_CMD or PLAYER_TAKE_OBJ_CMD).
+void player_take_set_to_tile(player_t PTR player, resources_t PTR tile,
+    resources_index_t resource_index, player_command_base_t action);

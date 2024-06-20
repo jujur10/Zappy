@@ -17,7 +17,6 @@
 static void send_enw_to_guis(server_t PTR server,
     const egg_t PTR egg, const player_t PTR player)
 {
-    msg_t message;
     char msg_content[4 + (4 * UINT32_MAX_DIGITS) + 1] = "enw ";
     uint32_t count = 4;
 
@@ -26,10 +25,7 @@ static void send_enw_to_guis(server_t PTR server,
     write_nb_to_buffer(egg->egg_coordinates.x, msg_content, &count);
     write_nb_to_buffer(egg->egg_coordinates.y, msg_content, &count);
     msg_content[count - 1] = '\n';
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(msg_content, count, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
+    send_message_to_guis(server, msg_content, count);
 }
 
 /// @brief Function which add an egg to a team.
@@ -65,16 +61,12 @@ static void add_egg_to_team(server_t PTR server, team_t PTR team,
 /// @param resource_index The resource index.
 static void send_pfk_to_guis(server_t PTR server, const player_t PTR player)
 {
-    msg_t message;
     char msg_content[4 + UINT32_MAX_DIGITS + 1] = "pfk ";
     uint32_t count = 4;
 
     write_nb_to_buffer(player->sock, msg_content, &count);
     msg_content[count - 1] = '\n';
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(msg_content, count, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
+    send_message_to_guis(server, msg_content, count);
 }
 
 void execute_player_fork_command(server_t PTR server, uint16_t player_idx,

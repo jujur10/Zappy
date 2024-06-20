@@ -16,7 +16,6 @@
 static void send_pie_to_guis(server_t PTR server,
     const coordinates_t PTR coordinates, status_t status)
 {
-    msg_t message;
     char msg_content[4 + (3 * UINT32_MAX_DIGITS) + 1] = "pie ";
     uint32_t count = 4;
 
@@ -24,10 +23,7 @@ static void send_pie_to_guis(server_t PTR server,
     write_nb_to_buffer(coordinates->y, msg_content, &count);
     write_nb_to_buffer(status, msg_content, &count);
     msg_content[count - 1] = '\n';
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(msg_content, count, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
+    send_message_to_guis(server, msg_content, count);
 }
 
 /// @brief Function used to elevate players who made incantation.
@@ -47,8 +43,6 @@ static void elevate_players(player_t ARRAY players, uint16_t nb_of_players,
     write_nb_to_buffer(player->level + 1, msg_content, &count);
     msg_content[count - 1] = '\n';
     for (uint16_t i = 0; i < nb_of_players; i++) {
-        if (i == player_idx)
-            continue;
         if (false == is_coordinates_equal(&player->coordinates,
             &players[i].coordinates))
             continue;

@@ -52,7 +52,7 @@ static void send_pnw_to_guis(server_t PTR server, const team_t PTR team,
 int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
 {
     player_t *player = &server->players[server->nb_players];
-    const map_t *map = &server->map;
+    map_t *map = &server->map;
 
     if (MAX_CLIENTS == server->nb_players ||
     FAILURE == add_player_to_team(server, team_idx, server->nb_players))
@@ -63,10 +63,11 @@ int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
     player->inventory.attr.food = BEGINNING_LIFE_UNITS;
     player->team_idx = team_idx;
     player->orientation = (uint8_t)rand() % 4;
-    server->nb_players++;
     get_resource_tile_by_coordinates(map, &player->coordinates)->attr
         .players++;
-    send_pnw_to_guis(server, &server->teams[team_idx], server->nb_players - 1);
+    send_pnw_to_guis(server, &server->teams[team_idx], server->nb_players);
+    server->nb_players++;
+    map->has_been_modified = true;
     return server->nb_players - 1;
 }
 

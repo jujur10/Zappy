@@ -74,5 +74,5 @@ void update_map(double current_time, map_t PTR map,
 resources_t *get_resource_tile_by_coordinates(const map_t PTR map,
     const coordinates_t PTR coordinates)
 {
-    return &map->tiles[coordinates->y * map->height + coordinates->x];
+    return &map->tiles[(coordinates->y * map->width) + coordinates->x];
 }

@@ -80,7 +80,7 @@ static void send_seg_to_guis(server_t PTR server, uint32_t winning_team)
         create_message(string.ptr, string.len, &message);
         add_msg_to_queue(&server->guis[i].queue, &message);
     }
-    destroy_message(&message);
+    clear_string(&string);
 }
 
 void update_server(server_t PTR server)

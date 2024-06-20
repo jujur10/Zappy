@@ -15,16 +15,12 @@
 /// @param egg_index The egg index of the taken egg.
 static void send_ebo_to_guis(server_t PTR server, uint16_t egg_index)
 {
-    msg_t message;
     char msg_content[4 + UINT32_MAX_DIGITS + 1] = "ebo ";
     uint32_t count = 4;
 
     write_nb_to_buffer(egg_index, msg_content, &count);
     msg_content[count - 1] = '\n';
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(msg_content, count, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
+    send_message_to_guis(server, msg_content, count);
 }
 
 /// @brief Function which sends to GUIs the events of edi.
@@ -33,16 +29,12 @@ static void send_ebo_to_guis(server_t PTR server, uint16_t egg_index)
 /// @param egg_index The egg index of the taken egg.
 static void send_edi_to_guis(server_t PTR server, uint16_t egg_index)
 {
-    msg_t message;
     char msg_content[4 + UINT32_MAX_DIGITS + 1] = "edi ";
     uint32_t count = 4;
 
     write_nb_to_buffer(egg_index, msg_content, &count);
     msg_content[count - 1] = '\n';
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(msg_content, count, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
+    send_message_to_guis(server, msg_content, count);
 }
 
 status_t add_player_to_team(server_t PTR server, uint16_t team_idx,

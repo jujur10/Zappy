@@ -26,6 +26,7 @@
 /// @brief Redefinition of structures.
 typedef struct gui_s gui_t;
 typedef struct server_s server_t;
+typedef struct msg_s msg_t;
 
 /// @brief Max number of commands into the buffer for GUIs.
 #define MAX_NB_OF_COMMAND_FOR_BUFFER 10
@@ -174,6 +175,14 @@ void execute_gui_tna_command(server_t PTR server, uint16_t gui_idx,
 void execute_gui_ppo_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command);
 
+/// @brief Function which create the PPO message.
+///
+/// @param server The server structure.
+/// @param player_sock The player socket.
+/// @param message Message to create.
+status_t create_gui_ppo_message(server_t PTR server,
+    uint16_t player_sock, msg_t PTR message);
+
 /// @brief The PLV command implementation.
 ///
 /// @param server The server structure.
@@ -205,3 +214,11 @@ void execute_gui_sgt_command(server_t PTR server, uint16_t gui_idx,
 /// @param command The command to execute.
 void execute_gui_sst_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command);
+
+/// @brief Function which sends a message to all the guis.
+///
+/// @param server The server structure.
+/// @param ptr The pointer on the message content.
+/// @param len The message len.
+void send_message_to_guis(server_t PTR server, const char PTR ptr,
+    uint32_t len);

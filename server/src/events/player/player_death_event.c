@@ -24,16 +24,12 @@ void create_player_death_event(player_t PTR player)
 /// @param player_idx The player index.
 static void send_pdi_to_guis(server_t PTR server, uint32_t player_idx)
 {
-    msg_t message;
     char msg_content[4 + UINT32_MAX_DIGITS + 1] = "pdi ";
     uint32_t count = 4;
 
     write_nb_to_buffer(server->players[player_idx].sock, msg_content, &count);
     msg_content[count - 1] = '\n';
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(msg_content, count, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
+    send_message_to_guis(server, msg_content, count);
 }
 
 void execute_player_death_event(server_t PTR server, uint32_t player_idx)

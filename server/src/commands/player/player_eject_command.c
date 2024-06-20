@@ -79,16 +79,12 @@ static orientation_t get_direction_of_ejection(const player_t PTR player)
 /// @param egg_index The egg index of the taken egg.
 static void send_pex_to_guis(server_t PTR server, const player_t PTR player)
 {
-    msg_t message;
     char msg_content[4 + UINT32_MAX_DIGITS + 1] = "pex ";
     uint32_t count = 4;
 
     write_nb_to_buffer(player->sock, msg_content, &count);
     msg_content[count - 1] = '\n';
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(msg_content, count, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
+    send_message_to_guis(server, msg_content, count);
 }
 
 void execute_player_eject_command(server_t PTR server, uint16_t player_idx,

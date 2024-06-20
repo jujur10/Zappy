@@ -53,8 +53,6 @@ static uint16_t get_nb_of_players_ready(const player_t ARRAY players,
     uint16_t player_counter = 0;
 
     for (uint16_t i = 0; i < nb_of_players; i++) {
-        if (i == player_idx)
-            continue;
         other_player = &players[i];
         if (false == is_coordinates_equal(&player->coordinates,
             &other_player->coordinates))
@@ -80,7 +78,7 @@ static bool verify_player_requirements(const player_t ARRAY players,
     uint16_t nb_of_players_ready = get_nb_of_players_ready(players,
         nb_of_players, player_idx);
 
-    if (nb_of_players_ready < elevation_requirements[player->level + 1]
+    if (nb_of_players_ready < elevation_requirements[player->level]
     .attr.players)
         return false;
     return true;
@@ -101,7 +99,7 @@ bool verify_requirements(server_t PTR server, uint16_t player_idx)
     const resources_t *current_tile = &server->map.tiles[(player->coordinates
         .y * server->map.width) + player->coordinates.x];
 
-    if (true == verify_tile_requirements(current_tile, player->level + 1) &&
+    if (true == verify_tile_requirements(current_tile, player->level) &&
         true == verify_player_requirements(server->players, server->nb_players,
         player_idx))
         return true;
