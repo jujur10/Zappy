@@ -509,6 +509,13 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
                 {
                     textRight = ::TextFormat(slider.formatTextRight, slider.value);
                 }
+
+                const auto * const frequency = entity.world().get<TimeUnit>();
+                if (frequency != nullptr && std::fabs(slider.value - static_cast<float>(frequency->frequency)) < FLT_EPSILON)
+                {
+                    slider.value = static_cast<float>(frequency->frequency);
+                }
+
                 if (gui::GuiSlider(slider.bounds, textLeft, textRight, &slider.value, slider.minValue, slider.maxValue, slider.editMode))
                 {
                     if (slider.editMode)
