@@ -2,6 +2,7 @@ package ai
 
 import (
 	"container/heap"
+	"log"
 	"zappy_ai/network"
 )
 
@@ -78,7 +79,7 @@ func (game *Game) getResourcePriority(item TileItem) int {
 		return 0
 	}
 	if item == Food {
-		return game.FoodManager.FoodPriority
+		return getFoodPriority(&game.FoodManager.FoodPriority)
 	}
 	priority := 8
 	for i := game.Level; i < 8; i++ {
@@ -103,9 +104,26 @@ func (game *Game) getTilePriority(tile []TileItem) int {
 	return prio
 }
 
+// getCurrentTilePriority returns the max priority of the items on the current tile
+func (game *Game) getCurrentTilePriority(tile []TileItem) int {
+	prio := 0
+	nbPlayers := 0
+	for _, item := range tile {
+		if item == Player {
+			nbPlayers++
+		}
+		itemPrio := game.getResourcePriority(item)
+		prio = max(prio, itemPrio)
+	}
+	if nbPlayers > 1 {
+		return 0
+	}
+	return prio
+}
+
 // getLevelUpPriority returns the priority at which the level up process should be started
 func (game *Game) getLevelUpPriority() int {
-	if game.FoodManager.FoodPriority > 6 {
+	if getFoodPriority(&game.FoodManager.FoodPriority) > 6 {
 		return 0
 	}
 	if game.isLevelUpLeechAvailable() {
@@ -140,6 +158,7 @@ func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates) int {
 // collectTileResources collects all the resources of a tile that are useful to the player
 func (game *Game) collectTileResources(pqTileIndex int) {
 	item := game.Movement.TilesQueue[pqTileIndex]
+	log.Println("Collect tile resources function entered, item", *item)
 	nbPlayers := 0
 	for _, resource := range (*item).usefulObjects {
 		if resource == Player {
@@ -151,6 +170,7 @@ func (game *Game) collectTileResources(pqTileIndex int) {
 	}
 	for _, resource := range (*item).usefulObjects {
 		if game.isResourceRequired(resource) {
+			log.Println("Trying to collect ressource", resource)
 			game.Socket.SendCommand(network.TakeObject, itemToString[resource])
 			status := game.awaitResponseToCommand()
 			game.updateFrequency()

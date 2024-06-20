@@ -57,6 +57,12 @@ func updatePosition(position, worldSize RelativeCoordinates, direction network.P
 func getMiddlePoints(origin, destination RelativeCoordinates, pqueue PriorityQueue) []*Item {
 	possiblePoints := make([]*Item, 0)
 	for _, element := range pqueue {
+		if element.value == origin {
+			log.Println("Origin is in Middle Points")
+		}
+		if element.value == destination {
+			log.Println("Destination is in Middle Points")
+		}
 		if element.value[0] >= min(origin[0], destination[0]) && // Check if the point is in the moving range
 			element.value[0] <= max(origin[0], destination[0]) &&
 			element.value[1] >= min(origin[1], destination[1]) &&
@@ -124,7 +130,18 @@ func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []
 			heap.Push(&queue, &graphItem{node: &graph[nodeIdx], priority: math.MaxInt})
 		}
 	}
-
+	log.Println("SEG VALUES: ORIGIN", origin, "DEST", destination)
+	for _, elem := range middlePoints {
+		log.Println("$>", *elem)
+	}
+	log.Println("SEG VALUES: GRAPH", graph)
+	log.Println("SEG VALUES: INITIAL QUEUE", queue)
+	for _, elem := range queue {
+		log.Println(">>>", *(*elem).node)
+	}
+	log.Println("DistanceMap", distanceMap)
+	log.Println("WeightsMap", weightsMap)
+	log.Println("PredecessorsMap", predecessorsMap)
 	for queue.Len() > 0 { // Until all the paths are processed
 		bestNode := heap.Pop(&queue).(*graphItem)  // Pop the nearest node
 		for _, link := range bestNode.node.paths { // Iterate over all links
@@ -136,7 +153,13 @@ func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []
 				predecessorsMap[link.destination.pos] = *bestNode.node // Update nodes values
 				distanceMap[link.destination.pos] = dist
 				weightsMap[link.destination.pos] = weight
-				queue.Update(getQueueItemPtr(queue, link.destination), link.destination, dist)
+				itemPtr := getQueueItemPtr(queue, link.destination)
+				log.Println("SEG VALUES: BEST NODE", *(bestNode.node))
+				log.Println("SEG VALUES: QUEUE", queue, "--- LINK DEST", link.destination, "--- ITEM PTR", itemPtr)
+				for _, elem := range queue {
+					log.Println(">>>", *(*elem).node)
+				}
+				queue.Update(itemPtr, link.destination, dist)
 			}
 		}
 	}
@@ -176,6 +199,7 @@ func (game *Game) computePath() (Path, error) {
 	destination := destinationItem.value
 	origin := game.Coordinates.CoordsFromOrigin
 	worldSize := game.Coordinates.WorldSize
+	log.Println("Creating new path to", destination)
 
 	xDistance := Abs(destination[0] - origin[0])
 	xDistanceWrap := Abs(destination[0] - origin[0] + worldSize[0])
@@ -191,6 +215,8 @@ func (game *Game) computePath() (Path, error) {
 		}
 	}
 
+	log.Println("Computing path xDistance", xDistance, "xDistanceWrap", xDistanceWrap, "xSign", xSign)
+
 	yDistance := Abs(destination[1] - origin[1])
 	yDistanceWrap := Abs(destination[1] - origin[1] + worldSize[1])
 	ySign := 1
@@ -204,6 +230,7 @@ func (game *Game) computePath() (Path, error) {
 			ySign = (destination[1] - origin[1] + worldSize[1]) / yDistance
 		}
 	}
+	log.Println("Computing path yDistance", yDistance, "yDistanceWrap", yDistanceWrap, "ySign", ySign)
 
 	middlePoints := getMiddlePoints(origin, destination, game.Movement.TilesQueue)
 	if len(middlePoints) == 0 { // If there are no intermediate points to go through, make a basic path
@@ -304,8 +331,9 @@ func (game *Game) moveToTile(tile RelativeCoordinates) {
 		log.Println("Error targeted tile: Invalid direction !")
 		return
 	}
-	leftOffset := direction - game.Coordinates.Direction
-	rightOffset := game.Coordinates.Direction - direction
+	rightOffset := (direction + (4 - game.Coordinates.Direction)) % 4
+	leftOffset := (game.Coordinates.Direction + (4 - direction)) % 4
+	log.Println("Trying to move from tile", game.Coordinates.CoordsFromOrigin, "to tile", tile, "Dest direction", direction, "left offset", leftOffset, "right offset", rightOffset)
 	if rightOffset > leftOffset {
 		for range leftOffset {
 			game.turnLeft()
@@ -320,20 +348,30 @@ func (game *Game) moveToTile(tile RelativeCoordinates) {
 
 // followPath follows the given path while collecting all useful resources on the visited tiles
 func (game *Game) followPath(path Path) Path {
+	if len(path.path) == 0 {
+		return Path{path.destination, nil}
+	}
 	tile := path.path[0]
 	path.path = path.path[1:]
+	log.Println("Path next tile", tile, "new path", path.path)
 	game.moveToTile(tile)
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
 	game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
 	pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(tile)
+	log.Println("Follow path PQ Index for tile", tile, pqTileIndex)
 	if pqTileIndex != -1 { // Remove tile if it was in the queue
 		game.collectTileResources(pqTileIndex)
+		log.Println("Trying to remove tile", tile, "from PQueue at index", pqTileIndex)
+		for _, elem := range game.Movement.TilesQueue {
+			log.Println("#>", *elem)
+		}
 		heap.Remove(&game.Movement.TilesQueue, pqTileIndex)
 		game.updatePriorityQueueAfterCollection()
 	}
-	if game.Movement.TilesQueue[0].originalPriority > path.destination.originalPriority &&
+	if len(game.Movement.TilesQueue) > 0 &&
+		game.Movement.TilesQueue[0].originalPriority > path.destination.originalPriority &&
 		game.Movement.TilesQueue[0].action == ResourceCollection {
 		newPath, err := game.computePath() // Check for a higher priority task
 		if err != nil {

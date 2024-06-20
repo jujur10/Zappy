@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"fmt"
 	"log"
 	"zappy_ai/network"
 )
@@ -19,6 +18,8 @@ var resourcesToDrop = map[int]Inventory{
 
 // itemToString converts TileItems to strings
 var itemToString = map[TileItem]string{
+	Player:    "player",
+	Food:      "food",
 	Linemate:  "linemate",
 	Deraumere: "deraumere",
 	Sibur:     "sibur",
@@ -60,7 +61,7 @@ func (game *Game) isLevelUpLeechAvailable() bool {
 // areLevelUpConditionsMet checks if all the level up conditions are met, i.e., enough food and
 // Enough resources to host a level up OR a level up leeching
 func (game *Game) areLevelUpConditionsMet() bool {
-	if game.FoodManager.FoodPriority >= 7 {
+	if getFoodPriority(&game.FoodManager.FoodPriority) >= 7 {
 		return false
 	}
 	if game.isLevelUpLeechAvailable() {
@@ -89,10 +90,10 @@ func dropResources(game *Game) {
 		for droppedNb < amount {
 			game.Socket.SendCommand(network.SetObject, itemToString[resource])
 			resp := game.awaitResponseToCommand()
-			game.updateFrequency()
 			if resp {
 				droppedNb++
 			}
+			game.updateFrequency()
 		}
 	}
 }
@@ -103,7 +104,7 @@ func (game *Game) startLevelUpHost() {
 	startLevelUp(game, game.Level+1)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
-	fmt.Println("Starting level up process as host, target level ", game.Level+1)
+	log.Println("Starting level up process as host, target level", game.Level+1)
 	game.Socket.SendCommand(network.LevelUp, network.EmptyBody)
 	initialResponse := game.awaitResponseToCommand()
 	game.updateFrequency()
@@ -111,7 +112,7 @@ func (game *Game) startLevelUpHost() {
 		levelUpFailed(game, game.Level+1)
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()
-		log.Println("Failed to start level up process as host, target level ", game.Level+1)
+		log.Println("Failed to start level up process as host, target level", game.Level+1)
 		return
 	}
 	finalResponse := game.awaitResponseToCommand()
@@ -120,14 +121,14 @@ func (game *Game) startLevelUpHost() {
 		levelUpComplete(game, game.Level+1)
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()
-		log.Println("Successfully leveled up as host, new level ", game.Level+1)
+		log.Println("Successfully leveled up as host, new level", game.Level+1)
 		game.Level += 1
 		game.forkPlayer()
 	} else {
 		levelUpFailed(game, game.Level+1)
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()
-		log.Println("Failed to level up as host, target level ", game.Level+1)
+		log.Println("Failed to level up as host, target level", game.Level+1)
 	}
 }
 
@@ -148,14 +149,14 @@ func awaitLevelUpLeechUpdate(game *Game, uuid string) bool {
 
 // startLevelUpLeech starts the level up leeching process
 func (game *Game) startLevelUpLeech(uuid string) {
-	log.Println("Starting level up as leech, target level ", game.Level+1)
+	log.Println("Starting level up as leech, target level", game.Level+1)
 	levelUpStatus := awaitLevelUpLeechUpdate(game, uuid)
 	if levelUpStatus {
-		log.Println("Successfully leveled up as leech, new level ", game.Level+1)
+		log.Println("Successfully leveled up as leech, new level", game.Level+1)
 		game.Level += 1
 		game.forkPlayer()
 	} else {
-		log.Println("Failed to level up as leech, target level ", game.Level+1)
+		log.Println("Failed to level up as leech, target level", game.Level+1)
 	}
 }
 
@@ -164,7 +165,7 @@ func (game *Game) startLevelUpLeech(uuid string) {
 func (game *Game) levelUpHostLoop() {
 	targetLevel := game.Level + 1
 	nbMissingPlayers := levelUpResources[game.Level][Player] - 1
-	log.Println("Starting level up host : target level ", targetLevel)
+	log.Println("Starting level up host : target level", targetLevel)
 	for game.areLevelUpConditionsMet() {
 		if nbMissingPlayers == 0 {
 			game.startLevelUpHost()
@@ -204,7 +205,7 @@ func (game *Game) levelUpHostLoop() {
 // or until the food reserves are too low to continue
 func (game *Game) levelUpLeechLoop(uuid string) {
 	targetLevel := game.Level + 1
-	log.Println("Joining level up : target level ", targetLevel)
+	log.Println("Joining level up : target level", targetLevel)
 	announcePresenceLevelUp(game, targetLevel)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
@@ -243,8 +244,8 @@ func (game *Game) forkPlayer() {
 	game.Socket.SendCommand(network.GetUnusedSlots, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
-	if game.SlotsLeft == 0 && game.FoodManager.FoodPriority < 8 {
-		log.Println("No slots left in team ", game.TeamName, ", forking player")
+	if game.SlotsLeft == 0 && getFoodPriority(&game.FoodManager.FoodPriority) < 8 {
+		log.Println("No slots left in team", game.TeamName, ", forking player")
 		game.Socket.SendCommand(network.Fork, network.EmptyBody)
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()

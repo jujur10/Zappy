@@ -142,9 +142,14 @@ func (conn *ServerConn) GetDirection() {
 	}
 }
 
+var commandIndex = map[CommandType]string{RotateRight: "RotateRight", RotateLeft: "RotateLeft", GoForward: "GoForward",
+	LookAround: "LookAround", GetInventory: "GetInventory", BroadcastText: "Broadcast", GetUnusedSlots: "GetUnusedSlots",
+	Fork: "Fork", EjectPlayers: "EjectPlayers", TakeObject: "TakeObject", SetObject: "SetObject",
+	LevelUp: "LevelUp", GetFrequency: "GetFrequency", GetDirection: "GetDirection", None: "None"}
+
 // SendCommand sends the specified command to the serv, using the body string if needed
 func (conn *ServerConn) SendCommand(cmdType CommandType, body string) {
-	log.Println("Sending command", cmdType, body)
+	log.Println("Sending command", commandIndex[cmdType], body)
 	conn.LastCommandType = cmdType
 	switch cmdType {
 	case RotateRight:
@@ -192,5 +197,4 @@ func (conn *ServerConn) SendCommand(cmdType CommandType, body string) {
 	default:
 		break
 	}
-	log.Println("Last command type", conn.LastCommandType)
 }

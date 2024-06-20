@@ -383,3 +383,64 @@ func TestGame_resourceCollected(t *testing.T) {
 		})
 	}
 }
+
+func TestGame_getCurrentTilePriority(t *testing.T) {
+	type fields struct {
+		View                   ViewMap
+		Inventory              Inventory
+		TimeStep               time.Duration
+		TeamName               string
+		Socket                 network.ServerConn
+		Coordinates            WorldCoords
+		Movement               MovementData
+		Level                  int
+		LevelUpResources       map[int]Inventory
+		TotalResourcesRequired Inventory
+		FoodManager            FoodManagement
+		MessageManager         MessagesManagement
+		SlotsLeft              int
+	}
+	type args struct {
+		tile []TileItem
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   int
+	}{
+		{"Tile with player and food", fields{FoodManager: FoodManagement{FoodPriority: 5, InputFoodChannel: make(chan int)}}, args{[]TileItem{Player, Food}}, 5},
+		{"Tile with two players and food", fields{FoodManager: FoodManagement{FoodPriority: 5, InputFoodChannel: make(chan int)}}, args{[]TileItem{Player, Food, Player}}, 0},
+		{"Tile with only player", fields{}, args{[]TileItem{Player}}, 0},
+		{"Tile with unneeded resource and player", fields{Level: 1, LevelUpResources: map[int]Inventory{
+			1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}}, args{[]TileItem{Player, Thystame}}, 0},
+		{"Tile with unneeded resource and food", fields{FoodManager: FoodManagement{FoodPriority: 4, InputFoodChannel: make(chan int)},
+			Level: 1, LevelUpResources: map[int]Inventory{1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}},
+			args{[]TileItem{Food, Thystame}}, 4},
+		{"Tile with resource needed at level 3", fields{Level: 1, LevelUpResources: levelUpResources}, args{[]TileItem{Phiras}}, 6},
+		{"Tile with resource needed at level 8 and at level 2", fields{Level: 1, LevelUpResources: levelUpResources}, args{[]TileItem{Deraumere, Thystame}}, 7},
+		{"Resource needed at current level and at level 5", fields{Level: 2, LevelUpResources: levelUpResources}, args{[]TileItem{Mendiane, Sibur}}, 8},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			game := &Game{
+				View:                   tt.fields.View,
+				Inventory:              tt.fields.Inventory,
+				TimeStep:               tt.fields.TimeStep,
+				TeamName:               tt.fields.TeamName,
+				Socket:                 tt.fields.Socket,
+				Coordinates:            tt.fields.Coordinates,
+				Movement:               tt.fields.Movement,
+				Level:                  tt.fields.Level,
+				LevelUpResources:       tt.fields.LevelUpResources,
+				TotalResourcesRequired: tt.fields.TotalResourcesRequired,
+				FoodManager:            tt.fields.FoodManager,
+				MessageManager:         tt.fields.MessageManager,
+				SlotsLeft:              tt.fields.SlotsLeft,
+			}
+			if got := game.getCurrentTilePriority(tt.args.tile); got != tt.want {
+				t.Errorf("getCurrentTilePriority() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

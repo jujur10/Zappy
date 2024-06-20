@@ -62,10 +62,9 @@ type FoodManagement struct {
 	// Channel to communicate with the food management goroutine.
 	// New food comes in, and food priority comes out
 	// In case of death by starvation, priority is -1
-	InputFoodChannel    chan int
-	FoodPriorityChannel chan int
-	TimeStepChannel     chan time.Duration
-	FoodPriority        int
+	InputFoodChannel chan int
+	TimeStepChannel  chan time.Duration
+	FoodPriority     int
 }
 
 type MovementData struct {
@@ -147,9 +146,12 @@ func createUUID(teamName string) string {
 // InitGame creates a new Game struct
 func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLeft int,
 	worldDims RelativeCoordinates) Game {
-	initialDirection := network.PlayerDirection(0) // getInitialDirection(serverConn)
-	if initialDirection == -1 {
-		log.Fatal("Failed to get player initial direction")
+	initialDirection := network.PlayerDirection(0)
+	if worldDims[0] != worldDims[1] {
+		initialDirection = getInitialDirection(serverConn)
+		if initialDirection == -1 {
+			log.Fatal("Failed to get player initial direction")
+		}
 	}
 	game := Game{View: make(ViewMap, 0),
 		Inventory: make(Inventory),
@@ -165,7 +167,7 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLef
 			messageStatusList: make([]broadcastMessageContent, 0), levelUpMessageChannel: make(chan broadcastMessageContent)},
 		TotalResourcesRequired: totalResourcesRequired,
 		SlotsLeft:              slotsLeft,
-		FoodManager: FoodManagement{InputFoodChannel: make(chan int), FoodPriorityChannel: make(chan int),
+		FoodManager: FoodManagement{InputFoodChannel: make(chan int),
 			TimeStepChannel: make(chan time.Duration), FoodPriority: 1},
 	}
 	heap.Init(&game.Movement.TilesQueue)
@@ -173,7 +175,7 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLef
 }
 
 func (game *Game) StartRoutines() {
-	go FoodManagementRoutine(game.FoodManager.InputFoodChannel, game.FoodManager.FoodPriorityChannel,
+	go FoodManagementRoutine(game.FoodManager.InputFoodChannel, &game.FoodManager.FoodPriority,
 		game.FoodManager.TimeStepChannel)
 	go serverResponseRoutine(game.Socket.ResponseFeedbackChannel, game)
 	game.FoodManager.TimeStepChannel <- game.TimeStep
@@ -183,7 +185,6 @@ func (game *Game) StartRoutines() {
 func (game *Game) EndGame() {
 	log.Println("Closing channels...")
 	close(game.FoodManager.InputFoodChannel)
-	close(game.FoodManager.FoodPriorityChannel)
 	close(game.FoodManager.TimeStepChannel)
 	close(game.Socket.ResponseFeedbackChannel)
 	close(game.MessageManager.levelUpMessageChannel)

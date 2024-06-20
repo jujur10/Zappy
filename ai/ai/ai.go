@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"container/heap"
 	"log"
 	"zappy_ai/network"
 )
@@ -18,14 +19,35 @@ func (game *Game) defaultAction() {
 func (game *Game) MainLoop() {
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
-	game.updateFrequency()
 	game.updatePrioritiesFromViewMap()
+	for _, item := range game.Movement.TilesQueue {
+		log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority)
+		for _, usefulItem := range item.usefulObjects {
+			log.Print(" ", itemToString[usefulItem])
+		}
+	}
+	pqTileIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(game.Coordinates.CoordsFromOrigin)
+	if pqTileIndex != -1 { // Remove tile if it was in the queue
+		game.collectTileResources(pqTileIndex)
+		heap.Remove(&game.Movement.TilesQueue, pqTileIndex)
+		game.updatePriorityQueueAfterCollection()
+	}
 	var path = Path{path: nil}
-	for game.FoodManager.FoodPriority > 0 && game.Level < 8 {
-		game.Socket.SendCommand(network.GetInventory, network.EmptyBody) // Fetch the inventory to update food level
-		_ = game.awaitResponseToCommand()
-
+	log.Println("Is frequency command available :", FrequencyCommandAvailable)
+	for getFoodPriority(&game.FoodManager.FoodPriority) > 0 && game.Level < 8 {
+		if FrequencyCommandAvailable { // Unnecessary if frequency command is unavailable
+			game.Socket.SendCommand(network.GetInventory, network.EmptyBody)
+			_ = game.awaitResponseToCommand()
+		}
 		game.updateFrequency()
+		log.Println("Player current position", game.Coordinates.CoordsFromOrigin, "direction", game.Coordinates.Direction)
+		for _, item := range game.Movement.TilesQueue {
+			log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority)
+			for _, usefulItem := range item.usefulObjects {
+				log.Print(" ", itemToString[usefulItem])
+			}
+		}
+
 		if game.isLevelUpLeechAvailable() { // Leeching is always easier, so it's more important
 			log.Println("Started leeching")
 			leechIdx := game.getLevelUpLeechIndex()
@@ -42,31 +64,42 @@ func (game *Game) MainLoop() {
 			log.Println("Started level up host")
 			game.levelUpHostLoop()
 		} else if len(game.Movement.TilesQueue) != 0 && path.path == nil { // If there is no path configured
-			log.Println("Creating new path")
 			newPath, err := game.computePath()
 			if err != nil {
 				log.Println(err)
 				game.defaultAction()
 				continue
 			}
+			log.Println("Created new path; destination", newPath.destination, "path", newPath.path)
 			path = game.followPath(newPath)
+			log.Println("Moved on path; destination", newPath.destination, "path", path.path)
+			if len(path.path) == 0 && path.destination.value == game.Coordinates.CoordsFromOrigin {
+				log.Println("Destroyed path with destination", path.destination)
+				path.path = nil
+			}
 		} else if path.path != nil { // If there is an already existing path
 			log.Println("Following existing path")
-			destinationPrio := max(0, path.destination.originalPriority-
-				ManhattanDistance(game.Coordinates.CoordsFromOrigin, path.destination.value))
-			pqHead := *game.Movement.TilesQueue[0]
-			path.destination.priority = destinationPrio
-			if pqHead.originalPriority > path.destination.originalPriority && pqHead.priority > destinationPrio {
-				newPath, err := game.computePath()
-				if err != nil {
-					log.Println(err)
-				} else {
-					path = newPath
+			if len(game.Movement.TilesQueue) > 0 {
+				destinationPrio := max(0, path.destination.originalPriority-
+					ManhattanDistance(game.Coordinates.CoordsFromOrigin, path.destination.value))
+				path.destination.priority = destinationPrio
+				pqHead := *game.Movement.TilesQueue[0]
+				if pqHead.originalPriority > path.destination.originalPriority && pqHead.priority > destinationPrio {
+					newPath, err := game.computePath()
+					log.Println("Found more important tile, created new path", newPath.destination, "path", newPath.path)
+					if err != nil {
+						log.Println(err)
+					} else {
+						path = newPath
+					}
 				}
-				path = game.followPath(path)
-				if len(path.path) == 0 && path.destination.value == game.Coordinates.CoordsFromOrigin {
-					path.path = nil
-				}
+			}
+			log.Println("Following path; destination", path.destination, "path", path.path)
+			path = game.followPath(path)
+			log.Println("Moved on path; destination", path.destination, "path", path.path)
+			if len(path.path) == 0 && path.destination.value == game.Coordinates.CoordsFromOrigin {
+				log.Println("Destroyed path with destination", path.destination)
+				path.path = nil
 			}
 		} else { // If no other option is available, just move forward
 			log.Println("Default action")
@@ -76,7 +109,7 @@ func (game *Game) MainLoop() {
 	if game.Level == 8 { // Status messages on exit
 		log.Println("Reached maximum level, exiting...")
 	} else {
-		log.Println("Food prio", game.FoodManager.FoodPriority)
+		log.Println("Food prio", getFoodPriority(&game.FoodManager.FoodPriority))
 		log.Println("Died of starvation, exiting...")
 	}
 }

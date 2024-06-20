@@ -1,11 +1,24 @@
 package ai
 
 import (
+	"fmt"
 	"io"
 	"log"
+	"math"
 	"time"
 	"zappy_ai/network"
 )
+
+var FrequencyCommandAvailable = true
+
+func checkChannelOpen[T any](channel chan T) bool {
+	select {
+	case _, ok := <-channel:
+		return ok
+	default:
+	}
+	return true
+}
 
 // switchResponseTypes runs the defined action for the given response type and updates the feedback channel
 func switchResponseTypes(msgType network.MessageType, message any, game *Game, feedbackChannel chan<- bool) {
@@ -69,17 +82,7 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 	log.Println("Starting server response routine")
 	for {
-		select {
-		case _, ok := <-feedbackChannel:
-			if !ok {
-				log.Println("Server response handling : channel closed, exiting..")
-				return
-			}
-		default:
-		}
-		log.Println("Started ReadAndParseResponse")
 		msgType, message, err := game.Socket.GetAndParseResponse()
-		log.Println("Finished ReadAndParseResponse")
 		if err != nil {
 			log.Println("Error getting response", err)
 			if err == io.EOF {
@@ -89,15 +92,34 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 		if game.Socket.IsResponseTypeValid(msgType) == false {
 			log.Println("Invalid response type", msgType)
 		}
+		if !checkChannelOpen(feedbackChannel) {
+			log.Fatalln("Server response handling : channel closed, exiting..")
+			return
+		}
 		switchResponseTypes(msgType, message, game, feedbackChannel)
 	}
 }
 
 // updateFrequency by requesting it from the server
 func (game *Game) updateFrequency() {
-	game.Socket.SendCommand(network.GetFrequency, network.EmptyBody)
-	select {
-	case _ = <-game.Socket.ResponseFeedbackChannel:
+	if FrequencyCommandAvailable {
+		game.Socket.SendCommand(network.GetFrequency, network.EmptyBody)
+		select {
+		case _ = <-game.Socket.ResponseFeedbackChannel:
+		}
+	} else {
+		timingSum := time.Duration(0)
+		for range 5 {
+			timerStart := time.Now()
+			game.Socket.SendCommand(network.GetInventory, network.EmptyBody)
+			select {
+			case _ = <-game.Socket.ResponseFeedbackChannel:
+			}
+			timingSum += time.Since(timerStart)
+		}
+		timeStepFloat := float64(time.Second.Microseconds()) / float64(timingSum.Microseconds()/5)
+		game.TimeStep = time.Second / time.Duration(int(math.Round(timeStepFloat)))
+		fmt.Println("New approximated timestep:", game.TimeStep, "; frequency:", int(math.Round(timeStepFloat)))
 	}
 }
 
@@ -110,13 +132,6 @@ func (game *Game) awaitResponseToCommand() bool {
 			responseValue = value
 		}
 	}
-	select {
-	case priority, ok := <-game.FoodManager.FoodPriorityChannel: // Check if there is an update of the food priority
-		if ok {
-			game.FoodManager.FoodPriority = priority
-			game.updatePrioritiesFromViewMap() // Recompute priorities
-		}
-	default:
-	}
+
 	return responseValue
 }

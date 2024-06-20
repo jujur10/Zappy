@@ -147,7 +147,7 @@ func parseInventory(values [][]string) (any, error) {
 
 // parseArray parses an array sent by the server and returns its parsed form or an error on failure
 func parseArray(line string) (MessageType, any, error) {
-	log.Println("Array: ", line)
+	log.Println("Array:", line)
 	line = strings.Trim(line, "[]")
 	values := strings.Split(line, ",")
 	individualValues := make([][]string, len(values))
@@ -167,7 +167,7 @@ func parseArray(line string) (MessageType, any, error) {
 	}
 
 	if checkValues(individualValues) == false {
-		return Nil, nil, fmt.Errorf("Invalid values\n")
+		return Nil, nil, fmt.Errorf("invalid values")
 	}
 
 	return View, individualValues, nil
@@ -238,9 +238,7 @@ func parseElevationMessage(line string) (MessageType, any, error) {
 
 // GetAndParseResponse reads a response from the server connection and parses it
 func (conn *ServerConn) GetAndParseResponse() (MessageType, any, error) {
-	log.Println("GetAndParseResponse 1")
 	line, err := conn.getServerResponse()
-	log.Println("GetAndParseResponse 2")
 	if err != nil {
 		return Nil, nil, err
 	}

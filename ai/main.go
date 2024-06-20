@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"net"
 	"os"
+	"time"
 	"zappy_ai/ai"
 	"zappy_ai/network"
 )
@@ -55,17 +57,33 @@ func parseArguments() (string, string) {
 // It ignores any other messages coming before this one
 func getFrequencyFromServer(conn network.ServerConn) int {
 	conn.SendCommand(network.GetFrequency, network.EmptyBody)
-	for {
-		rType, value, err := conn.GetAndParseResponse()
-		if err != nil {
-			log.Fatal("Failed to get frequency from server: ", err)
+	rType, value, err := conn.GetAndParseResponse()
+	if err != nil {
+		log.Fatal("Failed to get frequency from server: ", err)
+	}
+	if rType == network.Boolean && value == false {
+		ai.FrequencyCommandAvailable = false
+		log.Println("Failed to get frequency from server; using approximation method")
+		timingSum := time.Duration(0)
+		count := 0
+		for count < 5 {
+			timerStart := time.Now()
+			conn.SendCommand(network.GetInventory, network.EmptyBody)
+			invType, _, _ := conn.GetAndParseResponse()
+			if invType == network.Inventory {
+				duration := time.Since(timerStart)
+				timingSum += duration
+				log.Println("Sampling duration:", duration)
+				count++
+			}
 		}
-		if rType == network.Boolean && value == false {
-			log.Fatal("Failed to get frequency from server; exiting")
-		}
-		if rType == network.Frequency {
-			return value.(int)
-		}
+		timingSumSecs := timingSum.Microseconds() / 5
+		timeStepFloat := float64(time.Second.Microseconds()) / float64(timingSumSecs)
+		log.Println("Timing Mean:", timingSumSecs, ";Approximated timestep:", int(math.Round(timeStepFloat)))
+		return int(math.Round(timeStepFloat))
+	}
+	if rType == network.Frequency {
+		return value.(int)
 	}
 	return 0
 }
@@ -85,7 +103,7 @@ func main() {
 	}
 	log.Printf("Slots left: %d; dimX %d; dimY %d\n", slotsLeft, dimX, dimY)
 	log.Println("Handshake complete")
-	timeStep := 1 // getFrequencyFromServer(serverConn)
+	timeStep := getFrequencyFromServer(serverConn)
 	if timeStep == 0 {
 		log.Fatal("Failed to get timestep: Time step cannot be zero")
 	}
