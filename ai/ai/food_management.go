@@ -70,7 +70,7 @@ func FoodManagementRoutine(inputFood <-chan int, foodPrio *int, timeStepChan cha
 		consumptionCounter++
 		if lifeTime <= 0 {
 			setFoodPriority(foodPrio, playerOutOfFood)
-			log.Println("Food Management : player out of food, exiting..")
+			log.Fatalln("Food Management : player out of food, exiting..")
 			return
 		}
 		if consumptionCounter >= foodLifeTimeIncrement {

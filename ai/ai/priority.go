@@ -149,9 +149,28 @@ func Abs(x int) int {
 	return x
 }
 
-// ManhattanDistance returns the Manhattan / taxicab distance between two points
-func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates) int {
-	return Abs(pos2[0]-pos1[0]) + Abs(pos2[1]-pos1[1])
+// ManhattanDistance returns the Manhattan / taxicab distance between two points, accounting for world wrap
+func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates, worldSize RelativeCoordinates) int {
+	nonWrappingX := Abs(pos2[0] - pos1[0])
+	nonWrappingY := Abs(pos2[1] - pos1[1])
+
+	if worldSize[0] == 0 || worldSize[1] == 0 {
+		log.Fatal("World size cannot be null")
+	}
+	// Compute distance with wrapping world
+	wrappingX := 0
+	if pos1[0] > pos2[0] {
+		wrappingX = (pos2[0] - pos1[0] + worldSize[0]) % worldSize[0]
+	} else {
+		wrappingX = (pos1[0] - pos2[0] + worldSize[0]) % worldSize[0]
+	}
+	wrappingY := 0
+	if pos1[1] > pos2[1] {
+		wrappingY = (pos2[1] - pos1[1] + worldSize[1]) % worldSize[1]
+	} else {
+		wrappingY = (pos1[1] - pos2[1] + worldSize[1]) % worldSize[1]
+	}
+	return min(nonWrappingX, wrappingX) + min(nonWrappingY, wrappingY)
 }
 
 // collectTileResources collects all the resources of a tile that are useful to the player
@@ -184,7 +203,7 @@ func (game *Game) collectTileResources(pqTileItem *Item) {
 func (game *Game) updatePriorityQueueAfterCollection() {
 	positions := make([]Item, 0)
 	for _, item := range game.Movement.TilesQueue {
-		distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
+		distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value, game.Coordinates.WorldSize)
 		usefulObjs := make([]TileItem, 0)
 		for _, obj := range item.usefulObjects {
 			if game.isResourceRequired(obj) {

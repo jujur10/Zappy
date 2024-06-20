@@ -46,8 +46,31 @@ func updatePosition(position, worldSize RelativeCoordinates, direction network.P
 
 // getMiddlePoints returns all the points contained in the priority queue,
 // which are placed between the origin and destination
-func getMiddlePoints(origin, destination RelativeCoordinates, pqueue PriorityQueue) []*Item {
+func getMiddlePoints(origin, destination, worldSize RelativeCoordinates, pqueue PriorityQueue) []*Item {
 	possiblePoints := make([]*Item, 0)
+
+	nonWrappingX := Abs(destination[0] - origin[0])
+	nonWrappingY := Abs(destination[1] - origin[1])
+	wrappingX := 0
+	if origin[0] > destination[0] {
+		wrappingX = (destination[0] - origin[0] + worldSize[0]) % worldSize[0]
+	} else {
+		wrappingX = (origin[0] - destination[0] + worldSize[0]) % worldSize[0]
+	}
+	wrappingY := 0
+	if origin[1] > destination[1] {
+		wrappingY = (destination[1] - origin[1] + worldSize[1]) % worldSize[1]
+	} else {
+		wrappingY = (origin[1] - destination[1] + worldSize[1]) % worldSize[1]
+	}
+
+	xMin := min(origin[0], destination[0])
+	xMax := max(origin[0], destination[0])
+	yMin := min(origin[1], destination[1])
+	yMax := max(origin[1], destination[1])
+	xWrapping := wrappingX < nonWrappingX
+	yWrapping := wrappingY < nonWrappingY
+
 	for _, element := range pqueue {
 		if element.value == origin {
 			log.Println("Origin is in Middle Points")
@@ -55,19 +78,34 @@ func getMiddlePoints(origin, destination RelativeCoordinates, pqueue PriorityQue
 		if element.value == destination {
 			log.Println("Destination is in Middle Points")
 		}
-		if element.value[0] >= min(origin[0], destination[0]) && // Check if the point is in the moving range
-			element.value[0] <= max(origin[0], destination[0]) &&
-			element.value[1] >= min(origin[1], destination[1]) &&
-			element.value[1] <= max(origin[1], destination[1]) {
+		if element.value[0] >= worldSize[0] || element.value[1] >= worldSize[1] {
+			continue
+		}
+		xOk := false
+		if !xWrapping {
+			xOk = element.value[0] >= xMin && element.value[0] <= xMax
+		} else {
+			xOk = element.value[0] <= xMin || element.value[0] >= xMax
+		}
+
+		yOk := false
+		if !yWrapping {
+			yOk = element.value[1] >= yMin && element.value[1] <= yMax
+		} else {
+			yOk = element.value[1] <= yMin || element.value[1] >= yMax
+		}
+
+		if xOk && yOk { // Check if the point is in the moving range
 			possiblePoints = append(possiblePoints, element)
 		}
+
 	}
 
 	return possiblePoints
 }
 
 // createGraph creates a graph using the origin, destination and middle points for the Dijkstra algorithm
-func createGraph(origin, destination RelativeCoordinates, middlePoints []*Item) []graphNode {
+func createGraph(origin, destination, worldSize RelativeCoordinates, middlePoints []*Item) []graphNode {
 	graph := make([]graphNode, 1)
 	graph[0] = graphNode{isOrigin: true, isDestination: false, weight: 0, pos: origin} // Add origin
 	for _, point := range middlePoints {                                               // Create graph nodes
@@ -87,7 +125,7 @@ func createGraph(origin, destination RelativeCoordinates, middlePoints []*Item) 
 				continue
 			}
 			links = append(links, graphPath{destination: &graph[destIdx],
-				length: ManhattanDistance(graph[origIdx].pos, graph[destIdx].pos)})
+				length: ManhattanDistance(graph[origIdx].pos, graph[destIdx].pos, worldSize)})
 		}
 		graph[origIdx].paths = links
 	}
@@ -106,8 +144,9 @@ func getQueueItemPtr(queue graphPriorityQueue, node *graphNode) *graphItem {
 
 // computeOptimalPath returns the path from origin to destination while going through as many middle points as possible.
 // It uses a modified Dijkstra Algorithm
-func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []*Item) []RelativeCoordinates {
-	graph := createGraph(origin, destination, middlePoints)
+func computeOptimalPath(origin, destination, worldSize RelativeCoordinates,
+	middlePoints []*Item) []RelativeCoordinates {
+	graph := createGraph(origin, destination, worldSize, middlePoints)
 	queue := make(graphPriorityQueue, 1) // Create priority queue
 	queue[0] = &graphItem{node: &graph[0], priority: 0, index: 0}
 	heap.Init(&queue)
@@ -123,18 +162,6 @@ func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []
 			heap.Push(&queue, &graphItem{node: &graph[nodeIdx], priority: math.MaxInt})
 		}
 	}
-	log.Println("SEG VALUES: ORIGIN", origin, "DEST", destination)
-	for _, elem := range middlePoints {
-		log.Println("$>", *elem)
-	}
-	log.Println("SEG VALUES: GRAPH", graph)
-	log.Println("SEG VALUES: INITIAL QUEUE", queue)
-	for _, elem := range queue {
-		log.Println(">>>", *(*elem).node)
-	}
-	log.Println("DistanceMap", distanceMap)
-	log.Println("WeightsMap", weightsMap)
-	log.Println("PredecessorsMap", predecessorsMap)
 	for queue.Len() > 0 { // Until all the paths are processed
 		bestNode := heap.Pop(&queue).(*graphItem)  // Pop the nearest node
 		for _, link := range bestNode.node.paths { // Iterate over all links
@@ -147,11 +174,6 @@ func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []
 				distanceMap[link.destination.pos] = dist
 				weightsMap[link.destination.pos] = weight
 				itemPtr := getQueueItemPtr(queue, link.destination)
-				log.Println("SEG VALUES: BEST NODE", *(bestNode.node))
-				log.Println("SEG VALUES: QUEUE", queue, "--- LINK DEST", link.destination, "--- ITEM PTR", itemPtr)
-				for _, elem := range queue {
-					log.Println(">>>", *(*elem).node)
-				}
 				queue.Update(itemPtr, link.destination, dist)
 			}
 		}
@@ -170,14 +192,17 @@ func computeOptimalPath(origin, destination RelativeCoordinates, middlePoints []
 }
 
 // computeBasicPath returns a basic path from origin to destination
-func computeBasicPath(origin, destination RelativeCoordinates,
+func computeBasicPath(origin, destination, worldSize RelativeCoordinates,
 	xDistance, yDistance, xSign, ySign int) []RelativeCoordinates {
 	path := make([]RelativeCoordinates, xDistance+yDistance)
+	if worldSize[0] == 0 || worldSize[1] == 0 {
+		log.Fatal("World size cannot be null")
+	}
 	for i := range yDistance {
-		path[i] = RelativeCoordinates{origin[0], origin[1] + ((i + 1) * ySign)}
+		path[i] = RelativeCoordinates{origin[0], (origin[1] + worldSize[1] + ((i + 1) * ySign)) % worldSize[1]}
 	}
 	for i := range xDistance {
-		path[i+yDistance] = RelativeCoordinates{origin[0] + ((i + 1) * xSign), destination[1]}
+		path[i+yDistance] = RelativeCoordinates{(origin[0] + worldSize[0] + ((i + 1) * xSign)) % worldSize[0], destination[1]}
 	}
 	return path
 }
@@ -194,7 +219,12 @@ func (game *Game) computePath() (Path, error) {
 	log.Println("Creating new path to", destination)
 
 	xDistance := Abs(destination[0] - origin[0])
-	xDistanceWrap := Abs(destination[0]-origin[0]+worldSize[0]) % worldSize[0]
+	xDistanceWrap := 0
+	if origin[0] > destination[0] {
+		xDistanceWrap = (destination[0] - origin[0] + worldSize[0]) % worldSize[0]
+	} else {
+		xDistanceWrap = (origin[0] - destination[0] + worldSize[0]) % worldSize[0]
+	}
 	xSign := 1
 	if xDistance != 0 {
 		xSign = (destination[0] - origin[0]) / xDistance
@@ -210,7 +240,12 @@ func (game *Game) computePath() (Path, error) {
 	log.Println("Computing path xDistance", xDistance, "xDistanceWrap", xDistanceWrap, "xSign", xSign)
 
 	yDistance := Abs(destination[1] - origin[1])
-	yDistanceWrap := Abs(destination[1]-origin[1]+worldSize[1]) % worldSize[1]
+	yDistanceWrap := 0
+	if origin[1] > destination[1] {
+		yDistanceWrap = (destination[1] - origin[1] + worldSize[1]) % worldSize[1]
+	} else {
+		yDistanceWrap = (origin[1] - destination[1] + worldSize[1]) % worldSize[1]
+	}
 	ySign := 1
 	if yDistance != 0 {
 		ySign = (destination[1] - origin[1]) / yDistance
@@ -224,16 +259,17 @@ func (game *Game) computePath() (Path, error) {
 	}
 	log.Println("Computing path yDistance", yDistance, "yDistanceWrap", yDistanceWrap, "ySign", ySign)
 
-	middlePoints := getMiddlePoints(origin, destination, game.Movement.TilesQueue)
+	middlePoints := getMiddlePoints(origin, destination, worldSize, game.Movement.TilesQueue)
 	if len(middlePoints) == 0 { // If there are no intermediate points to go through, make a basic path
 		return Path{destination: *poppedDest,
-			path: computeBasicPath(origin, destination, xDistance, yDistance, xSign, ySign)}, nil
+			path: computeBasicPath(origin, destination, worldSize, xDistance, yDistance, xSign, ySign)}, nil
 	} // Else generate the most optimal path
-	selectedMiddlePoints := computeOptimalPath(origin, destination, middlePoints) // Get the middle points to go through
+	// Get the middle points to go through
+	selectedMiddlePoints := computeOptimalPath(origin, destination, worldSize, middlePoints)
 	path := make([]RelativeCoordinates, 0)
 	lastOrigin := origin
 	for _, point := range selectedMiddlePoints { // Create the path linking all the points
-		pathPart := computeBasicPath(lastOrigin, point, xDistance, yDistance, xSign, ySign)
+		pathPart := computeBasicPath(lastOrigin, point, worldSize, xDistance, yDistance, xSign, ySign)
 		path = append(path, pathPart...)
 	}
 	return Path{destination: *poppedDest, path: path}, nil
@@ -254,7 +290,7 @@ func (game *Game) turnLeft() {
 	game.Socket.SendCommand(network.RotateLeft, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
-	game.Coordinates.Direction += network.Left % 4 // (N + 3) % 4 = N - 1
+	game.Coordinates.Direction = (game.Coordinates.Direction + network.Left) % 4 // (N + 3) % 4 = N - 1
 }
 
 // turnRight turns the player 90° right, and updates its direction
@@ -262,14 +298,14 @@ func (game *Game) turnRight() {
 	game.Socket.SendCommand(network.RotateRight, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
-	game.Coordinates.Direction += network.Right % 4 // (N + 1) % 4
+	game.Coordinates.Direction = (game.Coordinates.Direction + network.Right) % 4 // (N + 1) % 4
 }
 
 // updateMovementQueueOnMove updates the priority of the items in the priority queue
 func (game *Game) updateMovementQueueOnMove() {
 	positions := make([]Item, 0)
 	for _, item := range game.Movement.TilesQueue {
-		distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
+		distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value, game.Coordinates.WorldSize)
 		positions = append(positions, Item{value: item.value, priority: max(0, item.originalPriority-distance),
 			originalPriority: item.originalPriority, index: item.index, usefulObjects: item.usefulObjects})
 	}
@@ -304,7 +340,7 @@ func getTileDirection(pos RelativeCoordinates, tile RelativeCoordinates) network
 
 // moveToTile moves the player to a given adjacent tile
 func (game *Game) moveToTile(tile RelativeCoordinates) {
-	if ManhattanDistance(game.Coordinates.CoordsFromOrigin, tile) != 1 {
+	if ManhattanDistance(game.Coordinates.CoordsFromOrigin, tile, game.Coordinates.WorldSize) != 1 {
 		log.Println("Error! Cannot move to non adjacent tile ", tile, ", position is ", game.Coordinates.CoordsFromOrigin)
 		return
 	}

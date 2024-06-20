@@ -69,10 +69,10 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 		feedbackChannel <- true
 		level := message.(int)
 		if level == 0 {
-			log.Println("Starting level up to level ", game.Level+1)
+			log.Println("Starting level up to level", game.Level+1)
 			break
 		}
-		log.Println("Successfully leveled up to level ", game.Level+1)
+		log.Println("Successfully leveled up to level", game.Level+1)
 	default:
 		log.Println("Error: unknown msgType", msgType)
 	}

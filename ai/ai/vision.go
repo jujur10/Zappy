@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"container/heap"
 	"fmt"
 	"log"
 	"strings"
@@ -110,8 +109,9 @@ func (game *Game) updatePrioritiesFromViewMap() {
 			log.Println("Iterated over current tile, tilePrio", tilePrio, "pqItemPtr", pqItem)
 		}
 		if tilePrio > 0 && pqItem == nil {
-			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx])
-			heap.Push(&game.Movement.TilesQueue, &Item{value: absoluteMap[tileIdx], originalPriority: tilePrio,
+			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx],
+				game.Coordinates.WorldSize)
+			PushToPriorityQueue(&game.Movement.TilesQueue, Item{value: absoluteMap[tileIdx], originalPriority: tilePrio,
 				priority:      max(0, tilePrio-distance),
 				usefulObjects: getTileUsefulResources(game.TotalResourcesRequired, viewedTile)})
 		}
@@ -122,7 +122,8 @@ func (game *Game) updatePrioritiesFromViewMap() {
 			}
 			pqItem.originalPriority = tilePrio
 			pqItem.usefulObjects = getTileUsefulResources(game.TotalResourcesRequired, viewedTile)
-			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx])
+			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx],
+				game.Coordinates.WorldSize)
 			UpdatePriorityQueue(&game.Movement.TilesQueue, absoluteMap[tileIdx], max(0, tilePrio-distance))
 		}
 	}

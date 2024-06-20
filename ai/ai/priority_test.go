@@ -32,24 +32,29 @@ func TestAbs(t *testing.T) {
 
 func TestManhattanDistance(t *testing.T) {
 	type args struct {
-		pos1 RelativeCoordinates
-		pos2 RelativeCoordinates
+		pos1      RelativeCoordinates
+		pos2      RelativeCoordinates
+		worldSize RelativeCoordinates
 	}
 	tests := []struct {
 		name string
 		args args
 		want int
 	}{
-		{"Distance 0", args{RelativeCoordinates{0, 0}, RelativeCoordinates{0, 0}}, 0},
-		{"Distance 0 bis", args{RelativeCoordinates{20, 60}, RelativeCoordinates{20, 60}}, 0},
-		{"Basic test 1", args{RelativeCoordinates{0, 0}, RelativeCoordinates{3, 1}}, 4},
-		{"Basic test 2", args{RelativeCoordinates{12, 5}, RelativeCoordinates{20, 6}}, 9},
-		{"Basic test 3", args{RelativeCoordinates{2, -4}, RelativeCoordinates{-6, 2}}, 14},
-		{"Basic test 4", args{RelativeCoordinates{256, 128}, RelativeCoordinates{128, 256}}, 256},
+		{"Distance 0", args{RelativeCoordinates{0, 0}, RelativeCoordinates{0, 0}, RelativeCoordinates{10, 10}}, 0},
+		{"Distance 0 bis", args{RelativeCoordinates{20, 60}, RelativeCoordinates{20, 60}, RelativeCoordinates{75, 75}}, 0},
+		{"Basic test 1", args{RelativeCoordinates{0, 0}, RelativeCoordinates{3, 1}, RelativeCoordinates{10, 10}}, 4},
+		{"Basic test 2", args{RelativeCoordinates{12, 5}, RelativeCoordinates{20, 6}, RelativeCoordinates{30, 30}}, 9},
+		{"Basic test 3", args{RelativeCoordinates{2, 14}, RelativeCoordinates{6, 2}, RelativeCoordinates{30, 30}}, 16},
+		{"Basic test 4", args{RelativeCoordinates{256, 128}, RelativeCoordinates{128, 256}, RelativeCoordinates{512, 512}}, 256},
+		{"Test wrapping 1", args{RelativeCoordinates{0, 2}, RelativeCoordinates{9, 0}, RelativeCoordinates{10, 10}}, 3},
+		{"Test wrapping 2", args{RelativeCoordinates{3, 2}, RelativeCoordinates{2, 9}, RelativeCoordinates{10, 10}}, 4},
+		{"Test wrapping 3", args{RelativeCoordinates{80, 90}, RelativeCoordinates{10, 10}, RelativeCoordinates{100, 100}}, 50},
+		{"Test wrapping 4", args{RelativeCoordinates{10, 10}, RelativeCoordinates{80, 90}, RelativeCoordinates{100, 100}}, 50},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ManhattanDistance(tt.args.pos1, tt.args.pos2); got != tt.want {
+			if got := ManhattanDistance(tt.args.pos1, tt.args.pos2, tt.args.worldSize); got != tt.want {
 				t.Errorf("ManhattanDistance() = %v, want %v", got, tt.want)
 			}
 		})
@@ -417,9 +422,9 @@ func TestGame_getCurrentTilePriority(t *testing.T) {
 		{"Tile with unneeded resource and food", fields{FoodManager: FoodManagement{FoodPriority: 4, InputFoodChannel: make(chan int)},
 			Level: 1, LevelUpResources: map[int]Inventory{1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}}},
 			args{[]TileItem{Food, Thystame}}, 4},
-		{"Tile with resource needed at level 3", fields{Level: 1, LevelUpResources: levelUpResources}, args{[]TileItem{Phiras}}, 6},
-		{"Tile with resource needed at level 8 and at level 2", fields{Level: 1, LevelUpResources: levelUpResources}, args{[]TileItem{Deraumere, Thystame}}, 7},
-		{"Resource needed at current level and at level 5", fields{Level: 2, LevelUpResources: levelUpResources}, args{[]TileItem{Mendiane, Sibur}}, 8},
+		{"Tile with resource needed at level 3", fields{Level: 1, LevelUpResources: resourcesToDrop}, args{[]TileItem{Phiras}}, 6},
+		{"Tile with resource needed at level 8 and at level 2", fields{Level: 1, LevelUpResources: resourcesToDrop}, args{[]TileItem{Deraumere, Thystame}}, 7},
+		{"Resource needed at current level and at level 5", fields{Level: 2, LevelUpResources: resourcesToDrop}, args{[]TileItem{Mendiane, Sibur}}, 8},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

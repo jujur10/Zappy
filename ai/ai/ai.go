@@ -20,7 +20,7 @@ func (game *Game) MainLoop() {
 	_ = game.awaitResponseToCommand()
 	game.updatePrioritiesFromViewMap()
 	for _, item := range game.Movement.TilesQueue {
-		log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " index ", item.index)
+		log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " // prio ", item.priority, " // index ", item.index)
 		for _, usefulItem := range item.usefulObjects {
 			log.Print(" ", itemToString[usefulItem])
 		}
@@ -80,7 +80,8 @@ func (game *Game) MainLoop() {
 			log.Println("Following existing path")
 			if len(game.Movement.TilesQueue) > 0 {
 				destinationPrio := max(0, path.destination.originalPriority-
-					ManhattanDistance(game.Coordinates.CoordsFromOrigin, path.destination.value))
+					ManhattanDistance(game.Coordinates.CoordsFromOrigin, path.destination.value,
+						game.Coordinates.WorldSize))
 				path.destination.priority = destinationPrio
 				pqHead := *game.Movement.TilesQueue[0]
 				if pqHead.originalPriority > path.destination.originalPriority && pqHead.priority > destinationPrio {

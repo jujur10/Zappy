@@ -35,7 +35,7 @@ func PushToPriorityQueue(pq *PriorityQueue, item Item) {
 
 func PopFromPriorityQueue(pq *PriorityQueue) *Item {
 	item := heap.Pop(pq).(*Item)
-	log.Println("==> Popping item from PQueue", *item, "p")
+	log.Println("==> Popping item from PQueue", *item, "priority", item.priority)
 	delete(priorityQueueLookup, item.value)
 	return item
 }
@@ -45,7 +45,7 @@ func RemoveFromPriorityQueue(pq *PriorityQueue, item RelativeCoordinates) {
 	if it == nil {
 		return
 	}
-	log.Println("==> Removing item from PQueue", *it)
+	log.Println("==> Removing item from PQueue", *it, "priority", it.priority)
 	heap.Remove(pq, it.index)
 	delete(priorityQueueLookup, it.value)
 }
@@ -157,14 +157,4 @@ func (pq *graphPriorityQueue) Update(item *graphItem, value *graphNode, priority
 	item.node = value
 	item.priority = priority
 	heap.Fix(pq, item.index)
-}
-
-// getPriorityQueueTileIndex returns the index of the tile in the priority queue, -1 if not found
-func (pq *PriorityQueue) getPriorityQueueTileIndex(tilePos RelativeCoordinates) int {
-	for _, item := range *pq {
-		if item.value == tilePos {
-			return item.index
-		}
-	}
-	return -1
 }
