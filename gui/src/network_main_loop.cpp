@@ -9,6 +9,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <print>
 
 #include "my_write.hpp"
 #include "networking.hpp"
@@ -61,7 +62,7 @@ void HandleServerCommand(const std::string& line)
             break;
         }
         default:
-            printf("Unknown command: %s\n", line.c_str());
+            std::print("Unknown command: {}\n", line);
             return;
     }
 }

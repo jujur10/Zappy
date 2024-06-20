@@ -79,7 +79,7 @@ static void registerOnStartSystems(const flecs::world &ecs)
         .iter(
             []([[maybe_unused]] const flecs::iter &it)
             {
-                char *request = new char[5];
+                auto *request = new char[5];
                 ::memcpy(request, GUI_TIME_UNIT, 4); // NOLINT
                 request[4] = '\0';
                 net::GuiToServerQueue.try_push(request);
