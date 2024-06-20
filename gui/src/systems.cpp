@@ -4,25 +4,27 @@
 
 #include "systems.hpp"
 
-#include <flecs.h>
-#include <Matrix.hpp>
-#include <rlgl.h>  // Must be included after Matrix.hpp, if not project will not compile
-#include <Camera3D.hpp>  // Must be included after Matrix.hpp, if not project will not compile
-#include <Color.hpp>
-#include <Mouse.hpp>
-#include <Rectangle.hpp>
 #include <cfloat>
-#include <map_utils.hpp>
+#include <cstring>
 #include <memory>
-#include <player.hpp>
 #include <string>
 
+
+#include "Color.hpp"
+#include "Matrix.hpp"
+#include "Camera3D.hpp"  // Must be included after Matrix.hpp, if not project will not compile
+#include "Mouse.hpp"
+#include "Rectangle.hpp"
+#include "flecs.h"
 #include "gui.hpp"
 #include "gui_to_server_cmd_structs.hpp"
 #include "gui_to_server_cmd_value.hpp"
 #include "map.hpp"
+#include "map_utils.hpp"
+#include "player.hpp"
 #include "raygui.h"
 #include "raylib_utils.hpp"
+#include "rlgl.h"  // Must be included after Matrix.hpp, if not project will not compile
 #include "server_to_gui_cmd_handling.hpp"
 #include "time_unit.hpp"
 
@@ -80,7 +82,7 @@ static void registerOnStartSystems(const flecs::world &ecs)
             []([[maybe_unused]] const flecs::iter &it)
             {
                 auto *request = new char[5];
-                ::memcpy(request, GUI_TIME_UNIT, 4); // NOLINT
+                std::memcpy(request, GUI_TIME_UNIT, 4);  // NOLINT
                 request[4] = '\0';
                 net::GuiToServerQueue.try_push(request);
             });
@@ -330,7 +332,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             {
                 if (::Vector2Distance(position, targetInfo.target) < 0.1f)
                 {
-                    END_POSITION_UPDATE:
+                END_POSITION_UPDATE:
                     player.disable<player::playerTargetInfo>();
                     player.enable<player::Orientation>();
                     auto *const playerAnimData = player.get_mut<player::playerAnimationData>();
@@ -339,7 +341,8 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                     return;
                 }
                 // Calculate the step size per frame
-                const float step = 0.01f * (static_cast<float>(player.world().get<TimeUnit>()->frequency) / 2); // Fixed step size per frame
+                const float step =
+                    0.01f * (static_cast<float>(player.world().get<TimeUnit>()->frequency) / 2);  // Fixed step size per frame
                 if (step > 0.2f)
                 {
                     position = targetInfo.target;
@@ -510,7 +513,7 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
                     textRight = ::TextFormat(slider.formatTextRight, slider.value);
                 }
 
-                const auto * const frequency = entity.world().get<TimeUnit>();
+                const auto *const frequency = entity.world().get<TimeUnit>();
                 if (frequency != nullptr && std::fabs(slider.value - static_cast<float>(frequency->frequency)) < FLT_EPSILON)
                 {
                     slider.value = static_cast<float>(frequency->frequency);
