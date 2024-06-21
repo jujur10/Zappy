@@ -60,6 +60,12 @@ struct EndIncantationCommand
     bool success;
 };
 
+struct PlayerInventoryCommand
+{
+    uint16_t id;
+    uint16_t resources[7];
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
@@ -71,7 +77,8 @@ using Command = std::variant<
     PlayerPositionCommand,
     TimeUnitUpdateCommand,
     StartIncantationCommand,
-    EndIncantationCommand
+    EndIncantationCommand,
+    PlayerInventoryCommand
 >;
 
 // Command queue server -> gui
@@ -113,4 +120,8 @@ void ParseStartIncantationCommand(const std::string_view& line);
 /// @brief Parse the pie command received as text from the server and push the corresponding command in the ServerToGuiQueue
 /// @param line The pie command received from the server
 void ParseEndIncantationCommand(const std::string_view& line);
+
+/// @brief Parse the pin command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The pin command received from the server
+void ParsePlayerInventoryCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

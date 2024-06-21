@@ -71,6 +71,11 @@ void HandleServerCommand(const std::string& line)
             ParseEndIncantationCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::PLAYER_INVENTORY:
+        {
+            ParsePlayerInventoryCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         default:
             std::print("Unknown command: {}\n", line);
             return;

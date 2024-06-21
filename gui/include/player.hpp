@@ -68,6 +68,11 @@ struct PlayerTargetInfo
     Vector2 normalizedDirection;
 };
 
+struct PlayerInventory
+{
+    uint16_t resources[7];
+};
+
 enum class IncantationState : uint16_t
 {
     kInProgress = 0,

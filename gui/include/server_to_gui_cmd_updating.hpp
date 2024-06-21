@@ -63,4 +63,12 @@ void HandleStartIncantationCommand(const flecs::world &world, const StartIncanta
  * @param endIncantation The received EndIncantationCommand command
  */
 void HandleEndIncantationCommand(const flecs::world &world, const EndIncantationCommand *endIncantation);
+
+/**
+ * @brief Process the PlayerInventory command
+ * Update the player inventory
+ * @param world The ecs world
+ * @param playerInventory The received PlayerInventoryCommand command
+ */
+void HandlePlayerInventoryCommand(const flecs::world &world, const PlayerInventoryCommand *playerInventory);
 }  // namespace zappy_gui::net

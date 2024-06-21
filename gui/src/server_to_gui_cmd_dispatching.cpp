@@ -77,6 +77,14 @@ void ParseGuiCommands(const flecs::iter &it)
                 }
                 break;
             }
+            case 7:
+            {
+                if (auto const *const playerInventory = std::get_if<PlayerInventoryCommand>(&cmd))
+                {
+                    HandlePlayerInventoryCommand(world, playerInventory);
+                }
+                break;
+            }
             // Other command cases to be added here
             default:;
         }

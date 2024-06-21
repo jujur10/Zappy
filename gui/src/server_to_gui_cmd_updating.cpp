@@ -69,6 +69,7 @@ void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *c
     player.set<player::PlayerAnimationData>({idle, 0});
     player.set<std::unique_ptr<raylib::Model>>(std::make_unique<raylib::Model>("gui/resources/assets/cactoro.m3d"));
     player.set<std::string_view>(newPlayer->teamName);  // TODO: Don't forget this when implementing teams
+    player.set<player::PlayerInventory>({10, 0, 0, 0, 0, 0, 0});
 }
 
 void HandleDeadPlayerCommand(const flecs::world &world, const DeadPlayerCommand *const deadPlayer)
@@ -205,6 +206,21 @@ void HandleEndIncantationCommand(const flecs::world &world, const EndIncantation
     incantationInfo->state = endIncantation->success ? player::IncantationState::kSuccess : player::IncantationState::kFailure;
     incantationInfo->frameLeftForIcon = 120;
     incantationInfo->distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14});
+}
+
+void HandlePlayerInventoryCommand(const flecs::world &world, const PlayerInventoryCommand *const playerInventory)
+{
+    const auto player = world.entity(playerInventory->id + PLAYER_STARTING_IDX);
+    if (!player.is_alive())
+    {
+        return;
+    }
+
+    auto &playerResources = player.ensure<player::PlayerInventory>();
+    for (uint8_t i = 0; i < static_cast<uint8_t>(map::resourceType::total); ++i)
+    {
+        playerResources.resources[i] = playerInventory->resources[i];
+    }
 }
 
 }  // namespace zappy_gui::net

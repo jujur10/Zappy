@@ -16,7 +16,7 @@ void ParseTileUpdateCommand(const std::string_view& line)
 {
     uint16_t x = 0;
     uint16_t y = 0;
-    uint16_t resources[7] = {99};
+    uint16_t resources[7] = {0};
     size_t paramPos = 0;
 
     string_utils::convertFromString(line, x);
@@ -161,5 +161,26 @@ void ParseEndIncantationCommand(const std::string_view& line)
 
     ServerToGuiQueue.try_push(EndIncantationCommand{
         .x = x, .y = y, .success = static_cast<bool>(success)});
+}
+
+void ParsePlayerInventoryCommand(const std::string_view& line)
+{
+    uint16_t id = 0;
+    uint16_t resources[7] = {0};
+    size_t paramPos = 0;
+
+    string_utils::convertFromString(line, id);
+
+    paramPos = line.find(' ') + 1;
+    paramPos = line.find(' ', paramPos) + 1; // Skip the "x" field
+    paramPos = line.find(' ', paramPos) + 1; // Skip the "y" field
+
+    for (uint16_t& resource : resources)
+    {
+        string_utils::convertFromString(line.data() + paramPos, resource);
+        paramPos = line.find(' ', paramPos) + 1;
+    }
+    ServerToGuiQueue.try_push(PlayerInventoryCommand{
+        .id = id, .resources = {resources[0], resources[1], resources[2], resources[3], resources[4], resources[5], resources[6]}});
 }
 }  // namespace zappy_gui::net
