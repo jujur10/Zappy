@@ -104,7 +104,7 @@ static void on_ai_rcv(server_t PTR server, uint32_t player_idx)
 
     if (bytes_received < 1) {
         LOG("Player closed connection")
-        return destroy_ai(server, player_idx);
+        return execute_player_death_event(server, player_idx);
     }
     LOGF("Player received : %.*s", (int32_t)bytes_received, buffer)
     player_command_handling(server, buffer, (uint32_t)bytes_received,
