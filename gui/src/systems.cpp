@@ -314,10 +314,10 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             });
 
     /// Query the players animations and update them
-    ecs.system<std::unique_ptr<raylib::Model>, player::playerAnimationData>("updatePlayerAnimations")
+    ecs.system<std::unique_ptr<raylib::Model>, player::PlayerAnimationData>("updatePlayerAnimations")
         .kind(flecs::OnUpdate)
         .each(
-            [](std::unique_ptr<raylib::Model> const &model, player::playerAnimationData &animations)
+            [](std::unique_ptr<raylib::Model> const &model, player::PlayerAnimationData &animations)
             {
                 model->UpdateAnimation(*animations.currentAnimation, animations.currentFrame);
                 animations.currentFrame =
@@ -325,18 +325,18 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             });
 
     /// Query the players and update their position if they are moving
-    ecs.system<Vector2, player::playerTargetInfo>("updatePlayerPosition")
+    ecs.system<Vector2, player::PlayerTargetInfo>("updatePlayerPosition")
         .kind(flecs::OnUpdate)
         .each(
-            [](flecs::entity player, Vector2 &position, player::playerTargetInfo &targetInfo)
+            [](flecs::entity player, Vector2 &position, player::PlayerTargetInfo &targetInfo)
             {
                 if (::Vector2Distance(position, targetInfo.target) < 0.1f)
                 {
                 END_POSITION_UPDATE:
-                    player.disable<player::playerTargetInfo>();
+                    player.disable<player::PlayerTargetInfo>();
                     player.enable<player::Orientation>();
-                    auto *const playerAnimData = player.get_mut<player::playerAnimationData>();
-                    playerAnimData->currentAnimation = &player.world().get<player::playerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
+                    auto *const playerAnimData = player.get_mut<player::PlayerAnimationData>();
+                    playerAnimData->currentAnimation = &player.world().get<player::PlayerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
                     playerAnimData->currentFrame = 0;
                     return;
                 }
@@ -408,16 +408,16 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                 switch (orientation)
                 {
                     using enum player::Orientation;
-                    case NORTH:
+                    case kNorth:
                         rotationAngle = utils::IsTileInOddRow(position.y) ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
                         break;
-                    case EAST:
+                    case kEast:
                         rotationAngle = EAST_ANGLE;
                         break;
-                    case SOUTH:
+                    case kSouth:
                         rotationAngle = utils::IsTileInOddRow(position.y) ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
                         break;
-                    case WEST:
+                    case kWest:
                         rotationAngle = WEST_ANGLE;
                         break;
                     default:
@@ -433,6 +433,32 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             {
                 model->Draw({position.x, 0.2f, position.y}, {0.f, 1.f, 0.f}, rotationAngle, {1.f, 1.f, 1.f}, WHITE);
             });
+
+
+    /// Query the incantation info and update the icon -> camera distance
+    ecs.system<raylib::Camera3D, raylib::Matrix, player::IncantationInfo>("update incantation icon distance")
+        .term_at(1).singleton()
+        .kind(flecs::OnUpdate)
+        .each(
+            [](const raylib::Camera3D &camera, const raylib::Matrix &incantationPos, player::IncantationInfo &incantationInfo)
+            {
+                incantationInfo.distance =
+                    ::Vector3Distance(camera.position, {incantationPos.m12, incantationPos.m13, incantationPos.m14});
+                printf("Distance: %f\n", incantationInfo.distance);
+            });
+
+    /// Draw the incantation icon
+    ecs.system<raylib::Camera3D, raylib::Matrix, player::IncantationInfo>("draw incantation icon")
+        .kind(flecs::OnUpdate)
+        .term_at(1).singleton()
+        .order_by<player::IncantationInfo>([](flecs::entity_t e1, const player::IncantationInfo *iI1, flecs::entity_t e2, const player::IncantationInfo *iI2) {
+            return (iI1->distance > iI2->distance) - (iI1->distance < iI2->distance);
+        })
+        .each([](const raylib::Camera3D &camera, const raylib::Matrix &incantationPos, const player::IncantationInfo &incantationInfo)
+        {
+            printf("Drawing incantation icon\n");
+            incantationInfo.incantationTexture->DrawBillboard(camera, Vector3{incantationPos.m12, incantationPos.m13 + 1.5f, incantationPos.m14}, 0.5f);
+        });
 }
 
 static void registerPostUpdateSystems(flecs::world const &ecs)
@@ -514,7 +540,7 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
                 }
 
                 const auto *const frequency = entity.world().get<TimeUnit>();
-                if (frequency != nullptr && std::fabs(slider.value - static_cast<float>(frequency->frequency)) < FLT_EPSILON)
+                if (frequency != nullptr && std::fabs(slider.value - static_cast<float>(frequency->frequency)) > FLT_EPSILON)
                 {
                     slider.value = static_cast<float>(frequency->frequency);
                 }

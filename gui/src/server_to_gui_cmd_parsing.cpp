@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
+#include <vector>
 
 #include "server_to_gui_cmd_structs.hpp"
 #include "string_utils.hpp"
@@ -101,5 +102,43 @@ void ParseTimeUnitUpdatedCommand(const std::string_view& line)
     string_utils::convertFromString(line, timeUnit);
 
     ServerToGuiQueue.try_push(TimeUnitUpdateCommand{.timeUnit = timeUnit});
+}
+
+void ParseStartIncantationCommand(const std::string_view& line)
+{
+    uint16_t x = 0;
+    uint16_t y = 0;
+    auto playerIdArray = std::vector<uint16_t>();
+    playerIdArray.reserve(8);
+    size_t paramPos = 0;
+
+    string_utils::convertFromString(line, x);
+
+    paramPos = line.find(' ') + 1;
+    string_utils::convertFromString(line.data() + paramPos, y);
+
+    paramPos = line.find(' ', paramPos) + 1;
+
+    uint16_t i = 0;
+    for (; true; ++i)
+    {
+        uint16_t playerId = 0;
+        if (!string_utils::convertFromString(line.data() + paramPos, playerId))
+        {
+            break;
+        }
+        playerIdArray.emplace_back(playerId);
+        paramPos = line.find(' ', paramPos) + 1;
+        if (0 == paramPos)
+        {
+            break;
+        }
+    }
+
+    auto playerIds = std::make_unique<uint16_t[]>(playerIdArray.size());
+    std::ranges::copy(playerIdArray, playerIds.get());
+
+    ServerToGuiQueue.try_push(StartIncantationCommand{
+        .x = x, .y = y, .playerCount = i, .playerIds = std::move(playerIds)});
 }
 }  // namespace zappy_gui::net

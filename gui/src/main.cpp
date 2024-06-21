@@ -60,7 +60,7 @@ static void InitializeECS(flecs::world &ecs,
 
     ecs.set<zappy_gui::map::resourceModels>({&food, &crystal});
 
-    ecs.set<zappy_gui::player::playerAnimations>({&playerAnimations});
+    ecs.set<zappy_gui::player::PlayerAnimations>({&playerAnimations});
 
     ecs.set<zappy_gui::map::skybox>({&skybox});
 
