@@ -62,7 +62,6 @@ func FoodManagementRoutine(inputFood <-chan int, foodPrio *int, timeStepChan cha
 				return
 			}
 			timeStep = ts
-			//log.Printf("Timestep updated, new timestep is %dms\n", ts.Milliseconds())
 		default:
 
 		}

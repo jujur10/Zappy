@@ -73,11 +73,7 @@ func getMiddlePoints(origin, destination, worldSize RelativeCoordinates, pqueue 
 
 	for _, element := range pqueue {
 		if element.value == origin {
-			log.Println("Origin is in Middle Points")
 			continue
-		}
-		if element.value == destination {
-			log.Println("Destination is in Middle Points")
 		}
 		if element.value[0] >= worldSize[0] || element.value[1] >= worldSize[1] {
 			continue
@@ -238,8 +234,6 @@ func (game *Game) computePath() (Path, error) {
 		}
 	}
 
-	log.Println("Computing path xDistance", xDistance, "xDistanceWrap", xDistanceWrap, "xSign", xSign)
-
 	yDistance := Abs(destination[1] - origin[1])
 	yDistanceWrap := 0
 	if origin[1] > destination[1] {
@@ -258,7 +252,6 @@ func (game *Game) computePath() (Path, error) {
 			ySign = ((destination[1] - origin[1] + worldSize[1]) % worldSize[1]) / yDistance
 		}
 	}
-	log.Println("Computing path yDistance", yDistance, "yDistanceWrap", yDistanceWrap, "ySign", ySign)
 
 	middlePoints := getMiddlePoints(origin, destination, worldSize, game.Movement.TilesQueue)
 	if len(middlePoints) == 0 { // If there are no intermediate points to go through, make a basic path
@@ -352,7 +345,9 @@ func (game *Game) moveToTile(tile RelativeCoordinates) {
 	}
 	rightOffset := (direction + (4 - game.Coordinates.Direction)) % 4
 	leftOffset := (game.Coordinates.Direction + (4 - direction)) % 4
-	log.Println("Trying to move from tile", game.Coordinates.CoordsFromOrigin, "to tile", tile, "Dest direction", direction, "left offset", leftOffset, "right offset", rightOffset)
+	log.Println("Trying to move from tile", game.Coordinates.CoordsFromOrigin,
+		"to tile", tile, "Dest direction", direction, "left offset", leftOffset,
+		"right offset", rightOffset)
 	if rightOffset > leftOffset {
 		for range leftOffset {
 			game.turnLeft()
@@ -372,17 +367,14 @@ func (game *Game) followPath(path Path) Path {
 	}
 	tile := path.path[0]
 	path.path = path.path[1:]
-	log.Println("Path next tile", tile, "new path", path.path)
 	game.moveToTile(tile)
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
 	game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
 	pqTileItem := GetPriorityQueueItem(&game.Movement.TilesQueue, tile)
-	log.Println("Follow path PQ Index for tile", tile, pqTileItem)
 	if pqTileItem != nil { // Remove tile if it was in the queue
 		game.collectTileResources(pqTileItem)
-		log.Println("Trying to remove tile", tile, "from PQueue at index", pqTileItem.index)
 		RemoveFromPriorityQueue(&game.Movement.TilesQueue, pqTileItem.value)
 		game.updatePriorityQueueAfterCollection()
 	}

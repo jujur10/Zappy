@@ -2,7 +2,6 @@ package ai
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"zappy_ai/network"
 )
@@ -106,7 +105,6 @@ func (game *Game) updatePrioritiesFromViewMap() {
 		pqItem := GetPriorityQueueItem(&game.Movement.TilesQueue, absoluteMap[tileIdx])
 		if absoluteMap[tileIdx] == game.Coordinates.CoordsFromOrigin {
 			tilePrio = game.getCurrentTilePriority(viewedTile)
-			log.Println("Iterated over current tile, tilePrio", tilePrio, "pqItemPtr", pqItem)
 		}
 		if tilePrio > 0 && pqItem == nil {
 			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx],

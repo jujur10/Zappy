@@ -29,13 +29,6 @@ func (game *Game) MainLoop() {
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updatePrioritiesFromViewMap()
-	for _, item := range game.Movement.TilesQueue {
-		log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " // prio ",
-			item.priority, " // index ", item.index)
-		for _, usefulItem := range item.usefulObjects {
-			log.Print(" ", itemToString[usefulItem])
-		}
-	}
 	game.collectCurrentTileResources()
 	var path = Path{path: nil}
 	log.Println("Is frequency command available :", FrequencyCommandAvailable)
@@ -46,13 +39,6 @@ func (game *Game) MainLoop() {
 		}
 		game.updateFrequency()
 		log.Println("Player current position", game.Coordinates.CoordsFromOrigin, "direction", game.Coordinates.Direction)
-		for _, item := range game.Movement.TilesQueue {
-			log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " // prio ",
-				item.priority, " // index ", item.index)
-			for _, usefulItem := range item.usefulObjects {
-				log.Print(" ", itemToString[usefulItem])
-			}
-		}
 		// Leeching is always easier, so it's more important
 		if game.FoodManager.FoodPriority < 7 && game.isLevelUpLeechAvailable() {
 			log.Println("Started leeching")
@@ -79,7 +65,6 @@ func (game *Game) MainLoop() {
 			}
 			log.Println("Created new path; destination", newPath.destination, "path", newPath.path)
 			path = game.followPath(newPath)
-			log.Println("Moved on path; destination", newPath.destination, "path", path.path)
 			if len(path.path) == 0 && path.destination.value == game.Coordinates.CoordsFromOrigin {
 				log.Println("Destroyed path with destination", path.destination)
 				path.path = nil
@@ -104,7 +89,6 @@ func (game *Game) MainLoop() {
 			}
 			log.Println("Following path; destination", path.destination, "path", path.path)
 			path = game.followPath(path)
-			log.Println("Moved on path; destination", path.destination, "path", path.path)
 			if len(path.path) == 0 && path.destination.value == game.Coordinates.CoordsFromOrigin {
 				log.Println("Destroyed path with destination", path.destination)
 				path.path = nil
@@ -117,7 +101,6 @@ func (game *Game) MainLoop() {
 	if game.Level == 8 { // Status messages on exit
 		log.Println("Reached maximum level, exiting...")
 	} else {
-		log.Println("Food prio", getFoodPriority(&game.FoodManager.FoodPriority))
 		log.Println("Died of starvation, exiting...")
 	}
 }

@@ -124,7 +124,6 @@ func parseMessageLevelAndReturn(levelStr string, uuid string, msgType broadcastT
 // parsePlayerMessage parses a message coming from another player.
 // It's not that complicated, it's just a lot of duplicated ifs
 func parsePlayerMessage(message string) (broadcastMessageContent, error) {
-	log.Println("==> Message received:", message)
 	uuid, message, found := strings.Cut(message, "_")
 	if !found {
 		return broadcastMessageContent{}, errors.New("invalid message format")
@@ -201,7 +200,6 @@ func (game *Game) InterpretPlayerMessage(message network.BroadcastData,
 
 	messageContent.direction = message.Direction
 	messageIndex := getMessageIndex(messageContent, game.MessageManager.messageStatusList)
-	log.Println("--> Message list:", game.MessageManager.messageStatusList)
 	if messageIndex == -1 && messageContent.msgType == missingPlayers { // New level up lobby
 		game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList, messageContent)
 		return
@@ -210,16 +208,12 @@ func (game *Game) InterpretPlayerMessage(message network.BroadcastData,
 	if game.MessageManager.waitingForLevelUp && // Player joined / left the lobby
 		messageContent.targetLevel == game.Level+1 &&
 		(messageContent.msgType == announcePresence || messageContent.msgType == announceDeparture) {
-		log.Println("Received leech announce message", messageContent)
 		addMessageToQueue(messageContent)
-		log.Println("Transmitted leech announce message", messageContent, "to main thread")
 	}
 	if game.MessageManager.waitingForLevelUpLeech && // Host's lobby update
 		messageContent.targetLevel == game.Level+1 &&
 		(messageContent.msgType == startLvlUp || messageContent.msgType == cancelLvlUp) {
-		log.Println("Received host status message", messageContent)
 		addMessageToQueue(messageContent)
-		log.Println("Transmitted host status message", messageContent, "to main thread")
 	}
 
 	if messageContent.msgType == missingPlayers { // Update to a level up lobby
