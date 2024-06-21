@@ -36,21 +36,21 @@ type broadcastMessageContent struct {
 
 // levelUpReadyMissingPlayers sends a formatted missingPlayers message
 func levelUpReadyMissingPlayers(game *Game, targetLevel, playersMissing int) {
-	formatStr := fmt.Sprintf(" Ready %d, missing %d", targetLevel, playersMissing)
+	formatStr := fmt.Sprintf("_Ready_%d,_missing_%d", targetLevel, playersMissing)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = true
 }
 
 // cancelLevelUp sends a formatted cancelLvlUp message
 func cancelLevelUp(game *Game, targetLevel int) {
-	formatStr := fmt.Sprintf(" Cancel %d", targetLevel)
+	formatStr := fmt.Sprintf("_Cancel_%d", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // announcePresenceLevelUp sends a formatted announcePresence message
 func announcePresenceLevelUp(game *Game, targetLevel int) {
-	formatStr := fmt.Sprintf(" Join %d", targetLevel)
+	formatStr := fmt.Sprintf("_Join_%d", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUpLeech = true
 	game.MessageManager.waitingForLevelUp = false
@@ -58,28 +58,28 @@ func announcePresenceLevelUp(game *Game, targetLevel int) {
 
 // announceDepartureLevelUp sends a formatted announceDeparture message
 func announceDepartureLevelUp(game *Game, targetLevel int) {
-	formatStr := fmt.Sprintf(" Leave %d", targetLevel)
+	formatStr := fmt.Sprintf("_Leave_%d", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUpLeech = true
 }
 
 // startLevelUp sends a formatted startLvlUp message
 func startLevelUp(game *Game, targetLevel int) {
-	formatStr := fmt.Sprintf(" Starting %d", targetLevel)
+	formatStr := fmt.Sprintf("_Starting_%d", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // levelUpComplete sends a formatted lvlUpComplete message
 func levelUpComplete(game *Game, targetLevel int) {
-	formatStr := fmt.Sprintf(" Reached %d", targetLevel)
+	formatStr := fmt.Sprintf("_Reached_%d", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // levelUpFailed sends a formatted lvlUpFailed message
 func levelUpFailed(game *Game, targetLevel int) {
-	formatStr := fmt.Sprintf(" Failed %d", targetLevel)
+	formatStr := fmt.Sprintf("_Failed_%d", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
 	game.MessageManager.waitingForLevelUp = false
 }
@@ -100,17 +100,17 @@ func parseMessageLevelAndReturn(levelStr string, uuid string, msgType broadcastT
 // It's not that complicated, it's just a lot of duplicated ifs
 func parsePlayerMessage(message string) (broadcastMessageContent, error) {
 	log.Println("==> Message received:", message)
-	uuid, message, found := strings.Cut(message, " ")
+	uuid, message, found := strings.Cut(message, "_")
 	if !found {
 		return broadcastMessageContent{}, errors.New("invalid message format")
 	}
-	if strings.HasPrefix(message, "Ready ") { // Check if it's a missingPlayers message
-		message = strings.TrimPrefix(message, "Ready ")
+	if strings.HasPrefix(message, "Ready_") { // Check if it's a missingPlayers message
+		message = strings.TrimPrefix(message, "Ready_")
 		messageParts := strings.Split(message, ",")
-		if len(messageParts) != 2 || !strings.HasPrefix(messageParts[1], " missing ") {
+		if len(messageParts) != 2 || !strings.HasPrefix(messageParts[1], "_missing_") {
 			return broadcastMessageContent{}, fmt.Errorf("invalid message format: %s", message)
 		}
-		messageParts[1] = strings.TrimPrefix(messageParts[1], " missing ")
+		messageParts[1] = strings.TrimPrefix(messageParts[1], "_missing_")
 		broadcast, err := parseMessageLevelAndReturn(messageParts[0], uuid, missingPlayers)
 		missing, err := strconv.Atoi(messageParts[1])
 		if missing < 1 || missing > levelUpResources[broadcast.targetLevel-1][Player] {
@@ -123,33 +123,33 @@ func parsePlayerMessage(message string) (broadcastMessageContent, error) {
 		return broadcast, nil
 	}
 
-	if strings.HasPrefix(message, "Cancel ") {
-		message = strings.TrimPrefix(message, "Cancel ")
+	if strings.HasPrefix(message, "Cancel_") {
+		message = strings.TrimPrefix(message, "Cancel_")
 		return parseMessageLevelAndReturn(message, uuid, cancelLvlUp)
 	}
 
-	if strings.HasPrefix(message, "Join ") {
-		message = strings.TrimPrefix(message, "Join ")
+	if strings.HasPrefix(message, "Join_") {
+		message = strings.TrimPrefix(message, "Join_")
 		return parseMessageLevelAndReturn(message, uuid, announcePresence)
 	}
 
-	if strings.HasPrefix(message, "Leave ") {
-		message = strings.TrimPrefix(message, "Leave ")
+	if strings.HasPrefix(message, "Leave_") {
+		message = strings.TrimPrefix(message, "Leave_")
 		return parseMessageLevelAndReturn(message, uuid, announceDeparture)
 	}
 
-	if strings.HasPrefix(message, "Starting ") {
-		message = strings.TrimPrefix(message, "Starting ")
+	if strings.HasPrefix(message, "Starting_") {
+		message = strings.TrimPrefix(message, "Starting_")
 		return parseMessageLevelAndReturn(message, uuid, startLvlUp)
 	}
 
-	if strings.HasPrefix(message, "Reached ") {
-		message = strings.TrimPrefix(message, "Reached ")
+	if strings.HasPrefix(message, "Reached_") {
+		message = strings.TrimPrefix(message, "Reached_")
 		return parseMessageLevelAndReturn(message, uuid, lvlUpComplete)
 	}
 
-	if strings.HasPrefix(message, "Failed ") {
-		message = strings.TrimPrefix(message, "Failed ")
+	if strings.HasPrefix(message, "Failed_") {
+		message = strings.TrimPrefix(message, "Failed_")
 		return parseMessageLevelAndReturn(message, uuid, lvlUpFailed)
 	}
 
