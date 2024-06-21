@@ -57,33 +57,35 @@ func parseArguments() (string, string) {
 // It ignores any other messages coming before this one
 func getFrequencyFromServer(conn network.ServerConn) int {
 	conn.SendCommand(network.GetFrequency, network.EmptyBody)
-	rType, value, err := conn.GetAndParseResponse()
-	if err != nil {
-		log.Fatal("Failed to get frequency from server: ", err)
-	}
-	if rType == network.Boolean && value == false {
-		ai.FrequencyCommandAvailable = false
-		log.Println("Failed to get frequency from server; using approximation method")
-		timingSum := time.Duration(0)
-		count := 0
-		for count < 5 {
-			timerStart := time.Now()
-			conn.SendCommand(network.GetInventory, network.EmptyBody)
-			invType, _, _ := conn.GetAndParseResponse()
-			if invType == network.Inventory {
-				duration := time.Since(timerStart)
-				timingSum += duration
-				log.Println("Sampling duration:", duration)
-				count++
-			}
+	for {
+		rType, value, err := conn.GetAndParseResponse()
+		if err != nil {
+			log.Fatal("Failed to get frequency from server: ", err)
 		}
-		timingSumSecs := timingSum.Microseconds() / 5
-		timeStepFloat := float64(time.Second.Microseconds()) / float64(timingSumSecs)
-		log.Println("Timing Mean:", timingSumSecs, ";Approximated timestep:", int(math.Round(timeStepFloat)))
-		return int(math.Round(timeStepFloat))
-	}
-	if rType == network.Frequency {
-		return value.(int)
+		if rType == network.Boolean && value == false {
+			ai.FrequencyCommandAvailable = false
+			log.Println("Failed to get frequency from server; using approximation method")
+			timingSum := time.Duration(0)
+			count := 0
+			for count < 5 {
+				timerStart := time.Now()
+				conn.SendCommand(network.GetInventory, network.EmptyBody)
+				invType, _, _ := conn.GetAndParseResponse()
+				if invType == network.Inventory {
+					duration := time.Since(timerStart)
+					timingSum += duration
+					log.Println("Sampling duration:", duration)
+					count++
+				}
+			}
+			timingSumSecs := timingSum.Microseconds() / 5
+			timeStepFloat := float64(time.Second.Microseconds()) / float64(timingSumSecs)
+			log.Println("Timing Mean:", timingSumSecs, ";Approximated timestep:", int(math.Round(timeStepFloat)))
+			return int(math.Round(timeStepFloat))
+		}
+		if rType == network.Frequency {
+			return value.(int)
+		}
 	}
 	return 0
 }

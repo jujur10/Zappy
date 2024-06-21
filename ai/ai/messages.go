@@ -99,6 +99,7 @@ func parseMessageLevelAndReturn(levelStr string, uuid string, msgType broadcastT
 // parsePlayerMessage parses a message coming from another player.
 // It's not that complicated, it's just a lot of duplicated ifs
 func parsePlayerMessage(message string) (broadcastMessageContent, error) {
+	log.Println("==> Message received:", message)
 	uuid, message, found := strings.Cut(message, " ")
 	if !found {
 		return broadcastMessageContent{}, errors.New("invalid message format")
