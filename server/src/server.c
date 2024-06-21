@@ -90,6 +90,8 @@ static uint8_t destroy_server(const argument_t PTR args, server_t PTR server)
     destroy_pre_generated_buffers(&server->generated_buffers);
     for (uint16_t i = 0; i < server->nb_clients; i++)
         destroy_new_client(server, i, false);
+    for (uint16_t i = 0; i < server->nb_players; i++)
+        destroy_ai(server, i);
     for (uint16_t i = 0; i < server->nb_guis; i++)
         destroy_gui(server, i);
     close(server->sock);
