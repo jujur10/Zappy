@@ -61,6 +61,16 @@ void HandleServerCommand(const std::string& line)
             ParseTimeUnitUpdatedCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::START_INCANTATION:
+        {
+            ParseStartIncantationCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::END_INCANTATION:
+        {
+            ParseEndIncantationCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         default:
             std::print("Unknown command: {}\n", line);
             return;

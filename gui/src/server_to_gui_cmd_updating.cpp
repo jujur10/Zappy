@@ -3,6 +3,7 @@
 //
 #include "server_to_gui_cmd_updating.hpp"
 
+#include <Camera3D.hpp>
 #include <cfloat>
 
 #include "map.hpp"
@@ -51,21 +52,21 @@ void HandleUpdateTileCommand(const flecs::world &world, const UpdateTileCommand 
 void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *const newPlayer)
 {
     flecs::entity player = world.make_alive(newPlayer->id + PLAYER_STARTING_IDX);
-    raylib::ModelAnimation *const idle = &world.get<player::playerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
+    raylib::ModelAnimation *const idle = &world.get<player::PlayerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
     const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(newPlayer->x, newPlayer->y));
     const auto &tileMatrix = tile.ensure<raylib::Matrix>();
-    const player::playerTargetInfo playerPosInfo{
+    const player::PlayerTargetInfo playerPosInfo{
         .target = {tileMatrix.m12, tileMatrix.m14},
         .normalizedDirection = {0.0f, 0.0f},
     };
 
     player.set<Vector2>({tileMatrix.m12, tileMatrix.m14});
     player.set<float>(0.f);
-    player.set<player::playerTargetInfo>(playerPosInfo);
-    player.disable<player::playerTargetInfo>();
+    player.set<player::PlayerTargetInfo>(playerPosInfo);
+    player.disable<player::PlayerTargetInfo>();
     player.set<player::Orientation>(static_cast<player::Orientation>(newPlayer->orientation));
     player.set<uint8_t>(newPlayer->level);
-    player.set<player::playerAnimationData>({idle, 0});
+    player.set<player::PlayerAnimationData>({idle, 0});
     player.set<std::unique_ptr<raylib::Model>>(std::make_unique<raylib::Model>("gui/resources/assets/cactoro.m3d"));
     player.set<std::string_view>(newPlayer->teamName);  // TODO: Don't forget this when implementing teams
 }
@@ -93,16 +94,20 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     playerOrientation = static_cast<player::Orientation>(playerPosition->orientation);
 
     auto playerPos = player.get_ref<Vector2>();
+    if (nullptr == playerPos.try_get())
+    {
+        return;
+    }
 
     // if player just changed it's orientation skip rest of the code
     if (::Vector2Distance(*playerPos.get(), {tileMatrix.m12, tileMatrix.m14}) <= 0.1f)
     {
-        player.disable<player::playerTargetInfo>();
+        player.disable<player::PlayerTargetInfo>();
         player.enable<player::Orientation>();
         return;
     }
 
-    auto *const playerTargetInfo = player.get_mut<player::playerTargetInfo>();
+    auto *const playerTargetInfo = player.get_mut<player::PlayerTargetInfo>();
     playerTargetInfo->target = {tileMatrix.m12, tileMatrix.m14};
 
     Vector2 direction = {tileMatrix.m12 - playerPos->x, tileMatrix.m14 - playerPos->y};
@@ -130,29 +135,29 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     };
 
     /// Enable the player target info component so that it can match the update position system
-    player.enable<player::playerTargetInfo>();
+    player.enable<player::PlayerTargetInfo>();
 
     /// Force the player to face the right direction while running
     auto * const rotationAngle = player.get_mut<float>();
     switch (playerOrientation)
     {
         using enum player::Orientation;
-        case NORTH:
+        case kNorth:
             // Make the player face the right direction while running (which is the opposite of the real orientation)
             // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
             *rotationAngle = !utils::IsTileInOddRow(tileMatrix.m14) ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
             player.disable<player::Orientation>();
             break;
-        case EAST:
+        case kEast:
             *rotationAngle = EAST_ANGLE;
             break;
-        case SOUTH:
+        case kSouth:
             // Make the player face the right direction while running (which is the opposite of the real orientation)
             // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
             *rotationAngle = !utils::IsTileInOddRow(tileMatrix.m14) ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
             player.disable<player::Orientation>();
             break;
-        case WEST:
+        case kWest:
             *rotationAngle = WEST_ANGLE;
             break;
         default:
@@ -160,8 +165,8 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     }
 
     /// Update the player animation to the run animation
-    raylib::ModelAnimation *const run = &world.get<player::playerAnimations>()->animations->at(RUN_ANIMATION_IDX);
-    auto *const playerAnimData = player.get_mut<player::playerAnimationData>();
+    raylib::ModelAnimation *const run = &world.get<player::PlayerAnimations>()->animations->at(RUN_ANIMATION_IDX);
+    auto *const playerAnimData = player.get_mut<player::PlayerAnimationData>();
     playerAnimData->currentAnimation = run;
     playerAnimData->currentFrame = 0;
 }
@@ -170,4 +175,36 @@ void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdate
 {
     world.ensure<TimeUnit>().frequency = timeUnitUpdate->timeUnit;
 }
+
+void HandleStartIncantationCommand(const flecs::world &world, const StartIncantationCommand * const newIncantation)
+{
+    auto tile = world.entity(utils::GetTileIndexFromCoords(newIncantation->x, newIncantation->y));
+    const auto * const tileMatrix = tile.get<raylib::Matrix>();
+    auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
+
+    tile.set<player::IncantationInfo>({
+        .state = player::IncantationState::kInProgress,
+        .frameLeftForIcon = 120,
+        .distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14}),
+    });
+}
+
+void HandleEndIncantationCommand(const flecs::world &world, const EndIncantationCommand * const endIncantation)
+{
+    const auto tile = world.entity(utils::GetTileIndexFromCoords(endIncantation->x, endIncantation->y));
+    const auto *const tileMatrix = tile.get<raylib::Matrix>();
+
+    auto * const incantationInfo = tile.get_mut<player::IncantationInfo>();
+
+    auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
+
+    if (nullptr == incantationInfo)
+    {
+        return;
+    }
+    incantationInfo->state = endIncantation->success ? player::IncantationState::kSuccess : player::IncantationState::kFailure;
+    incantationInfo->frameLeftForIcon = 120;
+    incantationInfo->distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14});
+}
+
 }  // namespace zappy_gui::net

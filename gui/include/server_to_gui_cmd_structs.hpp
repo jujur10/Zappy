@@ -45,19 +45,39 @@ struct TimeUnitUpdateCommand
     uint32_t timeUnit;
 };
 
+struct StartIncantationCommand
+{
+    uint16_t x;
+    uint16_t y;
+    uint16_t playerCount;
+    std::unique_ptr<uint16_t[]> playerIds;
+};
+
+struct EndIncantationCommand
+{
+    uint16_t x;
+    uint16_t y;
+    bool success;
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
 // DON'T CHANGE THE ORDER OF THE TYPES IN THE VARIANT OR YOU WILL BREAK THE PARSING CODE
-using Command = std::variant<UpdateTileCommand, NewPlayerCommand, DeadPlayerCommand, PlayerPositionCommand, TimeUnitUpdateCommand>;
-
+using Command = std::variant<
+    UpdateTileCommand,
+    NewPlayerCommand,
+    DeadPlayerCommand,
+    PlayerPositionCommand,
+    TimeUnitUpdateCommand,
+    StartIncantationCommand,
+    EndIncantationCommand
+>;
 
 // Command queue server -> gui
 using STGQueue = atomic_queue::AtomicQueueB2<Command>;
 /// @var Thread-safe queue to send commands from the server to the GUI
 extern STGQueue ServerToGuiQueue;
-
-
 
 // Parsing functions for commands coming from the server
 
@@ -85,4 +105,12 @@ void ParsePlayerPositionCommand(const std::string_view& line);
 /// @brief Parse the sgt command received as text from the server and push the corresponding command in the ServerToGuiQueue
 /// @param line The sgt command received from the server
 void ParseTimeUnitUpdatedCommand(const std::string_view& line);
+
+/// @brief Parse the pic command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The pic command received from the server
+void ParseStartIncantationCommand(const std::string_view& line);
+
+/// @brief Parse the pie command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The pie command received from the server
+void ParseEndIncantationCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

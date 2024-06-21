@@ -44,7 +44,23 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
  * @brief Process the TimeUnitUpdateCommand command
  * Update the time unit value
  * @param world The ecs world
- * @param timeUnit The received TimeUnitUpdateCommand command
+ * @param timeUnitUpdate The received TimeUnitUpdateCommand command
  */
 void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdateCommand *timeUnitUpdate);
+
+/**
+ * @brief Process the StartIncantation command
+ * Start the incantation animation
+ * @param world The ecs world
+ * @param newIncantation The received StartIncantationCommand command
+ */
+void HandleStartIncantationCommand(const flecs::world &world, const StartIncantationCommand *newIncantation);
+
+/**
+ * @brief Process the EndIncantation command
+ * End the incantation animation
+ * @param world The ecs world
+ * @param endIncantation The received EndIncantationCommand command
+ */
+void HandleEndIncantationCommand(const flecs::world &world, const EndIncantationCommand *endIncantation);
 }  // namespace zappy_gui::net

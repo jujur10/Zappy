@@ -5,6 +5,8 @@
 #pragma once
 
 #include "ModelAnimation.hpp"
+#include "Matrix.hpp" // Must be included before Texture.hpp if not will not compile // NOLINT
+#include "Texture.hpp"
 
 namespace zappy_gui::player
 {
@@ -43,27 +45,47 @@ namespace zappy_gui::player
 
 enum class Orientation
 {
-    NORTH = 1,
-    EAST = 2,
-    SOUTH = 3,
-    WEST = 4,
+    kNorth = 1,
+    kEast = 2,
+    kSouth = 3,
+    kWest = 4,
 };
 
-struct playerAnimations
+struct PlayerAnimations
 {
     std::vector<raylib::ModelAnimation> *animations;
 };
 
-struct playerAnimationData
+struct PlayerAnimationData
 {
     raylib::ModelAnimation *currentAnimation;
     int32_t currentFrame;
 };
 
-struct playerTargetInfo
+struct PlayerTargetInfo
 {
     Vector2 target;
     Vector2 normalizedDirection;
+};
+
+enum class IncantationState : uint16_t
+{
+    kInProgress = 0,
+    kSuccess = 1,
+    kFailure = 2,
+    kTotalStates = 3,
+};
+
+struct IncantationIcons
+{
+    raylib::Texture2D *icons[static_cast<unsigned long>(IncantationState::kTotalStates)];
+};
+
+struct IncantationInfo
+{
+    IncantationState state;
+    uint16_t frameLeftForIcon;
+    float distance;
 };
 
 }  // namespace zappy_gui::player
