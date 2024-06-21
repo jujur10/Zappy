@@ -152,15 +152,9 @@ func (game *Game) startLevelUpHost() {
 
 func awaitLevelUpLeechUpdate(game *Game, uuid string) bool {
 	for {
-		select {
-		case message, ok := <-game.MessageManager.levelUpMessageChannel:
-			if !ok {
-				log.Fatal("Message channel closed")
-				return false
-			}
-			if message.uuid == uuid && (message.msgType == lvlUpComplete || message.msgType == lvlUpFailed) {
-				return message.msgType == lvlUpComplete
-			}
+		message, err := popMessageFromQueue()
+		if err == nil && message.uuid == uuid && (message.msgType == lvlUpComplete || message.msgType == lvlUpFailed) {
+			return message.msgType == lvlUpComplete
 		}
 	}
 }
