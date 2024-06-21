@@ -465,18 +465,22 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
         });
 
     /// Draw the incantation icon
-    ecs.system<raylib::Camera3D, raylib::Matrix, player::IncantationInfo>("draw incantation icon")
+    ecs.system<raylib::Camera3D, player::IncantationIcons, raylib::Matrix, player::IncantationInfo>("draw incantation icon")
         .kind(flecs::OnUpdate)
         .term_at(1).singleton()
+        .term_at(2).singleton()
         .order_by<player::IncantationInfo>([](
             [[maybe_unused]]const flecs::entity_t e1, const player::IncantationInfo * const iI1,
             [[maybe_unused]]const flecs::entity_t e2, const player::IncantationInfo * const iI2)
             {
             return (iI1->distance > iI2->distance) - (iI1->distance < iI2->distance);
         })
-        .each([](const raylib::Camera3D &camera, const raylib::Matrix &incantationPos, const player::IncantationInfo &incantationInfo)
+        .each([](const raylib::Camera3D &camera,
+            const player::IncantationIcons &icons,
+            const raylib::Matrix &incantationPos,
+            const player::IncantationInfo &incantationInfo)
         {
-            incantationInfo.incantationTexture->DrawBillboard(
+            icons.icons[static_cast<unsigned long>(incantationInfo.state)]->DrawBillboard(
                 camera, Vector3{incantationPos.m12, incantationPos.m13 + 1.5f, incantationPos.m14}, 0.5f
             );
         });

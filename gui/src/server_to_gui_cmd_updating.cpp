@@ -183,7 +183,6 @@ void HandleStartIncantationCommand(const flecs::world &world, const StartIncanta
     auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
 
     tile.set<player::IncantationInfo>({
-        .incantationTexture = std::make_unique<raylib::Texture2D>("gui/resources/assets/hourglass.png"),
         .state = player::IncantationState::kInProgress,
         .frameLeftForIcon = 120,
         .distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14}),
@@ -199,21 +198,12 @@ void HandleEndIncantationCommand(const flecs::world &world, const EndIncantation
 
     auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
 
-
     if (nullptr == incantationInfo)
     {
         return;
     }
-    incantationInfo->incantationTexture.reset();
     incantationInfo->state = endIncantation->success ? player::IncantationState::kSuccess : player::IncantationState::kFailure;
     incantationInfo->frameLeftForIcon = 120;
-    if (player::IncantationState::kSuccess == incantationInfo->state)
-    {
-        incantationInfo->incantationTexture = std::make_unique<raylib::Texture2D>("gui/resources/assets/lvlup.png");
-    } else
-    {
-        incantationInfo->incantationTexture = std::make_unique<raylib::Texture2D>("gui/resources/assets/cross.png");
-    }
     incantationInfo->distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14});
 }
 

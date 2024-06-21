@@ -46,7 +46,10 @@ static void InitializeECS(flecs::world &ecs,
                           raylib::Model &food,
                           raylib::Model &crystal,
                           raylib::Model &skybox,
-                          std::vector<raylib::ModelAnimation> &playerAnimations)
+                          std::vector<raylib::ModelAnimation> &playerAnimations,
+                          raylib::Texture2D &inProgressIcon,
+                          raylib::Texture2D &successIcon,
+                          raylib::Texture2D &failureIcon)
 {
     ecs.set_entity_range(4'269'420, 0);  // Allow flecs to only generate entity ids starting from 4'269'420
 
@@ -63,6 +66,8 @@ static void InitializeECS(flecs::world &ecs,
     ecs.set<zappy_gui::player::PlayerAnimations>({&playerAnimations});
 
     ecs.set<zappy_gui::map::skybox>({&skybox});
+
+    ecs.set<zappy_gui::player::IncantationIcons>({&inProgressIcon, &successIcon, &failureIcon});
 
     zappy_gui::systems::registerSystems(ecs);
 
@@ -113,12 +118,21 @@ int32_t main(const int32_t argc, char *argv[])
     auto food = raylib::Model("gui/resources/assets/food.glb");
     auto crystal = raylib::Model("gui/resources/assets/crystal.glb");
     auto skybox = raylib::Model("gui/resources/assets/skybox.glb");
+    auto inProgressIcon = raylib::Texture2D("gui/resources/assets/hourglass.png");
+    auto successIcon = raylib::Texture2D("gui/resources/assets/lvlup.png");
+    auto failureIcon = raylib::Texture2D("gui/resources/assets/cross.png");
     std::vector<raylib::ModelAnimation> playerAnimations = raylib::ModelAnimation::Load("gui/resources/assets/cactoro.m3d");
 
     //--------------------------------------------------------------------------------------
     // Create the ECS and initialize it
     flecs::world ecs;
-    ::InitializeECS(ecs, camera, sand, sandRock, sandCactus, food, crystal, skybox, playerAnimations);
+    ::InitializeECS(ecs,
+        camera,
+        sand, sandRock, sandCactus,
+        food, crystal,
+        skybox,
+        playerAnimations,
+        inProgressIcon, successIcon, failureIcon);
 
     //--------------------------------------------------------------------------------------
     // Start the network main loop on another thread

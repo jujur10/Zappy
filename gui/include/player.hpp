@@ -73,11 +73,16 @@ enum class IncantationState : uint16_t
     kInProgress = 0,
     kSuccess = 1,
     kFailure = 2,
+    kTotalStates = 3,
+};
+
+struct IncantationIcons
+{
+    raylib::Texture2D *icons[static_cast<unsigned long>(IncantationState::kTotalStates)];
 };
 
 struct IncantationInfo
 {
-    std::unique_ptr<raylib::Texture2D> incantationTexture;
     IncantationState state;
     uint16_t frameLeftForIcon;
     float distance;
