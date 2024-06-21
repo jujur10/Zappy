@@ -55,4 +55,12 @@ void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdate
  * @param newIncantation The received StartIncantationCommand command
  */
 void HandleStartIncantationCommand(const flecs::world &world, const StartIncantationCommand *newIncantation);
+
+/**
+ * @brief Process the EndIncantation command
+ * End the incantation animation
+ * @param world The ecs world
+ * @param endIncantation The received EndIncantationCommand command
+ */
+void HandleEndIncantationCommand(const flecs::world &world, const EndIncantationCommand *endIncantation);
 }  // namespace zappy_gui::net

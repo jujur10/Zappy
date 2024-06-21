@@ -27,7 +27,7 @@ namespace zappy_gui
 //----------------------------------------------------------------------------------
 // Global Variables Definition
 //----------------------------------------------------------------------------------
-constexpr const char *const help = "USAGE: ./zappy_gui -p port -h machine\n";
+constexpr char help[] = "USAGE: ./zappy_gui -p port -h machine\n";
 constexpr int32_t screenWidth = 1'280;
 constexpr int32_t screenHeight = 720;
 constexpr uint32_t serverToGuiQueueCapacity = 4096;  // 4096 is the minimum size for the queues
@@ -97,7 +97,7 @@ int32_t main(const int32_t argc, char *argv[])
     ::SetConfigFlags(FLAG_MSAA_4X_HINT);
     raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
     window.SetTargetFPS(60);
-    // ::DisableCursor(); // Hides cursor and locks it to the window
+    ::DisableCursor(); // Hides cursor and locks it to the window
     raygui::GuiLoadStyleBluish();
     raygui::GuiUnlock();
 

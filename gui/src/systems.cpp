@@ -435,8 +435,8 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             });
 
 
-    /// Query the incantation info and update the icon -> camera distance
-    ecs.system<raylib::Camera3D, raylib::Matrix, player::IncantationInfo>("update incantation icon distance")
+    /// Query the incantation info and update the icon to camera distance
+    ecs.system<raylib::Camera3D, raylib::Matrix, player::IncantationInfo>("Update incantation icon distance")
         .term_at(1).singleton()
         .kind(flecs::OnUpdate)
         .each(
@@ -444,20 +444,41 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             {
                 incantationInfo.distance =
                     ::Vector3Distance(camera.position, {incantationPos.m12, incantationPos.m13, incantationPos.m14});
-                printf("Distance: %f\n", incantationInfo.distance);
             });
+
+    /// Update the incantation icon
+    ecs.system<player::IncantationInfo>("Update incantation icon")
+        .kind(flecs::OnUpdate)
+        .each([](flecs::entity e, player::IncantationInfo &incantationInfo)
+        {
+            if (incantationInfo.state == player::IncantationState::kInProgress)
+            {
+                return;
+            }
+            if (0 == incantationInfo.frameLeftForIcon)
+            {
+                e.remove<player::IncantationInfo>();
+                return;
+            }
+            --incantationInfo.frameLeftForIcon;
+
+        });
 
     /// Draw the incantation icon
     ecs.system<raylib::Camera3D, raylib::Matrix, player::IncantationInfo>("draw incantation icon")
         .kind(flecs::OnUpdate)
         .term_at(1).singleton()
-        .order_by<player::IncantationInfo>([](flecs::entity_t e1, const player::IncantationInfo *iI1, flecs::entity_t e2, const player::IncantationInfo *iI2) {
+        .order_by<player::IncantationInfo>([](
+            [[maybe_unused]]const flecs::entity_t e1, const player::IncantationInfo * const iI1,
+            [[maybe_unused]]const flecs::entity_t e2, const player::IncantationInfo * const iI2)
+            {
             return (iI1->distance > iI2->distance) - (iI1->distance < iI2->distance);
         })
         .each([](const raylib::Camera3D &camera, const raylib::Matrix &incantationPos, const player::IncantationInfo &incantationInfo)
         {
-            printf("Drawing incantation icon\n");
-            incantationInfo.incantationTexture->DrawBillboard(camera, Vector3{incantationPos.m12, incantationPos.m13 + 1.5f, incantationPos.m14}, 0.5f);
+            incantationInfo.incantationTexture->DrawBillboard(
+                camera, Vector3{incantationPos.m12, incantationPos.m13 + 1.5f, incantationPos.m14}, 0.5f
+            );
         });
 }
 

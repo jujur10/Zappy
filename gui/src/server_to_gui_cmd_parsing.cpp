@@ -141,4 +141,25 @@ void ParseStartIncantationCommand(const std::string_view& line)
     ServerToGuiQueue.try_push(StartIncantationCommand{
         .x = x, .y = y, .playerCount = i, .playerIds = std::move(playerIds)});
 }
+
+void ParseEndIncantationCommand(const std::string_view& line)
+{
+    uint16_t x = 0;
+    uint16_t y = 0;
+    uint8_t success = false;
+    size_t paramPos = 0;
+
+    string_utils::convertFromString(line, x);
+
+    paramPos = line.find(' ') + 1;
+
+    string_utils::convertFromString(line.data() + paramPos, y);
+
+    paramPos = line.find(' ', paramPos) + 1;
+
+    string_utils::convertFromString(line.data() + paramPos, success);
+
+    ServerToGuiQueue.try_push(EndIncantationCommand{
+        .x = x, .y = y, .success = static_cast<bool>(success)});
+}
 }  // namespace zappy_gui::net

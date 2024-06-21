@@ -17,5 +17,6 @@ enum class ServerCommands: uint32_t {
     PLAYER_POSITION = 7303280,  // ppo
     TIME_UNIT_UPDATED = 7628659, // sgt
     START_INCANTATION = 6515056, // pic
+    END_INCANTATION = 6646128, // pie
 };
 }

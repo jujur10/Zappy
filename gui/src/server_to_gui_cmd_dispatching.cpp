@@ -69,6 +69,14 @@ void ParseGuiCommands(const flecs::iter &it)
                 }
                 break;
             }
+            case 6:
+            {
+                if (auto const *const incantationEnd = std::get_if<EndIncantationCommand>(&cmd))
+                {
+                    HandleEndIncantationCommand(world, incantationEnd);
+                }
+                break;
+            }
             // Other command cases to be added here
             default:;
         }

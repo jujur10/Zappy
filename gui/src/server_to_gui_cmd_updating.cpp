@@ -94,6 +94,10 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     playerOrientation = static_cast<player::Orientation>(playerPosition->orientation);
 
     auto playerPos = player.get_ref<Vector2>();
+    if (nullptr == playerPos.try_get())
+    {
+        return;
+    }
 
     // if player just changed it's orientation skip rest of the code
     if (::Vector2Distance(*playerPos.get(), {tileMatrix.m12, tileMatrix.m14}) <= 0.1f)
@@ -181,9 +185,36 @@ void HandleStartIncantationCommand(const flecs::world &world, const StartIncanta
     tile.set<player::IncantationInfo>({
         .incantationTexture = std::make_unique<raylib::Texture2D>("gui/resources/assets/hourglass.png"),
         .state = player::IncantationState::kInProgress,
-        .frameLeftForIcon = 60,
+        .frameLeftForIcon = 120,
         .distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14}),
     });
+}
+
+void HandleEndIncantationCommand(const flecs::world &world, const EndIncantationCommand * const endIncantation)
+{
+    const auto tile = world.entity(utils::GetTileIndexFromCoords(endIncantation->x, endIncantation->y));
+    const auto *const tileMatrix = tile.get<raylib::Matrix>();
+
+    auto * const incantationInfo = tile.get_mut<player::IncantationInfo>();
+
+    auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
+
+
+    if (nullptr == incantationInfo)
+    {
+        return;
+    }
+    incantationInfo->incantationTexture.reset();
+    incantationInfo->state = endIncantation->success ? player::IncantationState::kSuccess : player::IncantationState::kFailure;
+    incantationInfo->frameLeftForIcon = 120;
+    if (player::IncantationState::kSuccess == incantationInfo->state)
+    {
+        incantationInfo->incantationTexture = std::make_unique<raylib::Texture2D>("gui/resources/assets/lvlup.png");
+    } else
+    {
+        incantationInfo->incantationTexture = std::make_unique<raylib::Texture2D>("gui/resources/assets/cross.png");
+    }
+    incantationInfo->distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14});
 }
 
 }  // namespace zappy_gui::net
