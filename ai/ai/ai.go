@@ -57,8 +57,9 @@ func (game *Game) MainLoop() {
 			leechMsg := game.MessageManager.messageStatusList[leechIdx]
 			if leechMsg.direction == 0 { // Is on the correct tile?
 				game.levelUpLeechLoop(leechMsg.uuid)
+			} else {
+				game.followMessageDirection(leechMsg.direction)
 			}
-			game.followMessageDirection(leechMsg.direction)
 		} else if game.areLevelUpConditionsMet() { // Start leveling up as host
 			log.Println("Started level up host")
 			game.levelUpHostLoop()

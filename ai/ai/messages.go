@@ -175,25 +175,12 @@ func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
 
 	messageContent.direction = message.Direction
 	messageIndex := getMessageIndex(messageContent, game.MessageManager.messageStatusList)
-	if messageIndex == -1 {
-		if messageContent.msgType == missingPlayers { // New level up lobby
-			game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList, messageContent)
-			return
-		}
-		log.Println("Invalid message, message not in array: ", message.Text)
+	fmt.Println("--> Message list:", game.MessageManager.messageStatusList)
+	if messageIndex == -1 && messageContent.msgType == missingPlayers { // New level up lobby
+		game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList, messageContent)
 		return
 	}
-	if messageContent.msgType == missingPlayers { // Update to a level up lobby
-		game.MessageManager.messageStatusList[messageIndex] = messageContent
-	} else if messageContent.msgType == cancelLvlUp || // Closed level up lobby
-		messageContent.msgType == lvlUpComplete ||
-		messageContent.msgType == lvlUpFailed {
-		if game.MessageManager.waitingForLevelUpLeech {
-			game.MessageManager.levelUpMessageChannel <- messageContent
-		}
-		game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList[:messageIndex],
-			game.MessageManager.messageStatusList[messageIndex+1:]...)
-	}
+
 	if game.MessageManager.waitingForLevelUp && // Player joined / left the lobby
 		messageContent.targetLevel == game.Level+1 &&
 		(messageContent.msgType == announcePresence || messageContent.msgType == announceDeparture) {
@@ -203,5 +190,13 @@ func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
 		messageContent.targetLevel == game.Level+1 &&
 		(messageContent.msgType == startLvlUp || messageContent.msgType == cancelLvlUp) {
 		game.MessageManager.levelUpMessageChannel <- messageContent
+	}
+
+	if messageContent.msgType == missingPlayers { // Update to a level up lobby
+		game.MessageManager.messageStatusList[messageIndex] = messageContent
+	} else if messageIndex != -1 && (messageContent.msgType == cancelLvlUp || // Closed level up lobby
+		messageContent.msgType == lvlUpComplete || messageContent.msgType == lvlUpFailed) {
+		game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList[:messageIndex],
+			game.MessageManager.messageStatusList[messageIndex+1:]...)
 	}
 }

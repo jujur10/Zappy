@@ -402,6 +402,7 @@ func (game *Game) followPath(path Path) Path {
 }
 
 func (game *Game) followMessageDirection(direction network.EventDirection) {
+	log.Println("Following player message direction:", direction)
 	worldSize := game.Coordinates.WorldSize
 	pos := game.Coordinates.CoordsFromOrigin
 	directionsVectors := map[network.PlayerDirection]RelativeCoordinates{Up: {0, 1},
