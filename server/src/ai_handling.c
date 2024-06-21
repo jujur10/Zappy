@@ -27,7 +27,7 @@
 static void send_pnw_to_guis(server_t PTR server, const team_t PTR team,
     uint32_t player_idx)
 {
-    msg_t message;
+    msg_t message = {};
     char msg_content[4 + (5 * UINT32_MAX_DIGITS) + 1] = "pnw ";
     uint32_t count = 4;
     const player_t *player = &server->players[player_idx];
@@ -193,7 +193,7 @@ static void send_next_message_from_queue(server_t PTR server,
     LOGF("Send msg from queue (PLAYER sock %hu) : %.*s", player->sock, msg
     .len, msg.ptr)
     write(player->sock, msg.ptr, msg.len);
-    execute_event_function(server, player_idx, msg.event.player_event);
+    execute_player_event_function(server, player_idx, msg.event.player_event);
     destroy_message(&msg);
 }
 

@@ -43,6 +43,9 @@ add_executable(zappy_server
     src/commands/player/player_set_command.c
     src/commands/player/player_take_command.c
     src/coordinates.c
+    src/events/gui/gui_events.c
+    src/events/gui/gui_none_event.c
+    src/events/gui/gui_update_mct_event.c
     src/events/player/player_death_event.c
     src/events/player/player_events.c
     src/events/player/player_events.c
@@ -155,10 +158,14 @@ if (DEFINED RUN_TESTS)
         src/commands/player/player_set_command.c
         src/commands/player/player_take_command.c
         src/coordinates.c
+        src/events/gui/gui_events.c
+        src/events/gui/gui_none_event.c
+        src/events/gui/gui_update_mct_event.c
         src/events/player/player_death_event.c
         src/events/player/player_events.c
         src/events/player/player_incantation_event.c
         src/events/player/player_none_event.c
+        src/gui.c
         src/gui_handling.c
         src/map.c
         src/map_buffer.c

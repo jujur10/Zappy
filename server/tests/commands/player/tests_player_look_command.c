@@ -182,7 +182,7 @@ Test(TEST_PLAYER_LOOK_COMMAND, test_player_look_command_6)
     server_t server = {};
     argument_t args;
     char msg_content[500];
-    msg_t message;
+    msg_t message = {};
 
     args.width = 7;
     args.height = 4;

@@ -70,7 +70,7 @@ static int32_t get_game_status(server_t PTR server)
 static void send_seg_to_guis(server_t PTR server, uint32_t winning_team)
 {
     string_t string;
-    msg_t message;
+    msg_t message = {};
 
     init_string_from_chars(&string, "seg ", 4);
     append_to_string_from_chars(&string, server->teams[winning_team].name,
@@ -90,5 +90,8 @@ void update_server(server_t PTR server)
     if (-1 != team_idx)
         send_seg_to_guis(server, team_idx);
     update_game_clock(server);
-    update_map(server->time_units, &server->map, &server->generated_buffers);
+    if (true == update_map(server->time_units, &server->map,
+    &server->generated_buffers))
+        send_buffer_to_guis(server, &server->generated_buffers
+        .buffers[PRE_MAP_BUFFER], GUI_EVENT_UPDATE_MCT);
 }

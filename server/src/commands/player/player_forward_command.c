@@ -6,22 +6,9 @@
 */
 #include "server.h"
 
-#include "queue/msg_queue.h"
 #include "game_settings.h"
 #include "commands/command_utils.h"
-
-/// @brief Function which sends to GUIs the events of ppo.
-///
-/// @param server The server structure.
-/// @param player The player.
-/// @param resource_index The resource index.
-static void send_ppo_to_guis(server_t PTR server, const player_t PTR player)
-{
-    msg_t message = {};
-
-    if (SUCCESS == create_gui_ppo_message(server, player->sock, &message))
-        send_message_to_guis(server, message.ptr, message.len);
-}
+#include "events/gui_events.h"
 
 void execute_player_forward_command(server_t PTR server, uint16_t player_idx,
     UNUSED const player_command_t PTR command)

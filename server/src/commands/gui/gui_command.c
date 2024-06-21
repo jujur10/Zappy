@@ -37,10 +37,22 @@ status_t get_next_gui_command(gui_command_buffer_t PTR gui_command_buffer,
 void send_message_to_guis(server_t PTR server, const char PTR ptr,
     uint32_t len)
 {
-    msg_t message;
+    msg_t message = {};
 
     for (uint16_t i = 0; i < server->nb_guis; i++) {
         create_message(ptr, len, &message);
+        add_msg_to_queue(&server->guis[i].queue, &message);
+    }
+}
+
+void send_buffer_to_guis(server_t PTR server, buffer_t PTR buffer,
+    gui_event_t gui_event)
+{
+    msg_t message = {};
+
+    create_message_from_buffer(buffer, &message);
+    message.event.gui_event = gui_event;
+    for (uint16_t i = 0; i < server->nb_guis; i++) {
         add_msg_to_queue(&server->guis[i].queue, &message);
     }
 }

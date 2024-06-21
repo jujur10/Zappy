@@ -31,6 +31,7 @@ static void handle_player_health(server_t PTR server, uint32_t player_idx)
         }
         player->inventory.attr.food--;
         player->time_to_eat = server->time_units + PLAYER_FOOD_CONSUMTION;
+        send_pin_to_guis(server, player);
     }
 }
 
@@ -39,7 +40,7 @@ void handle_player_events(server_t PTR server, uint32_t player_idx)
     handle_player_health(server, player_idx);
 }
 
-void execute_event_function(server_t PTR server, uint32_t player_idx,
+void execute_player_event_function(server_t PTR server, uint32_t player_idx,
     player_event_t player_event)
 {
     return event_functions[player_event](server, player_idx);

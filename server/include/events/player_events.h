@@ -34,7 +34,7 @@ void handle_player_events(server_t PTR server, uint32_t player_idx);
 /// @param server The server structure.
 /// @param player_idx The player index we want to handle events.
 /// @param player_event The event to execute.
-void execute_event_function(server_t PTR server, uint32_t player_idx,
+void execute_player_event_function(server_t PTR server, uint32_t player_idx,
     player_event_t player_event);
 
 /// @brief Events.

@@ -14,6 +14,7 @@
 #include "queue/msg_queue.h"
 #include "logging.h"
 #include "commands/gui_commands.h"
+#include "gui_handling.h"
 
 int32_t init_gui(server_t PTR server, int sock)
 {
@@ -22,6 +23,7 @@ int32_t init_gui(server_t PTR server, int sock)
     LOGF("Swapped to GUI %i", server->nb_guis)
     server->guis[server->nb_guis].sock = sock;
     TAILQ_INIT(&server->guis[server->nb_guis].queue);
+    send_starting_guis_events(server, server->nb_guis);
     server->nb_guis++;
     return server->nb_guis - 1;
 }
@@ -146,14 +148,16 @@ static uint8_t handle_guis_rfds(server_t PTR server, uint32_t gui_idx,
 
 /// @brief Function which pop message from the queue and send it.
 /// @param gui The current gui.
-static void send_next_message_from_queue(gui_t PTR gui)
+static void send_next_message_from_queue(server_t PTR server, uint32_t gui_idx)
 {
     msg_t msg;
+    gui_t *gui = &server->guis[gui_idx];
 
     if (FAILURE == pop_msg(&gui->queue, &msg))
         return;
-    LOGF("Send msg from queue (GUI sock %i) : %.*s", gui->sock, msg
-        .len, msg.ptr)
+    LOGF("Send msg from queue (GUI sock %i) : %.*s", gui->sock, msg.len,
+    msg.ptr)
+    execute_gui_event_function(server, gui_idx, msg.event.gui_event);
     write(gui->sock, msg.ptr, msg.len);
     destroy_message(&msg);
 }
@@ -173,7 +177,7 @@ static uint8_t handle_guis_wfds(server_t PTR server, uint32_t gui_idx,
     switch (is_ready(server, &server->guis[gui_idx], wfds)) {
         case 0:
         case 1:
-            send_next_message_from_queue(&server->guis[gui_idx]);
+            send_next_message_from_queue(server, gui_idx);
             (*select_ret)--;
             LOG("Stop handle GUI wfds 1")
             return 1;

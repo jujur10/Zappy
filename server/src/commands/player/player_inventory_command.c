@@ -11,6 +11,7 @@
 #include "commands/command_utils.h"
 #include "utils/itoa/fast_itoa.h"
 #include "game_settings.h"
+#include "logging.h"
 
 /// @brief Constant representing the max buffer size for the string
 /// representation of the inventory.
@@ -80,6 +81,11 @@ void execute_player_inventory_command(server_t PTR server, uint16_t player_idx,
 
     wrote = write_inventory_as_chars(buffer, inventory);
     create_message(buffer, wrote, &message);
+    LOGF("[food %hu, linemate %hu, deraumere %hu, sibur %hu, mendiane %hu, "
+    "phiras %hu, thystame %hu]", inventory->attr.food, inventory->attr
+    .linemate, inventory->attr.deraumere, inventory->attr.sibur,
+    inventory->attr.mendiane, inventory->attr.phiras, inventory->attr
+    .thystame)
     add_msg_to_queue(&server->players[player_idx].queue, &message);
     add_time_limit_to_player(server->time_units, PLAYER_INVENTORY_WAIT,
         &server->players[player_idx]);

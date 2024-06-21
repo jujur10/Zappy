@@ -16,7 +16,7 @@
 static void send_enw_to_gui(server_t PTR server, const egg_t PTR egg,
     uint16_t gui_idx)
 {
-    msg_t message;
+    msg_t message = {};
     char msg_content[4 + (4 * UINT32_MAX_DIGITS) + 1] = "enw ";
     uint32_t count = 4;
 
@@ -32,6 +32,7 @@ static void send_enw_to_gui(server_t PTR server, const egg_t PTR egg,
 
 void send_starting_guis_events(server_t PTR server, uint16_t gui_idx)
 {
+    execute_gui_msz_command(server, gui_idx, NULL);
     execute_gui_tna_command(server, gui_idx, NULL);
     for (uint16_t team_idx = 0; team_idx < server->args->nb_of_teams;
         team_idx++) {
@@ -40,4 +41,5 @@ void send_starting_guis_events(server_t PTR server, uint16_t gui_idx)
                 send_enw_to_gui(server, &server->teams[team_idx]
                 .eggs[egg_idx], gui_idx);
     }
+    execute_gui_mct_command(server, gui_idx, NULL);
 }

@@ -37,7 +37,6 @@ typedef struct team_s {
     const char ARRAY name;
     uint16_t ARRAY players_idx;
     uint16_t nb_of_players;
-    uint16_t max_nb_of_players;
     uint16_t nb_of_eggs;
     uint16_t nb_of_allocated_eggs;
     egg_t ARRAY eggs;

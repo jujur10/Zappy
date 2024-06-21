@@ -8,7 +8,7 @@
 
 #include "queue/msg_queue.h"
 
-void execute_player_none_event(__attribute__((unused)) server_t PTR server,
-    __attribute__((unused)) uint32_t player_idx)
+void execute_player_none_event(UNUSED server_t PTR server,
+    UNUSED uint32_t player_idx)
 {
 }

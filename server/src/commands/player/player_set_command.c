@@ -44,6 +44,8 @@ void execute_player_set_command(server_t PTR server, uint16_t player_idx,
         player_take_set_to_tile(player, tile, resource_idx,
             PLAYER_SET_OBJ_CMD);
         send_pdr_to_guis(server, player, resource_idx);
+        send_pin_to_guis(server, player);
+        send_bct_to_guis(server, &player->coordinates);
         add_time_limit_to_player(server->time_units, PLAYER_SET_WAIT, player);
         return player_ok_response(server, player);
     }

@@ -43,8 +43,7 @@ status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
     player_t *player = &server->players[player_idx];
     team_t *team = &server->teams[team_idx];
 
-    if (team->nb_of_players == team->max_nb_of_players ||
-    0 == team->nb_of_eggs)
+    if (0 == team->nb_of_eggs)
         return FAILURE;
     team->nb_of_eggs--;
     player->coordinates = team->eggs[team->nb_of_eggs].egg_coordinates;

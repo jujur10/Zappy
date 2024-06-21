@@ -138,7 +138,7 @@ static void write_ready_players_into_string(server_t PTR server,
 /// @param player_idx The player index.
 static void send_pic_to_guis(server_t PTR server, uint32_t player_idx)
 {
-    msg_t message;
+    msg_t message = {};
     char msg_content[4 + (3 * UINT32_MAX_DIGITS) + 1] = "pic ";
     uint32_t count = 4;
     const player_t *player = &server->players[player_idx];

@@ -13,11 +13,8 @@
 void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
     UNUSED const gui_command_t PTR command)
 {
-    msg_t message = {};
-
-    create_message_from_buffer(&server->generated_buffers
-    .buffers[PRE_MAP_BUFFER], &message);
-    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    add_buffer_to_queue(&server->guis[gui_idx].queue,
+        &server->generated_buffers.buffers[PRE_MAP_BUFFER]);
     server->guis[gui_idx].blocking_time = server->clock;
     add_to_clock(&server->guis[gui_idx].blocking_time, 0,
     GUI_MCT_REQUEST_COOLDOWN);

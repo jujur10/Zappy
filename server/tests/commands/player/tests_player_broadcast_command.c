@@ -26,7 +26,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_pdf_exemple)
     args.width = 8;
     args.height = 8;
     server.args = &args;
-    init_string_from_chars(&string, "je m'appelle toto\n", 18);
+    init_string_from_chars(&string, "je m'appelle toto", 17);
     player_command_t cmd = {PLAYER_NONE_CMD, string};
     pre_generate_buffers(&server);
     server.map.width = 10;
@@ -59,7 +59,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_out_of_map)
     args.width = 8;
     args.height = 8;
     server.args = &args;
-    init_string_from_chars(&string, "je m'appelle toto\n", 18);
+    init_string_from_chars(&string, "je m'appelle toto", 17);
     player_command_t cmd = {PLAYER_NONE_CMD, string};
     pre_generate_buffers(&server);
     server.map.width = 8;
@@ -92,7 +92,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_same_tile)
     args.width = 8;
     args.height = 8;
     server.args = &args;
-    init_string_from_chars(&string, "je m'appelle toto\n", 18);
+    init_string_from_chars(&string, "je m'appelle toto", 17);
     player_command_t cmd = {PLAYER_NONE_CMD, string};
     pre_generate_buffers(&server);
     server.map.width = 8;
@@ -125,7 +125,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_left)
     args.width = 8;
     args.height = 8;
     server.args = &args;
-    init_string_from_chars(&string, "je m'appelle toto\n", 18);
+    init_string_from_chars(&string, "je m'appelle toto", 17);
     player_command_t cmd = {PLAYER_NONE_CMD, string};
     pre_generate_buffers(&server);
     server.map.width = 8;
@@ -158,7 +158,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_right)
     args.width = 8;
     args.height = 8;
     server.args = &args;
-    init_string_from_chars(&string, "je m'appelle toto\n", 18);
+    init_string_from_chars(&string, "je m'appelle toto", 17);
     player_command_t cmd = {PLAYER_NONE_CMD, string};
     pre_generate_buffers(&server);
     server.map.width = 8;
@@ -191,7 +191,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_top)
     args.width = 8;
     args.height = 8;
     server.args = &args;
-    init_string_from_chars(&string, "je m'appelle toto\n", 18);
+    init_string_from_chars(&string, "je m'appelle toto", 17);
     player_command_t cmd = {PLAYER_NONE_CMD, string};
     pre_generate_buffers(&server);
     server.map.width = 8;
@@ -224,7 +224,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_bottom)
     args.width = 8;
     args.height = 8;
     server.args = &args;
-    init_string_from_chars(&string, "je m'appelle toto\n", 18);
+    init_string_from_chars(&string, "je m'appelle toto", 17);
     player_command_t cmd = {PLAYER_NONE_CMD, string};
     pre_generate_buffers(&server);
     server.map.width = 8;

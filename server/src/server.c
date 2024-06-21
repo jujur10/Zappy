@@ -131,8 +131,8 @@ static void handle_sockets(server_t PTR server, const fd_set PTR rfds,
         on_connection(server);
     else {
         handle_new_clients(server, rfds, wfds, select_ret);
-        handle_guis(server, rfds, wfds, select_ret);
         handle_players(server, rfds, wfds, select_ret);
+        handle_guis(server, rfds, wfds, select_ret);
     }
 }
 

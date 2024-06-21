@@ -4,7 +4,7 @@
 ** File description:
 ** player_broadcast_command.c.
 */
-#include <string.h>
+#include <stdlib.h>
 #include "server.h"
 #include "utils/itoa/fast_itoa.h"
 #include "commands/command_utils.h"
@@ -103,7 +103,7 @@ static void broadcast_message_to_player(player_t PTR player,
 static void send_pbc_to_guis(server_t PTR server,
     const buffer_t PTR message_buffer, uint32_t player_idx)
 {
-    msg_t message;
+    msg_t message = {};
     char msg_content[4 + UINT32_MAX_DIGITS + 1] = "pbc ";
     uint32_t count = 4;
     const player_t *player = &server->players[player_idx];
@@ -132,6 +132,8 @@ static void reinitialize_broadcast_buffer(buffer_t PTR buffer,
     buffer->len = sizeof(MESSAGE_STR) - 1;
     append_to_buffer_from_chars(buffer, command->argument.ptr,
         command->argument.len);
+    append_to_buffer_from_chars(buffer, "\n", 1);
+    free(command->argument.ptr);
 }
 
 void execute_player_broadcast_command(server_t PTR server, uint16_t player_idx,

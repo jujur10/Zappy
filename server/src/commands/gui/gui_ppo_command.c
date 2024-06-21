@@ -29,6 +29,15 @@ status_t create_gui_ppo_message(server_t PTR server,
     return SUCCESS;
 }
 
+void send_ppo_to_guis(server_t PTR server, const player_t PTR player)
+{
+    msg_t message = {};
+
+    if (SUCCESS == create_gui_ppo_message(server, player->sock, &message))
+        send_message_to_guis(server, message.ptr, message.len);
+    destroy_message(&message);
+}
+
 void execute_gui_ppo_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command)
 {

@@ -13,8 +13,9 @@
 ///
 /// @param server The server structure.
 /// @param egg_index The egg index of the taken egg.
+/// @param status True for success or false for failure.
 static void send_pie_to_guis(server_t PTR server,
-    const coordinates_t PTR coordinates, status_t status)
+    const coordinates_t PTR coordinates, bool status)
 {
     char msg_content[4 + (3 * UINT32_MAX_DIGITS) + 1] = "pie ";
     uint32_t count = 4;
@@ -26,13 +27,28 @@ static void send_pie_to_guis(server_t PTR server,
     send_message_to_guis(server, msg_content, count);
 }
 
+/// @brief Function which sends to GUIs the events of plv.
+///
+/// @param server The server structure.
+/// @param egg_index The egg index of the taken egg.
+static void send_plv_to_guis(server_t PTR server, const player_t PTR player)
+{
+    char msg_content[4 + (2 * UINT32_MAX_DIGITS) + 1] = "plv ";
+    uint32_t count = 4;
+
+    write_nb_to_buffer(player->sock, msg_content, &count);
+    write_nb_to_buffer(player->level + 1, msg_content, &count);
+    msg_content[count - 1] = '\n';
+    send_message_to_guis(server, msg_content, count);
+}
+
 /// @brief Function used to elevate players who made incantation.
 ///
 /// @param players The array of players.
 /// @param nb_of_players The len of the array of players.
 /// @param player_idx The player index of the player who made the incantation.
-static void elevate_players(player_t ARRAY players, uint16_t nb_of_players,
-    uint16_t player_idx)
+static void elevate_players(server_t PTR server, player_t ARRAY players,
+    uint16_t nb_of_players, uint16_t player_idx)
 {
     msg_t message = {};
     char msg_content[sizeof("Current level: ") + UINT32_MAX_DIGITS] =
@@ -40,7 +56,7 @@ static void elevate_players(player_t ARRAY players, uint16_t nb_of_players,
     uint32_t count = 15;
     const player_t *player = &players[player_idx];
 
-    write_nb_to_buffer(player->level + 1, msg_content, &count);
+    write_nb_to_buffer(player->level + 2, msg_content, &count);
     msg_content[count - 1] = '\n';
     for (uint16_t i = 0; i < nb_of_players; i++) {
         if (false == is_coordinates_equal(&player->coordinates,
@@ -49,6 +65,7 @@ static void elevate_players(player_t ARRAY players, uint16_t nb_of_players,
         if (player->level != players[i].level)
             continue;
         players[i].level++;
+        send_plv_to_guis(server, &players[i]);
         create_message(msg_content, count, &message);
         add_msg_to_queue(&players[i].queue, &message);
     }
@@ -71,15 +88,15 @@ void execute_player_incantation_event(server_t PTR server, uint32_t player_idx)
 
     if (true == verify_requirements(server, (uint16_t)player_idx)) {
         remove_items_from_tile(get_resource_tile_by_coordinates
-        (&server->map, &player->coordinates), player->level + 1);
-        if (player->level < MAX_AI_LVL - 1)
-            player->level++;
-        elevate_players(server->players, server->nb_players,
-            (uint16_t)player_idx);
-        send_pie_to_guis(server, &player->coordinates, SUCCESS);
-        server->map.has_been_modified = true;
-        return;
+        (&server->map, &player->coordinates), player->level);
+        if (player->level < MAX_AI_LVL - 1) {
+            elevate_players(server, server->players, server->nb_players,
+                (uint16_t)player_idx);
+            send_pie_to_guis(server, &player->coordinates, true);
+            server->map.has_been_modified = true;
+            return;
+        }
     }
-    send_pie_to_guis(server, &player->coordinates, FAILURE);
+    send_pie_to_guis(server, &player->coordinates, false);
     return player_ko_response(server, player);
 }

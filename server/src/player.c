@@ -43,7 +43,7 @@ void teleport_player(map_t PTR map, player_t PTR player,
     resources_t *target_tile = &map->tiles[(new_coordinates->y *
         map->width) + new_coordinates->x];
 
-    current_tile->attr.players -= (current_tile->attr.players > 0) ? -1 : 0;
+    current_tile->attr.players -= (current_tile->attr.players > 0) ? 1 : 0;
     target_tile->attr.players++;
     player->coordinates = *new_coordinates;
     map->has_been_modified = true;

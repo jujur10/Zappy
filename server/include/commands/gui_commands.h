@@ -11,6 +11,7 @@
 
 #include "utils/string/string.h"
 #include "style/macros.h"
+#include "events/gui_events.h"
 
 /// @brief Read buffer size in byte.
 #define READ_BUFFER_SIZE 256
@@ -27,6 +28,9 @@
 typedef struct gui_s gui_t;
 typedef struct server_s server_t;
 typedef struct msg_s msg_t;
+typedef struct player_s player_t;
+typedef struct buffer_s buffer_t;
+typedef struct coordinates_s coordinates_t;
 
 /// @brief Max number of commands into the buffer for GUIs.
 #define MAX_NB_OF_COMMAND_FOR_BUFFER 10
@@ -151,6 +155,22 @@ void execute_gui_msz_command(server_t PTR server, uint16_t gui_idx,
 void execute_gui_bct_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command);
 
+/// @brief Function used to create the bct message.
+///
+/// @param server The server structure.
+/// @param coordinates The coordinates to the tile to send.
+/// @param message The message to create.
+/// @return Success if message created as desired behavior, Failure if not.
+status_t create_gui_bct_message(server_t PTR server,
+    const coordinates_t PTR coordinates, msg_t PTR message);
+
+/// @brief Function which sends to GUIs the events of bct.
+///
+/// @param server The server structure.
+/// @param coordinates The coordinates to the tile to send.
+void send_bct_to_guis(server_t PTR server,
+    const coordinates_t PTR coordinates);
+
 /// @brief The MCT command implementation.
 ///
 /// @param server The server structure.
@@ -180,6 +200,7 @@ void execute_gui_ppo_command(server_t PTR server, uint16_t gui_idx,
 /// @param server The server structure.
 /// @param player_sock The player socket.
 /// @param message Message to create.
+/// @return Success if message created as desired behavior, Failure if not.
 status_t create_gui_ppo_message(server_t PTR server,
     uint16_t player_sock, msg_t PTR message);
 
@@ -198,6 +219,22 @@ void execute_gui_plv_command(server_t PTR server, uint16_t gui_idx,
 /// @param command The command to execute.
 void execute_gui_pin_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command);
+
+/// @brief Function used to create the pin message.
+///
+/// @param server The server structure.
+/// @param player_sock The player socket.
+/// @param message The message to create.
+/// @return Success if message created as desired behavior, Failure if not.
+status_t create_gui_pin_message(server_t PTR server, uint16_t player_sock,
+    msg_t PTR message);
+
+/// @brief Function which sends to GUIs the events of pin.
+///
+/// @param server The server structure.
+/// @param player The player.
+/// @param resource_index The resource index.
+void send_pin_to_guis(server_t PTR server, const player_t PTR player);
 
 /// @brief The SGT command implementation.
 ///
@@ -222,3 +259,11 @@ void execute_gui_sst_command(server_t PTR server, uint16_t gui_idx,
 /// @param len The message len.
 void send_message_to_guis(server_t PTR server, const char PTR ptr,
     uint32_t len);
+
+/// @brief Function which sends a buffer to all the guis.
+///
+/// @param server The server structure.
+/// @param buffer The buffer to send.
+/// @param gui_event The event to set.
+void send_buffer_to_guis(server_t PTR server, buffer_t PTR buffer,
+    gui_event_t gui_event);
