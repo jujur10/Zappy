@@ -383,9 +383,6 @@ func (game *Game) followPath(path Path) Path {
 	if pqTileItem != nil { // Remove tile if it was in the queue
 		game.collectTileResources(pqTileItem)
 		log.Println("Trying to remove tile", tile, "from PQueue at index", pqTileItem.index)
-		for _, elem := range game.Movement.TilesQueue {
-			log.Println("#>", *elem)
-		}
 		RemoveFromPriorityQueue(&game.Movement.TilesQueue, pqTileItem.value)
 		game.updatePriorityQueueAfterCollection()
 	}
@@ -456,5 +453,6 @@ func (game *Game) followMessageDirection(direction network.EventDirection) {
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()
 		game.updatePrioritiesFromViewMap()
+		game.collectCurrentTileResources()
 	}
 }

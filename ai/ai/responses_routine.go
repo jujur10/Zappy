@@ -27,7 +27,7 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 		log.Fatal("Died of starvation (received from server), exiting...")
 	case network.Nil:
 	case network.Broadcast:
-		game.InterpretPlayerMessage(message.(network.BroadcastData))
+		game.InterpretPlayerMessage(message.(network.BroadcastData), game.MessageManager.levelUpMessageChannel)
 	case network.Int:
 		if game.Socket.LastCommandType == network.GetUnusedSlots {
 			game.SlotsLeft = message.(int)

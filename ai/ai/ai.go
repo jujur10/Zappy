@@ -5,6 +5,15 @@ import (
 	"zappy_ai/network"
 )
 
+func (game *Game) collectCurrentTileResources() {
+	currentTilePtr := GetPriorityQueueItem(&game.Movement.TilesQueue, game.Coordinates.CoordsFromOrigin)
+	if currentTilePtr != nil {
+		game.collectTileResources(currentTilePtr)
+		RemoveFromPriorityQueue(&game.Movement.TilesQueue, currentTilePtr.value)
+		game.updatePriorityQueueAfterCollection()
+	}
+}
+
 // The defaultAction of the player
 func (game *Game) defaultAction() {
 	game.movePlayerForward()
@@ -12,6 +21,7 @@ func (game *Game) defaultAction() {
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
 	game.updatePrioritiesFromViewMap()
+	game.collectCurrentTileResources()
 }
 
 // The game MainLoop
@@ -20,17 +30,13 @@ func (game *Game) MainLoop() {
 	_ = game.awaitResponseToCommand()
 	game.updatePrioritiesFromViewMap()
 	for _, item := range game.Movement.TilesQueue {
-		log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " // prio ", item.priority, " // index ", item.index)
+		log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " // prio ",
+			item.priority, " // index ", item.index)
 		for _, usefulItem := range item.usefulObjects {
 			log.Print(" ", itemToString[usefulItem])
 		}
 	}
-	pqTileItem := GetPriorityQueueItem(&game.Movement.TilesQueue, game.Coordinates.CoordsFromOrigin)
-	if pqTileItem != nil { // Remove tile if it was in the queue
-		game.collectTileResources(pqTileItem)
-		RemoveFromPriorityQueue(&game.Movement.TilesQueue, pqTileItem.value)
-		game.updatePriorityQueueAfterCollection()
-	}
+	game.collectCurrentTileResources()
 	var path = Path{path: nil}
 	log.Println("Is frequency command available :", FrequencyCommandAvailable)
 	for getFoodPriority(&game.FoodManager.FoodPriority) > 0 && game.Level < 8 {
@@ -41,13 +47,14 @@ func (game *Game) MainLoop() {
 		game.updateFrequency()
 		log.Println("Player current position", game.Coordinates.CoordsFromOrigin, "direction", game.Coordinates.Direction)
 		for _, item := range game.Movement.TilesQueue {
-			log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " index ", item.index)
+			log.Print("PQueue element coords ", item.value, " original priority ", item.originalPriority, " // prio ",
+				item.priority, " // index ", item.index)
 			for _, usefulItem := range item.usefulObjects {
 				log.Print(" ", itemToString[usefulItem])
 			}
 		}
-
-		if game.isLevelUpLeechAvailable() { // Leeching is always easier, so it's more important
+		// Leeching is always easier, so it's more important
+		if game.FoodManager.FoodPriority < 7 && game.isLevelUpLeechAvailable() {
 			log.Println("Started leeching")
 			leechIdx := game.getLevelUpLeechIndex()
 			if leechIdx == -1 {

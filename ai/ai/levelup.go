@@ -189,14 +189,8 @@ func (game *Game) levelUpHostLoop() {
 			game.startLevelUpHost()
 			return
 		}
-		select {
-		case message, ok := <-game.MessageManager.levelUpMessageChannel:
-			if !ok {
-				cancelLevelUp(game, targetLevel)
-				_ = game.awaitResponseToCommand()
-				game.updateFrequency()
-				return
-			}
+		message, err := popMessageFromQueue()
+		if err == nil {
 			switch message.msgType {
 			case announcePresence:
 				nbMissingPlayers -= 1
@@ -204,7 +198,6 @@ func (game *Game) levelUpHostLoop() {
 				nbMissingPlayers += 1
 			default:
 			}
-		default:
 		}
 		if nbMissingPlayers == 0 {
 			continue
@@ -228,14 +221,8 @@ func (game *Game) levelUpLeechLoop(uuid string) {
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
 	for game.areLevelUpConditionsMet() {
-		select {
-		case message, ok := <-game.MessageManager.levelUpMessageChannel:
-			if !ok {
-				announceDepartureLevelUp(game, targetLevel)
-				_ = game.awaitResponseToCommand()
-				game.updateFrequency()
-				return
-			}
+		message, err := popMessageFromQueue()
+		if err == nil {
 			switch message.msgType {
 			case startLvlUp:
 				game.startLevelUpLeech(uuid)
@@ -245,7 +232,6 @@ func (game *Game) levelUpLeechLoop(uuid string) {
 				return
 			default:
 			}
-		default:
 		}
 	}
 	log.Println("Not enough food to standby and leech, leaving")

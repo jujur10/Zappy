@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 	"zappy_ai/network"
 )
 
@@ -32,6 +33,30 @@ type broadcastMessageContent struct {
 	uuid string
 	// the direction the message is coming from
 	direction network.EventDirection
+}
+
+type messageReceptionQueue struct {
+	queue []broadcastMessageContent
+	lock  sync.Mutex
+}
+
+var messageQueue = messageReceptionQueue{queue: make([]broadcastMessageContent, 0)}
+
+func addMessageToQueue(message broadcastMessageContent) {
+	messageQueue.lock.Lock()
+	defer messageQueue.lock.Unlock()
+	messageQueue.queue = append(messageQueue.queue, message)
+}
+
+func popMessageFromQueue() (broadcastMessageContent, error) {
+	messageQueue.lock.Lock()
+	defer messageQueue.lock.Unlock()
+	if len(messageQueue.queue) == 0 {
+		return broadcastMessageContent{}, fmt.Errorf("queue is empty")
+	}
+	message := messageQueue.queue[0]
+	messageQueue.queue = messageQueue.queue[1:]
+	return message, nil
 }
 
 // levelUpReadyMissingPlayers sends a formatted missingPlayers message
@@ -167,7 +192,8 @@ func getMessageIndex(content broadcastMessageContent, messageList []broadcastMes
 }
 
 // InterpretPlayerMessage parses the broadcast message and handles its content as necessary
-func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
+func (game *Game) InterpretPlayerMessage(message network.BroadcastData,
+	levelUpMessageChannel chan<- broadcastMessageContent) {
 	messageContent, err := parsePlayerMessage(message.Text)
 	if err != nil {
 		log.Println("Error parsing player message:", err)
@@ -175,7 +201,7 @@ func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
 
 	messageContent.direction = message.Direction
 	messageIndex := getMessageIndex(messageContent, game.MessageManager.messageStatusList)
-	fmt.Println("--> Message list:", game.MessageManager.messageStatusList)
+	log.Println("--> Message list:", game.MessageManager.messageStatusList)
 	if messageIndex == -1 && messageContent.msgType == missingPlayers { // New level up lobby
 		game.MessageManager.messageStatusList = append(game.MessageManager.messageStatusList, messageContent)
 		return
@@ -184,12 +210,16 @@ func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
 	if game.MessageManager.waitingForLevelUp && // Player joined / left the lobby
 		messageContent.targetLevel == game.Level+1 &&
 		(messageContent.msgType == announcePresence || messageContent.msgType == announceDeparture) {
-		game.MessageManager.levelUpMessageChannel <- messageContent
+		log.Println("Received leech announce message", messageContent)
+		addMessageToQueue(messageContent)
+		log.Println("Transmitted leech announce message", messageContent, "to main thread")
 	}
 	if game.MessageManager.waitingForLevelUpLeech && // Host's lobby update
 		messageContent.targetLevel == game.Level+1 &&
 		(messageContent.msgType == startLvlUp || messageContent.msgType == cancelLvlUp) {
-		game.MessageManager.levelUpMessageChannel <- messageContent
+		log.Println("Received host status message", messageContent)
+		addMessageToQueue(messageContent)
+		log.Println("Transmitted host status message", messageContent, "to main thread")
 	}
 
 	if messageContent.msgType == missingPlayers { // Update to a level up lobby
