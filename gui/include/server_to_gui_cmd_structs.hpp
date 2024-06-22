@@ -24,7 +24,7 @@ struct NewPlayerCommand
     uint16_t y;
     uint8_t orientation;
     uint8_t level;
-    std::string_view teamName;
+    std::unique_ptr<char[]> teamName;
 };
 
 struct DeadPlayerCommand
@@ -78,6 +78,11 @@ struct PlayerDropCommand
     uint16_t resource;
 };
 
+struct TeamNameCommand
+{
+    std::unique_ptr<char[]> teamName;
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
@@ -92,7 +97,8 @@ using Command = std::variant<
     EndIncantationCommand,
     PlayerInventoryCommand,
     PlayerPickupCommand,
-    PlayerDropCommand
+    PlayerDropCommand,
+    TeamNameCommand
 >;
 
 // Command queue server -> gui
@@ -146,4 +152,8 @@ void ParsePlayerPickupCommand(const std::string_view& line);
 /// @brief Parse the pdr command received as text from the server and push the corresponding command in the ServerToGuiQueue
 /// @param line The pdr command received from the server
 void ParsePlayerDropCommand(const std::string_view& line);
+
+/// @brief Parse the tna command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The tna command received from the server
+void ParseTeamNameCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

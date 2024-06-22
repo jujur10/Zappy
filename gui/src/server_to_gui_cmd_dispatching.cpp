@@ -101,6 +101,14 @@ void ParseGuiCommands(const flecs::iter &it)
                 }
                 break;
             }
+            case 10:
+            {
+                if (auto const *const teamName = std::get_if<TeamNameCommand>(&cmd))
+                {
+                    HandleTeamNameCommand(world, teamName);
+                }
+                break;
+            }
             // Other command cases to be added here
             default:;
         }

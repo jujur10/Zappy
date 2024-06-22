@@ -68,7 +68,12 @@ void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *c
     player.set<uint8_t>(newPlayer->level);
     player.set<player::PlayerAnimationData>({idle, 0});
     player.set<std::unique_ptr<raylib::Model>>(std::make_unique<raylib::Model>("gui/resources/assets/cactoro.m3d"));
-    player.set<std::string_view>(newPlayer->teamName);  // TODO: Don't forget this when implementing teams
+    auto team = world.lookup(newPlayer->teamName.get()).id();
+    if (0 == team)
+    {
+        team = world.entity(newPlayer->teamName.get()).id();
+    }
+    player.set<uint64_t>(team);
     player.set<player::PlayerInventory>({10, 0, 0, 0, 0, 0, 0});
 }
 
@@ -251,5 +256,10 @@ void HandlePlayerDropCommand(const flecs::world &world, const PlayerDropCommand 
 
     auto &playerResources = player.ensure<player::PlayerInventory>();
     playerResources.resources[playerDrop->resource] -= 1;
+}
+
+void HandleTeamNameCommand(const flecs::world &world, const TeamNameCommand *const teamName)
+{
+    world.entity(teamName->teamName.get());
 }
 }  // namespace zappy_gui::net

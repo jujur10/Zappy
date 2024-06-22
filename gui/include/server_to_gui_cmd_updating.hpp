@@ -87,4 +87,12 @@ void HandlePlayerPickupCommand(const flecs::world &world, const PlayerPickupComm
  * @param playerDrop The received PlayerDropCommand command
  */
 void HandlePlayerDropCommand(const flecs::world &world, const PlayerDropCommand *playerDrop);
+
+/**
+ * @brief Process the TeamName command
+ * Set the team name
+ * @param world The ecs world
+ * @param teamName The received TeamNameCommand command
+ */
+void HandleTeamNameCommand(const flecs::world &world, const TeamNameCommand *teamName);
 }  // namespace zappy_gui::net

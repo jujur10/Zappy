@@ -22,5 +22,6 @@ enum class ServerCommands: uint32_t {
     PLAYER_INVENTORY = 7235952, // pin
     PLAYER_PICKUP = 7628656, // pgt
     PLAYER_DROP = 7496816, // pdr
+    TEAM_NAME = 6385268, // tna
 };
 }
