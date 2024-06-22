@@ -4,8 +4,6 @@
 ** File description:
 ** swap_clients.c.
 */
-#include <string.h>
-
 #include "style/status.h"
 #include "new_clients_handling.h"
 #include "gui_handling.h"

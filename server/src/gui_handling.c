@@ -23,7 +23,6 @@ int32_t init_gui(server_t PTR server, int sock)
     LOGF("Swapped to GUI %i", server->nb_guis)
     server->guis[server->nb_guis].sock = sock;
     TAILQ_INIT(&server->guis[server->nb_guis].queue);
-    send_starting_guis_events(server, server->nb_guis);
     server->nb_guis++;
     return server->nb_guis - 1;
 }

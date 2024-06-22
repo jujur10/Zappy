@@ -12,6 +12,8 @@
 /// @brief Redefinition of structures.
 typedef struct server_s server_t;
 typedef struct player_s player_t;
+typedef struct msg_s msg_t;
+typedef struct team_s team_t;
 
 /// @brief Enumeration representing the possible gui events to handle.
 ///
@@ -50,3 +52,19 @@ void execute_gui_none_event(UNUSED server_t PTR server,
 /// @param gui_idx The gui's index.
 void execute_gui_update_mct_event(server_t PTR server,
     UNUSED uint32_t gui_idx);
+
+/// @brief Function used to create a message containing the pnw event.
+///
+/// @param server The server structure.
+/// @param player The player.
+/// @param message The message to initialize.
+void create_gui_pnw_message(server_t PTR server, const player_t PTR player,
+    msg_t PTR message);
+
+/// @brief Function which sends to GUIs the events of pnw.
+///
+/// @param server The server structure.
+/// @param team The player's team.
+/// @param player_idx The player index.
+void send_pnw_to_guis(server_t PTR server, const team_t PTR team,
+    uint32_t player_idx);

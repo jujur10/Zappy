@@ -212,6 +212,15 @@ status_t create_gui_ppo_message(server_t PTR server,
 void execute_gui_plv_command(server_t PTR server, uint16_t gui_idx,
     const gui_command_t PTR command);
 
+/// @brief Function which create the PLV message.
+///
+/// @param server The server structure.
+/// @param player_sock The player socket.
+/// @param message Message to create.
+/// @return Success if message created as desired behavior, Failure if not.
+status_t create_gui_plv_message(server_t PTR server,
+    uint16_t player_sock, msg_t PTR message);
+
 /// @brief The PIN command implementation.
 ///
 /// @param server The server structure.

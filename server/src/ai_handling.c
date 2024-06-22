@@ -17,37 +17,6 @@
 #include "commands/player_commands.h"
 #include "events/player_events.h"
 #include "team.h"
-#include "commands/command_utils.h"
-
-/// @brief Function which sends to GUIs the events of pnw.
-///
-/// @param server The server structure.
-/// @param team The player's team.
-/// @param player_idx The player index.
-static void send_pnw_to_guis(server_t PTR server, const team_t PTR team,
-    uint32_t player_idx)
-{
-    msg_t message = {};
-    char msg_content[4 + (5 * UINT32_MAX_DIGITS) + 1] = "pnw ";
-    uint32_t count = 4;
-    const player_t *player = &server->players[player_idx];
-    string_t string;
-
-    write_nb_to_buffer(player->sock, msg_content, &count);
-    write_nb_to_buffer(player->coordinates.x, msg_content, &count);
-    write_nb_to_buffer(player->coordinates.y, msg_content, &count);
-    write_nb_to_buffer(player->orientation + 1, msg_content, &count);
-    write_nb_to_buffer(player->level + 1, msg_content, &count);
-    init_string_from_chars(&string, msg_content, count);
-    append_to_string_from_chars(&string, team->name,
-        (uint32_t)strlen(team->name));
-    append_to_string_from_chars(&string, "\n", 1);
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(string.ptr, string.len, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
-    clear_string(&string);
-}
 
 int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
 {

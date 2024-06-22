@@ -30,10 +30,36 @@ static void send_enw_to_gui(server_t PTR server, const egg_t PTR egg,
     add_msg_to_queue(&server->guis[gui_idx].queue, &message);
 }
 
-void send_starting_guis_events(server_t PTR server, uint16_t gui_idx)
+/// @brief Function used to send player information's to the GUI.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+static void send_player_information_to_gui(server_t PTR server,
+    uint16_t gui_idx)
 {
-    execute_gui_msz_command(server, gui_idx, NULL);
-    execute_gui_tna_command(server, gui_idx, NULL);
+    msg_t message = {};
+
+    for (uint16_t player_idx = 0; player_idx < server->nb_players;
+    player_idx++) {
+        create_gui_pnw_message(server, &server->players[player_idx], &message);
+        add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+        message.event.gui_event = GUI_EVENT_NONE;
+        create_gui_pin_message(server, server->players[player_idx].sock,
+            &message);
+        add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+        message.event.gui_event = GUI_EVENT_NONE;
+        create_gui_plv_message(server, server->players[player_idx].sock,
+            &message);
+        add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    }
+}
+
+/// @brief Function used to send the enw response for each egg to gui.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index.
+static void send_enw_for_each_egg_to_gui(server_t PTR server, uint16_t gui_idx)
+{
     for (uint16_t team_idx = 0; team_idx < server->args->nb_of_teams;
         team_idx++) {
         for (uint16_t egg_idx = 0; egg_idx <
@@ -41,5 +67,13 @@ void send_starting_guis_events(server_t PTR server, uint16_t gui_idx)
                 send_enw_to_gui(server, &server->teams[team_idx]
                 .eggs[egg_idx], gui_idx);
     }
+}
+
+void send_starting_guis_events(server_t PTR server, uint16_t gui_idx)
+{
+    execute_gui_msz_command(server, gui_idx, NULL);
+    execute_gui_tna_command(server, gui_idx, NULL);
+    send_player_information_to_gui(server, gui_idx);
+    send_enw_for_each_egg_to_gui(server, gui_idx);
     execute_gui_mct_command(server, gui_idx, NULL);
 }

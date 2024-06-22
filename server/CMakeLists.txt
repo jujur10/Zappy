@@ -45,6 +45,7 @@ add_executable(zappy_server
     src/coordinates.c
     src/events/gui/gui_events.c
     src/events/gui/gui_none_event.c
+    src/events/gui/gui_pnw_event.c
     src/events/gui/gui_update_mct_event.c
     src/events/player/player_death_event.c
     src/events/player/player_events.c
@@ -160,6 +161,7 @@ if (DEFINED RUN_TESTS)
         src/coordinates.c
         src/events/gui/gui_events.c
         src/events/gui/gui_none_event.c
+        src/events/gui/gui_pnw_event.c
         src/events/gui/gui_update_mct_event.c
         src/events/player/player_death_event.c
         src/events/player/player_events.c
