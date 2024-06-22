@@ -36,6 +36,10 @@ void HandleServerCommand(const std::string& line)
 
     switch (static_cast<ServerCommands>(command))
     {
+        case ServerCommands::MAP_SIZE:
+        {
+            break;
+        }
         case ServerCommands::MAP_TILE:
         {
             ParseTileUpdateCommand(static_cast<std::string_view>(line).data() + 4);
@@ -56,7 +60,8 @@ void HandleServerCommand(const std::string& line)
             ParsePlayerPositionCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
-        case ServerCommands::TIME_UNIT_UPDATED:
+        case ServerCommands::TIME_UNIT_CHANGED:
+        case ServerCommands::SET_TIME_UNIT:
         {
             ParseTimeUnitUpdatedCommand(static_cast<std::string_view>(line).data() + 4);
             break;
@@ -69,6 +74,21 @@ void HandleServerCommand(const std::string& line)
         case ServerCommands::END_INCANTATION:
         {
             ParseEndIncantationCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::PLAYER_INVENTORY:
+        {
+            ParsePlayerInventoryCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::PLAYER_PICKUP:
+        {
+            ParsePlayerPickupCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::PLAYER_DROP:
+        {
+            ParsePlayerDropCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
         default:

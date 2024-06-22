@@ -3,7 +3,6 @@
 
 #include "Camera3D.hpp"
 #include "Window.hpp"
-#include "Rectangle.hpp"
 #include "ModelAnimation.hpp"
 #include "flecs.h"
 #include "gui_to_server_cmd_structs.hpp"

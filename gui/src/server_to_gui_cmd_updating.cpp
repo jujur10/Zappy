@@ -69,6 +69,7 @@ void HandleNewPlayerCommand(const flecs::world &world, const NewPlayerCommand *c
     player.set<player::PlayerAnimationData>({idle, 0});
     player.set<std::unique_ptr<raylib::Model>>(std::make_unique<raylib::Model>("gui/resources/assets/cactoro.m3d"));
     player.set<std::string_view>(newPlayer->teamName);  // TODO: Don't forget this when implementing teams
+    player.set<player::PlayerInventory>({10, 0, 0, 0, 0, 0, 0});
 }
 
 void HandleDeadPlayerCommand(const flecs::world &world, const DeadPlayerCommand *const deadPlayer)
@@ -90,20 +91,24 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(playerPosition->x, playerPosition->y));
     const auto &tileMatrix = tile.ensure<raylib::Matrix>();
 
-    auto &playerOrientation = player.ensure<player::Orientation>();
-    playerOrientation = static_cast<player::Orientation>(playerPosition->orientation);
-
-    auto playerPos = player.get_ref<Vector2>();
-    if (nullptr == playerPos.try_get())
+    auto * const playerPos = player.get_mut<Vector2>();
+    if (nullptr == playerPos)
     {
         return;
     }
 
+    // if there is a player target info component, it means the player is running so teleport the player to the target position
+    if (player.has<player::PlayerTargetInfo>() && player.enabled<player::PlayerTargetInfo>())
+    {
+        *playerPos = player.get_ref<player::PlayerTargetInfo>()->target;
+    }
+
     // if player just changed it's orientation skip rest of the code
-    if (::Vector2Distance(*playerPos.get(), {tileMatrix.m12, tileMatrix.m14}) <= 0.1f)
+    if (::Vector2Distance(*playerPos, {tileMatrix.m12, tileMatrix.m14}) <= 0.1f)
     {
         player.disable<player::PlayerTargetInfo>();
         player.enable<player::Orientation>();
+        player.set<player::Orientation>(static_cast<player::Orientation>(playerPosition->orientation));
         return;
     }
 
@@ -137,6 +142,7 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     /// Enable the player target info component so that it can match the update position system
     player.enable<player::PlayerTargetInfo>();
 
+    auto &playerOrientation = player.ensure<player::Orientation>();
     /// Force the player to face the right direction while running
     auto * const rotationAngle = player.get_mut<float>();
     switch (playerOrientation)
@@ -145,7 +151,7 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
         case kNorth:
             // Make the player face the right direction while running (which is the opposite of the real orientation)
             // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
-            *rotationAngle = !utils::IsTileInOddRow(tileMatrix.m14) ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
+            *rotationAngle = static_cast<uint16_t>(playerPosIndices.y) % 2 ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
             player.disable<player::Orientation>();
             break;
         case kEast:
@@ -154,7 +160,7 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
         case kSouth:
             // Make the player face the right direction while running (which is the opposite of the real orientation)
             // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
-            *rotationAngle = !utils::IsTileInOddRow(tileMatrix.m14) ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
+            *rotationAngle = static_cast<uint16_t>(playerPosIndices.y) % 2 ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
             player.disable<player::Orientation>();
             break;
         case kWest:
@@ -163,6 +169,7 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
         default:
             break;
     }
+    playerOrientation = static_cast<player::Orientation>(playerPosition->orientation);
 
     /// Update the player animation to the run animation
     raylib::ModelAnimation *const run = &world.get<player::PlayerAnimations>()->animations->at(RUN_ANIMATION_IDX);
@@ -207,4 +214,42 @@ void HandleEndIncantationCommand(const flecs::world &world, const EndIncantation
     incantationInfo->distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14});
 }
 
+void HandlePlayerInventoryCommand(const flecs::world &world, const PlayerInventoryCommand *const playerInventory)
+{
+    const auto player = world.entity(playerInventory->id + PLAYER_STARTING_IDX);
+    if (!player.is_alive())
+    {
+        return;
+    }
+
+    auto &playerResources = player.ensure<player::PlayerInventory>();
+    for (uint8_t i = 0; i < static_cast<uint8_t>(map::resourceType::total); ++i)
+    {
+        playerResources.resources[i] = playerInventory->resources[i];
+    }
+}
+
+void HandlePlayerPickupCommand(const flecs::world &world, const PlayerPickupCommand *const playerPickup)
+{
+    const auto player = world.entity(playerPickup->id + PLAYER_STARTING_IDX);
+    if (!player.is_alive())
+    {
+        return;
+    }
+
+    auto &playerResources = player.ensure<player::PlayerInventory>();
+    playerResources.resources[playerPickup->resource] += 1;
+}
+
+void HandlePlayerDropCommand(const flecs::world &world, const PlayerDropCommand *const playerDrop)
+{
+    const auto player = world.entity(playerDrop->id + PLAYER_STARTING_IDX);
+    if (!player.is_alive())
+    {
+        return;
+    }
+
+    auto &playerResources = player.ensure<player::PlayerInventory>();
+    playerResources.resources[playerDrop->resource] -= 1;
+}
 }  // namespace zappy_gui::net
