@@ -15,7 +15,8 @@ enum class ServerCommands: uint32_t {
     NEW_PLAYER = 7827056, // pnw
     DEATH_OF_PLAYER = 6906992, // pdi
     PLAYER_POSITION = 7303280,  // ppo
-    TIME_UNIT_UPDATED = 7628659, // sgt
+    SET_TIME_UNIT = 7628659, // sgt
+    TIME_UNIT_CHANGED = 7631731, // sst
     START_INCANTATION = 6515056, // pic
     END_INCANTATION = 6646128, // pie
     PLAYER_INVENTORY = 7235952, // pin

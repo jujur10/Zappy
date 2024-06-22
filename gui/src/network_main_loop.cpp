@@ -56,7 +56,8 @@ void HandleServerCommand(const std::string& line)
             ParsePlayerPositionCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
-        case ServerCommands::TIME_UNIT_UPDATED:
+        case ServerCommands::TIME_UNIT_CHANGED:
+        case ServerCommands::SET_TIME_UNIT:
         {
             ParseTimeUnitUpdatedCommand(static_cast<std::string_view>(line).data() + 4);
             break;
