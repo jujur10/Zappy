@@ -166,6 +166,26 @@ void ParseEndIncantationCommand(const std::string_view& line)
         .x = x, .y = y, .success = static_cast<bool>(success)});
 }
 
+void ParsePlayerLevelCommand(const std::string_view& line)
+{
+    uint16_t id = 0;
+    uint8_t level = 0;
+
+    string_utils::convertFromString(line, id);
+
+    const size_t paramPos = line.find(' ') + 1;
+    if (paramPos <= 1)
+    {
+        return;
+    }
+    if (!string_utils::convertFromString(line.data() + paramPos, level) || level > 8)
+    {
+        return;
+    }
+
+    ServerToGuiQueue.try_push(PlayerLevelCommand{.id = id, .level = level});
+}
+
 void ParsePlayerInventoryCommand(const std::string_view& line)
 {
     uint16_t id = 0;
@@ -231,5 +251,46 @@ void ParseTeamNameCommand(const std::string_view& line)
     auto teamName = std::make_unique<char[]>(line.size());
     std::ranges::copy(line, teamName.get());
     ServerToGuiQueue.try_push(TeamNameCommand{.teamName = std::move(teamName)});
+}
+
+void ParseEggLaidCommand(const std::string_view& line)
+{
+    uint16_t eggId = 0;
+    uint16_t playerId = 0;
+    uint16_t x = 0;
+    uint16_t y = 0;
+    size_t paramPos = 0;
+
+    string_utils::convertFromString(line, eggId);
+
+    paramPos = line.find(' ') + 1;
+    string_utils::convertFromString(line.data() + paramPos, playerId);
+
+    paramPos = line.find(' ', paramPos) + 1;
+    string_utils::convertFromString(line.data() + paramPos, x);
+
+    paramPos = line.find(' ', paramPos) + 1;
+    string_utils::convertFromString(line.data() + paramPos, y);
+
+    ServerToGuiQueue.try_push(EggLaidCommand{
+        .eggId = eggId, .playerId = playerId, .x = x, .y = y});
+}
+
+void ParseConnectionOnEggCommand(const std::string_view& line)
+{
+    uint16_t eggId = 0;
+
+    string_utils::convertFromString(line, eggId);
+
+    ServerToGuiQueue.try_push(ConnectionOnEggCommand{.eggId = eggId});
+}
+
+void ParseDeathOfEggCommand(const std::string_view& line)
+{
+    uint16_t eggId = 0;
+
+    string_utils::convertFromString(line, eggId);
+
+    ServerToGuiQueue.try_push(DeathOfEggCommand{.eggId = eggId});
 }
 }  // namespace zappy_gui::net

@@ -60,6 +60,12 @@ struct EndIncantationCommand
     bool success;
 };
 
+struct PlayerLevelCommand
+{
+    uint16_t id;
+    uint8_t level;
+};
+
 struct PlayerInventoryCommand
 {
     uint16_t id;
@@ -83,6 +89,24 @@ struct TeamNameCommand
     std::unique_ptr<char[]> teamName;
 };
 
+struct EggLaidCommand
+{
+    uint16_t eggId;
+    uint16_t playerId;
+    uint16_t x;
+    uint16_t y;
+};
+
+struct ConnectionOnEggCommand
+{
+    uint16_t eggId;
+};
+
+struct DeathOfEggCommand
+{
+    uint16_t eggId;
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
@@ -98,7 +122,11 @@ using Command = std::variant<
     PlayerInventoryCommand,
     PlayerPickupCommand,
     PlayerDropCommand,
-    TeamNameCommand
+    TeamNameCommand,
+    PlayerLevelCommand,
+    EggLaidCommand,
+    ConnectionOnEggCommand,
+    DeathOfEggCommand
 >;
 
 // Command queue server -> gui
@@ -141,6 +169,10 @@ void ParseStartIncantationCommand(const std::string_view& line);
 /// @param line The pie command received from the server
 void ParseEndIncantationCommand(const std::string_view& line);
 
+/// @brief Parse the plv command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The plv command received from the server
+void ParsePlayerLevelCommand(const std::string_view& line);
+
 /// @brief Parse the pin command received as text from the server and push the corresponding command in the ServerToGuiQueue
 /// @param line The pin command received from the server
 void ParsePlayerInventoryCommand(const std::string_view& line);
@@ -156,4 +188,16 @@ void ParsePlayerDropCommand(const std::string_view& line);
 /// @brief Parse the tna command received as text from the server and push the corresponding command in the ServerToGuiQueue
 /// @param line The tna command received from the server
 void ParseTeamNameCommand(const std::string_view& line);
+
+/// @brief Parse the enw command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The enw command received from the server
+void ParseEggLaidCommand(const std::string_view& line);
+
+/// @brief Parse the ebo command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The ebo command received from the server
+void ParseConnectionOnEggCommand(const std::string_view& line);
+
+/// @brief Parse the edi command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The edi command received from the server
+void ParseDeathOfEggCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

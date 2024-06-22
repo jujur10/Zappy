@@ -76,6 +76,11 @@ void HandleServerCommand(const std::string& line)
             ParseEndIncantationCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::PLAYER_LEVEL:
+        {
+            ParsePlayerLevelCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         case ServerCommands::PLAYER_INVENTORY:
         {
             ParsePlayerInventoryCommand(static_cast<std::string_view>(line).data() + 4);
@@ -94,6 +99,23 @@ void HandleServerCommand(const std::string& line)
         case ServerCommands::TEAM_NAME:
         {
             ParseTeamNameCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::PLAYER_LAY_EGG: // Why would I care about this?
+            break;
+        case ServerCommands::EGG_LAID:
+        {
+            ParseEggLaidCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::CONNECTION_ON_EGG:
+        {
+            ParseConnectionOnEggCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::EGG_DEATH:
+        {
+            ParseDeathOfEggCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
         default:
