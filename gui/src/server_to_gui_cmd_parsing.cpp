@@ -60,8 +60,11 @@ void ParseNewPlayerCommand(const std::string_view& line)
 
     paramPos = line.find_first_of(' ', paramPos) + 1;
 
+    auto teamName = std::make_unique<char[]>(line.size() - paramPos);
+    line.copy(teamName.get(), line.size() - paramPos, paramPos);
+
     ServerToGuiQueue.try_push(NewPlayerCommand{
-        .id = id, .x = x, .y = y, .orientation = orientation, .level = level, .teamName = line.substr(paramPos)});
+        .id = id, .x = x, .y = y, .orientation = orientation, .level = level, .teamName = std::move(teamName)});
 }
 
 void ParseDeathOfPlayerCommand(const std::string_view& line)
@@ -221,5 +224,12 @@ void ParsePlayerDropCommand(const std::string_view& line)
         return;
     }
     ServerToGuiQueue.try_push(PlayerDropCommand{.id = id, .resource = resource});
+}
+
+void ParseTeamNameCommand(const std::string_view& line)
+{
+    auto teamName = std::make_unique<char[]>(line.size());
+    std::ranges::copy(line, teamName.get());
+    ServerToGuiQueue.try_push(TeamNameCommand{.teamName = std::move(teamName)});
 }
 }  // namespace zappy_gui::net

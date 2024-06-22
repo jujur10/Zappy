@@ -91,6 +91,11 @@ void HandleServerCommand(const std::string& line)
             ParsePlayerDropCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::TEAM_NAME:
+        {
+            ParseTeamNameCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         default:
             std::print("Unknown command: {}\n", line);
             return;
