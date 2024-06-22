@@ -91,20 +91,28 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(playerPosition->x, playerPosition->y));
     const auto &tileMatrix = tile.ensure<raylib::Matrix>();
 
-    auto &playerOrientation = player.ensure<player::Orientation>();
-    playerOrientation = static_cast<player::Orientation>(playerPosition->orientation);
-
-    auto playerPos = player.get_ref<Vector2>();
-    if (nullptr == playerPos.try_get())
+    // printf("Player %d was at %d, %d with orientation %d\n", playerPosition->id, static_cast<int>(pos.x), static_cast<int>(pos.y), orian);
+    printf("Server sent Player %d is at %d, %d with orientation %d\n", playerPosition->id, playerPosition->x, playerPosition->y, playerPosition->orientation);
+    auto * const playerPos = player.get_mut<Vector2>();
+    if (nullptr == playerPos)
     {
         return;
     }
 
-    // if player just changed it's orientation skip rest of the code
-    if (::Vector2Distance(*playerPos.get(), {tileMatrix.m12, tileMatrix.m14}) <= 0.1f)
+    // if there is a player target info component, it means the player is running so teleport the player to the target position
+    if (player.has<player::PlayerTargetInfo>() && player.enabled<player::PlayerTargetInfo>())
     {
+        printf("Player was running\n");
+        *playerPos = player.get_ref<player::PlayerTargetInfo>()->target;
+    }
+
+    // if player just changed it's orientation skip rest of the code
+    if (::Vector2Distance(*playerPos, {tileMatrix.m12, tileMatrix.m14}) <= 0.1f)
+    {
+        printf("Player just changed orientation: %d\n", playerPosition->orientation);
         player.disable<player::PlayerTargetInfo>();
         player.enable<player::Orientation>();
+        player.set<player::Orientation>(static_cast<player::Orientation>(playerPosition->orientation));
         return;
     }
 
@@ -138,6 +146,7 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     /// Enable the player target info component so that it can match the update position system
     player.enable<player::PlayerTargetInfo>();
 
+    auto &playerOrientation = player.ensure<player::Orientation>();
     /// Force the player to face the right direction while running
     auto * const rotationAngle = player.get_mut<float>();
     switch (playerOrientation)
@@ -146,24 +155,29 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
         case kNorth:
             // Make the player face the right direction while running (which is the opposite of the real orientation)
             // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
-            *rotationAngle = !utils::IsTileInOddRow(tileMatrix.m14) ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
+            *rotationAngle = static_cast<uint16_t>(playerPosIndices.y) % 2 ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
             player.disable<player::Orientation>();
+            printf("Overwrite north player at y: %f with angle %f\n", playerPosIndices.y, *rotationAngle);
             break;
         case kEast:
             *rotationAngle = EAST_ANGLE;
+            printf("Overwrite east player at y: %f with angle %f\n", playerPosIndices.y, *rotationAngle);
             break;
         case kSouth:
             // Make the player face the right direction while running (which is the opposite of the real orientation)
             // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
-            *rotationAngle = !utils::IsTileInOddRow(tileMatrix.m14) ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
+            *rotationAngle = static_cast<uint16_t>(playerPosIndices.y) % 2 ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
             player.disable<player::Orientation>();
+            printf("Overwrite south player at y: %f with angle %f\n", playerPosIndices.y, *rotationAngle);
             break;
         case kWest:
             *rotationAngle = WEST_ANGLE;
+            printf("Overwrite west player at y: %f with angle %f\n", playerPosIndices.y, *rotationAngle);
             break;
         default:
             break;
     }
+    playerOrientation = static_cast<player::Orientation>(playerPosition->orientation);
 
     /// Update the player animation to the run animation
     raylib::ModelAnimation *const run = &world.get<player::PlayerAnimations>()->animations->at(RUN_ANIMATION_IDX);
