@@ -14,6 +14,8 @@ namespace zappy_gui::player
 /// @brief The starting index used in flecs for the player entities
 #define PLAYER_STARTING_IDX 1'100'000
 
+#define EGG_STARTING_IDX (PLAYER_STARTING_IDX + 100'000)
+
 /// @brief The index of the idle animation
 #define IDLE_ANIMATION_IDX 3
 
@@ -91,6 +93,11 @@ struct IncantationInfo
     IncantationState state;
     uint16_t frameLeftForIcon;
     float distance;
+};
+
+struct  EggModel
+{
+    raylib::Model *model;
 };
 
 }  // namespace zappy_gui::player

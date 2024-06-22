@@ -23,5 +23,10 @@ enum class ServerCommands: uint32_t {
     PLAYER_PICKUP = 7628656, // pgt
     PLAYER_DROP = 7496816, // pdr
     TEAM_NAME = 6385268, // tna
+    PLAYER_LEVEL = 7761008, // plv
+    PLAYER_LAY_EGG = 7038576, // pfk
+    EGG_LAYED = 7827045, // enw
+    CONNECTION_ON_EGG = 7299685, // ebo
+    EGG_DEATH = 6906981, // edi
 };
 }
