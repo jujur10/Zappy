@@ -20,5 +20,7 @@ enum class ServerCommands: uint32_t {
     START_INCANTATION = 6515056, // pic
     END_INCANTATION = 6646128, // pie
     PLAYER_INVENTORY = 7235952, // pin
+    PLAYER_PICKUP = 7628656, // pgt
+    PLAYER_DROP = 7496816, // pdr
 };
 }

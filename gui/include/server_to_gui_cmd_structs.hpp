@@ -66,6 +66,18 @@ struct PlayerInventoryCommand
     uint16_t resources[7];
 };
 
+struct PlayerPickupCommand
+{
+    uint16_t id;
+    uint16_t resource;
+};
+
+struct PlayerDropCommand
+{
+    uint16_t id;
+    uint16_t resource;
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
@@ -78,7 +90,9 @@ using Command = std::variant<
     TimeUnitUpdateCommand,
     StartIncantationCommand,
     EndIncantationCommand,
-    PlayerInventoryCommand
+    PlayerInventoryCommand,
+    PlayerPickupCommand,
+    PlayerDropCommand
 >;
 
 // Command queue server -> gui
@@ -124,4 +138,12 @@ void ParseEndIncantationCommand(const std::string_view& line);
 /// @brief Parse the pin command received as text from the server and push the corresponding command in the ServerToGuiQueue
 /// @param line The pin command received from the server
 void ParsePlayerInventoryCommand(const std::string_view& line);
+
+/// @brief Parse the pgt command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The pgt command received from the server
+void ParsePlayerPickupCommand(const std::string_view& line);
+
+/// @brief Parse the pdr command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The pdr command received from the server
+void ParsePlayerDropCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

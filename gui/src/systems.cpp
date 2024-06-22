@@ -338,7 +338,6 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                     auto *const playerAnimData = player.get_mut<player::PlayerAnimationData>();
                     playerAnimData->currentAnimation = &player.world().get<player::PlayerAnimations>()->animations->at(IDLE_ANIMATION_IDX);
                     playerAnimData->currentFrame = 0;
-                    printf("player reached target\n");
                     return;
                 }
                 // Calculate the step size per frame
@@ -346,7 +345,6 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                     0.01f * (static_cast<float>(player.world().get<TimeUnit>()->frequency) / 2);  // Fixed step size per frame
                 if (step > 0.2f)
                 {
-                    printf("step is too big\n");
                     position = targetInfo.target;
                     goto END_POSITION_UPDATE;
                 }
@@ -407,7 +405,6 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
         .each(
             [](const Vector2 &position, player::Orientation const &orientation, float &rotationAngle)
             {
-                static float oldRotationAngle = 0.0f;
                 switch (orientation)
                 {
                     using enum player::Orientation;
@@ -425,11 +422,6 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                         break;
                     default:
                         break;
-                }
-                if (oldRotationAngle != rotationAngle)
-                {
-                    printf("Player rotation angle: %f\n", rotationAngle);
-                    oldRotationAngle = rotationAngle;
                 }
             });
 

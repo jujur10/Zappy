@@ -71,4 +71,20 @@ void HandleEndIncantationCommand(const flecs::world &world, const EndIncantation
  * @param playerInventory The received PlayerInventoryCommand command
  */
 void HandlePlayerInventoryCommand(const flecs::world &world, const PlayerInventoryCommand *playerInventory);
+
+/**
+ * @brief Process the PlayerPickup command
+ * Update the player inventory and the tile resources
+ * @param world The ecs world
+ * @param playerPickup The received PlayerPickupCommand command
+ */
+void HandlePlayerPickupCommand(const flecs::world &world, const PlayerPickupCommand *playerPickup);
+
+/**
+ * @brief Process the PlayerDrop command
+ * Update the player inventory and the tile resources
+ * @param world The ecs world
+ * @param playerDrop The received PlayerDropCommand command
+ */
+void HandlePlayerDropCommand(const flecs::world &world, const PlayerDropCommand *playerDrop);
 }  // namespace zappy_gui::net

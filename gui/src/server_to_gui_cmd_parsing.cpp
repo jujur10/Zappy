@@ -183,4 +183,43 @@ void ParsePlayerInventoryCommand(const std::string_view& line)
     ServerToGuiQueue.try_push(PlayerInventoryCommand{
         .id = id, .resources = {resources[0], resources[1], resources[2], resources[3], resources[4], resources[5], resources[6]}});
 }
+
+void ParsePlayerPickupCommand(const std::string_view& line)
+{
+    uint16_t id = 0;
+    uint16_t resource = 0;
+
+    string_utils::convertFromString(line, id);
+
+    const size_t paramPos = line.find(' ') + 1;
+    if (paramPos <= 1)
+    {
+        return;
+    }
+    if (!string_utils::convertFromString(line.data() + paramPos, resource) || resource > 6)
+    {
+        return;
+    }
+
+    ServerToGuiQueue.try_push(PlayerPickupCommand{.id = id, .resource = resource});
+}
+
+void ParsePlayerDropCommand(const std::string_view& line)
+{
+    uint16_t id = 0;
+    uint16_t resource = 0;
+
+    string_utils::convertFromString(line, id);
+
+    const size_t paramPos = line.find(' ') + 1;
+    if (paramPos <= 1)
+    {
+        return;
+    }
+    if (!string_utils::convertFromString(line.data() + paramPos, resource) || resource > 6)
+    {
+        return;
+    }
+    ServerToGuiQueue.try_push(PlayerDropCommand{.id = id, .resource = resource});
+}
 }  // namespace zappy_gui::net

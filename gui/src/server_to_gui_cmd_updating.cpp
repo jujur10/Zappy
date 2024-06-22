@@ -91,8 +91,6 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     const flecs::entity tile = world.entity(utils::GetTileIndexFromCoords(playerPosition->x, playerPosition->y));
     const auto &tileMatrix = tile.ensure<raylib::Matrix>();
 
-    // printf("Player %d was at %d, %d with orientation %d\n", playerPosition->id, static_cast<int>(pos.x), static_cast<int>(pos.y), orian);
-    printf("Server sent Player %d is at %d, %d with orientation %d\n", playerPosition->id, playerPosition->x, playerPosition->y, playerPosition->orientation);
     auto * const playerPos = player.get_mut<Vector2>();
     if (nullptr == playerPos)
     {
@@ -102,14 +100,12 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
     // if there is a player target info component, it means the player is running so teleport the player to the target position
     if (player.has<player::PlayerTargetInfo>() && player.enabled<player::PlayerTargetInfo>())
     {
-        printf("Player was running\n");
         *playerPos = player.get_ref<player::PlayerTargetInfo>()->target;
     }
 
     // if player just changed it's orientation skip rest of the code
     if (::Vector2Distance(*playerPos, {tileMatrix.m12, tileMatrix.m14}) <= 0.1f)
     {
-        printf("Player just changed orientation: %d\n", playerPosition->orientation);
         player.disable<player::PlayerTargetInfo>();
         player.enable<player::Orientation>();
         player.set<player::Orientation>(static_cast<player::Orientation>(playerPosition->orientation));
@@ -157,22 +153,18 @@ void HandlePlayerPositionCommand(const flecs::world &world, const PlayerPosition
             // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
             *rotationAngle = static_cast<uint16_t>(playerPosIndices.y) % 2 ? NORTH_ODD_ANGLE : NORTH_REGULAR_ANGLE;
             player.disable<player::Orientation>();
-            printf("Overwrite north player at y: %f with angle %f\n", playerPosIndices.y, *rotationAngle);
             break;
         case kEast:
             *rotationAngle = EAST_ANGLE;
-            printf("Overwrite east player at y: %f with angle %f\n", playerPosIndices.y, *rotationAngle);
             break;
         case kSouth:
             // Make the player face the right direction while running (which is the opposite of the real orientation)
             // disable player orientation component so that the system doesn't re rotate the player in it's real orientation
             *rotationAngle = static_cast<uint16_t>(playerPosIndices.y) % 2 ? SOUTH_ODD_ANGLE : SOUTH_REGULAR_ANGLE;
             player.disable<player::Orientation>();
-            printf("Overwrite south player at y: %f with angle %f\n", playerPosIndices.y, *rotationAngle);
             break;
         case kWest:
             *rotationAngle = WEST_ANGLE;
-            printf("Overwrite west player at y: %f with angle %f\n", playerPosIndices.y, *rotationAngle);
             break;
         default:
             break;
@@ -237,4 +229,27 @@ void HandlePlayerInventoryCommand(const flecs::world &world, const PlayerInvento
     }
 }
 
+void HandlePlayerPickupCommand(const flecs::world &world, const PlayerPickupCommand *const playerPickup)
+{
+    const auto player = world.entity(playerPickup->id + PLAYER_STARTING_IDX);
+    if (!player.is_alive())
+    {
+        return;
+    }
+
+    auto &playerResources = player.ensure<player::PlayerInventory>();
+    playerResources.resources[playerPickup->resource] += 1;
+}
+
+void HandlePlayerDropCommand(const flecs::world &world, const PlayerDropCommand *const playerDrop)
+{
+    const auto player = world.entity(playerDrop->id + PLAYER_STARTING_IDX);
+    if (!player.is_alive())
+    {
+        return;
+    }
+
+    auto &playerResources = player.ensure<player::PlayerInventory>();
+    playerResources.resources[playerDrop->resource] -= 1;
+}
 }  // namespace zappy_gui::net
