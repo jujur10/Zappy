@@ -16,7 +16,6 @@
 #include "team.h"
 #include "map.h"
 #include "signal_handler.h"
-#include "events.h"
 #include "new_clients_handling.h"
 #include "gui_handling.h"
 #include "ai_handling.h"

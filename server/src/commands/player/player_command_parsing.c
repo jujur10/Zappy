@@ -235,7 +235,7 @@ void player_command_handling(server_t *server, char ARRAY buffer, uint32_t len,
         return;
     }
     if (FAILURE == parse_player_commands(buffer, len, player_buffer,
-        &to_append)) {
+    &to_append)) {
         player_buffer->raw_buffer = to_append;
     }
 }

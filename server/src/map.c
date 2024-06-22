@@ -25,7 +25,6 @@ status_t init_map(const argument_t ARRAY args, map_t PTR map)
         return FAILURE;
     map->height = (uint16_t)args->height;
     map->width = (uint16_t)args->width;
-    map->has_been_modified = true;
     return SUCCESS;
 }
 
@@ -66,7 +65,6 @@ void spread_resources_on_map(map_t PTR map,
             map->total_resources.arr[i] += (needed_resources[i] > 0) ? 1 : 0;
         }
     }
-    map->has_been_modified = false;
 }
 
 bool update_map(double current_time, map_t PTR map,

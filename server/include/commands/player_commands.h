@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 
+#include "utils/arrays/arrays_resources_u32.h"
 #include "utils/string/string.h"
 #include "style/macros.h"
 #include "resources.h"
@@ -259,7 +260,5 @@ void player_ko_response(const server_t PTR server, player_t PTR player);
 /// @param server The server structure.
 /// @param player The current player.
 /// @param sorted_resources The already allocated output array.
-/// @param nb_of_tile The size of the output array.
 void get_sorted_resources(const server_t PTR server,
-    player_t PTR player,
-    resources_t ARRAY sorted_resources, uint32_t nb_of_tile);
+    const player_t PTR player, array_resources_u32_t PTR sorted_resources);

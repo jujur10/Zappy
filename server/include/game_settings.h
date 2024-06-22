@@ -34,6 +34,9 @@
 /// @brief The cooldown delay for the inventory action.
 #define PLAYER_INVENTORY_WAIT 1
 
+/// @brief The cooldown delay for the broadcast action.
+#define PLAYER_BROADCAST_WAIT 7
+
 /// @brief The cooldown delay for the inventory action.
 #define PLAYER_LOOK_WAIT 7
 

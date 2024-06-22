@@ -10,11 +10,14 @@
 void execute_gui_sst_command(server_t PTR server, UNUSED uint16_t gui_idx,
     const gui_command_t PTR command)
 {
-    char buffer[50] = "sst ";
+    char buffer[4 + UINT32_MAX_DIGITS + 1] = "sst ";
+    msg_t message = {};
     uint32_t count = 4;
 
-    server->frequency = command->args[0];
+    server->frequency = (0 == command->args[0]) ?
+        server->frequency : command->args[0];
     write_nb_to_buffer(server->frequency, buffer, &count);
     buffer[count - 1] = '\n';
-    send_message_to_guis(server, buffer, count);
+    create_message(buffer, count, &message);
+    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
 }

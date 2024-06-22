@@ -61,3 +61,9 @@ void clear_msg_queue(msg_queue_head_t PTR msg_queue);
 /// @return SUCCESS for success, FAILURE for failure.
 status_t add_buffer_to_queue(msg_queue_head_t PTR msg_queue,
     const buffer_t PTR buffer);
+
+/// @brief Function used to set an event to a message.
+///
+/// @param message The message structure to add an event to.
+/// @param event The event to add to the message.
+void set_event_to_message(msg_t PTR message, event_t event);

@@ -22,6 +22,7 @@ add_executable(zappy_server
     src/commands/gui/gui_pin_command.c
     src/commands/gui/gui_plv_command.c
     src/commands/gui/gui_ppo_command.c
+    src/commands/gui/gui_responses.c
     src/commands/gui/gui_sgt_command.c
     src/commands/gui/gui_sst_command.c
     src/commands/gui/gui_tna_command.c
@@ -43,8 +44,15 @@ add_executable(zappy_server
     src/commands/player/player_set_command.c
     src/commands/player/player_take_command.c
     src/coordinates.c
+    src/events/gui/gui_enw_event.c
     src/events/gui/gui_events.c
     src/events/gui/gui_none_event.c
+    src/events/gui/gui_pbc_event.c
+    src/events/gui/gui_pdr_event.c
+    src/events/gui/gui_pex_event.c
+    src/events/gui/gui_pfk_event.c
+    src/events/gui/gui_pgt_event.c
+    src/events/gui/gui_pic_event.c
     src/events/gui/gui_pnw_event.c
     src/events/gui/gui_update_mct_event.c
     src/events/player/player_death_event.c
@@ -85,6 +93,7 @@ add_executable(zappy_server
 
 target_include_directories(zappy_server PRIVATE
     include
+    tests/include
 )
 
 target_link_libraries(zappy_server PRIVATE
@@ -130,6 +139,7 @@ if (DEFINED RUN_TESTS)
         src/commands/gui/gui_pin_command.c
         src/commands/gui/gui_plv_command.c
         src/commands/gui/gui_ppo_command.c
+        src/commands/gui/gui_responses.c
         src/commands/gui/gui_sgt_command.c
         src/commands/gui/gui_sst_command.c
         src/commands/player/player_broadcast_command.c
@@ -159,8 +169,15 @@ if (DEFINED RUN_TESTS)
         src/commands/player/player_set_command.c
         src/commands/player/player_take_command.c
         src/coordinates.c
+        src/events/gui/gui_enw_event.c
         src/events/gui/gui_events.c
         src/events/gui/gui_none_event.c
+        src/events/gui/gui_pbc_event.c
+        src/events/gui/gui_pdr_event.c
+        src/events/gui/gui_pex_event.c
+        src/events/gui/gui_pfk_event.c
+        src/events/gui/gui_pgt_event.c
+        src/events/gui/gui_pic_event.c
         src/events/gui/gui_pnw_event.c
         src/events/gui/gui_update_mct_event.c
         src/events/player/player_death_event.c
@@ -208,6 +225,7 @@ if (DEFINED RUN_TESTS)
 
     target_include_directories(test_zappy_server PRIVATE
         include
+        tests/include
     )
 
     target_link_libraries(test_zappy_server PRIVATE

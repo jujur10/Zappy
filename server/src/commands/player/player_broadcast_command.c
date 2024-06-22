@@ -4,10 +4,12 @@
 ** File description:
 ** player_broadcast_command.c.
 */
+#include <stdio.h>
 #include <stdlib.h>
 #include "server.h"
 #include "utils/itoa/fast_itoa.h"
 #include "commands/command_utils.h"
+#include "game_settings.h"
 
 /// @brief There is always 8 cells around a point in a 2d array.
 static const int32_t NB_OF_CELLS_AROUND_CENTER = 8;
@@ -84,40 +86,17 @@ static int32_t get_shortest_direction(const map_t PTR map,
 /// @param player The player.
 /// @param message_buffer The message to broadcast (as a buffer to copy).
 /// @param direction The direction of the sender.
-static void broadcast_message_to_player(player_t PTR player,
-    const buffer_t PTR message_buffer, int32_t direction)
+static void broadcast_message_to_player(const server_t PTR server,
+    player_t PTR player, const buffer_t PTR message_buffer, int32_t direction)
 {
     msg_t message = {};
 
-    fast_itoa_u32(direction, message_buffer->ptr + 8);
     create_message(message_buffer->ptr, message_buffer->len,
         &message);
+    fast_itoa_u32(direction, message.ptr + 8);
     add_msg_to_queue(&player->queue, &message);
-}
-
-/// @brief Function which sends to GUIs the events of pbc.
-///
-/// @param server The server structure.
-/// @param message_buffer The message buffer.
-/// @param player_idx The player index.
-static void send_pbc_to_guis(server_t PTR server,
-    const buffer_t PTR message_buffer, uint32_t player_idx)
-{
-    msg_t message = {};
-    char msg_content[4 + UINT32_MAX_DIGITS + 1] = "pbc ";
-    uint32_t count = 4;
-    const player_t *player = &server->players[player_idx];
-    string_t string;
-
-    write_nb_to_buffer(player->sock, msg_content, &count);
-    init_string_from_chars(&string, msg_content, count);
-    append_to_string_from_chars(&string, message_buffer->ptr + sizeof
-    (MESSAGE_STR) - 1, message_buffer->len - sizeof(MESSAGE_STR) + 1);
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(string.ptr, string.len, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
-    clear_string(&string);
+    add_time_limit_to_player(server->time_units, PLAYER_BROADCAST_WAIT,
+        player);
 }
 
 /// @brief Function which re-initialize the broadcast buffer.
@@ -155,7 +134,7 @@ void execute_player_broadcast_command(server_t PTR server, uint16_t player_idx,
         receiver_coo = &receiver->coordinates;
         direction = (true == is_coordinates_equal(sender_coo, receiver_coo)) ?
             0 : get_shortest_direction(&server->map, sender, receiver);
-        broadcast_message_to_player(receiver, buffer, direction);
+        broadcast_message_to_player(server, receiver, buffer, direction);
     }
     player_ok_response(server, sender);
 }

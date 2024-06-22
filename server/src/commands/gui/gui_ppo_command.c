@@ -43,7 +43,6 @@ void execute_gui_ppo_command(server_t PTR server, uint16_t gui_idx,
 {
     msg_t message = {};
 
-    if (SUCCESS == create_gui_ppo_message(server, command->args[0], &message))
-        send_message_to_guis(server, message.ptr, message.len);
+    create_gui_ppo_message(server, command->args[0], &message);
     add_msg_to_queue(&server->guis[gui_idx].queue, &message);
 }

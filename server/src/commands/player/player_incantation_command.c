@@ -96,64 +96,14 @@ static bool verify_player_requirements(const player_t ARRAY players,
 bool verify_requirements(server_t PTR server, uint16_t player_idx)
 {
     const player_t *player = &server->players[player_idx];
-    const resources_t *current_tile = &server->map.tiles[(player->coordinates
-        .y * server->map.width) + player->coordinates.x];
+    const resources_t *current_tile = get_resource_tile_by_coordinates
+        (&server->map, &player->coordinates);
 
     if (true == verify_tile_requirements(current_tile, player->level) &&
         true == verify_player_requirements(server->players, server->nb_players,
         player_idx))
         return true;
     return false;
-}
-
-/// @brief Function used to write the player indexes (sockets) into the string.
-///
-/// @param server The server structure.
-/// @param player_idx The player index.
-/// @param string The string to write to.
-static void write_ready_players_into_string(server_t PTR server,
-    uint16_t player_idx, string_t PTR string)
-{
-    const player_t *player = &server->players[player_idx];
-    char msg_content[4 + (3 * UINT32_MAX_DIGITS) + 1] = "pic ";
-    uint32_t count;
-
-    for (uint32_t i = 0; i < server->nb_players; i++) {
-        if (i != player_idx && true == is_coordinates_equal
-        (&player->coordinates, &server->players[i].coordinates) &&
-        player->level == server->players[i].level) {
-            count = (uint32_t)fast_itoa_u32(server->players[i].sock,
-                msg_content);
-            msg_content[count] = ' ';
-            append_to_string_from_chars(string, msg_content, count + 1);
-        }
-    }
-    string->ptr[string->len - 1] = '\n';
-}
-
-/// @brief Function which sends to GUIs the events of pic.
-///
-/// @param server The server structure.
-/// @param team The player's team.
-/// @param player_idx The player index.
-static void send_pic_to_guis(server_t PTR server, uint32_t player_idx)
-{
-    msg_t message = {};
-    char msg_content[4 + (3 * UINT32_MAX_DIGITS) + 1] = "pic ";
-    uint32_t count = 4;
-    const player_t *player = &server->players[player_idx];
-    string_t string;
-
-    write_nb_to_buffer(player->coordinates.x, msg_content, &count);
-    write_nb_to_buffer(player->coordinates.y, msg_content, &count);
-    write_nb_to_buffer(player->level + 1, msg_content, &count);
-    init_string_from_chars(&string, msg_content, count);
-    write_ready_players_into_string(server, (uint16_t)player_idx, &string);
-    for (uint16_t i = 0; i < server->nb_guis; i++) {
-        create_message(string.ptr, string.len, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
-    }
-    clear_string(&string);
 }
 
 void execute_player_incantation_command(server_t PTR server,

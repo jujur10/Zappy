@@ -93,7 +93,6 @@ void execute_player_incantation_event(server_t PTR server, uint32_t player_idx)
             send_pie_to_guis(server, &player->coordinates, true);
             elevate_players(server, server->players, server->nb_players,
                 (uint16_t)player_idx);
-            server->map.has_been_modified = true;
             return;
         }
     }

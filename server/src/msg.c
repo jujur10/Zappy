@@ -24,14 +24,6 @@ status_t create_message(const char ARRAY msg_content, uint32_t len,
     return SUCCESS;
 }
 
-void create_message_from_ptr(char ARRAY ptr, uint32_t len,
-    msg_t PTR message)
-{
-    message->ptr = ptr;
-    message->len = len;
-    message->to_free = false;
-}
-
 void create_message_from_buffer(const buffer_t PTR buffer, msg_t PTR message)
 {
     message->ptr = buffer->ptr;
@@ -43,4 +35,9 @@ void destroy_message(msg_t PTR message)
 {
     if (true == message->to_free)
         free(message->ptr);
+}
+
+void set_event_to_message(msg_t PTR message, event_t event)
+{
+    message->event = event;
 }

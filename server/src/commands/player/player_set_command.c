@@ -5,28 +5,10 @@
 ** player_set_command.c.
 */
 #include <stdlib.h>
+
 #include "server.h"
-#include "queue/msg_queue.h"
 #include "game_settings.h"
 #include "utils/itoa/fast_itoa.h"
-#include "commands/command_utils.h"
-
-/// @brief Function which sends to GUIs the events of pdr.
-///
-/// @param server The server structure.
-/// @param player The player.
-/// @param resource_index The resource index.
-static void send_pdr_to_guis(server_t PTR server, const player_t PTR player,
-    resources_index_t resource_index)
-{
-    char msg_content[4 + (2 * UINT32_MAX_DIGITS) + 1] = "pdr ";
-    uint32_t count = 4;
-
-    write_nb_to_buffer(player->sock, msg_content, &count);
-    write_nb_to_buffer(resource_index, msg_content, &count);
-    msg_content[count - 1] = '\n';
-    send_message_to_guis(server, msg_content, count);
-}
 
 void execute_player_set_command(server_t PTR server, uint16_t player_idx,
     const player_command_t PTR command)
@@ -50,5 +32,4 @@ void execute_player_set_command(server_t PTR server, uint16_t player_idx,
         return player_ok_response(server, player);
     }
     player_ko_response(server, player);
-    server->map.has_been_modified = true;
 }

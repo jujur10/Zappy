@@ -30,6 +30,7 @@ void create_gui_pnw_message(server_t PTR server, const player_t PTR player,
         (uint32_t)strlen(server->teams[player->team_idx].name));
     append_to_string_from_chars(&string, "\n", 1);
     create_message(string.ptr, string.len, message);
+    free(string.ptr);
 }
 
 void send_pnw_to_guis(server_t PTR server, const team_t PTR team,

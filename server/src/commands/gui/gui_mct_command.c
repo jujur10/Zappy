@@ -7,15 +7,15 @@
 #include "gui_handling.h"
 #include "utils/pre_generate/pre_generate.h"
 #include "utils/itoa/fast_itoa.h"
-#include "clock.h"
-#include "game_settings.h"
 
 void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
     UNUSED const gui_command_t PTR command)
 {
-    add_buffer_to_queue(&server->guis[gui_idx].queue,
-        &server->generated_buffers.buffers[PRE_MAP_BUFFER]);
-    server->guis[gui_idx].blocking_time = server->clock;
-    add_to_clock(&server->guis[gui_idx].blocking_time, 0,
-    GUI_MCT_REQUEST_COOLDOWN);
+    msg_t message = {};
+
+    create_message_from_buffer(&server->generated_buffers
+    .buffers[PRE_MAP_BUFFER], &message);
+    set_event_to_message(&message,
+        (event_t){PLAYER_EVENT_NONE, GUI_EVENT_UPDATE_MCT});
+    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
 }

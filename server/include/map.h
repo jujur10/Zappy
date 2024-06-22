@@ -21,13 +21,11 @@
 /// @var width The map width.
 /// @var total_resources The total resources of the map.
 /// @var tiles The map representation.
-/// @var has_been_modified Is the map has been modified.
 typedef struct map_s {
     uint16_t height;
     uint16_t width;
     resources64_t total_resources;
     resources_t ARRAY tiles;
-    bool has_been_modified;
 } map_t;
 
 /// @brief Function which initializes map.

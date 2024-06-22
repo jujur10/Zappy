@@ -21,7 +21,7 @@
 int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
 {
     player_t *player = &server->players[server->nb_players];
-    map_t *map = &server->map;
+    const map_t *map = &server->map;
 
     if (MAX_CLIENTS == server->nb_players ||
     FAILURE == add_player_to_team(server, team_idx, server->nb_players))
@@ -36,13 +36,12 @@ int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
         .players++;
     send_pnw_to_guis(server, &server->teams[team_idx], server->nb_players);
     server->nb_players++;
-    map->has_been_modified = true;
     return server->nb_players - 1;
 }
 
 void destroy_ai(server_t PTR server, uint32_t ai_idx)
 {
-    map_t *map = &server->map;
+    const map_t *map = &server->map;
 
     LOGF("Destroying player (player idx: %u)", ai_idx)
     FD_CLR(server->players[ai_idx].sock, &server->current_socks);
@@ -55,7 +54,6 @@ void destroy_ai(server_t PTR server, uint32_t ai_idx)
     memmove(&server->players[ai_idx], &server->players[server->nb_players],
     sizeof(player_t));
     memset(&server->players[server->nb_players], 0, sizeof(player_t));
-    map->has_been_modified = true;
 }
 
 /// @brief Function called when the server receive data from a player_t.\n
@@ -114,7 +112,7 @@ static void blocking_time_not_respected(server_t PTR server,
 
     if (bytes_received < 1) {
         LOG("Player closed connection")
-        return destroy_ai(server, player_idx);
+        return execute_player_death_event(server, player_idx);
     }
     create_message("ko\n", 4, &message);
     add_msg_to_queue(&server->players[player_idx].queue, &message);

@@ -21,7 +21,3 @@ typedef struct event_s {
     player_event_t player_event;
     gui_event_t gui_event;
 } event_t;
-
-/// @brief Function which is used to handle new connections.
-/// @param server The server structure.
-void on_connection(server_t PTR server);

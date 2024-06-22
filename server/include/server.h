@@ -71,3 +71,7 @@ typedef struct server_s {
 /// @param args The parsed program parameters.
 /// @return 0 on success, 84 on failure.
 uint8_t run_server(const argument_t PTR args);
+
+/// @brief Function which is used to handle new connections.
+/// @param server The server structure.
+void on_connection(server_t PTR server);

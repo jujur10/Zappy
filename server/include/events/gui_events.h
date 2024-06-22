@@ -8,12 +8,15 @@
 #pragma once
 
 #include "style/macros.h"
+#include "utils/string/buffer.h"
+#include "resources.h"
 
 /// @brief Redefinition of structures.
 typedef struct server_s server_t;
 typedef struct player_s player_t;
 typedef struct msg_s msg_t;
 typedef struct team_s team_t;
+typedef struct egg_s egg_t;
 
 /// @brief Enumeration representing the possible gui events to handle.
 ///
@@ -68,3 +71,53 @@ void create_gui_pnw_message(server_t PTR server, const player_t PTR player,
 /// @param player_idx The player index.
 void send_pnw_to_guis(server_t PTR server, const team_t PTR team,
     uint32_t player_idx);
+
+/// @brief Function which sends to GUIs the events of pbc.
+///
+/// @param server The server structure.
+/// @param message_buffer The message buffer.
+/// @param player_idx The player index.
+void send_pbc_to_guis(server_t PTR server, const buffer_t PTR message_buffer,
+    uint32_t player_idx);
+
+/// @brief Function which sends to GUIs the events of pex.
+///
+/// @param server The server structure.
+/// @param egg_index The egg index of the taken egg.
+void send_pex_to_guis(server_t PTR server, const player_t PTR player);
+
+/// @brief Function which sends to GUIs the events of enw.
+///
+/// @param server The server structure.
+/// @param egg The egg.
+/// @param player The player involved.
+void send_enw_to_guis(server_t PTR server, const egg_t PTR egg,
+    const player_t PTR player);
+
+/// @brief Function which sends to GUIs the events of pfk.
+///
+/// @param server The server structure.
+/// @param player The player involved.
+void send_pfk_to_guis(server_t PTR server, const player_t PTR player);
+
+/// @brief Function which sends to GUIs the events of pic.
+///
+/// @param server The server structure.
+/// @param player_idx The player index.
+void send_pic_to_guis(server_t PTR server, uint32_t player_idx);
+
+/// @brief Function which sends to GUIs the events of pdr.
+///
+/// @param server The server structure.
+/// @param player The player.
+/// @param resource_index The resource index.
+void send_pdr_to_guis(server_t PTR server, const player_t PTR player,
+    resources_index_t resource_index);
+
+/// @brief Function which sends to GUIs the events of pgt.
+///
+/// @param server The server structure.
+/// @param player The player.
+/// @param resource_index The resource index.
+void send_pgt_to_guis(server_t PTR server, const player_t PTR player,
+    resources_index_t resource_index);
