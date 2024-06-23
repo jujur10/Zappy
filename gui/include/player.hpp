@@ -75,7 +75,7 @@ struct PlayerInventory
     uint16_t resources[7];
 };
 
-enum class IncantationState : uint16_t
+enum class IncantationState : uint8_t
 {
     kInProgress = 0,
     kSuccess = 1,
@@ -91,8 +91,10 @@ struct IncantationIcons
 struct IncantationInfo
 {
     IncantationState state;
-    uint16_t frameLeftForIcon;
+    uint8_t frameLeftForIcon;
+    uint16_t nbPlayers;
     float distance;
+    std::unique_ptr<uint16_t[]> playerIds;
 };
 
 struct  EggModel

@@ -188,7 +188,7 @@ void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdate
     world.ensure<TimeUnit>().frequency = timeUnitUpdate->timeUnit;
 }
 
-void HandleStartIncantationCommand(const flecs::world &world, const StartIncantationCommand * const newIncantation)
+void HandleStartIncantationCommand(const flecs::world &world, StartIncantationCommand * const newIncantation)
 {
     auto tile = world.entity(utils::GetTileIndexFromCoords(newIncantation->x, newIncantation->y));
     const auto * const tileMatrix = tile.get<raylib::Matrix>();
@@ -198,26 +198,60 @@ void HandleStartIncantationCommand(const flecs::world &world, const StartIncanta
         .state = player::IncantationState::kInProgress,
         .frameLeftForIcon = 120,
         .distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14}),
+        .playerIds = std::move(newIncantation->playerIds),
+        .nbPlayers = newIncantation->playerCount
     });
 }
 
 void HandleEndIncantationCommand(const flecs::world &world, const EndIncantationCommand * const endIncantation)
 {
-    const auto tile = world.entity(utils::GetTileIndexFromCoords(endIncantation->x, endIncantation->y));
-    const auto *const tileMatrix = tile.get<raylib::Matrix>();
+    const auto incantationTile = world.entity(utils::GetTileIndexFromCoords(endIncantation->x, endIncantation->y));
+    if (!incantationTile.is_alive())
+    {
+        return;
+    }
+    const auto *const tileMatrix = incantationTile.get<raylib::Matrix>();
 
-    auto * const incantationInfo = tile.get_mut<player::IncantationInfo>();
-
-    auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
-
+    auto * const incantationInfo = incantationTile.get_mut<player::IncantationInfo>();
     if (nullptr == incantationInfo)
     {
         return;
     }
+
+    auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
+
     incantationInfo->state = endIncantation->success ? player::IncantationState::kSuccess : player::IncantationState::kFailure;
     incantationInfo->frameLeftForIcon = 120;
     incantationInfo->distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14});
+
+    const auto * const playerIds = incantationInfo->playerIds.get();
+    const auto playerCount = incantationInfo->nbPlayers;
+
+    for (uint16_t i = 0; i < playerCount; ++i)
+    {
+        const auto player = world.entity(playerIds[i] + PLAYER_STARTING_IDX);
+        if (!player.is_alive())
+        {
+            continue;
+        }
+        auto *level = player.get_mut<uint8_t>();
+        if (level != nullptr && *level < 8)
+        {
+            *level += 1;
+        }
+    }
 }
+
+void HandlePlayerLevelCommand(const flecs::world &world, const PlayerLevelCommand * const playerLevel)
+{
+    auto player = world.entity(playerLevel->id + PLAYER_STARTING_IDX);
+    if (!player.is_alive())
+    {
+            return;
+    }
+    player.set<uint8_t>(playerLevel->level);
+}
+
 
 void HandlePlayerInventoryCommand(const flecs::world &world, const PlayerInventoryCommand *const playerInventory)
 {
