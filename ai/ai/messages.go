@@ -85,7 +85,8 @@ func announcePresenceLevelUp(game *Game, targetLevel int) {
 func announceDepartureLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf("_Leave_%d", targetLevel)
 	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
-	game.MessageManager.waitingForLevelUpLeech = true
+	game.MessageManager.waitingForLevelUp = false
+	game.MessageManager.waitingForLevelUpLeech = false
 }
 
 // startLevelUp sends a formatted startLvlUp message
@@ -191,8 +192,7 @@ func getMessageIndex(content broadcastMessageContent, messageList []broadcastMes
 }
 
 // InterpretPlayerMessage parses the broadcast message and handles its content as necessary
-func (game *Game) InterpretPlayerMessage(message network.BroadcastData,
-	levelUpMessageChannel chan<- broadcastMessageContent) {
+func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
 	messageContent, err := parsePlayerMessage(message.Text)
 	if err != nil {
 		log.Println("Error parsing player message:", err)
@@ -212,7 +212,8 @@ func (game *Game) InterpretPlayerMessage(message network.BroadcastData,
 	}
 	if game.MessageManager.waitingForLevelUpLeech && // Host's lobby update
 		messageContent.targetLevel == game.Level+1 &&
-		(messageContent.msgType == startLvlUp || messageContent.msgType == cancelLvlUp) {
+		(messageContent.msgType == startLvlUp || messageContent.msgType == cancelLvlUp ||
+			messageContent.msgType == lvlUpComplete || messageContent.msgType == lvlUpFailed) {
 		addMessageToQueue(messageContent)
 	}
 

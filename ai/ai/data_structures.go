@@ -83,8 +83,6 @@ type MessagesManagement struct {
 	waitingForLevelUp bool
 	// Is the player waitingForLevelUpLeech?
 	waitingForLevelUpLeech bool
-	// The levelUpMessageChannel
-	levelUpMessageChannel chan broadcastMessageContent
 }
 
 // Game is the main struct containing the game data
@@ -164,7 +162,7 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLef
 		LevelUpResources: levelUpResources,
 		Level:            1,
 		MessageManager: MessagesManagement{UUID: createUUID(teamName),
-			messageStatusList: make([]broadcastMessageContent, 0), levelUpMessageChannel: make(chan broadcastMessageContent)},
+			messageStatusList: make([]broadcastMessageContent, 0)},
 		TotalResourcesRequired: totalResourcesRequired,
 		SlotsLeft:              slotsLeft,
 		FoodManager: FoodManagement{InputFoodChannel: make(chan int),
@@ -187,7 +185,6 @@ func (game *Game) EndGame() {
 	close(game.FoodManager.InputFoodChannel)
 	close(game.FoodManager.TimeStepChannel)
 	close(game.Socket.ResponseFeedbackChannel)
-	close(game.MessageManager.levelUpMessageChannel)
 	log.Println("Channels closed")
 }
 
