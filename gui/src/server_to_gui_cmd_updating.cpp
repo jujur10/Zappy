@@ -234,7 +234,7 @@ void HandleEndIncantationCommand(const flecs::world &world, const EndIncantation
         {
             continue;
         }
-        auto *level = player.get_mut<uint8_t>();
+        auto * const level = player.get_mut<uint8_t>();
         if (level != nullptr && *level < 8)
         {
             *level += 1;
@@ -295,5 +295,38 @@ void HandlePlayerDropCommand(const flecs::world &world, const PlayerDropCommand 
 void HandleTeamNameCommand(const flecs::world &world, const TeamNameCommand *const teamName)
 {
     world.entity(teamName->teamName.get());
+}
+
+void HandleEggLaidCommand(const flecs::world &world, const EggLaidCommand *const eggLaid)
+{
+    const auto tile = world.entity(utils::GetTileIndexFromCoords(eggLaid->x, eggLaid->y));
+    if (!tile.is_alive())
+    {
+        return;
+    }
+    const auto * const tileMatrix = tile.get<raylib::Matrix>();
+    auto egg = world.make_alive(eggLaid->eggId + EGG_STARTING_IDX);
+    egg.set<player::EggData>({eggLaid->playerId});
+    egg.set<raylib::Matrix>(raylib::Matrix::Translate(tileMatrix->m12, tileMatrix->m13 + 0.2f, tileMatrix->m14));
+}
+
+void HandleConnectionOnEggCommand(const flecs::world &world, const ConnectionOnEggCommand *const connectionOnEgg)
+{
+    const auto egg = world.entity(connectionOnEgg->eggId + EGG_STARTING_IDX);
+    if (!egg.is_alive())
+    {
+        return;
+    }
+    egg.destruct();
+}
+
+void HandleDeathOfEggCommand(const flecs::world &world, const DeathOfEggCommand *const deathOfEgg)
+{
+    const auto egg = world.entity(deathOfEgg->eggId + EGG_STARTING_IDX);
+    if (!egg.is_alive())
+    {
+        return;
+    }
+    egg.destruct();
 }
 }  // namespace zappy_gui::net
