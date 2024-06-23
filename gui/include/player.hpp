@@ -102,4 +102,9 @@ struct  EggModel
     raylib::Model *model;
 };
 
+struct EggData
+{
+    uint16_t playerId;
+};
+
 }  // namespace zappy_gui::player
