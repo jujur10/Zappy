@@ -2,6 +2,8 @@ package ai
 
 import (
 	"container/heap"
+	"crypto/aes"
+	"crypto/cipher"
 	"fmt"
 	"log"
 	"math/rand"
@@ -113,6 +115,8 @@ type Game struct {
 	MessageManager MessagesManagement
 	// The number of SlotsLeft
 	SlotsLeft int
+	// The AES cipher
+	AesCipher cipher.AEAD
 }
 
 // getInitialDirection fetches the initial direction of the AI from the server
@@ -141,6 +145,18 @@ func createUUID(teamName string) string {
 	return teamName + stringUuidVal
 }
 
+func growAesKey(key string) string {
+	keyLen := len(key)
+	if keyLen > 32 {
+		return key[:32]
+	} else {
+		for i := keyLen; i < 32; i++ {
+			key += "-"
+		}
+	}
+	return key
+}
+
 // InitGame creates a new Game struct
 func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLeft int,
 	worldDims RelativeCoordinates) Game {
@@ -150,6 +166,20 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLef
 		if initialDirection == -1 {
 			log.Fatal("Failed to get player initial direction")
 		}
+	}
+
+	// Create AES cipher and GCM
+	aesCipher, err := aes.NewCipher([]byte(growAesKey(teamName)))
+	if err != nil {
+		fmt.Println("Failed to create AES cipher, defaulting to no cipher")
+		CipherMessages = false
+		log.Fatal("Failed to create AES cipher", err)
+	}
+	gcm, err := cipher.NewGCM(aesCipher)
+	if err != nil {
+		fmt.Println("Failed to create GCM", err)
+		CipherMessages = false
+		log.Fatal("Failed to create GCM", err)
 	}
 	game := Game{View: make(ViewMap, 0),
 		Inventory: make(Inventory),
@@ -167,6 +197,7 @@ func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLef
 		SlotsLeft:              slotsLeft,
 		FoodManager: FoodManagement{InputFoodChannel: make(chan int),
 			TimeStepChannel: make(chan time.Duration), FoodPriority: 1},
+		AesCipher: gcm,
 	}
 	heap.Init(&game.Movement.TilesQueue)
 	return game
