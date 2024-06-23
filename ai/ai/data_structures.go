@@ -62,9 +62,9 @@ type FoodManagement struct {
 	// Channel to communicate with the food management goroutine.
 	// New food comes in, and food priority comes out
 	// In case of death by starvation, priority is -1
-	FoodChannel     chan int
-	TimeStepChannel chan time.Duration
-	FoodPriority    int
+	InputFoodChannel chan int
+	TimeStepChannel  chan time.Duration
+	FoodPriority     int
 }
 
 type MovementData struct {
@@ -83,8 +83,6 @@ type MessagesManagement struct {
 	waitingForLevelUp bool
 	// Is the player waitingForLevelUpLeech?
 	waitingForLevelUpLeech bool
-	// The levelUpMessageChannel
-	levelUpMessageChannel chan broadcastMessageContent
 }
 
 // Game is the main struct containing the game data
@@ -120,7 +118,7 @@ type Game struct {
 // getInitialDirection fetches the initial direction of the AI from the server
 // It ignores any other messages coming before this one
 func getInitialDirection(conn network.ServerConn) network.PlayerDirection {
-	conn.GetDirection()
+	conn.SendCommand(network.GetDirection, network.EmptyBody)
 	respType := network.Nil
 	for respType != network.Direction {
 		rType, value, err := conn.GetAndParseResponse()
@@ -139,46 +137,54 @@ func createUUID(teamName string) string {
 	val3 := rand.Int()
 	uuidValue := val1 ^ val3 ^ val2
 	stringUuidVal := strconv.FormatInt(int64(uuidValue%1000000), 10)
-	log.Println("Created player UUID: ", stringUuidVal)
+	log.Println("Created player UUID:", stringUuidVal)
 	return teamName + stringUuidVal
 }
 
 // InitGame creates a new Game struct
-func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLeft int) Game {
-	initialDirection := getInitialDirection(serverConn)
-	if initialDirection == -1 {
-		log.Fatal("Failed to get player initial direction")
+func InitGame(serverConn network.ServerConn, teamName string, timeStep, slotsLeft int,
+	worldDims RelativeCoordinates) Game {
+	initialDirection := network.PlayerDirection(0)
+	if worldDims[0] != worldDims[1] {
+		initialDirection = getInitialDirection(serverConn)
+		if initialDirection == -1 {
+			log.Fatal("Failed to get player initial direction")
+		}
 	}
 	game := Game{View: make(ViewMap, 0),
-		Inventory:        make(Inventory),
-		TimeStep:         time.Second / time.Duration(timeStep),
-		TeamName:         teamName,
-		Socket:           serverConn,
-		Coordinates:      WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: initialDirection},
+		Inventory: make(Inventory),
+		TimeStep:  time.Second / time.Duration(timeStep),
+		TeamName:  teamName,
+		Socket:    serverConn,
+		Coordinates: WorldCoords{CoordsFromOrigin: RelativeCoordinates{0, 0}, Direction: initialDirection,
+			WorldSize: worldDims},
 		Movement:         MovementData{Path: make([]RelativeCoordinates, 0), TilesQueue: make(PriorityQueue, 0)},
 		LevelUpResources: levelUpResources,
 		Level:            1,
 		MessageManager: MessagesManagement{UUID: createUUID(teamName),
-			messageStatusList: make([]broadcastMessageContent, 0), levelUpMessageChannel: make(chan broadcastMessageContent)},
+			messageStatusList: make([]broadcastMessageContent, 0)},
 		TotalResourcesRequired: totalResourcesRequired,
 		SlotsLeft:              slotsLeft,
-		FoodManager: FoodManagement{FoodChannel: make(chan int), TimeStepChannel: make(chan time.Duration),
-			FoodPriority: 1},
+		FoodManager: FoodManagement{InputFoodChannel: make(chan int),
+			TimeStepChannel: make(chan time.Duration), FoodPriority: 1},
 	}
 	heap.Init(&game.Movement.TilesQueue)
-	go FoodManagementRoutine(game.FoodManager.FoodChannel, game.FoodManager.TimeStepChannel)
-	go serverResponseRoutine(game.Socket.ResponseFeedbackChannel, &game)
-	game.FoodManager.TimeStepChannel <- game.TimeStep
 	return game
 }
 
+func (game *Game) StartRoutines() {
+	go FoodManagementRoutine(game.FoodManager.InputFoodChannel, &game.FoodManager.FoodPriority,
+		game.FoodManager.TimeStepChannel)
+	go serverResponseRoutine(game.Socket.ResponseFeedbackChannel, game)
+	game.FoodManager.TimeStepChannel <- game.TimeStep
+}
+
 // EndGame closes the channels when the program exit, thus telling the goroutines to stop
-func EndGame(game *Game) {
+func (game *Game) EndGame() {
 	log.Println("Closing channels...")
-	close(game.FoodManager.FoodChannel)
+	close(game.FoodManager.InputFoodChannel)
 	close(game.FoodManager.TimeStepChannel)
 	close(game.Socket.ResponseFeedbackChannel)
-	close(game.MessageManager.levelUpMessageChannel)
 	log.Println("Channels closed")
 }
 

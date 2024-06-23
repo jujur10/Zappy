@@ -1,7 +1,6 @@
 package ai
 
 import (
-	"container/heap"
 	"fmt"
 	"strings"
 	"zappy_ai/network"
@@ -98,27 +97,32 @@ func getTileUsefulResources(totalResourcesNeeded Inventory, tile []TileItem) []T
 
 // updatePrioritiesFromViewMap updates the PQueue using the generated ViewMap.
 // It adds new useful tiles, updates already existing ones, and removes the useless ones
-func (game Game) updatePrioritiesFromViewMap() {
+func (game *Game) updatePrioritiesFromViewMap() {
 	absoluteMap := buildAbsoluteCoordsMap(game.Coordinates.Direction,
 		game.Coordinates.WorldSize, game.Coordinates.CoordsFromOrigin, len(game.View))
 	for tileIdx, viewedTile := range game.View {
 		tilePrio := game.getTilePriority(viewedTile)
-		pqIndex := game.Movement.TilesQueue.getPriorityQueueTileIndex(absoluteMap[tileIdx])
-		if tilePrio > 0 && pqIndex == -1 {
-			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx])
-			heap.Push(&game.Movement.TilesQueue, &Item{value: absoluteMap[tileIdx], originalPriority: tilePrio,
-				priority: max(0, tilePrio-distance), action: ResourceCollection,
+		pqItem := GetPriorityQueueItem(&game.Movement.TilesQueue, absoluteMap[tileIdx])
+		if absoluteMap[tileIdx] == game.Coordinates.CoordsFromOrigin {
+			tilePrio = game.getCurrentTilePriority(viewedTile)
+		}
+		if tilePrio > 0 && pqItem == nil {
+			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx],
+				game.Coordinates.WorldSize)
+			PushToPriorityQueue(&game.Movement.TilesQueue, Item{value: absoluteMap[tileIdx], originalPriority: tilePrio,
+				priority:      max(0, tilePrio-distance),
 				usefulObjects: getTileUsefulResources(game.TotalResourcesRequired, viewedTile)})
 		}
-		if pqIndex != -1 {
+		if pqItem != nil {
 			if tilePrio == 0 {
-				heap.Remove(&game.Movement.TilesQueue, pqIndex)
+				RemoveFromPriorityQueue(&game.Movement.TilesQueue, pqItem.value)
 				continue
 			}
-			game.Movement.TilesQueue[pqIndex].originalPriority = tilePrio
-			game.Movement.TilesQueue[pqIndex].usefulObjects = getTileUsefulResources(game.TotalResourcesRequired, viewedTile)
-			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx])
-			game.Movement.TilesQueue.Update(game.Movement.TilesQueue[pqIndex], absoluteMap[tileIdx], max(0, tilePrio-distance))
+			pqItem.originalPriority = tilePrio
+			pqItem.usefulObjects = getTileUsefulResources(game.TotalResourcesRequired, viewedTile)
+			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, absoluteMap[tileIdx],
+				game.Coordinates.WorldSize)
+			UpdatePriorityQueue(&game.Movement.TilesQueue, absoluteMap[tileIdx], max(0, tilePrio-distance))
 		}
 	}
 }

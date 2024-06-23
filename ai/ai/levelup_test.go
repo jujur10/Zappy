@@ -62,7 +62,7 @@ func TestGame_isLevelUpLeechAvailable(t *testing.T) {
 	}
 }
 
-func TestGame_areLevelUpConditionsMet(t *testing.T) {
+func TestGame_isLevelUpHostAvailable(t *testing.T) {
 	type fields struct {
 		View                   ViewMap
 		Inventory              Inventory
@@ -84,11 +84,6 @@ func TestGame_areLevelUpConditionsMet(t *testing.T) {
 		want   bool
 	}{
 		{"Test not enough food", fields{FoodManager: FoodManagement{FoodPriority: 8}}, false},
-		{"Test leech available", fields{Level: 4, FoodManager: FoodManagement{FoodPriority: 5},
-			MessageManager: MessagesManagement{UUID: "aaa123", waitingForLevelUp: false, messageStatusList: []broadcastMessageContent{
-				{msgType: lvlUpComplete, uuid: "aab125", targetLevel: 4},
-				{msgType: missingPlayers, uuid: "aad566", targetLevel: 5},
-				{msgType: missingPlayers, uuid: "aas52", targetLevel: 6}}}}, true},
 		{"Test not enough resources", fields{Level: 4, MessageManager: MessagesManagement{waitingForLevelUp: true},
 			LevelUpResources: map[int]Inventory{4: {Player: 4, Linemate: 0, Deraumere: 1, Sibur: 1, Mendiane: 0, Phiras: 0, Thystame: 0}}},
 			false},
@@ -98,7 +93,7 @@ func TestGame_areLevelUpConditionsMet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			game := Game{
+			game := &Game{
 				View:                   tt.fields.View,
 				Inventory:              tt.fields.Inventory,
 				TimeStep:               tt.fields.TimeStep,
@@ -113,8 +108,8 @@ func TestGame_areLevelUpConditionsMet(t *testing.T) {
 				MessageManager:         tt.fields.MessageManager,
 				SlotsLeft:              tt.fields.SlotsLeft,
 			}
-			if got := game.areLevelUpConditionsMet(); got != tt.want {
-				t.Errorf("areLevelUpConditionsMet() = %v, want %v", got, tt.want)
+			if got := game.isLevelUpHostAvailable(); got != tt.want {
+				t.Errorf("isLevelUpHostAvailable() = %v, want %v", got, tt.want)
 			}
 		})
 	}

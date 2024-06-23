@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -79,7 +80,7 @@ var validResponsesTypes = map[CommandType][]MessageType{
 }
 
 // getServerResponse reads a line from the server socket, or returns an error if a line is not available
-func (conn ServerConn) getServerResponse() (string, error) {
+func (conn *ServerConn) getServerResponse() (string, error) {
 	line, err := conn.Reader.ReadLine()
 	if err != nil {
 		return "", err
@@ -100,6 +101,7 @@ func IsInArray[T comparable](value T, array []T) bool {
 // checkValues verifies the validity of the view (length, player at current pos and all elems are valid)
 func checkValues(values [][]string) bool {
 	if !IsInArray("player", values[0]) {
+		log.Println("Player not in first cell")
 		return false
 	}
 	size := 0
@@ -109,11 +111,13 @@ func checkValues(values [][]string) bool {
 		counter += 2
 	}
 	if len(values) != size {
+		log.Println("Invalid view size")
 		return false
 	}
 	for _, tile := range values {
 		for _, val := range tile {
 			if !IsInArray(val, validObjects) {
+				log.Println("Invalid value", val)
 				return false
 			}
 		}
@@ -143,6 +147,7 @@ func parseInventory(values [][]string) (any, error) {
 
 // parseArray parses an array sent by the server and returns its parsed form or an error on failure
 func parseArray(line string) (MessageType, any, error) {
+	log.Println("Array:", line)
 	line = strings.Trim(line, "[]")
 	values := strings.Split(line, ",")
 	individualValues := make([][]string, len(values))
@@ -162,7 +167,7 @@ func parseArray(line string) (MessageType, any, error) {
 	}
 
 	if checkValues(individualValues) == false {
-		return Nil, nil, fmt.Errorf("Invalid values\n")
+		return Nil, nil, fmt.Errorf("invalid values")
 	}
 
 	return View, individualValues, nil
@@ -232,7 +237,7 @@ func parseElevationMessage(line string) (MessageType, any, error) {
 }
 
 // GetAndParseResponse reads a response from the server connection and parses it
-func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
+func (conn *ServerConn) GetAndParseResponse() (MessageType, any, error) {
 	line, err := conn.getServerResponse()
 	if err != nil {
 		return Nil, nil, err
@@ -270,7 +275,7 @@ func (conn ServerConn) GetAndParseResponse() (MessageType, any, error) {
 }
 
 // IsResponseTypeValid checks if the type of the obtained response is expected for the last command sent
-func (conn ServerConn) IsResponseTypeValid(msgType MessageType) bool {
+func (conn *ServerConn) IsResponseTypeValid(msgType MessageType) bool {
 	if msgType == Broadcast || msgType == Death {
 		return true
 	}

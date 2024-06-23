@@ -1,7 +1,7 @@
 package ai
 
 import (
-	"container/heap"
+	"log"
 	"zappy_ai/network"
 )
 
@@ -28,12 +28,12 @@ const levelUpPriority = 8
 const leechLevelUpPriority = 9
 
 // resourceCollected update the resource tables or the food goroutine when the player collects a resource
-func (game Game) resourceCollected(item TileItem) {
+func (game *Game) resourceCollected(item TileItem) {
 	if item == Player {
 		return
 	}
 	if item == Food {
-		game.FoodManager.FoodChannel <- 1
+		game.FoodManager.InputFoodChannel <- 1
 		return
 	}
 	for i := game.Level; i < 8; i++ {
@@ -49,7 +49,7 @@ func (game Game) resourceCollected(item TileItem) {
 
 // removeLevelUpResources removes the resources required for the previous level up
 // removeLevelUpResources also updates the total resources required to reach level 8
-func (game Game) removeLevelUpResources() {
+func (game *Game) removeLevelUpResources() {
 	for i := 1; i < game.Level; i++ {
 		for key, value := range game.LevelUpResources[i] {
 			if key != Player {
@@ -62,7 +62,7 @@ func (game Game) removeLevelUpResources() {
 
 // isResourceRequired checks if the resource is going to be needed at some point in the future.
 // isResourceRequired always return false for a Player and true for Food
-func (game Game) isResourceRequired(item TileItem) bool {
+func (game *Game) isResourceRequired(item TileItem) bool {
 	if item == Player {
 		return false
 	}
@@ -73,12 +73,12 @@ func (game Game) isResourceRequired(item TileItem) bool {
 }
 
 // getResourcePriority returns the priority for the item based on the resources needed for level-up(s)
-func (game Game) getResourcePriority(item TileItem) int {
+func (game *Game) getResourcePriority(item TileItem) int {
 	if item == Player {
 		return 0
 	}
 	if item == Food {
-		return game.FoodManager.FoodPriority
+		return getFoodPriority(&game.FoodManager.FoodPriority)
 	}
 	priority := 8
 	for i := game.Level; i < 8; i++ {
@@ -91,7 +91,7 @@ func (game Game) getResourcePriority(item TileItem) int {
 }
 
 // getTilePriority returns the max priority of the items on this tile
-func (game Game) getTilePriority(tile []TileItem) int {
+func (game *Game) getTilePriority(tile []TileItem) int {
 	prio := 0
 	for _, item := range tile {
 		if item == Player {
@@ -103,9 +103,26 @@ func (game Game) getTilePriority(tile []TileItem) int {
 	return prio
 }
 
+// getCurrentTilePriority returns the max priority of the items on the current tile
+func (game *Game) getCurrentTilePriority(tile []TileItem) int {
+	prio := 0
+	nbPlayers := 0
+	for _, item := range tile {
+		if item == Player {
+			nbPlayers++
+		}
+		itemPrio := game.getResourcePriority(item)
+		prio = max(prio, itemPrio)
+	}
+	if nbPlayers > 1 {
+		return 0
+	}
+	return prio
+}
+
 // getLevelUpPriority returns the priority at which the level up process should be started
-func (game Game) getLevelUpPriority() int {
-	if game.FoodManager.FoodPriority > 6 {
+func (game *Game) getLevelUpPriority() int {
+	if getFoodPriority(&game.FoodManager.FoodPriority) > 6 {
 		return 0
 	}
 	if game.isLevelUpLeechAvailable() {
@@ -132,16 +149,35 @@ func Abs(x int) int {
 	return x
 }
 
-// ManhattanDistance returns the Manhattan / taxicab distance between two points
-func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates) int {
-	return Abs(pos2[0]-pos1[0]) + Abs(pos2[1]-pos1[1])
+// ManhattanDistance returns the Manhattan / taxicab distance between two points, accounting for world wrap
+func ManhattanDistance(pos1 RelativeCoordinates, pos2 RelativeCoordinates, worldSize RelativeCoordinates) int {
+	nonWrappingX := Abs(pos2[0] - pos1[0])
+	nonWrappingY := Abs(pos2[1] - pos1[1])
+
+	if worldSize[0] == 0 || worldSize[1] == 0 {
+		log.Fatal("World size cannot be null")
+	}
+	// Compute distance with wrapping world
+	wrappingX := 0
+	if pos1[0] > pos2[0] {
+		wrappingX = (pos2[0] - pos1[0] + worldSize[0]) % worldSize[0]
+	} else {
+		wrappingX = (pos1[0] - pos2[0] + worldSize[0]) % worldSize[0]
+	}
+	wrappingY := 0
+	if pos1[1] > pos2[1] {
+		wrappingY = (pos2[1] - pos1[1] + worldSize[1]) % worldSize[1]
+	} else {
+		wrappingY = (pos1[1] - pos2[1] + worldSize[1]) % worldSize[1]
+	}
+	return min(nonWrappingX, wrappingX) + min(nonWrappingY, wrappingY)
 }
 
 // collectTileResources collects all the resources of a tile that are useful to the player
-func (game Game) collectTileResources(pqTileIndex int) {
-	item := game.Movement.TilesQueue[pqTileIndex]
+func (game *Game) collectTileResources(pqTileItem *Item) {
+	log.Println("Collect tile resources function entered, item", *pqTileItem)
 	nbPlayers := 0
-	for _, resource := range (*item).usefulObjects {
+	for _, resource := range (*pqTileItem).usefulObjects {
 		if resource == Player {
 			nbPlayers++
 		}
@@ -149,8 +185,9 @@ func (game Game) collectTileResources(pqTileIndex int) {
 	if nbPlayers > 1 {
 		return
 	}
-	for _, resource := range (*item).usefulObjects {
+	for _, resource := range (*pqTileItem).usefulObjects {
 		if game.isResourceRequired(resource) {
+			log.Println("Trying to collect ressource", resource)
 			game.Socket.SendCommand(network.TakeObject, itemToString[resource])
 			status := game.awaitResponseToCommand()
 			game.updateFrequency()
@@ -163,27 +200,25 @@ func (game Game) collectTileResources(pqTileIndex int) {
 
 // updatePriorityQueueAfterCollection updates all the priorities in the PQueue after that a tile was harvested
 // If a tile is no longer useful, it is removed from the queue
-func (game Game) updatePriorityQueueAfterCollection() {
-	positions := make(map[*Item]Item)
+func (game *Game) updatePriorityQueueAfterCollection() {
+	positions := make([]Item, 0)
 	for _, item := range game.Movement.TilesQueue {
-		if item.action == ResourceCollection {
-			distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value)
-			usefulObjs := make([]TileItem, 0)
-			for _, obj := range item.usefulObjects {
-				if game.isResourceRequired(obj) {
-					usefulObjs = append(usefulObjs, obj)
-				}
+		distance := ManhattanDistance(game.Coordinates.CoordsFromOrigin, item.value, game.Coordinates.WorldSize)
+		usefulObjs := make([]TileItem, 0)
+		for _, obj := range item.usefulObjects {
+			if game.isResourceRequired(obj) {
+				usefulObjs = append(usefulObjs, obj)
 			}
-			newOriginalPrio := game.getTilePriority(usefulObjs)
-			positions[item] = Item{value: item.value, priority: max(0, newOriginalPrio-distance),
-				originalPriority: newOriginalPrio, index: item.index, usefulObjects: usefulObjs}
 		}
+		newOriginalPrio := game.getTilePriority(usefulObjs)
+		positions = append(positions, Item{value: item.value, priority: max(0, newOriginalPrio-distance),
+			originalPriority: newOriginalPrio, index: item.index, usefulObjects: usefulObjs})
 	}
-	for originalItem, newItem := range positions {
+	for _, newItem := range positions {
 		if newItem.originalPriority == 0 {
-			heap.Remove(&game.Movement.TilesQueue, originalItem.index)
+			RemoveFromPriorityQueue(&game.Movement.TilesQueue, newItem.value)
 		} else {
-			game.Movement.TilesQueue.Update(originalItem, newItem.value, newItem.priority)
+			UpdatePriorityQueue(&game.Movement.TilesQueue, newItem.value, newItem.priority)
 		}
 	}
 }

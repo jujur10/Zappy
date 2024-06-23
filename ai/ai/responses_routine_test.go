@@ -33,9 +33,9 @@ func TestGame_awaitResponseToCommand(t *testing.T) {
 		fields fields
 		want   bool
 	}{
-		{"Test False", fields{Socket: network.ServerConn{ResponseFeedbackChannel: make(chan bool)}, FoodManager: FoodManagement{FoodPriority: 2, FoodChannel: make(chan int)}}, false},
-		{"Test True", fields{Socket: network.ServerConn{ResponseFeedbackChannel: make(chan bool)}, FoodManager: FoodManagement{FoodPriority: 2, FoodChannel: make(chan int)}}, true},
-		{"Test closed channel", fields{Socket: network.ServerConn{ResponseFeedbackChannel: make(chan bool)}, FoodManager: FoodManagement{FoodPriority: 2, FoodChannel: make(chan int)}, Level: 1}, true},
+		{"Test False", fields{Socket: network.ServerConn{ResponseFeedbackChannel: make(chan bool)}, FoodManager: FoodManagement{FoodPriority: 2, InputFoodChannel: make(chan int)}}, false},
+		{"Test True", fields{Socket: network.ServerConn{ResponseFeedbackChannel: make(chan bool)}, FoodManager: FoodManagement{FoodPriority: 2, InputFoodChannel: make(chan int)}}, true},
+		{"Test closed channel", fields{Socket: network.ServerConn{ResponseFeedbackChannel: make(chan bool)}, FoodManager: FoodManagement{FoodPriority: 2, InputFoodChannel: make(chan int)}, Level: 1}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestGame_awaitResponseToCommand(t *testing.T) {
 				MessageManager:         tt.fields.MessageManager,
 				SlotsLeft:              tt.fields.SlotsLeft,
 			}
-			go helperTest_awaitResponseToCommand(game.Socket.ResponseFeedbackChannel, tt.want, game.FoodManager.FoodChannel)
+			go helperTest_awaitResponseToCommand(game.Socket.ResponseFeedbackChannel, tt.want, game.FoodManager.InputFoodChannel)
 			if game.Level == 1 {
 				close(game.Socket.ResponseFeedbackChannel)
 				tt.want = false
