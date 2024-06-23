@@ -72,7 +72,8 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 			log.Println("Starting level up to level", game.Level+1)
 			break
 		}
-		log.Println("Successfully leveled up to level", game.Level+1)
+		game.Level = level
+		log.Println("Successfully leveled up to level", game.Level)
 	default:
 		log.Println("Error: unknown msgType", msgType)
 	}
@@ -91,6 +92,7 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 		}
 		if game.Socket.IsResponseTypeValid(msgType) == false {
 			log.Println("Invalid response type", msgType, "previous command was", game.Socket.LastCommandType)
+			continue
 		}
 		if !checkChannelOpen(feedbackChannel) {
 			log.Fatalln("Server response handling : channel closed, exiting..")

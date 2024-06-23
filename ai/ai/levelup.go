@@ -45,6 +45,9 @@ func (game *Game) getLevelUpLeechIndex() int {
 
 // isLevelUpLeechAvailable checks if a hosted level up is available to leech from
 func (game *Game) isLevelUpLeechAvailable() bool {
+	if getFoodPriority(&game.FoodManager.FoodPriority) >= 7 {
+		return false
+	}
 	if game.MessageManager.waitingForLevelUp {
 		return false
 	}
@@ -134,11 +137,10 @@ func (game *Game) startLevelUpHost() {
 	finalResponse := game.awaitResponseToCommand()
 	game.updateFrequency()
 	if finalResponse {
-		levelUpComplete(game, game.Level+1)
+		levelUpComplete(game, game.Level)
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()
-		log.Println("Successfully leveled up as host, new level", game.Level+1)
-		game.Level += 1
+		log.Println("Successfully leveled up as host, new level", game.Level)
 		game.forkPlayer()
 	} else {
 		levelUpFailed(game, game.Level+1)
@@ -149,18 +151,18 @@ func (game *Game) startLevelUpHost() {
 	}
 }
 
-func awaitLevelUpLeechUpdate(game *Game, uuid string) bool {
+func awaitLevelUpLeechUpdate(game *Game, uuid string) (bool, bool) {
 	for {
 		select {
 		case value, ok := <-game.Socket.ResponseFeedbackChannel:
 			if ok {
-				return value
+				return true, value
 			}
 		default:
 		}
 		message, err := popMessageFromQueue()
 		if err == nil && message.uuid == uuid && (message.msgType == lvlUpComplete || message.msgType == lvlUpFailed) {
-			return message.msgType == lvlUpComplete
+			return false, message.msgType == lvlUpComplete
 		}
 	}
 }
@@ -169,11 +171,12 @@ func awaitLevelUpLeechUpdate(game *Game, uuid string) bool {
 func (game *Game) startLevelUpLeech(uuid string) {
 	log.Println("Starting level up as leech, target level", game.Level+1)
 	game.Socket.LastCommandType = network.LevelUp
-	levelUpStatus := awaitLevelUpLeechUpdate(game, uuid)
-	if levelUpStatus {
-		log.Println("Successfully leveled up as leech, new level", game.Level+1)
-		game.Level += 1
+	fromServer, levelUpStatus := awaitLevelUpLeechUpdate(game, uuid)
+	if fromServer && levelUpStatus {
+		log.Println("Successfully leveled up as leech, new level", game.Level)
 		game.forkPlayer()
+	} else if !fromServer && levelUpStatus {
+		log.Println("Failed to level up as leech, target level", game.Level+1, ": server never notified level up")
 	} else {
 		log.Println("Failed to level up as leech, target level", game.Level+1)
 	}
@@ -245,9 +248,6 @@ func (game *Game) levelUpLeechLoop(uuid string) {
 
 // forkPlayer if there are no slots left in the team, to ensure that the team can reach level 8 eventually
 func (game *Game) forkPlayer() {
-	if game.Level != 2 {
-		return
-	}
 	game.Socket.SendCommand(network.GetUnusedSlots, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()

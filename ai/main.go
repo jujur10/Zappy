@@ -113,6 +113,7 @@ func main() {
 	game := ai.InitGame(serverConn, teamName, timeStep, slotsLeft, ai.RelativeCoordinates{dimX, dimY})
 	log.Println("AI initialized")
 	game.StartRoutines()
+	fmt.Println("AI", game.MessageManager.UUID, "connected, slots left", game.SlotsLeft)
 	game.MainLoop()
 	game.EndGame()
 }
