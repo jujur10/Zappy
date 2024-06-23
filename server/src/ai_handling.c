@@ -196,13 +196,14 @@ void handle_players(server_t PTR server, const fd_set PTR rfds,
 {
     uint16_t count_players = 0;
 
-    LOG("Start handling PLAYERS");
     for (int32_t i = 0; count_players < server->nb_players &&
     *select_ret > 0 && i < MAX_CLIENTS; i++) {
-        LOGF("Actual PLAYER %i", i)
+        LOGF("Handling the actual PLAYER : %i", i)
         if (0 == server->players[i].sock)
             continue;
         count_players++;
+        if (INTO_RITUAL == server->players[i].status)
+            continue;
         if (FAILURE == queue_empty(&server->players[i].queue)) {
             handle_players_wfds(server, i, wfds, select_ret);
             continue;
@@ -213,5 +214,4 @@ void handle_players(server_t PTR server, const fd_set PTR rfds,
         if (1 == handle_players_wfds(server, i, wfds, select_ret))
             continue;
     }
-    LOG("Stop handling PLAYERS")
 }
