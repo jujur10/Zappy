@@ -104,7 +104,9 @@ int32_t main(const int32_t argc, char *argv[])
     ::SetConfigFlags(FLAG_MSAA_4X_HINT);
     raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
     window.SetTargetFPS(60);
+#if !defined(DEBUG) || defined(NDEBUG)
     ::DisableCursor(); // Hides cursor and locks it to the window
+#endif
     raygui::GuiLoadStyleBluish();
     raygui::GuiUnlock();
 
