@@ -166,24 +166,29 @@ func Test_computeBasicPath(t *testing.T) {
 
 func Test_getTileDirection(t *testing.T) {
 	type args struct {
-		pos  RelativeCoordinates
-		tile RelativeCoordinates
+		pos       RelativeCoordinates
+		tile      RelativeCoordinates
+		worldSize RelativeCoordinates
 	}
 	tests := []struct {
 		name string
 		args args
 		want network.PlayerDirection
 	}{
-		{"Direction Right", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{2, 1}}, network.Right},
-		{"Direction Left", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{0, 1}}, network.Left},
-		{"Direction Down", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 0}}, network.Down},
-		{"Direction Up", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 2}}, network.Up},
-		{"Invalid direction same tile", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 1}}, -1},
-		{"Invalid direction diagonal", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{2, 2}}, -1},
+		{"Direction Right", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{2, 1}, worldSize: RelativeCoordinates{10, 10}}, network.Right},
+		{"Direction Right Wrap", args{pos: RelativeCoordinates{9, 1}, tile: RelativeCoordinates{0, 1}, worldSize: RelativeCoordinates{10, 10}}, network.Right},
+		{"Direction Left", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{0, 1}, worldSize: RelativeCoordinates{10, 10}}, network.Left},
+		{"Direction Left Wrap", args{pos: RelativeCoordinates{0, 1}, tile: RelativeCoordinates{9, 1}, worldSize: RelativeCoordinates{10, 10}}, network.Left},
+		{"Direction Down", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 0}, worldSize: RelativeCoordinates{10, 10}}, network.Down},
+		{"Direction Down Wrap", args{pos: RelativeCoordinates{1, 0}, tile: RelativeCoordinates{1, 9}, worldSize: RelativeCoordinates{10, 10}}, network.Down},
+		{"Direction Up", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 2}, worldSize: RelativeCoordinates{10, 10}}, network.Up},
+		{"Direction Up Wrap", args{pos: RelativeCoordinates{1, 9}, tile: RelativeCoordinates{1, 0}, worldSize: RelativeCoordinates{10, 10}}, network.Up},
+		{"Invalid direction same tile", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{1, 1}, worldSize: RelativeCoordinates{10, 10}}, -1},
+		{"Invalid direction diagonal", args{pos: RelativeCoordinates{1, 1}, tile: RelativeCoordinates{2, 2}, worldSize: RelativeCoordinates{10, 10}}, -1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getTileDirection(tt.args.pos, tt.args.tile); got != tt.want {
+			if got := getTileDirection(tt.args.pos, tt.args.tile, tt.args.worldSize); got != tt.want {
 				t.Errorf("getTileDirection() = %v, want %v", got, tt.want)
 			}
 		})

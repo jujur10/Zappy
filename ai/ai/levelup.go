@@ -61,7 +61,9 @@ func (game *Game) isLevelUpLeechAvailable() bool {
 // areLevelUpConditionsMet checks if all the level up conditions are met, i.e., enough food and
 // Enough resources to host a level up OR a level up leeching
 func (game *Game) areLevelUpConditionsMet() bool {
-	if getFoodPriority(&game.FoodManager.FoodPriority) >= 7 {
+	foodPrio := getFoodPriority(&game.FoodManager.FoodPriority)
+	log.Println("Food priority", foodPrio)
+	if foodPrio >= 7 {
 		return false
 	}
 	if game.isLevelUpLeechAvailable() {

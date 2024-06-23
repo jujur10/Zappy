@@ -213,58 +213,35 @@ func (game *Game) computePath() (Path, error) {
 	destination := poppedDest.value
 	origin := game.Coordinates.CoordsFromOrigin
 	worldSize := game.Coordinates.WorldSize
-	log.Println("Creating new path to", destination)
+	log.Println("Creating new path to", destination, "current position is", origin)
 
-	xDistance := Abs(destination[0] - origin[0])
-	xDistanceWrap := 0
-	if origin[0] > destination[0] {
-		xDistanceWrap = (destination[0] - origin[0] + worldSize[0]) % worldSize[0]
-	} else {
-		xDistanceWrap = (origin[0] - destination[0] + worldSize[0]) % worldSize[0]
-	}
-	xSign := 1
-	if xDistance != 0 {
-		xSign = (destination[0] - origin[0]) / xDistance
-	}
-	if xDistanceWrap < xDistance { // If wrapping around in X is shorter
-		xDistance = xDistanceWrap
-		xSign = 1
-		if xDistance != 0 {
-			xSign = ((destination[0] - origin[0] + worldSize[0]) % worldSize[0]) / xDistance
-		}
-	}
-
-	yDistance := Abs(destination[1] - origin[1])
-	yDistanceWrap := 0
-	if origin[1] > destination[1] {
-		yDistanceWrap = (destination[1] - origin[1] + worldSize[1]) % worldSize[1]
-	} else {
-		yDistanceWrap = (origin[1] - destination[1] + worldSize[1]) % worldSize[1]
-	}
-	ySign := 1
-	if yDistance != 0 {
-		ySign = (destination[1] - origin[1]) / yDistance
-	}
-	if yDistanceWrap < yDistance { // If wrapping around in Y is shorter
-		yDistance = yDistanceWrap
-		ySign = 1
-		if yDistance != 0 {
-			ySign = ((destination[1] - origin[1] + worldSize[1]) % worldSize[1]) / yDistance
-		}
-	}
+	distances, signs := getDistanceAndSign(origin, destination, worldSize)
+	xDistance := distances[0]
+	yDistance := distances[1]
+	xSign := signs[0]
+	ySign := signs[1]
 
 	middlePoints := getMiddlePoints(origin, destination, worldSize, game.Movement.TilesQueue)
 	if len(middlePoints) == 0 { // If there are no intermediate points to go through, make a basic path
+		log.Println("No middle points found, computing basic path")
 		return Path{destination: *poppedDest,
 			path: computeBasicPath(origin, destination, worldSize, xDistance, yDistance, xSign, ySign)}, nil
 	} // Else generate the most optimal path
 	// Get the middle points to go through
+	log.Println("Optimal distance", ManhattanDistance(origin, destination, worldSize))
 	selectedMiddlePoints := computeOptimalPath(origin, destination, worldSize, middlePoints)
+	if selectedMiddlePoints[len(selectedMiddlePoints)-1] != destination {
+		selectedMiddlePoints = append(selectedMiddlePoints, destination)
+	}
+	log.Println("Selected points", selectedMiddlePoints)
 	path := make([]RelativeCoordinates, 0)
 	lastOrigin := origin
 	for _, point := range selectedMiddlePoints { // Create the path linking all the points
-		pathPart := computeBasicPath(lastOrigin, point, worldSize, xDistance, yDistance, xSign, ySign)
+		segmentDist, _ := getDistanceAndSign(lastOrigin, point, worldSize)
+		pathPart := computeBasicPath(lastOrigin, point, worldSize, segmentDist[0],
+			segmentDist[1], xSign, ySign)
 		path = append(path, pathPart...)
+		lastOrigin = point
 	}
 	return Path{destination: *poppedDest, path: path}, nil
 }
@@ -277,6 +254,45 @@ func (game *Game) movePlayerForward() {
 	game.Coordinates.CoordsFromOrigin =
 		updatePosition(game.Coordinates.CoordsFromOrigin, game.Coordinates.WorldSize, game.Coordinates.Direction)
 	game.updateMovementQueueOnMove()
+}
+
+func getDistanceAndSign(origin, destination, worldSize RelativeCoordinates) (RelativeCoordinates, RelativeCoordinates) {
+	xDistance := Abs(destination[0] - origin[0])
+	xDistanceWrap := 0
+	xSignWrap := 1
+	if origin[0] > destination[0] {
+		xDistanceWrap = (destination[0] - origin[0] + worldSize[0]) % worldSize[0]
+	} else {
+		xDistanceWrap = (origin[0] - destination[0] + worldSize[0]) % worldSize[0]
+		xSignWrap = -1
+	}
+	xSign := 1
+	if xDistance != 0 {
+		xSign = (destination[0] - origin[0]) / xDistance
+	}
+	if xDistanceWrap < xDistance { // If wrapping around in X is shorter
+		xDistance = xDistanceWrap
+		xSign = xSignWrap
+	}
+
+	yDistance := Abs(destination[1] - origin[1])
+	yDistanceWrap := 0
+	ySignWrap := 1
+	if origin[1] > destination[1] {
+		yDistanceWrap = (destination[1] - origin[1] + worldSize[1]) % worldSize[1]
+	} else {
+		yDistanceWrap = (origin[1] - destination[1] + worldSize[1]) % worldSize[1]
+		ySignWrap = -1
+	}
+	ySign := 1
+	if yDistance != 0 {
+		ySign = (destination[1] - origin[1]) / yDistance
+	}
+	if yDistanceWrap < yDistance { // If wrapping around in Y is shorter
+		yDistance = yDistanceWrap
+		ySign = ySignWrap
+	}
+	return RelativeCoordinates{xDistance, yDistance}, RelativeCoordinates{xSign, ySign}
 }
 
 // turnLeft turns the player 90° left, and updates its direction
@@ -310,10 +326,16 @@ func (game *Game) updateMovementQueueOnMove() {
 
 // getTileDirection returns the direction in which the given tile is from the current position
 // Returns -1 in case of error
-func getTileDirection(pos RelativeCoordinates, tile RelativeCoordinates) network.PlayerDirection {
+func getTileDirection(pos, tile, worldSize RelativeCoordinates) network.PlayerDirection {
 	deltaX := tile[0] - pos[0]
 	deltaY := tile[1] - pos[1]
 	if deltaY == 0 { // Horizontal movement
+		if deltaX == worldSize[0]-1 {
+			return network.Left
+		}
+		if -deltaX == worldSize[0]-1 {
+			return network.Right
+		}
 		if deltaX > 0 {
 			return network.Right
 		}
@@ -322,6 +344,12 @@ func getTileDirection(pos RelativeCoordinates, tile RelativeCoordinates) network
 		}
 	}
 	if deltaX == 0 {
+		if deltaY == worldSize[1]-1 {
+			return network.Down
+		}
+		if -deltaY == worldSize[1]-1 {
+			return network.Up
+		}
 		if deltaY > 0 {
 			return network.Up
 		}
@@ -338,7 +366,7 @@ func (game *Game) moveToTile(tile RelativeCoordinates) {
 		log.Println("Error! Cannot move to non adjacent tile ", tile, ", position is ", game.Coordinates.CoordsFromOrigin)
 		return
 	}
-	direction := getTileDirection(game.Coordinates.CoordsFromOrigin, tile)
+	direction := getTileDirection(game.Coordinates.CoordsFromOrigin, tile, game.Coordinates.WorldSize)
 	if direction == -1 {
 		log.Println("Error targeted tile: Invalid direction !")
 		return
@@ -440,6 +468,8 @@ func (game *Game) followMessageDirection(direction network.EventDirection) {
 		log.Println("Invalid message direction:", direction)
 	}
 	for _, point := range pathToFollow {
+		point[0] %= worldSize[0]
+		point[1] %= worldSize[1]
 		game.moveToTile(point)
 		game.Socket.SendCommand(network.LookAround, network.EmptyBody)
 		_ = game.awaitResponseToCommand()
