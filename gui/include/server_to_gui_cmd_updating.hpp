@@ -54,7 +54,7 @@ void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdate
  * @param world The ecs world
  * @param newIncantation The received StartIncantationCommand command
  */
-void HandleStartIncantationCommand(const flecs::world &world, const StartIncantationCommand *newIncantation);
+void HandleStartIncantationCommand(const flecs::world &world, StartIncantationCommand *newIncantation);
 
 /**
  * @brief Process the EndIncantation command

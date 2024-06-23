@@ -63,7 +63,7 @@ void ParseGuiCommands(const flecs::iter &it)
             }
             case 5:
             {
-                if (auto const *const playerLevel = std::get_if<StartIncantationCommand>(&cmd))
+                if (auto *const playerLevel = std::get_if<StartIncantationCommand>(&cmd))
                 {
                     HandleStartIncantationCommand(world, playerLevel);
                 }

@@ -197,9 +197,9 @@ void HandleStartIncantationCommand(const flecs::world &world, StartIncantationCo
     tile.set<player::IncantationInfo>({
         .state = player::IncantationState::kInProgress,
         .frameLeftForIcon = 120,
+        .nbPlayers = newIncantation->playerCount,
         .distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14}),
-        .playerIds = std::move(newIncantation->playerIds),
-        .nbPlayers = newIncantation->playerCount
+        .playerIds = std::move(newIncantation->playerIds)
     });
 }
 
