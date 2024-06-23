@@ -224,10 +224,9 @@ void handle_new_clients(server_t PTR server, const fd_set PTR rfds,
 {
     uint16_t count_client = 0;
 
-    LOG("Start handling new clients");
     for (int32_t i = 0; count_client < server->nb_clients &&
     *select_ret > 0 && i < MAX_CLIENTS; i++) {
-        LOGF("Actual client %i", i)
+        LOGF("Handling the actual NEW CLIENT : %i", i)
         if (0 == server->clients[i].sock)
             continue;
         count_client++;
@@ -236,5 +235,4 @@ void handle_new_clients(server_t PTR server, const fd_set PTR rfds,
         if (1 == handle_client_wfds(server, i, wfds, select_ret))
             continue;
     }
-    LOG("Stop handling new clients")
 }

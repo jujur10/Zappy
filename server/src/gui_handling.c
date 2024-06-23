@@ -162,9 +162,9 @@ void handle_guis(server_t PTR server, const fd_set PTR rfds,
 {
     uint16_t count_guis = 0;
 
-    LOG("Start handling GUIs");
     for (int32_t i = 0; count_guis < server->nb_guis &&
     *select_ret > 0 && i < MAX_CLIENTS; i++) {
+        LOGF("Handling the actual GUI : %i", i)
         if (0 == server->guis[i].sock)
             continue;
         count_guis++;
@@ -179,5 +179,4 @@ void handle_guis(server_t PTR server, const fd_set PTR rfds,
         if (1 == handle_guis_wfds(server, i, wfds, select_ret))
             continue;
     }
-    LOG("Stop handling GUIs")
 }

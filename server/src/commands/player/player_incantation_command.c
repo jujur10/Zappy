@@ -63,6 +63,32 @@ static uint16_t get_nb_of_players_ready(const player_t ARRAY players,
     return player_counter;
 }
 
+/// @brief Function which sets the incantation's available players into the
+// incantation's status.
+///
+/// @param players The players array.
+/// @param nb_of_players The number of players into the array.
+/// @param player_idx The player's index of the player at the origin of the
+/// incantation.
+static void set_players_into_incantation(player_t ARRAY players,
+    uint16_t nb_of_players, uint16_t player_idx)
+{
+    const player_t *player = &players[player_idx];
+    player_t *other_player;
+
+    for (uint16_t i = 0; i < nb_of_players; i++) {
+        other_player = &players[i];
+        if (i == player_idx)
+            continue;
+        if (false == is_coordinates_equal(&player->coordinates,
+        &other_player->coordinates))
+            continue;
+        if (player->level != other_player->level)
+            continue;
+        other_player->status = INTO_RITUAL;
+    }
+}
+
 /// @brief Function which verifies the players requirements.
 ///
 /// @param players The players array.
@@ -112,6 +138,8 @@ void execute_player_incantation_command(server_t PTR server,
     player_t *player = &server->players[player_idx];
 
     if (true == verify_requirements(server, player_idx)) {
+        set_players_into_incantation(server->players, server->nb_players,
+            player_idx);
         send_pic_to_guis(server, player_idx);
         create_message("Elevation underway\n", 19, &message);
         message.event.player_event = PLAYER_EVENT_INCANTATION;
