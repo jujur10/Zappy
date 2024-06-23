@@ -109,6 +109,38 @@ void ParseGuiCommands(const flecs::iter &it)
                 }
                 break;
             }
+            case 11:
+            {
+                if (auto const *const playerLevel = std::get_if<PlayerLevelCommand>(&cmd))
+                {
+                    HandlePlayerLevelCommand(world, playerLevel);
+                }
+                break;
+            }
+            case 12:
+            {
+                if (auto const *const eggLaid = std::get_if<EggLaidCommand>(&cmd))
+                {
+                    HandleEggLaidCommand(world, eggLaid);
+                }
+                break;
+            }
+            case 13:
+            {
+                if (auto const *const connectionOnEgg = std::get_if<ConnectionOnEggCommand>(&cmd))
+                {
+                    HandleConnectionOnEggCommand(world, connectionOnEgg);
+                }
+                break;
+            }
+            case 14:
+            {
+                if (auto const *const deathOfEgg = std::get_if<DeathOfEggCommand>(&cmd))
+                {
+                    HandleDeathOfEggCommand(world, deathOfEgg);
+                }
+                break;
+            }
             // Other command cases to be added here
             default:;
         }
