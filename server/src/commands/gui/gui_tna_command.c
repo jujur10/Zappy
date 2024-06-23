@@ -10,10 +10,10 @@
 void execute_gui_tna_command(server_t PTR server, uint16_t gui_idx,
     UNUSED const gui_command_t PTR command)
 {
-    msg_t message;
+    msg_t message = {};
     const buffer_t *tna_buffer = &server->generated_buffers
         .buffers[PRE_TNA_RESPONSE];
 
-    create_message(tna_buffer->ptr, tna_buffer->len, &message);
+    create_message_from_buffer(tna_buffer, &message);
     add_msg_to_queue(&server->guis[gui_idx].queue, &message);
 }

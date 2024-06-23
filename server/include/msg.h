@@ -12,14 +12,18 @@
 
 #include "style/status.h"
 #include "utils/string/buffer.h"
+#include "events.h"
 
 /// @brief Structure representing message.
 ///
 /// @var len The message len.
 /// @var ptr The pointer on message data.
+/// @var event The event.
+/// @var to_free Boolean indicating if the pointer (ptr) is to free.
 typedef struct msg_s {
     uint32_t len;
     char ARRAY ptr;
+    event_t event;
     bool to_free;
 } msg_t;
 
@@ -30,14 +34,6 @@ typedef struct msg_s {
 /// @param message The pointer on the structure to fill.
 /// @return Success or failure if the allocation failed.
 status_t create_message(const char ARRAY msg_content, uint32_t len,
-    msg_t PTR message);
-
-/// @brief Function which creates a message without allocation.
-///
-/// @param ptr The pointer on the buffer to send.
-/// @param len The data length.
-/// @param message The pointer on the structure to fill.
-void create_message_from_ptr(char ARRAY ptr, uint32_t len,
     msg_t PTR message);
 
 /// @brief Function which creates a message from an existing buffer.

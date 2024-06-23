@@ -10,6 +10,8 @@
 #include "queue/msg_queue.h"
 #include "commands/command_utils.h"
 #include "utils/itoa/fast_itoa.h"
+#include "game_settings.h"
+#include "logging.h"
 
 /// @brief Constant representing the max buffer size for the string
 /// representation of the inventory.
@@ -65,7 +67,7 @@ static uint32_t write_inventory_as_chars(char ARRAY buffer,
         (PHIRAS_STR) - 1, inventory->attr.phiras);
     wrote += write_string_with_nb(buffer + wrote, THYSTAME_STR, sizeof
         (THYSTAME_STR) - 1, inventory->attr.thystame);
-    buffer[wrote - 2] = ']';
+    memcpy(buffer + wrote - 2, "]\n", 2);
     return wrote;
 }
 
@@ -75,9 +77,16 @@ void execute_player_inventory_command(server_t PTR server, uint16_t player_idx,
     char buffer[INVENTORY_STRING_MAX_LENGTH];
     const inventory_t *inventory = &server->players[player_idx].inventory;
     uint32_t wrote;
-    msg_t message;
+    msg_t message = {};
 
     wrote = write_inventory_as_chars(buffer, inventory);
-    create_message(buffer, wrote - 1, &message);
+    create_message(buffer, wrote, &message);
+    LOGF("[food %hu, linemate %hu, deraumere %hu, sibur %hu, mendiane %hu, "
+    "phiras %hu, thystame %hu]", inventory->attr.food, inventory->attr
+    .linemate, inventory->attr.deraumere, inventory->attr.sibur,
+    inventory->attr.mendiane, inventory->attr.phiras, inventory->attr
+    .thystame)
     add_msg_to_queue(&server->players[player_idx].queue, &message);
+    add_time_limit_to_player(server->time_units, PLAYER_INVENTORY_WAIT,
+        &server->players[player_idx]);
 }

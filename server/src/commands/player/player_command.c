@@ -18,7 +18,8 @@ static void (* const player_commands[PLAYER_NB_OF_CMD])(server_t PTR server,
     execute_player_broadcast_command, execute_player_connect_nbr_command,
     execute_player_fork_command, execute_player_eject_command,
     execute_player_take_command, execute_player_set_command,
-    NULL, execute_player_frequency_command, execute_player_direction_command
+    execute_player_incantation_command, execute_player_frequency_command,
+    execute_player_direction_command
 };
 
 status_t get_next_player_command(

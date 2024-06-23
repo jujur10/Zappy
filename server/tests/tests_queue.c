@@ -13,7 +13,7 @@
 
 Test(TEST_QUEUE, test_queue_1)
 {
-    msg_t message;
+    msg_t message = {};
     msg_queue_head_t queue;
 
     TAILQ_INIT(&queue);
@@ -26,7 +26,7 @@ Test(TEST_QUEUE, test_queue_1)
 
 Test(TEST_QUEUE, test_queue_2)
 {
-    msg_t message;
+    msg_t message = {};
     msg_queue_head_t queue;
 
     TAILQ_INIT(&queue);

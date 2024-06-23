@@ -63,6 +63,7 @@ typedef struct server_s {
     gui_t guis[MAX_CLIENTS];
     uint16_t nb_guis;
     team_t ARRAY teams;
+    uint16_t egg_counter;
     map_t map;
 } server_t;
 
@@ -70,3 +71,7 @@ typedef struct server_s {
 /// @param args The parsed program parameters.
 /// @return 0 on success, 84 on failure.
 uint8_t run_server(const argument_t PTR args);
+
+/// @brief Function which is used to handle new connections.
+/// @param server The server structure.
+void on_connection(server_t PTR server);

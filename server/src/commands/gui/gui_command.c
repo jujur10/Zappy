@@ -9,6 +9,7 @@
 #include "style/status.h"
 #include "server.h"
 #include "commands/gui_commands.h"
+#include "msg.h"
 
 static void (* const gui_commands[GUI_NB_OF_CMD])(server_t PTR server,
     uint16_t gui_idx, const gui_command_t PTR command) = {
@@ -31,6 +32,29 @@ status_t get_next_gui_command(gui_command_buffer_t PTR gui_command_buffer,
     memset(gui_command_buffer->commands + gui_command_buffer->nb_of_command,
         0, sizeof(gui_command_t));
     return SUCCESS;
+}
+
+void send_message_to_guis(server_t PTR server, const char PTR ptr,
+    uint32_t len)
+{
+    msg_t message = {};
+
+    for (uint16_t i = 0; i < server->nb_guis; i++) {
+        create_message(ptr, len, &message);
+        add_msg_to_queue(&server->guis[i].queue, &message);
+    }
+}
+
+void send_buffer_to_guis(server_t PTR server, buffer_t PTR buffer,
+    gui_event_t gui_event)
+{
+    msg_t message = {};
+
+    create_message_from_buffer(buffer, &message);
+    message.event.gui_event = gui_event;
+    for (uint16_t i = 0; i < server->nb_guis; i++) {
+        add_msg_to_queue(&server->guis[i].queue, &message);
+    }
 }
 
 void execute_gui_command(server_t PTR server, uint16_t gui_idx,

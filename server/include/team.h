@@ -11,6 +11,20 @@
 
 #include "arguments.h"
 #include "coordinates.h"
+#include "style/status.h"
+
+/// @brief Redefinition.
+typedef struct server_s server_t;
+typedef struct player_s player_t;
+
+/// @brief Structure representing an egg.
+///
+/// @var index The index of the egg.
+/// @var egg_coordinates The egg coordinates.
+typedef struct egg_s {
+    uint16_t index;
+    coordinates_t egg_coordinates;
+} egg_t;
 
 /// @brief Structure representing teams.
 ///
@@ -24,17 +38,18 @@ typedef struct team_s {
     const char ARRAY name;
     uint16_t ARRAY players_idx;
     uint16_t nb_of_players;
-    uint16_t max_nb_of_players;
     uint16_t nb_of_eggs;
     uint16_t nb_of_allocated_eggs;
-    coordinates_t ARRAY eggs_coordinates;
+    egg_t ARRAY eggs;
 } team_t;
 
 /// @brief Function which initializes teams.
 /// @param args The parsed program parameters.
 /// @param teams The teams to initialize.
+/// @param egg_counter The egg counter of the server.
 /// @return 0 on success, 1 on failure.
-uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams);
+uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams,
+    uint16_t PTR egg_counter);
 
 /// @brief Function which destroys teams.
 /// @param args The parsed program parameters.
@@ -53,3 +68,34 @@ int32_t get_team_index_by_name(const team_t ARRAY teams, uint32_t nb_of_teams,
 /// @param team The team.
 /// @return The number of unused slots for the team.
 uint16_t get_nb_of_unused_slot(const team_t PTR team);
+
+/// @brief Function which adds a player to a team (if possible).
+///
+/// @param server The server structure.
+/// @param team_idx The team we want to assign the player to.
+/// @param player_idx The player to add to the team.
+/// @return SUCCESS if the player has been added successfully, FAILURE if not.
+status_t try_add_player_to_team(server_t PTR server, uint16_t team_idx,
+    uint16_t player_idx);
+
+/// @brief Function used to remove a player from a team.
+///
+/// @param server The server structure.
+/// @param player_idx The player to add to the team.
+void remove_player_from_team(server_t PTR server, uint16_t player_idx);
+
+/// @brief Function which add an egg to a team.
+///
+/// @param server The server structure.
+/// @param team The team where you have to add the egg.
+/// @param egg_coordinates The egg coordinates.
+status_t try_add_egg_to_team(server_t PTR server, team_t PTR team,
+    const coordinates_t PTR egg_coordinates);
+
+/// @brief Function used to destroy an egg properly with a notification to
+/// the guis.
+///
+/// @param server The server structure.
+/// @param team The concerned team.
+/// @param egg_index The egg index in the team structure to destroy.
+void destroy_egg(server_t PTR server, team_t PTR team, uint16_t egg_index);

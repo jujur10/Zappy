@@ -12,7 +12,7 @@ void execute_gui_sgt_command(server_t PTR server, uint16_t gui_idx,
     UNUSED const gui_command_t PTR command)
 {
     char buffer[50] = "sgt ";
-    msg_t message;
+    msg_t message = {};
     uint32_t count = 4;
 
     write_nb_to_buffer(server->frequency, buffer, &count);

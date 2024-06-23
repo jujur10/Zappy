@@ -14,7 +14,7 @@ void execute_player_frequency_command(server_t PTR server, uint16_t player_idx,
     char msg_content[sizeof("frequency: ") + sizeof("4294967295")] =
         {"frequency: "};
     player_t *player = &server->players[player_idx];
-    msg_t message;
+    msg_t message = {};
     uint64_t wrote;
 
     wrote = fast_itoa_u32(server->frequency, msg_content +

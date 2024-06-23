@@ -40,7 +40,7 @@ typedef enum {
     PRE_LOOK_RESPONSE_BUFFER,
     PRE_BROADCAST_MSG,
     PRE_GENERATED_ARR_LEN
-} generated_enum_t;
+} generated_buffer_enum_t;
 
 /// @brief Welcome message.
 #define WELCOME_MSG "WELCOME\n"

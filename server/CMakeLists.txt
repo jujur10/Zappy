@@ -22,6 +22,7 @@ add_executable(zappy_server
     src/commands/gui/gui_pin_command.c
     src/commands/gui/gui_plv_command.c
     src/commands/gui/gui_ppo_command.c
+    src/commands/gui/gui_responses.c
     src/commands/gui/gui_sgt_command.c
     src/commands/gui/gui_sst_command.c
     src/commands/gui/gui_tna_command.c
@@ -43,6 +44,27 @@ add_executable(zappy_server
     src/commands/player/player_set_command.c
     src/commands/player/player_take_command.c
     src/coordinates.c
+    src/eggs.c
+    src/events/gui/gui_enw_event.c
+    src/events/gui/gui_events.c
+    src/events/gui/gui_none_event.c
+    src/events/gui/gui_pbc_event.c
+    src/events/gui/gui_pdr_event.c
+    src/events/gui/gui_pex_event.c
+    src/events/gui/gui_pfk_event.c
+    src/events/gui/gui_pgt_event.c
+    src/events/gui/gui_pic_event.c
+    src/events/gui/gui_pnw_event.c
+    src/events/gui/gui_update_mct_event.c
+    src/events/new_client/new_client_event.c
+    src/events/new_client/new_client_new_slot_available_event.c
+    src/events/new_client/new_client_none_event.c
+    src/events/player/player_death_event.c
+    src/events/player/player_events.c
+    src/events/player/player_events.c
+    src/events/player/player_incantation_event.c
+    src/events/player/player_none_event.c
+    src/gui.c
     src/gui_handling.c
     src/main.c
     src/map.c
@@ -59,6 +81,7 @@ add_executable(zappy_server
     src/socket/create_socket.c
     src/swap_clients.c
     src/team.c
+    src/team_management.c
     src/utils/arrays/arrays_u32.c
     src/utils/arrays/arrays_u64.c
     src/utils/arrays/arrays_virtual.c
@@ -74,6 +97,7 @@ add_executable(zappy_server
 
 target_include_directories(zappy_server PRIVATE
     include
+    tests/include
 )
 
 target_link_libraries(zappy_server PRIVATE
@@ -119,23 +143,68 @@ if (DEFINED RUN_TESTS)
         src/commands/gui/gui_pin_command.c
         src/commands/gui/gui_plv_command.c
         src/commands/gui/gui_ppo_command.c
+        src/commands/gui/gui_responses.c
         src/commands/gui/gui_sgt_command.c
         src/commands/gui/gui_sst_command.c
         src/commands/player/player_broadcast_command.c
+        src/commands/player/player_broadcast_command.c
+        src/commands/player/player_command.c
+        src/commands/player/player_command.c
         src/commands/player/player_command_parsing.c
+        src/commands/player/player_command_parsing.c
+        src/commands/player/player_connect_nbr_command.c
         src/commands/player/player_direction_command.c
+        src/commands/player/player_direction_command.c
+        src/commands/player/player_eject_command.c
+        src/commands/player/player_fork_command.c
+        src/commands/player/player_forward_command.c
         src/commands/player/player_frequency_command.c
+        src/commands/player/player_frequency_command.c
+        src/commands/player/player_incantation_command.c
+        src/commands/player/player_incantation_command.c
+        src/commands/player/player_inventory_command.c
         src/commands/player/player_inventory_command.c
         src/commands/player/player_look_command.c
+        src/commands/player/player_look_command.c
+        src/commands/player/player_none_command.c
         src/commands/player/player_responses.c
+        src/commands/player/player_responses.c
+        src/commands/player/player_right_left_command.c
+        src/commands/player/player_set_command.c
+        src/commands/player/player_take_command.c
         src/coordinates.c
+        src/eggs.c
+        src/events/gui/gui_enw_event.c
+        src/events/gui/gui_events.c
+        src/events/gui/gui_none_event.c
+        src/events/gui/gui_pbc_event.c
+        src/events/gui/gui_pdr_event.c
+        src/events/gui/gui_pex_event.c
+        src/events/gui/gui_pfk_event.c
+        src/events/gui/gui_pgt_event.c
+        src/events/gui/gui_pic_event.c
+        src/events/gui/gui_pnw_event.c
+        src/events/gui/gui_update_mct_event.c
+        src/events/new_client/new_client_event.c
+        src/events/new_client/new_client_new_slot_available_event.c
+        src/events/new_client/new_client_none_event.c
+        src/events/player/player_death_event.c
+        src/events/player/player_events.c
+        src/events/player/player_incantation_event.c
+        src/events/player/player_none_event.c
+        src/gui.c
         src/gui_handling.c
         src/map.c
         src/map_buffer.c
         src/msg.c
+        src/new_clients_handling.c
+        src/player.c
         src/player.c
         src/queue/queue_utils_msg.c
+        src/resource.c
+        src/swap_clients.c
         src/team.c
+        src/team_management.c
         src/utils/arrays/arrays_u32.c
         src/utils/arrays/arrays_u64.c
         src/utils/arrays/arrays_virtual.c
@@ -166,6 +235,7 @@ if (DEFINED RUN_TESTS)
 
     target_include_directories(test_zappy_server PRIVATE
         include
+        tests/include
     )
 
     target_link_libraries(test_zappy_server PRIVATE

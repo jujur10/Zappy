@@ -12,8 +12,8 @@
 void execute_gui_msz_command(server_t PTR server, uint16_t gui_idx,
     UNUSED const gui_command_t PTR command)
 {
-    char buffer[30] = "msz ";
-    msg_t message;
+    char buffer[4 + (2 * UINT32_MAX_DIGITS) + 1] = "msz ";
+    msg_t message = {};
     const buffer_t *world_dims_buffer = &server->generated_buffers
         .buffers[PRE_WORLD_DIM_BUFFER];
 

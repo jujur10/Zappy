@@ -15,7 +15,7 @@ Test(TEST_PLAYER_FREQUENCY_COMMAND, test_player_frequency_command_1)
 {
     server_t server = {};
     player_t *player = &server.players[0];
-    msg_t message;
+    msg_t message = {};
     char msg_content[50];
 
     TAILQ_INIT(&player->queue);

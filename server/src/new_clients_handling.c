@@ -15,10 +15,11 @@
 #include "queue/msg_queue.h"
 #include "swap_clients.h"
 #include "logging.h"
+#include "events/new_client_events.h"
 
 void init_new_client(server_t PTR server, new_client_t PTR client)
 {
-    msg_t message;
+    msg_t message = {};
 
     server->nb_clients++;
     TAILQ_INIT(&client->queue);
@@ -53,14 +54,19 @@ void destroy_new_client(server_t PTR server, uint32_t client_idx,
 static bool new_client_is_a_gui(server_t PTR server,
     uint64_t team_name_length, uint32_t client_idx, char ARRAY buffer)
 {
+    msg_t message = {};
+
     if (team_name_length + 1 == sizeof(GUI_TEAM) - 1 &&
     0 == strncmp(buffer, GUI_TEAM, sizeof(GUI_TEAM) - 1)) {
-        LOG("Start swapping new client to GUI")
+        LOG("Start swapping new client to GUI");
         if (FAILURE == transform_new_client_to_gui(server, client_idx)) {
             ERROR("Failed to accept new client in GUI's array")
             server->clients[client_idx].expiration = server->clock;
             add_to_clock(&server->clients[client_idx].expiration,
             AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
+            create_message((char *)&(int32_t){-1}, sizeof(int32_t), &message);
+            message.event.new_client_event = NEW_CLIENT_EVENT_VERIFY_GUI_SLOT;
+            add_msg_to_queue(&server->clients[client_idx].queue, &message);
         }
         return true;
     }
@@ -78,6 +84,7 @@ static void new_client_is_an_ai(server_t PTR server,
 {
     int32_t team_index = get_team_index_by_name(server->teams,
     server->args->nb_of_teams, buffer, (uint32_t)team_name_length);
+    msg_t message = {};
 
     if (-1 == team_index)
         return destroy_new_client(server, client_idx, false);
@@ -87,6 +94,9 @@ static void new_client_is_an_ai(server_t PTR server,
         server->clients[client_idx].expiration = server->clock;
         add_to_clock(&server->clients[client_idx].expiration,
         AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
+        create_message((char *)&team_index, sizeof(int32_t), &message);
+        message.event.new_client_event = NEW_CLIENT_EVENT_VERIFY_AI_SLOT;
+        add_msg_to_queue(&server->clients[client_idx].queue, &message);
     }
 }
 
@@ -100,9 +110,9 @@ static void new_client_is_an_ai(server_t PTR server,
 /// @param client The client index of the client who sent the message.
 static void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
 {
-    static char buffer[64];
-    int64_t bytes_received = read(server->clients[client_idx].sock, buffer,
-    sizeof(buffer));
+    static char buffer[65];
+    int64_t bytes_received =
+        read(server->clients[client_idx].sock, buffer, sizeof(buffer) - 1);
     uint64_t team_name_length;
 
     if (bytes_received < 1) {
@@ -110,6 +120,7 @@ static void on_new_client_rcv(server_t PTR server, uint32_t client_idx)
         return destroy_new_client(server, client_idx, false);
     }
     LOGF("Client received : %.*s", (int32_t)bytes_received, buffer)
+    buffer[bytes_received] = '\0';
     team_name_length = strcspn(buffer, "\n");
     if (true == new_client_is_a_gui(server, team_name_length, client_idx,
     buffer))
@@ -149,12 +160,11 @@ static uint8_t handle_client_rfds(server_t PTR server, uint32_t client_idx,
     LOG("Start handle client rfds");
     switch (is_ready(server, &server->clients[client_idx], rfds)) {
         case 0:
-            destroy_new_client(server, client_idx, false);
+            on_new_client_rcv(server, client_idx);
             (*select_ret)--;
             LOG("Stop handle client rfds 1")
             return 1;
         case 1:
-            on_new_client_rcv(server, client_idx);
             (*select_ret)--;
             LOG("Stop handle client rfds 2")
             return 1;
@@ -166,15 +176,18 @@ static uint8_t handle_client_rfds(server_t PTR server, uint32_t client_idx,
 
 /// @brief Function which pop message from the queue and send it.
 /// @param client The current client.
-static void send_next_message_from_queue(new_client_t PTR client)
+static void send_next_message_from_queue(server_t PTR server,
+    uint32_t client_idx)
 {
     msg_t msg;
 
-    if (FAILURE == pop_msg(&client->queue, &msg))
+    if (FAILURE == pop_msg(&server->clients[client_idx].queue, &msg))
+        return;
+    if (false == execute_new_client_event_function(server, client_idx, &msg))
         return;
     LOGF("Send msg from queue (new client sock %i) : %.*s", client->sock, msg
     .len, msg.ptr)
-    write(client->sock, msg.ptr, msg.len);
+    write(server->clients[client_idx].sock, msg.ptr, msg.len);
     destroy_message(&msg);
 }
 
@@ -192,12 +205,11 @@ static uint8_t handle_client_wfds(server_t PTR server, uint32_t client_idx,
     LOG("Start handle client wfds");
     switch (is_ready(server, &server->clients[client_idx], wfds)) {
         case 0:
-            destroy_new_client(server, client_idx, false);
+            send_next_message_from_queue(server, client_idx);
             (*select_ret)--;
             LOG("Stop handle client wfds 1")
             return 1;
         case 1:
-            send_next_message_from_queue(&server->clients[client_idx]);
             (*select_ret)--;
             LOG("Stop handle client wfds 2")
             return 1;
@@ -213,8 +225,8 @@ void handle_new_clients(server_t PTR server, const fd_set PTR rfds,
     uint16_t count_client = 0;
 
     LOG("Start handling new clients");
-    for (int32_t i = 0; count_client < server->nb_clients && *select_ret > 0
-    && i < MAX_CLIENTS; i++) {
+    for (int32_t i = 0; count_client < server->nb_clients &&
+    *select_ret > 0 && i < MAX_CLIENTS; i++) {
         LOGF("Actual client %i", i)
         if (0 == server->clients[i].sock)
             continue;

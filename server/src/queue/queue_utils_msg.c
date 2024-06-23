@@ -68,7 +68,7 @@ void clear_msg_queue(msg_queue_head_t PTR msg_queue)
 status_t add_buffer_to_queue(msg_queue_head_t PTR msg_queue,
     const buffer_t PTR buffer)
 {
-    msg_t message;
+    msg_t message = {};
 
     create_message_from_buffer(buffer, &message);
     return add_msg_to_queue(msg_queue, &message);

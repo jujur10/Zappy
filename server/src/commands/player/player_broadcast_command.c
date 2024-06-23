@@ -4,8 +4,10 @@
 ** File description:
 ** player_broadcast_command.c.
 */
+#include <stdlib.h>
 #include "server.h"
 #include "utils/itoa/fast_itoa.h"
+#include "game_settings.h"
 
 /// @brief There is always 8 cells around a point in a 2d array.
 static const int32_t NB_OF_CELLS_AROUND_CENTER = 8;
@@ -85,27 +87,28 @@ static int32_t get_shortest_direction(const map_t PTR map,
 static void broadcast_message_to_player(player_t PTR player,
     const buffer_t PTR message_buffer, int32_t direction)
 {
-    msg_t message;
+    msg_t message = {};
 
-    fast_itoa_u32(direction, message_buffer->ptr + 8);
-    create_message_from_ptr(message_buffer->ptr, message_buffer->len,
+    create_message(message_buffer->ptr, message_buffer->len,
         &message);
+    fast_itoa_u32(direction, message.ptr + 8);
     add_msg_to_queue(&player->queue, &message);
 }
 
-void execute_player_broadcast_command(server_t PTR server, uint16_t player_idx,
-    const player_command_t PTR command)
+/// @brief Function used to broadcast the message to all the players.
+///
+/// @param server The server structure.
+/// @param player_idx The sender's index (into the player's array).
+/// @param buffer The buffer containing the message.
+static void broadcast_message_to_players(server_t PTR server,
+    uint16_t player_idx, buffer_t PTR buffer)
 {
-    player_t *sender = &server->players[player_idx];
-    player_t *receiver;
+    const player_t *sender = &server->players[player_idx];
     const coordinates_t *sender_coo = &sender->coordinates;
+    player_t *receiver;
     const coordinates_t *receiver_coo;
     int32_t direction;
-    buffer_t *buffer = &server->generated_buffers.buffers[PRE_BROADCAST_MSG];
 
-    buffer->len = sizeof(MESSAGE_STR) - 1;
-    append_to_buffer_from_chars(buffer, command->argument.ptr,
-        command->argument.len);
     for (uint32_t i = 0; i < server->nb_players; i++) {
         if (i == player_idx)
             continue;
@@ -115,5 +118,36 @@ void execute_player_broadcast_command(server_t PTR server, uint16_t player_idx,
             0 : get_shortest_direction(&server->map, sender, receiver);
         broadcast_message_to_player(receiver, buffer, direction);
     }
+}
+
+/// @brief Function which prepares the broadcast buffer.
+/// - Set the length to the start of a broadcast message "message K, ".
+/// - Append the message after the start of the message.
+/// - Append a '\n'.
+/// - Free the argument of the command (not used anymore).
+///
+/// @param buffer The buffer to prepares.
+/// @param command The player's command (containing the message).
+static void prepare_broadcast_buffer(buffer_t PTR buffer,
+    const player_command_t PTR command)
+{
+    buffer->len = sizeof(MESSAGE_STR) - 1;
+    append_to_buffer_from_chars(buffer, command->argument.ptr,
+        command->argument.len);
+    append_to_buffer_from_chars(buffer, "\n", 1);
+    free(command->argument.ptr);
+}
+
+void execute_player_broadcast_command(server_t PTR server, uint16_t player_idx,
+    const player_command_t PTR command)
+{
+    player_t *sender = &server->players[player_idx];
+    buffer_t *buffer = &server->generated_buffers.buffers[PRE_BROADCAST_MSG];
+
+    prepare_broadcast_buffer(buffer, command);
+    send_pbc_to_guis(server, buffer, player_idx);
+    broadcast_message_to_players(server, player_idx, buffer);
+    add_time_limit_to_player(server->time_units, PLAYER_BROADCAST_WAIT,
+        sender);
     player_ok_response(server, sender);
 }

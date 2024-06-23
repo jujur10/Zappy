@@ -7,9 +7,11 @@
 #include "server.h"
 #include "resources.h"
 #include "game_settings.h"
+#include "commands/player_commands.h"
+#include "commands/command_utils.h"
 
 /// @brief Array of resources_t representing the needed elements for elevation.
-static const resources_t elevation_requirements[] = {
+const resources_t elevation_requirements[] = {
     {{0, 1, 0, 0, 0, 0, 0, 1}},
     {{0, 1, 1, 1, 0, 0, 0, 2}},
     {{0, 2, 0, 1, 0, 2, 0, 2}},
@@ -50,11 +52,9 @@ static uint16_t get_nb_of_players_ready(const player_t ARRAY players,
     uint16_t player_counter = 0;
 
     for (uint16_t i = 0; i < nb_of_players; i++) {
-        if (i == player_idx)
-            continue;
         other_player = &players[i];
         if (false == is_coordinates_equal(&player->coordinates,
-            &other_player->coordinates))
+        &other_player->coordinates))
             continue;
         if (player->level != other_player->level)
             continue;
@@ -77,8 +77,8 @@ static bool verify_player_requirements(const player_t ARRAY players,
     uint16_t nb_of_players_ready = get_nb_of_players_ready(players,
         nb_of_players, player_idx);
 
-    if (nb_of_players_ready < elevation_requirements[player->level + 1]
-    .attr.players)
+    if (nb_of_players_ready <
+    elevation_requirements[player->level].attr.players)
         return false;
     return true;
 }
@@ -92,16 +92,15 @@ static bool verify_player_requirements(const player_t ARRAY players,
 /// @param player_idx The player index of the player at the origin of
 /// incantation.
 /// @return True for success, False for failure.
-static bool verify_requirements(server_t PTR server,
-    uint16_t player_idx)
+bool verify_requirements(server_t PTR server, uint16_t player_idx)
 {
     const player_t *player = &server->players[player_idx];
-    const resources_t *current_tile = &server->map.tiles[(player->coordinates
-        .y * server->map.width) + player->coordinates.x];
+    const resources_t *current_tile = get_resource_tile_by_coordinates
+        (&server->map, &player->coordinates);
 
-    if (true == verify_tile_requirements(current_tile, player->level + 1) &&
-        true == verify_player_requirements(server->players, server->nb_players,
-        player_idx))
+    if (true == verify_tile_requirements(current_tile, player->level) &&
+    true == verify_player_requirements(server->players, server->nb_players,
+    player_idx))
         return true;
     return false;
 }
@@ -109,13 +108,15 @@ static bool verify_requirements(server_t PTR server,
 void execute_player_incantation_command(server_t PTR server,
     uint16_t player_idx, UNUSED const player_command_t PTR command)
 {
-    msg_t message;
+    msg_t message = {};
     player_t *player = &server->players[player_idx];
 
     if (true == verify_requirements(server, player_idx)) {
-        create_message_from_ptr("Elevation underway\n", 19, &message);
+        send_pic_to_guis(server, player_idx);
+        create_message("Elevation underway\n", 19, &message);
+        message.event.player_event = PLAYER_EVENT_INCANTATION;
         add_msg_to_queue(&player->queue, &message);
-        add_time_limit_to_player(server->time_units,
+        return add_time_limit_to_player(server->time_units,
             PLAYER_INCANTATION_WAIT, player);
     }
     return player_ko_response(server, player);

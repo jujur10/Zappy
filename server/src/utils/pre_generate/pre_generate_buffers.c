@@ -17,10 +17,10 @@
 
 /// @brief Constant representing the max size in byte for a string
 // representation of a tile.
-static const uint64_t MAX_SIZE_FOR_A_TILE = sizeof(FOOD_STR) +
-sizeof(LINEMATE_STR) + sizeof(DERAUMERE_STR) + sizeof(SIBUR_STR) +
-sizeof(MENDIANE_STR) + sizeof(PHIRAS_STR) + sizeof(THYSTAME_STR) +
-sizeof(PLAYER_STR) + 1;
+static const uint64_t MAX_SIZE_FOR_A_TILE = MAX_RESOURCES_BY_TILE *
+    (sizeof(FOOD_STR) + sizeof(LINEMATE_STR) + sizeof(DERAUMERE_STR) +
+    sizeof(SIBUR_STR) + sizeof(MENDIANE_STR) + sizeof(PHIRAS_STR) +
+    sizeof(THYSTAME_STR) + sizeof(PLAYER_STR)) + 1;
 
 /// @brief Set the welcome message into the welcome message buffer.
 ///

@@ -13,7 +13,7 @@
 Test(TEST_PLAYER_INVENTORY_COMMAND, test_player_inventory_command_1)
 {
     server_t server = {};
-    msg_t message;
+    msg_t message = {};
     char buffer[1 + (sizeof(FOOD_STR) + sizeof(LINEMATE_STR) + sizeof
     (DERAUMERE_STR) + sizeof(SIBUR_STR) + sizeof(MENDIANE_STR) +
     sizeof(PHIRAS_STR) + sizeof(THYSTAME_STR) + (7 * 11)) + 2 + 2];
@@ -26,5 +26,5 @@ Test(TEST_PLAYER_INVENTORY_COMMAND, test_player_inventory_command_1)
     memcpy(buffer, message.ptr, message.len);
     buffer[message.len] = '\0';
     cr_assert_str_eq(buffer, "[food 65535, linemate 65535, deraumere 65535, "
-    "sibur 65535, mendiane 65535, phiras 65535, thystame 65535]");
+    "sibur 65535, mendiane 65535, phiras 65535, thystame 65535]\n");
 }

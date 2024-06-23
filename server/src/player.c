@@ -38,13 +38,24 @@ void teleport_player(map_t PTR map, player_t PTR player,
     const coordinates_t PTR new_coordinates)
 {
     const coordinates_t *player_coordinates = &player->coordinates;
-    resources_t *current_tile = &map->tiles[(player_coordinates->y *
-        map->height) + player_coordinates->x];
-    resources_t *target_tile = &map->tiles[(new_coordinates->y *
-        map->height) + new_coordinates->x];
+    resources_t *current_tile = get_resource_tile_by_coordinates(map,
+        player_coordinates);
+    resources_t *target_tile = get_resource_tile_by_coordinates(map,
+        new_coordinates);
 
-    current_tile->attr.players -= (current_tile->attr.players > 0) ? -1 : 0;
+    current_tile->attr.players -= (current_tile->attr.players > 0) ? 1 : 0;
     target_tile->attr.players++;
     player->coordinates = *new_coordinates;
-    map->has_been_modified = true;
+}
+
+void player_take_set_to_tile(player_t PTR player, resources_t PTR tile,
+    resources_index_t resource_index, player_command_base_t action)
+{
+    if (PLAYER_SET_OBJ_CMD == action) {
+        tile->arr[resource_index]++;
+        player->inventory.arr[resource_index]--;
+    } else if (PLAYER_TAKE_OBJ_CMD == action) {
+        tile->arr[resource_index]--;
+        player->inventory.arr[resource_index]++;
+    }
 }

@@ -16,7 +16,7 @@ Test(TEST_GUI_BCT_COMMAND, test_gui_bct_command_1)
     server_t server = {};
     gui_command_t command = {GUI_BCT_CMD, {10, 10}};
     argument_t args;
-    msg_t message;
+    msg_t message = {};
     char buffer[200];
 
     args.width = 20;

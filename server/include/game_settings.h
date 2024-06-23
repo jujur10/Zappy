@@ -31,11 +31,27 @@
 /// @brief The cooldown delay for the eject action.
 #define PLAYER_EJECT_WAIT 7
 
+/// @brief The cooldown delay for the inventory action.
+#define PLAYER_INVENTORY_WAIT 1
+
+/// @brief The cooldown delay for the broadcast action.
+#define PLAYER_BROADCAST_WAIT 7
+
+/// @brief The cooldown delay for the inventory action.
+#define PLAYER_LOOK_WAIT 7
+
 /// @brief The cooldown for the incantation command.
 #define PLAYER_INCANTATION_WAIT 300
 
 /// @brief The cooldown delay for MCT in ns.
 #define GUI_MCT_REQUEST_COOLDOWN 100000000
 
+/// @brief The cooldown delay to re-eat food.
+#define PLAYER_FOOD_CONSUMTION 126
+
 /// @brief The maximal level of an AI. (8 by default).
 #define MAX_AI_LVL 8
+
+/// @brief The maximal number of a resources for a tile.
+/// The value is needed in order to allocate the buffer at the program start.
+#define MAX_RESOURCES_BY_TILE 10
