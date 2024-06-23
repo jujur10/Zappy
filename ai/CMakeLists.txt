@@ -3,13 +3,13 @@ project(Zappy_AI)
 
 set(EXECUTABLE_NAME zappy_ai)
 
-find_program(GO_COMPILER go)
+find_program(GO_COMPILER go PATHS /usr/local/go/bin)
 if(NOT GO_COMPILER)
     message(FATAL_ERROR "Go compiler not found")
 endif()
 
 add_custom_target(zappy_ai ALL
-    COMMAND ${GO_COMPILER} build -buildvcs=false
+    COMMAND ${GO_COMPILER} version && ${GO_COMPILER} build -buildvcs=false -tags netgo
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 add_custom_command(TARGET zappy_ai

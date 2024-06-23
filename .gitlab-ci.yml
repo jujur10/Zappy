@@ -1,5 +1,5 @@
 variables:
-  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  # PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   BUILD_TYPE: Release # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
   BINARY_NAME: EXECUTABLE_NAME
@@ -40,7 +40,9 @@ build_sonarqube_wrapper:
     - ~/build-wrapper/build-wrapper-linux-x86-64 --out-dir "${BUILD_WRAPPER_OUT_DIR}" cmake --build build --config "${BUILD_TYPE}" -j
   artifacts:
     paths:
-      - "build/"
+      - "build/server/zappy_server"
+      - "build/ai/zappy_ai"
+      - "build/gui/zappy_gui"
   cache:
     policy: pull-push
     key: "${CI_COMMIT_SHORT_SHA}"
@@ -51,6 +53,36 @@ build_sonarqube_wrapper:
     - build
     - SAST
 
+
+check_coding_style:
+  stage: test
+  cache: []
+  dependencies: []
+  script:
+    - plum
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  tags:
+    - epitech-coding-style
+
+run_tests:
+  stage: test
+  script:
+    - make tests_run
+  only:
+    - merge_requests
+    - master
+    - main
+    - develop
+    - dev
+  tags:
+    - tests
+    - ubuntu
+
 sonarqube-check:
   stage: test
   cache:
@@ -59,8 +91,6 @@ sonarqube-check:
     paths:
       - "${BUILD_WRAPPER_OUT_DIR}"
   script:
-    - pwd
-    - ls -lR
     - ~/sonar-scanner/bin/sonar-scanner --define sonar.host.url="${SONAR_HOST_URL}" --define sonar.cfamily.build-wrapper-output="${BUILD_WRAPPER_OUT_DIR}"
   only:
     - merge_requests
@@ -128,20 +158,3 @@ deploy-to-package-registry-dev:
     - develop
   tags:
     - ubuntu
-
-deploy-to-package-registry-mr:
-  stage: deploy
-  allow_failure: false
-  script:
-    - cmake -B build -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DBUILD_PACKAGE=1 .
-    - cmake --build build --config "${BUILD_TYPE}" -j
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_ai "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.0.1/zappy_ai"'
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_server "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.0.1/zappy_server"'
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file build/zappy_gui "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/zappy/0.0.1/zappy_gui"'
-  needs:
-    - build_sonarqube_wrapper
-  only:
-    - merge_requests
-  tags:
-    - ubuntu
-
