@@ -87,14 +87,15 @@ void get_sorted_resources(const server_t PTR server,
         .buffers[PRE_TOP_INDEXES + player->orientation];
     const uint32_t *sorted_indexes = (const uint32_t *)buffer->ptr;
     uint32_t nb_of_tiles_max_depth = get_nb_of_tiles_for_a_depth(MAX_AI_LVL);
-    virtual_array_t virtual_array;
+    virtual_array_t virtual_array = {};
 
     set_virtual_array(&virtual_array, &server->map, nb_of_tiles_max_depth,
         player);
-    for (uint32_t i = 0; i < (buffer->len / sizeof(uint32_t))
-    && i < sorted_resources->len; i++)
-        sorted_resources->array[i] = map->tiles[get_real_index(&virtual_array,
-        sorted_indexes[i])];
+    for (uint32_t i = 0; i < (buffer->len / sizeof(uint32_t)) &&
+    i < sorted_resources->len; i++) {
+        sorted_resources->array[i] =
+            map->tiles[get_real_index(&virtual_array, sorted_indexes[i])];
+    }
 }
 
 static void write_resources_to_buffer(buffer_t PTR buffer,

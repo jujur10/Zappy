@@ -9,7 +9,6 @@
 #include "game_settings.h"
 #include "commands/player_commands.h"
 #include "commands/command_utils.h"
-#include "utils/itoa/fast_itoa.h"
 
 /// @brief Array of resources_t representing the needed elements for elevation.
 const resources_t elevation_requirements[] = {
@@ -55,7 +54,7 @@ static uint16_t get_nb_of_players_ready(const player_t ARRAY players,
     for (uint16_t i = 0; i < nb_of_players; i++) {
         other_player = &players[i];
         if (false == is_coordinates_equal(&player->coordinates,
-            &other_player->coordinates))
+        &other_player->coordinates))
             continue;
         if (player->level != other_player->level)
             continue;
@@ -78,8 +77,8 @@ static bool verify_player_requirements(const player_t ARRAY players,
     uint16_t nb_of_players_ready = get_nb_of_players_ready(players,
         nb_of_players, player_idx);
 
-    if (nb_of_players_ready < elevation_requirements[player->level]
-    .attr.players)
+    if (nb_of_players_ready <
+    elevation_requirements[player->level].attr.players)
         return false;
     return true;
 }
@@ -100,8 +99,8 @@ bool verify_requirements(server_t PTR server, uint16_t player_idx)
         (&server->map, &player->coordinates);
 
     if (true == verify_tile_requirements(current_tile, player->level) &&
-        true == verify_player_requirements(server->players, server->nb_players,
-        player_idx))
+    true == verify_player_requirements(server->players, server->nb_players,
+    player_idx))
         return true;
     return false;
 }

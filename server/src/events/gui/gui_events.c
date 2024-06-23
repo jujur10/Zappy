@@ -10,8 +10,7 @@
 #include "server.h"
 
 /// @brief Function pointer array with every available events for a GUI.
-static void (* const event_functions[GUI_NB_EVENT])(server_t PTR server,
-    uint32_t gui_idx) = {
+static const gui_event_handler_t event_functions[GUI_NB_EVENT] = {
     execute_gui_none_event, execute_gui_update_mct_event
 };
 

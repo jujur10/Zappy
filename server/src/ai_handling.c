@@ -24,7 +24,7 @@ int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
     const map_t *map = &server->map;
 
     if (MAX_CLIENTS == server->nb_players ||
-    FAILURE == add_player_to_team(server, team_idx, server->nb_players))
+    FAILURE == try_add_player_to_team(server, team_idx, server->nb_players))
         return -1;
     LOGF("Swapped to AI %i", server->nb_players)
     player->sock = (uint16_t)sock;
@@ -197,8 +197,8 @@ void handle_players(server_t PTR server, const fd_set PTR rfds,
     uint16_t count_players = 0;
 
     LOG("Start handling PLAYERS");
-    for (int32_t i = 0; count_players < server->nb_players && *select_ret > 0
-        && i < MAX_CLIENTS; i++) {
+    for (int32_t i = 0; count_players < server->nb_players &&
+    *select_ret > 0 && i < MAX_CLIENTS; i++) {
         LOGF("Actual PLAYER %i", i)
         if (0 == server->players[i].sock)
             continue;

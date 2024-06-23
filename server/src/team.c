@@ -37,11 +37,11 @@ uint8_t init_teams(const argument_t PTR args, team_t PTR ARRAY teams,
     for (uint32_t i = 0; i < args->nb_of_teams; i++) {
         (*teams)[i].name = args->team_names[i];
         (*teams)[i].players_idx = calloc(args->clients_nb,
-        sizeof(*((*teams)->players_idx)));
+            sizeof(*((*teams)->players_idx)));
         (*teams)[i].nb_of_eggs = args->clients_nb;
         (*teams)[i].nb_of_allocated_eggs = args->clients_nb;
         (*teams)[i].eggs = calloc(args->clients_nb,
-        sizeof(*((*teams)->eggs)));
+            sizeof(*((*teams)->eggs)));
         set_random_coordinates_to_eggs(&(*teams)[i], args->width,
             args->height, egg_counter);
     }

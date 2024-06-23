@@ -7,7 +7,6 @@
 #include "server.h"
 #include "utils/arrays/arrays_virtual.h"
 #include "game_settings.h"
-#include "commands/command_utils.h"
 
 /// @brief Function which execute the eject behavior on the selected player.
 ///
@@ -77,19 +76,19 @@ void execute_player_eject_command(server_t PTR server, uint16_t player_idx,
     UNUSED const player_command_t PTR command)
 {
     player_t *player = &server->players[player_idx];
-    const coordinates_t *player_coo = &player->coordinates;
+    const coordinates_t *player_pos = &player->coordinates;
     map_t *map = &server->map;
-    coordinates_t new_coordinates;
+    coordinates_t new_position;
 
-    get_next_player_coordinates(map, player, &new_coordinates);
-    destroy_eggs_at_coordinates(server, player_coo);
-    if (get_resource_tile_by_coordinates(map, player_coo)->attr.players <= 1)
+    get_next_player_coordinates(map, player, &new_position);
+    destroy_eggs_at_coordinates(server, player_pos);
+    if (get_resource_tile_by_coordinates(map, player_pos)->attr.players <= 1)
         return player_ko_response(server, player);
     for (uint32_t i = 0; i < server->nb_players; i++) {
         if (i == player_idx)
             continue;
-        if (true == is_coordinates_equal(player_coo, &new_coordinates)) {
-            eject_player(map, &server->players[i], &new_coordinates,
+        if (true == is_coordinates_equal(player_pos, &new_position)) {
+            eject_player(map, &server->players[i], &new_position,
                 get_direction_of_ejection(player));
             send_pex_to_guis(server, player);
         }

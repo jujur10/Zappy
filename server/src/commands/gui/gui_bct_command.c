@@ -16,8 +16,8 @@ status_t create_gui_bct_message(server_t PTR server,
     const resources_t *current_tile;
     uint32_t count = 4;
 
-    if (!(coordinates->x < server->map.width && coordinates->y <
-    server->map.height)) {
+    if (!(coordinates->x < server->map.width &&
+    coordinates->y < server->map.height)) {
         create_message("sbp\n", 4, message);
         return FAILURE;
     }

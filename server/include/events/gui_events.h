@@ -21,11 +21,20 @@ typedef struct egg_s egg_t;
 /// @brief Enumeration representing the possible gui events to handle.
 ///
 /// @var GUI_EVENT_NONE Representing empty event.
+/// @var GUI_EVENT_UPDATE_MCT Representing that the mct buffer should be
+/// updated before sending the message.
+/// @var GUI_NB_EVENT Representing the total number of events.
 typedef enum {
     GUI_EVENT_NONE,
     GUI_EVENT_UPDATE_MCT,
     GUI_NB_EVENT
 } PACKED gui_event_t;
+
+/// @brief Function prototype for every player event functions.
+///
+/// @param server The server structure.
+/// @param gui_idx The gui index of the gui.
+typedef void (*gui_event_handler_t)(server_t PTR server, uint32_t gui_idx);
 
 /// @brief Function which sends to GUIs the events of ppo.
 ///

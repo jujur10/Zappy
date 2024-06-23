@@ -23,6 +23,13 @@ typedef enum {
     PLAYER_NB_EVENT
 } PACKED player_event_t;
 
+/// @brief Function prototype for every player event functions.
+///
+/// @param server The server structure.
+/// @param new_client_idx The player index of the current player.
+typedef void (*player_event_handler_t)(server_t PTR server,
+    uint32_t player_idx);
+
 /// @brief Function used to handle all events of a client.
 ///
 /// @param server The server structure.

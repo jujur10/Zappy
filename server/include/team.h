@@ -15,6 +15,7 @@
 
 /// @brief Redefinition.
 typedef struct server_s server_t;
+typedef struct player_s player_t;
 
 /// @brief Structure representing an egg.
 ///
@@ -74,7 +75,7 @@ uint16_t get_nb_of_unused_slot(const team_t PTR team);
 /// @param team_idx The team we want to assign the player to.
 /// @param player_idx The player to add to the team.
 /// @return SUCCESS if the player has been added successfully, FAILURE if not.
-status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
+status_t try_add_player_to_team(server_t PTR server, uint16_t team_idx,
     uint16_t player_idx);
 
 /// @brief Function used to remove a player from a team.
@@ -82,6 +83,14 @@ status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
 /// @param server The server structure.
 /// @param player_idx The player to add to the team.
 void remove_player_from_team(server_t PTR server, uint16_t player_idx);
+
+/// @brief Function which add an egg to a team.
+///
+/// @param server The server structure.
+/// @param team The team where you have to add the egg.
+/// @param egg_coordinates The egg coordinates.
+status_t try_add_egg_to_team(server_t PTR server, team_t PTR team,
+    const coordinates_t PTR egg_coordinates);
 
 /// @brief Function used to destroy an egg properly with a notification to
 /// the guis.

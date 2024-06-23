@@ -44,6 +44,7 @@ add_executable(zappy_server
     src/commands/player/player_set_command.c
     src/commands/player/player_take_command.c
     src/coordinates.c
+    src/eggs.c
     src/events/gui/gui_enw_event.c
     src/events/gui/gui_events.c
     src/events/gui/gui_none_event.c
@@ -55,6 +56,9 @@ add_executable(zappy_server
     src/events/gui/gui_pic_event.c
     src/events/gui/gui_pnw_event.c
     src/events/gui/gui_update_mct_event.c
+    src/events/new_client/new_client_event.c
+    src/events/new_client/new_client_new_slot_available_event.c
+    src/events/new_client/new_client_none_event.c
     src/events/player/player_death_event.c
     src/events/player/player_events.c
     src/events/player/player_events.c
@@ -169,6 +173,7 @@ if (DEFINED RUN_TESTS)
         src/commands/player/player_set_command.c
         src/commands/player/player_take_command.c
         src/coordinates.c
+        src/eggs.c
         src/events/gui/gui_enw_event.c
         src/events/gui/gui_events.c
         src/events/gui/gui_none_event.c
@@ -180,6 +185,9 @@ if (DEFINED RUN_TESTS)
         src/events/gui/gui_pic_event.c
         src/events/gui/gui_pnw_event.c
         src/events/gui/gui_update_mct_event.c
+        src/events/new_client/new_client_event.c
+        src/events/new_client/new_client_new_slot_available_event.c
+        src/events/new_client/new_client_none_event.c
         src/events/player/player_death_event.c
         src/events/player/player_events.c
         src/events/player/player_incantation_event.c
@@ -189,10 +197,12 @@ if (DEFINED RUN_TESTS)
         src/map.c
         src/map_buffer.c
         src/msg.c
+        src/new_clients_handling.c
         src/player.c
         src/player.c
         src/queue/queue_utils_msg.c
         src/resource.c
+        src/swap_clients.c
         src/team.c
         src/team_management.c
         src/utils/arrays/arrays_u32.c

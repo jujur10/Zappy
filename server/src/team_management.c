@@ -37,7 +37,23 @@ static void send_edi_to_guis(server_t PTR server, uint16_t egg_index)
     send_message_to_guis(server, msg_content, count);
 }
 
-status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
+/// @brief Function used to reallocate memory for team's player array..
+///
+/// @param team The team we want to increase capacity.
+/// @return Success if reallocation is a success, Failure if not.
+static status_t reallocate_team_players(team_t PTR team)
+{
+    uint16_t *new_player_index_array;
+
+    new_player_index_array = realloc(team->players_idx, sizeof(uint16_t)
+        * (team->nb_of_players + 1));
+    if (NULL == new_player_index_array)
+        return FAILURE;
+    team->players_idx = new_player_index_array;
+    return SUCCESS;
+}
+
+status_t try_add_player_to_team(server_t PTR server, uint16_t team_idx,
     uint16_t player_idx)
 {
     player_t *player = &server->players[player_idx];
@@ -49,9 +65,10 @@ status_t add_player_to_team(server_t PTR server, uint16_t team_idx,
     player->coordinates = team->eggs[team->nb_of_eggs].egg_coordinates;
     send_ebo_to_guis(server, team->eggs[team->nb_of_eggs].index);
     memset(&team->eggs[team->nb_of_eggs], 0, sizeof(egg_t));
+    reallocate_team_players(team);
     team->players_idx[team->nb_of_players] = player_idx;
     team->nb_of_players++;
-    server->players[player_idx].team_idx = team_idx;
+    player->team_idx = team_idx;
     return SUCCESS;
 }
 

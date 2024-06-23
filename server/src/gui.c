@@ -61,11 +61,12 @@ static void send_player_information_to_gui(server_t PTR server,
 static void send_enw_for_each_egg_to_gui(server_t PTR server, uint16_t gui_idx)
 {
     for (uint16_t team_idx = 0; team_idx < server->args->nb_of_teams;
-        team_idx++) {
+    team_idx++) {
         for (uint16_t egg_idx = 0; egg_idx <
-            server->teams[team_idx].nb_of_eggs; egg_idx++)
-                send_enw_to_gui(server, &server->teams[team_idx]
-                .eggs[egg_idx], gui_idx);
+        server->teams[team_idx].nb_of_eggs; egg_idx++) {
+            send_enw_to_gui(server, &server->teams[team_idx].eggs[egg_idx],
+                gui_idx);
+        }
     }
 }
 

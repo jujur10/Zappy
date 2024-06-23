@@ -4,11 +4,9 @@
 ** File description:
 ** player_broadcast_command.c.
 */
-#include <stdio.h>
 #include <stdlib.h>
 #include "server.h"
 #include "utils/itoa/fast_itoa.h"
-#include "commands/command_utils.h"
 #include "game_settings.h"
 
 /// @brief There is always 8 cells around a point in a 2d array.
@@ -86,8 +84,8 @@ static int32_t get_shortest_direction(const map_t PTR map,
 /// @param player The player.
 /// @param message_buffer The message to broadcast (as a buffer to copy).
 /// @param direction The direction of the sender.
-static void broadcast_message_to_player(const server_t PTR server,
-    player_t PTR player, const buffer_t PTR message_buffer, int32_t direction)
+static void broadcast_message_to_player(player_t PTR player,
+    const buffer_t PTR message_buffer, int32_t direction)
 {
     msg_t message = {};
 
@@ -95,17 +93,42 @@ static void broadcast_message_to_player(const server_t PTR server,
         &message);
     fast_itoa_u32(direction, message.ptr + 8);
     add_msg_to_queue(&player->queue, &message);
-    add_time_limit_to_player(server->time_units, PLAYER_BROADCAST_WAIT,
-        player);
 }
 
-/// @brief Function which re-initialize the broadcast buffer.
-/// - Reinitialize.
-/// - Append the message.
+/// @brief Function used to broadcast the message to all the players.
 ///
-/// @param buffer The buffer to re-initialize.
+/// @param server The server structure.
+/// @param player_idx The sender's index (into the player's array).
+/// @param buffer The buffer containing the message.
+static void broadcast_message_to_players(server_t PTR server,
+    uint16_t player_idx, buffer_t PTR buffer)
+{
+    const player_t *sender = &server->players[player_idx];
+    const coordinates_t *sender_coo = &sender->coordinates;
+    player_t *receiver;
+    const coordinates_t *receiver_coo;
+    int32_t direction;
+
+    for (uint32_t i = 0; i < server->nb_players; i++) {
+        if (i == player_idx)
+            continue;
+        receiver = &server->players[i];
+        receiver_coo = &receiver->coordinates;
+        direction = (true == is_coordinates_equal(sender_coo, receiver_coo)) ?
+            0 : get_shortest_direction(&server->map, sender, receiver);
+        broadcast_message_to_player(receiver, buffer, direction);
+    }
+}
+
+/// @brief Function which prepares the broadcast buffer.
+/// - Set the length to the start of a broadcast message "message K, ".
+/// - Append the message after the start of the message.
+/// - Append a '\n'.
+/// - Free the argument of the command (not used anymore).
+///
+/// @param buffer The buffer to prepares.
 /// @param command The player's command (containing the message).
-static void reinitialize_broadcast_buffer(buffer_t PTR buffer,
+static void prepare_broadcast_buffer(buffer_t PTR buffer,
     const player_command_t PTR command)
 {
     buffer->len = sizeof(MESSAGE_STR) - 1;
@@ -119,22 +142,12 @@ void execute_player_broadcast_command(server_t PTR server, uint16_t player_idx,
     const player_command_t PTR command)
 {
     player_t *sender = &server->players[player_idx];
-    player_t *receiver;
-    const coordinates_t *sender_coo = &sender->coordinates;
-    const coordinates_t *receiver_coo;
-    int32_t direction;
     buffer_t *buffer = &server->generated_buffers.buffers[PRE_BROADCAST_MSG];
 
-    reinitialize_broadcast_buffer(buffer, command);
+    prepare_broadcast_buffer(buffer, command);
     send_pbc_to_guis(server, buffer, player_idx);
-    for (uint32_t i = 0; i < server->nb_players; i++) {
-        if (i == player_idx)
-            continue;
-        receiver = &server->players[i];
-        receiver_coo = &receiver->coordinates;
-        direction = (true == is_coordinates_equal(sender_coo, receiver_coo)) ?
-            0 : get_shortest_direction(&server->map, sender, receiver);
-        broadcast_message_to_player(server, receiver, buffer, direction);
-    }
+    broadcast_message_to_players(server, player_idx, buffer);
+    add_time_limit_to_player(server->time_units, PLAYER_BROADCAST_WAIT,
+        sender);
     player_ok_response(server, sender);
 }

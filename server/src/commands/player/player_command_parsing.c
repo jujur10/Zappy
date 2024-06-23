@@ -36,8 +36,11 @@ static void set_string_parameter(player_command_buffer_t *player_cmd_buff,
 {
     if (len < 1)
         return set_base_command(player_cmd_buff, PLAYER_NONE_CMD);
-    init_string_from_chars(&player_cmd_buff->commands[player_cmd_buff
-    ->nb_of_command].argument, start_string, len);
+    init_string_from_chars(
+        &player_cmd_buff->commands[player_cmd_buff->nb_of_command].argument,
+        start_string,
+        len
+    );
 }
 
 /// @brief Function which parse the command with variable parameter length.
@@ -48,18 +51,18 @@ static void set_string_parameter(player_command_buffer_t *player_cmd_buff,
 static void parse_variable_command(const char ARRAY current_ptr, uint32_t len,
     player_command_buffer_t *player_cmd_buff)
 {
-    if (len >= 5 && 0 == strncmp(current_ptr, PLAYER_SET_OBJ_TXT, sizeof
-    (PLAYER_SET_OBJ_TXT) - 1)) {
+    if (len >= 5 && 0 == strncmp(current_ptr, PLAYER_SET_OBJ_TXT,
+    sizeof(PLAYER_SET_OBJ_TXT) - 1)) {
         set_string_parameter(player_cmd_buff, current_ptr + 4, len - 4);
         return set_base_command(player_cmd_buff, PLAYER_SET_OBJ_CMD);
     }
-    if (len >= 6 && 0 == strncmp(current_ptr, PLAYER_TAKE_OBJ_TXT, sizeof
-    (PLAYER_TAKE_OBJ_TXT) - 1)) {
+    if (len >= 6 && 0 == strncmp(current_ptr, PLAYER_TAKE_OBJ_TXT,
+    sizeof(PLAYER_TAKE_OBJ_TXT) - 1)) {
         set_string_parameter(player_cmd_buff, current_ptr + 5, len - 5);
         return set_base_command(player_cmd_buff, PLAYER_TAKE_OBJ_CMD);
     }
-    if (len >= 11 && 0 == strncmp(current_ptr, PLAYER_BROADCAST_TXT, sizeof
-    (PLAYER_BROADCAST_TXT) - 1)) {
+    if (len >= 11 && 0 == strncmp(current_ptr, PLAYER_BROADCAST_TXT,
+    sizeof(PLAYER_BROADCAST_TXT) - 1)) {
         set_string_parameter(player_cmd_buff, current_ptr + 10, len - 10);
         return set_base_command(player_cmd_buff, PLAYER_BROADCAST_CMD);
     }
@@ -74,14 +77,14 @@ static void parse_variable_command(const char ARRAY current_ptr, uint32_t len,
 static void parse_command_of_len_4(const char ARRAY current_ptr,
     player_command_buffer_t *player_cmd_buff)
 {
-    if (0 == strncmp(current_ptr, PLAYER_LEFT_TXT, sizeof
-    (PLAYER_LEFT_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_LEFT_TXT,
+    sizeof(PLAYER_LEFT_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_LEFT_CMD);
-    if (0 == strncmp(current_ptr, PLAYER_LOOK_TXT, sizeof
-    (PLAYER_LOOK_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_LOOK_TXT,
+    sizeof(PLAYER_LOOK_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_LOOK_CMD);
-    if (0 == strncmp(current_ptr, PLAYER_FORK_TXT, sizeof
-    (PLAYER_FORK_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_FORK_TXT,
+    sizeof(PLAYER_FORK_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_FORK_CMD);
     return set_base_command(player_cmd_buff, PLAYER_NONE_CMD);
 }
@@ -94,20 +97,20 @@ static void parse_command_of_len_4(const char ARRAY current_ptr,
 static void parse_command_of_len_9_11(const char ARRAY current_ptr,
     uint32_t len, player_command_buffer_t *player_cmd_buff)
 {
-    if (0 == strncmp(current_ptr, PLAYER_INVENTORY_TXT, sizeof
-    (PLAYER_INVENTORY_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_INVENTORY_TXT,
+    sizeof(PLAYER_INVENTORY_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_INVENTORY_CMD);
-    if (0 == strncmp(current_ptr, PLAYER_FREQUENCY_TXT, sizeof
-    (PLAYER_FREQUENCY_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_FREQUENCY_TXT,
+    sizeof(PLAYER_FREQUENCY_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_FREQUENCY_CMD);
-    if (0 == strncmp(current_ptr, PLAYER_DIRECTION_TXT, sizeof
-    (PLAYER_DIRECTION_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_DIRECTION_TXT,
+    sizeof(PLAYER_DIRECTION_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_DIRECTION_CMD);
-    if (0 == strncmp(current_ptr, PLAYER_CONNECT_NB_TXT, sizeof
-    (PLAYER_CONNECT_NB_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_CONNECT_NB_TXT,
+    sizeof(PLAYER_CONNECT_NB_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_CONNECT_NB_CMD);
-    if (0 == strncmp(current_ptr, PLAYER_INCANTATION_TXT, sizeof
-    (PLAYER_INCANTATION_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_INCANTATION_TXT,
+    sizeof(PLAYER_INCANTATION_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_INCANTATION_CMD);
     return parse_variable_command(current_ptr, len, player_cmd_buff);
 }
@@ -120,14 +123,14 @@ static void parse_command_of_len_9_11(const char ARRAY current_ptr,
 static void parse_command_of_len_5_6_7(const char ARRAY current_ptr,
     uint32_t len, player_command_buffer_t *player_cmd_buff)
 {
-    if (0 == strncmp(current_ptr, PLAYER_RIGHT_TXT, sizeof
-    (PLAYER_RIGHT_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_RIGHT_TXT,
+    sizeof(PLAYER_RIGHT_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_RIGHT_CMD);
-    if (0 == strncmp(current_ptr, PLAYER_EJECT_TXT, sizeof
-    (PLAYER_EJECT_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_EJECT_TXT,
+    sizeof(PLAYER_EJECT_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_EJECT_CMD);
-    if (0 == strncmp(current_ptr, PLAYER_FORWARD_TXT, sizeof
-    (PLAYER_FORWARD_TXT) - 1))
+    if (0 == strncmp(current_ptr, PLAYER_FORWARD_TXT,
+    sizeof(PLAYER_FORWARD_TXT) - 1))
         return set_base_command(player_cmd_buff, PLAYER_FORWARD_CMD);
     return parse_variable_command(current_ptr, len, player_cmd_buff);
 }
@@ -211,7 +214,7 @@ static status_t use_player_buffer(char ARRAY buffer, uint32_t len,
     }
     append_to_string_from_chars(&player_buffer->raw_buffer, buffer, len);
     if (FAILURE == parse_player_commands(player_buffer->raw_buffer.ptr,
-        player_buffer->raw_buffer.len, player_buffer, &to_append)) {
+    player_buffer->raw_buffer.len, player_buffer, &to_append)) {
         clear_string(&player_buffer->raw_buffer);
         player_buffer->raw_buffer = to_append;
         return SUCCESS;
