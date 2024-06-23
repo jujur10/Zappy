@@ -54,7 +54,7 @@ void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdate
  * @param world The ecs world
  * @param newIncantation The received StartIncantationCommand command
  */
-void HandleStartIncantationCommand(const flecs::world &world, const StartIncantationCommand *newIncantation);
+void HandleStartIncantationCommand(const flecs::world &world, StartIncantationCommand *newIncantation);
 
 /**
  * @brief Process the EndIncantation command
@@ -63,6 +63,14 @@ void HandleStartIncantationCommand(const flecs::world &world, const StartIncanta
  * @param endIncantation The received EndIncantationCommand command
  */
 void HandleEndIncantationCommand(const flecs::world &world, const EndIncantationCommand *endIncantation);
+
+/**
+ * @brief Process the PlayerLevel command
+ * Update the player level
+ * @param world The ecs world
+ * @param playerLevel The received PlayerLevelCommand command
+ */
+void HandlePlayerLevelCommand(const flecs::world &world, const PlayerLevelCommand *playerLevel);
 
 /**
  * @brief Process the PlayerInventory command
@@ -95,4 +103,28 @@ void HandlePlayerDropCommand(const flecs::world &world, const PlayerDropCommand 
  * @param teamName The received TeamNameCommand command
  */
 void HandleTeamNameCommand(const flecs::world &world, const TeamNameCommand *teamName);
+
+/**
+ * @brief Process the EggLaid command
+ * Add a new egg entity
+ * @param world The ecs world
+ * @param eggLaid The received EggLaidCommand command
+ */
+void HandleEggLaidCommand(const flecs::world &world, const EggLaidCommand *eggLaid);
+
+/**
+ * @brief Process the ConnectionOnEgg command
+ * Update the egg connection status
+ * @param world The ecs world
+ * @param connectionOnEgg The received ConnectionOnEggCommand command
+ */
+void HandleConnectionOnEggCommand(const flecs::world &world, const ConnectionOnEggCommand *connectionOnEgg);
+
+/**
+ * @brief Process the DeathOfEgg command
+ * Remove the egg entity
+ * @param world The ecs world
+ * @param deathOfEgg The received DeathOfEggCommand command
+ */
+void HandleDeathOfEggCommand(const flecs::world &world, const DeathOfEggCommand *deathOfEgg);
 }  // namespace zappy_gui::net

@@ -14,6 +14,8 @@ namespace zappy_gui::player
 /// @brief The starting index used in flecs for the player entities
 #define PLAYER_STARTING_IDX 1'100'000
 
+#define EGG_STARTING_IDX (PLAYER_STARTING_IDX + 100'000)
+
 /// @brief The index of the idle animation
 #define IDLE_ANIMATION_IDX 3
 
@@ -73,7 +75,7 @@ struct PlayerInventory
     uint16_t resources[7];
 };
 
-enum class IncantationState : uint16_t
+enum class IncantationState : uint8_t
 {
     kInProgress = 0,
     kSuccess = 1,
@@ -89,8 +91,20 @@ struct IncantationIcons
 struct IncantationInfo
 {
     IncantationState state;
-    uint16_t frameLeftForIcon;
+    uint8_t frameLeftForIcon;
+    uint16_t nbPlayers;
     float distance;
+    std::unique_ptr<uint16_t[]> playerIds;
+};
+
+struct  EggModel
+{
+    raylib::Model *model;
+};
+
+struct EggData
+{
+    uint16_t playerId;
 };
 
 }  // namespace zappy_gui::player

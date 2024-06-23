@@ -75,6 +75,14 @@ static void registerOnStartSystems(const flecs::world &ecs)
                 utils::SetupModel(models->crystal, "gui/resources/shaders/tile_instancing.vs", nullptr);
             });
 
+    ecs.system<player::EggModel>("loadEggInstancingShader")
+        .kind(flecs::OnStart)
+        .iter(
+            []([[maybe_unused]] const flecs::iter &it, const player::EggModel *const model)
+            {
+                utils::SetupModel(model->model, "gui/resources/shaders/tile_instancing.vs", nullptr);
+            });
+
     /// Ask server for time unit
     ecs.system("AskForTimeUnit")
         .kind(flecs::OnStart)
@@ -483,6 +491,16 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             icons.icons[static_cast<unsigned long>(incantationInfo.state)]->DrawBillboard(
                 camera, Vector3{incantationPos.m12, incantationPos.m13 + 1.5f, incantationPos.m14}, 0.5f
             );
+        });
+
+    /// Draw the eggs
+    ecs.system<player::EggModel, raylib::Matrix>("drawEggs")
+        .kind(flecs::OnUpdate)
+        .term_at(1).singleton()
+        .with<player::EggData>()
+        .iter([](const flecs::iter &it, const player::EggModel *const model, const raylib::Matrix * const eggsPosition)
+        {
+            utils::DrawModelInstanced(model[0].model, eggsPosition, static_cast<int32_t>(it.count()));
         });
 }
 

@@ -63,7 +63,7 @@ void ParseGuiCommands(const flecs::iter &it)
             }
             case 5:
             {
-                if (auto const *const playerLevel = std::get_if<StartIncantationCommand>(&cmd))
+                if (auto *const playerLevel = std::get_if<StartIncantationCommand>(&cmd))
                 {
                     HandleStartIncantationCommand(world, playerLevel);
                 }
@@ -106,6 +106,38 @@ void ParseGuiCommands(const flecs::iter &it)
                 if (auto const *const teamName = std::get_if<TeamNameCommand>(&cmd))
                 {
                     HandleTeamNameCommand(world, teamName);
+                }
+                break;
+            }
+            case 11:
+            {
+                if (auto const *const playerLevel = std::get_if<PlayerLevelCommand>(&cmd))
+                {
+                    HandlePlayerLevelCommand(world, playerLevel);
+                }
+                break;
+            }
+            case 12:
+            {
+                if (auto const *const eggLaid = std::get_if<EggLaidCommand>(&cmd))
+                {
+                    HandleEggLaidCommand(world, eggLaid);
+                }
+                break;
+            }
+            case 13:
+            {
+                if (auto const *const connectionOnEgg = std::get_if<ConnectionOnEggCommand>(&cmd))
+                {
+                    HandleConnectionOnEggCommand(world, connectionOnEgg);
+                }
+                break;
+            }
+            case 14:
+            {
+                if (auto const *const deathOfEgg = std::get_if<DeathOfEggCommand>(&cmd))
+                {
+                    HandleDeathOfEggCommand(world, deathOfEgg);
                 }
                 break;
             }

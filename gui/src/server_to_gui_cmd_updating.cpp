@@ -188,7 +188,7 @@ void HandleTimeUnitUpdateCommand(const flecs::world &world, const TimeUnitUpdate
     world.ensure<TimeUnit>().frequency = timeUnitUpdate->timeUnit;
 }
 
-void HandleStartIncantationCommand(const flecs::world &world, const StartIncantationCommand * const newIncantation)
+void HandleStartIncantationCommand(const flecs::world &world, StartIncantationCommand * const newIncantation)
 {
     auto tile = world.entity(utils::GetTileIndexFromCoords(newIncantation->x, newIncantation->y));
     const auto * const tileMatrix = tile.get<raylib::Matrix>();
@@ -197,27 +197,61 @@ void HandleStartIncantationCommand(const flecs::world &world, const StartIncanta
     tile.set<player::IncantationInfo>({
         .state = player::IncantationState::kInProgress,
         .frameLeftForIcon = 120,
+        .nbPlayers = newIncantation->playerCount,
         .distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14}),
+        .playerIds = std::move(newIncantation->playerIds)
     });
 }
 
 void HandleEndIncantationCommand(const flecs::world &world, const EndIncantationCommand * const endIncantation)
 {
-    const auto tile = world.entity(utils::GetTileIndexFromCoords(endIncantation->x, endIncantation->y));
-    const auto *const tileMatrix = tile.get<raylib::Matrix>();
+    const auto incantationTile = world.entity(utils::GetTileIndexFromCoords(endIncantation->x, endIncantation->y));
+    if (!incantationTile.is_alive())
+    {
+        return;
+    }
+    const auto *const tileMatrix = incantationTile.get<raylib::Matrix>();
 
-    auto * const incantationInfo = tile.get_mut<player::IncantationInfo>();
-
-    auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
-
+    auto * const incantationInfo = incantationTile.get_mut<player::IncantationInfo>();
     if (nullptr == incantationInfo)
     {
         return;
     }
+
+    auto const &cameraPos = world.get_ref<raylib::Camera3D>()->position;
+
     incantationInfo->state = endIncantation->success ? player::IncantationState::kSuccess : player::IncantationState::kFailure;
     incantationInfo->frameLeftForIcon = 120;
     incantationInfo->distance = ::Vector3Distance(cameraPos, {tileMatrix->m12, tileMatrix->m13 + 1.5f, tileMatrix->m14});
+
+    const auto * const playerIds = incantationInfo->playerIds.get();
+    const auto playerCount = incantationInfo->nbPlayers;
+
+    for (uint16_t i = 0; i < playerCount; ++i)
+    {
+        const auto player = world.entity(playerIds[i] + PLAYER_STARTING_IDX);
+        if (!player.is_alive())
+        {
+            continue;
+        }
+        auto * const level = player.get_mut<uint8_t>();
+        if (level != nullptr && *level < 8)
+        {
+            *level += 1;
+        }
+    }
 }
+
+void HandlePlayerLevelCommand(const flecs::world &world, const PlayerLevelCommand * const playerLevel)
+{
+    auto player = world.entity(playerLevel->id + PLAYER_STARTING_IDX);
+    if (!player.is_alive())
+    {
+            return;
+    }
+    player.set<uint8_t>(playerLevel->level);
+}
+
 
 void HandlePlayerInventoryCommand(const flecs::world &world, const PlayerInventoryCommand *const playerInventory)
 {
@@ -261,5 +295,38 @@ void HandlePlayerDropCommand(const flecs::world &world, const PlayerDropCommand 
 void HandleTeamNameCommand(const flecs::world &world, const TeamNameCommand *const teamName)
 {
     world.entity(teamName->teamName.get());
+}
+
+void HandleEggLaidCommand(const flecs::world &world, const EggLaidCommand *const eggLaid)
+{
+    const auto tile = world.entity(utils::GetTileIndexFromCoords(eggLaid->x, eggLaid->y));
+    if (!tile.is_alive())
+    {
+        return;
+    }
+    const auto * const tileMatrix = tile.get<raylib::Matrix>();
+    auto egg = world.make_alive(eggLaid->eggId + EGG_STARTING_IDX);
+    egg.set<player::EggData>({eggLaid->playerId});
+    egg.set<raylib::Matrix>(raylib::Matrix::Translate(tileMatrix->m12, tileMatrix->m13 + 0.2f, tileMatrix->m14));
+}
+
+void HandleConnectionOnEggCommand(const flecs::world &world, const ConnectionOnEggCommand *const connectionOnEgg)
+{
+    const auto egg = world.entity(connectionOnEgg->eggId + EGG_STARTING_IDX);
+    if (!egg.is_alive())
+    {
+        return;
+    }
+    egg.destruct();
+}
+
+void HandleDeathOfEggCommand(const flecs::world &world, const DeathOfEggCommand *const deathOfEgg)
+{
+    const auto egg = world.entity(deathOfEgg->eggId + EGG_STARTING_IDX);
+    if (!egg.is_alive())
+    {
+        return;
+    }
+    egg.destruct();
 }
 }  // namespace zappy_gui::net
