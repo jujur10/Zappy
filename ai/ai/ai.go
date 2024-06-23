@@ -54,7 +54,7 @@ func (game *Game) MainLoop() {
 				path.path = nil
 				game.followMessageDirection(leechMsg.direction)
 			}
-		} else if game.areLevelUpConditionsMet() { // Start leveling up as host
+		} else if game.isLevelUpHostAvailable() { // Start leveling up as host
 			log.Println("Started level up host")
 			game.levelUpHostLoop()
 		} else if len(game.Movement.TilesQueue) != 0 && path.path == nil { // If there is no path configured

@@ -90,7 +90,7 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 			}
 		}
 		if game.Socket.IsResponseTypeValid(msgType) == false {
-			log.Println("Invalid response type", msgType)
+			log.Println("Invalid response type", msgType, "previous command was", game.Socket.LastCommandType)
 		}
 		if !checkChannelOpen(feedbackChannel) {
 			log.Fatalln("Server response handling : channel closed, exiting..")
