@@ -7,6 +7,7 @@
 #include "ModelAnimation.hpp"
 #include "Matrix.hpp" // Must be included before Texture.hpp if not will not compile // NOLINT
 #include "Texture.hpp"
+#include <memory>
 
 namespace zappy_gui::player
 {

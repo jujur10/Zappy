@@ -46,7 +46,7 @@ void HandleMenuInteraction(bool &menuInteraction, const flecs::iter &it)
         else
         {
             ::DisableCursor();
-            it.world().lookup("DrawSelection").disable();
+            it.world().entity<gui::Selection>().disable();
         }
     }
 }
@@ -150,7 +150,7 @@ static void registerOnLoadSystems(const flecs::world &ecs)
         const Vector2 tileCoords = utils::GetCoordsFromVector(point);
         if (tileCoords.x < 0 || tileCoords.x >= map::kMAP_WIDTH || tileCoords.y < 0 || tileCoords.y >= map::kMAP_HEIGHT)
         {
-            it.world().lookup("DrawSelection").disable();
+            it.world().entity<gui::Selection>().disable();
             return;
         }
 
@@ -158,11 +158,11 @@ static void registerOnLoadSystems(const flecs::world &ecs)
         const auto tile = it.world().entity(tileIndex);
         if (!tile.is_alive())
         {
-            it.world().lookup("DrawSelection").disable();
+            it.world().entity<gui::Selection>().disable();
             return;
         }
 
-        uint8_t tileType = tile.has<map::tileType1>() ? 1 : (tile.has<map::tileType2>() ? 2 : (tile.has<map::tileType3>() ? 3 : 0));
+        const uint8_t tileType = tile.has<map::tileType1>() ? 1 : (tile.has<map::tileType2>() ? 2 : (tile.has<map::tileType3>() ? 3 : 0));
         const raylib::Model *model = nullptr;
         switch (tileType)
         {
@@ -175,14 +175,19 @@ static void registerOnLoadSystems(const flecs::world &ecs)
         const auto * const tileMatrix = tile.get<raylib::Matrix>();
         const Vector3 tilePosition = {tileMatrix->m12, tileMatrix->m13, tileMatrix->m14};
 
-        it.world().lookup("DrawSelection").enable();
-        gui::Selection selection = *it.world().get<gui::Selection>();
-        selection.renderTexture->BeginMode();
+        const auto * const selection = it.world().get<gui::Selection>();
+        if (nullptr == selection)
+        {
+            return;
+        }
+        it.world().entity<gui::Selection>().enable();
+
+        selection->renderTexture->BeginMode();
         ::ClearBackground(BLANK);
         camera->BeginMode();
         model->Draw(tilePosition, 1.f, WHITE);
         camera->EndMode();
-        selection.renderTexture->EndMode();
+        selection->renderTexture->EndMode();
     });
 }
 
@@ -305,7 +310,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
 
     ecs.system<gui::Selection, raylib::Camera3D>("DrawSelection")
     .kind(flecs::OnUpdate)
-    .term_at(1).singleton()
+    // .term_at(1).singleton()
     .term_at(2).singleton()
     .iter(
         []([[maybe_unused]] const flecs::iter &it, const gui::Selection * const selection, raylib::Camera3D * const camera)
@@ -612,6 +617,7 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
         .each(
             []([[maybe_unused]] const flecs::entity &entity, const raylib::Rectangle &rectangle)
             {
+                gui::GuiWindowFloatingTest(entity.world());
                 const auto squareSideSize = static_cast<uint16_t>(rectangle.GetSize().GetX());
                 const uint16_t positionOffset = squareSideSize / 10;
                 const raylib::Vector2 iconPos = rectangle.GetPosition();
@@ -749,7 +755,6 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
                         return;
                     }
                 }
-
             });
 
 

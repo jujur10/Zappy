@@ -61,4 +61,6 @@ void timeStepSliderAction(float value);
 /// Disable the menu systems that should not be displayed at startup
 /// @param ecs The ECS
 void disableMenuSystems(const flecs::world &ecs);
+
+void GuiWindowFloatingTest(flecs::world ecs);
 }  // namespace zappy_gui::gui

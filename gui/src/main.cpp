@@ -80,13 +80,13 @@ static void InitializeECS(flecs::world &ecs,
     ecs.set<zappy_gui::player::EggModel>({&eggModel});
 
     ecs.set<zappy_gui::gui::Selection>({&sobolShader, &selectionRenderTexture, &selectionPosition});
+    ecs.entity<zappy_gui::gui::Selection>().disable();
 
     zappy_gui::systems::registerSystems(ecs);
 
     ecs.progress();  // Progress through OnStart pipeline // NOLINT
 
     zappy_gui::gui::createGuiEntities(ecs, zappy_gui::screenWidth, zappy_gui::screenHeight);
-    ecs.lookup("DrawSelection").disable();
 }
 
 //----------------------------------------------------------------------------------
