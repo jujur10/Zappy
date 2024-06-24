@@ -248,8 +248,9 @@ void ParsePlayerDropCommand(const std::string_view& line)
 
 void ParseTeamNameCommand(const std::string_view& line)
 {
-    auto teamName = std::make_unique<char[]>(line.size());
+    auto teamName = std::make_unique<char[]>(line.size() + 1);
     std::ranges::copy(line, teamName.get());
+    teamName[line.size()] = '\0';
     ServerToGuiQueue.try_push(TeamNameCommand{.teamName = std::move(teamName)});
 }
 
