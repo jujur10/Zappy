@@ -105,6 +105,10 @@ target_link_libraries(zappy_server PRIVATE
     m
 )
 
+target_link_options(zappy_server PRIVATE
+    -static
+)
+
 set_target_properties(zappy_server PROPERTIES
     OUTPUT_NAME ${EXECUTABLE_NAME}
 )

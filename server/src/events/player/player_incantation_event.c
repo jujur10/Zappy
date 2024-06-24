@@ -46,18 +46,32 @@ static void send_plv_to_guis(server_t PTR server, const player_t PTR player)
 ///
 /// @param server The server structure.
 /// @param player The player to elevate.
-/// @param msg_content The message content to send.
-/// @param len The message content length.
+/// @param message The message to send.
 static void elevate_player(server_t PTR server, player_t PTR player,
-    char ARRAY msg_content, uint32_t len)
+    const msg_t PTR message)
 {
-    msg_t message = {};
+    msg_t new_message = {};
 
     player->status = PLAYING;
     player->level++;
     send_plv_to_guis(server, player);
-    create_message(msg_content, len, &message);
-    add_msg_to_queue(&player->queue, &message);
+    create_message(message->ptr, message->len, &new_message);
+    add_msg_to_queue(&player->queue, &new_message);
+}
+
+/// @brief Function used to create the current level message.
+///
+/// @param level The level to write into the message.
+/// @param message The message structure to fill.
+static void create_current_level_message(uint32_t level, msg_t PTR message)
+{
+    char msg_content[sizeof("Current level: ") + UINT32_MAX_DIGITS + 1] =
+        "Current level: ";
+    uint32_t count = 15;
+
+    write_nb_to_buffer(level + 1, msg_content, &count);
+    msg_content[count - 1] = '\n';
+    create_message(msg_content, count, message);
 }
 
 /// @brief Function used to elevate players who made incantation.
@@ -68,21 +82,24 @@ static void elevate_player(server_t PTR server, player_t PTR player,
 static void elevate_players(server_t PTR server, player_t ARRAY players,
     uint16_t nb_of_players, uint16_t player_idx)
 {
-    char msg_content[sizeof("Current level: ") + UINT32_MAX_DIGITS] =
-        "Current level: ";
-    uint32_t count = 15;
+    msg_t message = {};
     player_t *player = &players[player_idx];
+    uint32_t player_counter = 1;
 
-    write_nb_to_buffer(player->level + 2, msg_content, &count);
-    msg_content[count - 1] = '\n';
+    create_current_level_message(player->level + 1, &message);
     for (uint16_t i = 0; i < nb_of_players; i++) {
         if (i == player_idx || false == is_coordinates_equal
         (&player->coordinates, &players[i].coordinates) || player->level !=
         players[i].level)
             continue;
-        elevate_player(server, &players[i], msg_content, count);
+        if (player_counter <
+        elevation_requirements[player->level].attr.players) {
+            elevate_player(server, &players[i], &message);
+            player_counter++;
+        }
+        players[i].status = PLAYING;
     }
-    elevate_player(server, player, msg_content, count);
+    elevate_player(server, player, &message);
 }
 
 /// @brief Function which remove the items needed for incantation.
