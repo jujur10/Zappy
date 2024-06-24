@@ -72,6 +72,13 @@ struct tileModels
     raylib::Model *sandCactus;
 };
 
+struct tileModelsNoShader
+{
+    raylib::Model *sand;
+    raylib::Model *sandRock;
+    raylib::Model *sandCactus;
+};
+
 /// @brief Tag component for the tile type used to apply different models
 struct tileType1
 {
