@@ -40,7 +40,7 @@ func (game *Game) MainLoop() {
 		game.updateFrequency()
 		log.Println("Player current position", game.Coordinates.CoordsFromOrigin, "direction", game.Coordinates.Direction)
 		// Leeching is always easier, so it's more important
-		if game.FoodManager.FoodPriority < 7 && game.isLevelUpLeechAvailable() {
+		if getFoodPriority(&game.FoodManager.FoodPriority) < 6 && game.isLevelUpLeechAvailable() {
 			log.Println("Started leeching")
 			leechIdx := game.getLevelUpLeechIndex()
 			if leechIdx == -1 {
@@ -54,7 +54,8 @@ func (game *Game) MainLoop() {
 				path.path = nil
 				game.followMessageDirection(leechMsg.direction)
 			}
-		} else if game.isLevelUpHostAvailable() { // Start leveling up as host
+			// Start leveling up as host
+		} else if getFoodPriority(&game.FoodManager.FoodPriority) < 6 && game.isLevelUpHostAvailable() {
 			log.Println("Started level up host")
 			game.levelUpHostLoop()
 		} else if len(game.Movement.TilesQueue) != 0 && path.path == nil { // If there is no path configured

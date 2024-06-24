@@ -102,6 +102,10 @@ func dropResources(game *Game) {
 
 func (game *Game) collectResourcesOnFailedLevelUp() {
 	log.Println("Clearing resources after failed level up")
+	for resource, amount := range resourcesToDrop[game.Level] {
+		game.TotalResourcesRequired[resource] += amount
+		game.LevelUpResources[game.Level][resource] = amount
+	}
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
@@ -190,6 +194,7 @@ func (game *Game) levelUpHostLoop() {
 	targetLevel := game.Level + 1
 	nbMissingPlayers := levelUpResources[game.Level][Player] - 1
 	log.Println("Starting level up host : target level", targetLevel)
+	defer clearQueue()
 	for game.isLevelUpHostAvailable() {
 		if nbMissingPlayers == 0 {
 			game.startLevelUpHost()
@@ -202,6 +207,9 @@ func (game *Game) levelUpHostLoop() {
 				nbMissingPlayers -= 1
 			case announceDeparture:
 				nbMissingPlayers += 1
+				if nbMissingPlayers > levelUpResources[game.Level][Player]-1 {
+					nbMissingPlayers = levelUpResources[game.Level][Player] - 1
+				}
 			default:
 			}
 		}
@@ -222,10 +230,12 @@ func (game *Game) levelUpHostLoop() {
 // or until the food reserves are too low to continue
 func (game *Game) levelUpLeechLoop(uuid string) {
 	targetLevel := game.Level + 1
-	log.Println("Joining level up : target level", targetLevel)
+	clearQueue()
+	log.Println("Joining level up : target level", targetLevel, "host uuid", uuid)
 	announcePresenceLevelUp(game, targetLevel)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
+	defer clearQueue()
 	for game.isLevelUpLeechAvailable() {
 		message, err := popMessageFromQueue()
 		if err == nil {

@@ -16,7 +16,7 @@ import (
 
 type broadcastType int
 
-var CipherMessages = true
+var CipherMessages = false
 
 const (
 	missingPlayers broadcastType = iota
@@ -63,6 +63,12 @@ func popMessageFromQueue() (broadcastMessageContent, error) {
 	message := messageQueue.queue[0]
 	messageQueue.queue = messageQueue.queue[1:]
 	return message, nil
+}
+
+func clearQueue() {
+	messageQueue.lock.Lock()
+	defer messageQueue.lock.Unlock()
+	messageQueue.queue = make([]broadcastMessageContent, 0)
 }
 
 func cipherMessage(message string, gcm cipher.AEAD) string {
