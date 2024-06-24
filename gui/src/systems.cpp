@@ -137,11 +137,15 @@ static void registerOnLoadSystems(const flecs::world &ecs)
     .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D * const camera)
     {
         if (it.world().has<gui::InUI>() || ::IsCursorHidden())
+        {
             return;
+        }
 
         Vector2 point;
         if (!GetMouseCollisionWithTiles(camera->GetMouseRay(raylib::Mouse::GetPosition()), &point))
+        {
             return;
+        }
 
         const Vector2 tileCoords = utils::GetCoordsFromVector(point);
         if (tileCoords.x < 0 || tileCoords.x >= map::kMAP_WIDTH || tileCoords.y < 0 || tileCoords.y >= map::kMAP_HEIGHT)
@@ -690,13 +694,12 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
                 }
             });
 
-    ecs.system<raylib::Camera3D, raylib::Vector2>("mouseClicks")
+    ecs.system<raylib::Vector2>("mouseClicks")
         .kind(flecs::OnUpdate)
-        .term_at(1).singleton()
         .no_readonly()
         .with(utils::MouseButton::LeftButton)
         .each(
-            []([[maybe_unused]] flecs::entity const &entity, raylib::Camera3D const &camera, raylib::Vector2 const &mousePos)
+            []([[maybe_unused]] flecs::entity const &entity, raylib::Vector2 const &mousePos)
             {
                 if (entity.world().lookup("drawMenuExpandArrow").enabled())
                 {
