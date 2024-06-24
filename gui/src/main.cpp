@@ -49,7 +49,13 @@ static void InitializeECS(flecs::world &ecs,
                           raylib::Texture2D &inProgressIcon,
                           raylib::Texture2D &successIcon,
                           raylib::Texture2D &failureIcon,
-                          raylib::Model &eggModel)
+                          raylib::Model &eggModel,
+                          raylib::Shader &sobolShader,
+                          raylib::RenderTexture &selectionRenderTexture,
+                          raylib::Vector3 &selectionPosition,
+                          raylib::Model &sandCopy,
+                          raylib::Model &sandRockCopy,
+                          raylib::Model &sandCactusCopy)
 {
     ecs.set_entity_range(4'269'420, 0);  // Allow flecs to only generate entity ids starting from 4'269'420
 
@@ -61,6 +67,8 @@ static void InitializeECS(flecs::world &ecs,
 
     ecs.set<zappy_gui::map::tileModels>({&sand, &sandRock, &sandCactus});
 
+    ecs.set<zappy_gui::map::tileModelsNoShader>({&sandCopy, &sandRockCopy, &sandCactusCopy});
+
     ecs.set<zappy_gui::map::resourceModels>({&food, &crystal});
 
     ecs.set<zappy_gui::player::PlayerAnimations>({&playerAnimations});
@@ -71,11 +79,14 @@ static void InitializeECS(flecs::world &ecs,
 
     ecs.set<zappy_gui::player::EggModel>({&eggModel});
 
+    ecs.set<zappy_gui::gui::Selection>({&sobolShader, &selectionRenderTexture, &selectionPosition});
+
     zappy_gui::systems::registerSystems(ecs);
 
     ecs.progress();  // Progress through OnStart pipeline // NOLINT
 
     zappy_gui::gui::createGuiEntities(ecs, zappy_gui::screenWidth, zappy_gui::screenHeight);
+    ecs.lookup("DrawSelection").disable();
 }
 
 //----------------------------------------------------------------------------------
@@ -119,6 +130,9 @@ int32_t main(const int32_t argc, char *argv[])
     auto sand = raylib::Model("gui/resources/assets/sand.glb");
     auto sandRock = raylib::Model("gui/resources/assets/sand_rocks.glb");
     auto sandCactus = raylib::Model("gui/resources/assets/sand_cactus.glb");
+    auto sandCopy = raylib::Model("gui/resources/assets/sand.glb");
+    auto sandRockCopy = raylib::Model("gui/resources/assets/sand_rocks.glb");
+    auto sandCactusCopy = raylib::Model("gui/resources/assets/sand_cactus.glb");
     auto food = raylib::Model("gui/resources/assets/food.glb");
     auto crystal = raylib::Model("gui/resources/assets/crystal.glb");
     auto skybox = raylib::Model("gui/resources/assets/skybox.glb");
@@ -127,6 +141,9 @@ int32_t main(const int32_t argc, char *argv[])
     auto failureIcon = raylib::Texture2D("gui/resources/assets/cross.png");
     std::vector<raylib::ModelAnimation> playerAnimations = raylib::ModelAnimation::Load("gui/resources/assets/cactoro.m3d");
     auto eggModel = raylib::Model("gui/resources/assets/cactoro_egg.m3d");
+    auto sobolShader = raylib::Shader(nullptr, "gui/resources/shaders/sobel.fs");
+    auto selectionRenderTexture = raylib::RenderTexture(zappy_gui::screenWidth, zappy_gui::screenHeight);
+    auto selectionPosition = raylib::Vector3(0.0f, 0.0f, 0.0f);
 
     //--------------------------------------------------------------------------------------
     // Create the ECS and initialize it
@@ -138,7 +155,9 @@ int32_t main(const int32_t argc, char *argv[])
         skybox,
         playerAnimations,
         inProgressIcon, successIcon, failureIcon,
-        eggModel);
+        eggModel,
+        sobolShader, selectionRenderTexture, selectionPosition,
+        sandCopy, sandRockCopy, sandCactusCopy);
 
     //--------------------------------------------------------------------------------------
     // Start the network main loop on another thread
