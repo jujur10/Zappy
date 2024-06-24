@@ -7,13 +7,13 @@
 #include <cfloat>
 #include <cstring>
 #include <memory>
-#include <string>
 
 
 #include "Color.hpp"
 #include "Matrix.hpp"
 #include "Camera3D.hpp"  // Must be included after Matrix.hpp, if not project will not compile
 #include "Mouse.hpp"
+#include "Ray.hpp"
 #include "Rectangle.hpp"
 #include "flecs.h"
 #include "gui.hpp"
@@ -34,7 +34,7 @@ namespace zappy_gui::systems
 //----------------------------------------------------------------------------------
 // Disables and Enables menu interactions
 //----------------------------------------------------------------------------------
-void HandleMenuInteraction(bool &menuInteraction)
+void HandleMenuInteraction(bool &menuInteraction, const flecs::iter &it)
 {
     if (::IsKeyPressed(KEY_I))
     {
@@ -46,8 +46,24 @@ void HandleMenuInteraction(bool &menuInteraction)
         else
         {
             ::DisableCursor();
+            it.world().lookup("DrawSelection").disable();
         }
     }
+}
+
+bool GetMouseCollisionWithTiles(const raylib::Ray &ray, Vector2 * const point)
+{
+    if (ray.direction.y < -0.0001f || ray.direction.y > 0.0001f)
+    {
+        const float distance = -ray.position.y / ray.direction.y;
+        if (distance >= 0)
+        {
+            point->x = ray.position.x + ray.direction.x * distance;
+            point->y = ray.position.z + ray.direction.z * distance;
+            return true;
+        }
+    }
+    return false;
 }
 
 /// @brief Register systems that will be executed in the OnStart pipeline
@@ -114,6 +130,60 @@ static void registerOnLoadSystems(const flecs::world &ecs)
                     }
                 }
             });
+
+    ecs.system<raylib::Camera3D>("TraceMouseRay")
+    .kind(flecs::OnLoad)
+    .term_at(1).singleton()
+    .iter([]([[maybe_unused]] const flecs::iter &it, raylib::Camera3D * const camera)
+    {
+        if (it.world().has<gui::InUI>() || ::IsCursorHidden())
+        {
+            return;
+        }
+
+        Vector2 point;
+        if (!GetMouseCollisionWithTiles(camera->GetMouseRay(raylib::Mouse::GetPosition()), &point))
+        {
+            return;
+        }
+
+        const Vector2 tileCoords = utils::GetCoordsFromVector(point);
+        if (tileCoords.x < 0 || tileCoords.x >= map::kMAP_WIDTH || tileCoords.y < 0 || tileCoords.y >= map::kMAP_HEIGHT)
+        {
+            it.world().lookup("DrawSelection").disable();
+            return;
+        }
+
+        auto tileIndex = utils::GetTileIndexFromCoords(tileCoords);
+        const auto tile = it.world().entity(tileIndex);
+        if (!tile.is_alive())
+        {
+            it.world().lookup("DrawSelection").disable();
+            return;
+        }
+
+        uint8_t tileType = tile.has<map::tileType1>() ? 1 : (tile.has<map::tileType2>() ? 2 : (tile.has<map::tileType3>() ? 3 : 0));
+        const raylib::Model *model = nullptr;
+        switch (tileType)
+        {
+            case 1: model = it.world().get<map::tileModelsNoShader>()->sand;       break;
+            case 2: model = it.world().get<map::tileModelsNoShader>()->sandRock;   break;
+            case 3: model = it.world().get<map::tileModelsNoShader>()->sandCactus; break;
+            default: model = it.world().get<map::tileModelsNoShader>()->sand;      break;
+        }
+
+        const auto * const tileMatrix = tile.get<raylib::Matrix>();
+        const Vector3 tilePosition = {tileMatrix->m12, tileMatrix->m13, tileMatrix->m14};
+
+        it.world().lookup("DrawSelection").enable();
+        gui::Selection selection = *it.world().get<gui::Selection>();
+        selection.renderTexture->BeginMode();
+        ::ClearBackground(BLANK);
+        camera->BeginMode();
+        model->Draw(tilePosition, 1.f, WHITE);
+        camera->EndMode();
+        selection.renderTexture->EndMode();
+    });
 }
 
 static void registerPreUpdateSystems(const flecs::world &ecs)
@@ -163,7 +233,7 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             {
                 static bool menuInteraction = false;
                 constexpr static Vector3 nullVector = {0.0f, 0.0f, 0.0f};  // Is static so that it doesn't get recreated every frame
-                HandleMenuInteraction(menuInteraction);
+                HandleMenuInteraction(menuInteraction, it);
                 camera->Update(
                             Vector3{
                                     (::IsKeyDown(KEY_W) || ::IsKeyDown(KEY_UP)) * 0.1f -    // Move forward-backward
@@ -232,6 +302,24 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
             {
                 utils::DrawModelInstanced(it.world().get<map::tileModels>()->sandCactus, tilesPosition, static_cast<int32_t>(it.count()));
             });
+
+    ecs.system<gui::Selection, raylib::Camera3D>("DrawSelection")
+    .kind(flecs::OnUpdate)
+    .term_at(1).singleton()
+    .term_at(2).singleton()
+    .iter(
+        []([[maybe_unused]] const flecs::iter &it, const gui::Selection * const selection, raylib::Camera3D * const camera)
+        {
+            camera->EndMode();
+            selection->sobolShader->BeginMode();
+            ::DrawTextureRec(selection->renderTexture->texture,
+                Rectangle{0, 0, static_cast<float>(selection->renderTexture->texture.width),
+                    static_cast<float>(-selection->renderTexture->texture.height)},
+                Vector2{0, 0},
+                WHITE);
+            selection->sobolShader->EndMode();
+            camera->BeginMode();
+        });
 
     /// Query all food and draw it
     ecs.system<raylib::Matrix>("drawFood")
@@ -564,6 +652,14 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
             {
                 rectangle.Draw(raylib::Color(raygui::GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
                 raygui::GuiGroupBox(rectangle, "Zappy Menu");
+                if (rectangle.CheckCollision(GetMousePosition()))
+                {
+                    entity.world().add<gui::InUI>();
+                }
+                else
+                {
+                    entity.world().remove<gui::InUI>();
+                }
             });
 
     ecs.system<gui::Slider>("drawMenuSliders")
@@ -605,15 +701,15 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
         .each(
             []([[maybe_unused]] flecs::entity const &entity, raylib::Vector2 const &mousePos)
             {
-                entity.world().defer_suspend();
                 if (entity.world().lookup("drawMenuExpandArrow").enabled())
                 {
+                    bool arrowInteraction = false;
                     entity.world()
                         .filter_builder<raylib::Rectangle>()
                         .with(utils::MenuLabels::MenuExpandArrow)
                         .build()
                         .each(
-                            [&mousePos]([[maybe_unused]] flecs::entity const &e, raylib::Rectangle const &rectangle)
+                            [&mousePos, &arrowInteraction](flecs::entity const &e, raylib::Rectangle const &rectangle)
                             {
                                 if (rectangle.CheckCollision(mousePos))
                                 {
@@ -621,17 +717,23 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
                                     e.world().lookup("drawMenu").enable();
                                     e.world().lookup("drawMenuSliders").enable();
                                     e.world().lookup("drawMenuRetractArrow").enable();
+                                    arrowInteraction = true;
                                 }
                             });
+                    if (arrowInteraction)
+                    {
+                        return;
+                    }
                 }
                 if (entity.world().lookup("drawMenuRetractArrow").enabled())
                 {
+                    bool arrowInteraction = false;
                     entity.world()
                         .filter_builder<raylib::Rectangle>()
                         .with(utils::MenuLabels::MenuRetractArrow)
                         .build()
                         .each(
-                            [&mousePos]([[maybe_unused]] flecs::entity const &e, raylib::Rectangle const &rectangle)
+                            [&mousePos, &arrowInteraction](flecs::entity const &e, raylib::Rectangle const &rectangle)
                             {
                                 if (rectangle.CheckCollision(mousePos))
                                 {
@@ -639,11 +741,18 @@ static void registerPostUpdateSystems(flecs::world const &ecs)
                                     e.world().lookup("drawMenu").disable();
                                     e.world().lookup("drawMenuSliders").disable();
                                     e.world().lookup("drawMenuRetractArrow").disable();
+                                    arrowInteraction = true;
                                 }
                             });
+                    if (arrowInteraction)
+                    {
+                        return;
+                    }
                 }
-                entity.world().defer_resume();
+
             });
+
+
 
     ecs.system("endDrawing")
         .kind(flecs::PostUpdate)
