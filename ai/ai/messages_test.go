@@ -1,6 +1,10 @@
 package ai
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"fmt"
+	"log"
 	"reflect"
 	"testing"
 )
@@ -8,6 +12,18 @@ import (
 func Test_interpretMessage(t *testing.T) {
 	type args struct {
 		message string
+	}
+	aesCipher, err := aes.NewCipher([]byte(growAesKey("aaa")))
+	if err != nil {
+		fmt.Println("Failed to create AES cipher, defaulting to no cipher")
+		CipherMessages = false
+		log.Fatal("Failed to create AES cipher", err)
+	}
+	gcm, err := cipher.NewGCM(aesCipher)
+	if err != nil {
+		fmt.Println("Failed to create GCM", err)
+		CipherMessages = false
+		log.Fatal("Failed to create GCM", err)
 	}
 	tests := []struct {
 		name    string
@@ -47,7 +63,7 @@ func Test_interpretMessage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parsePlayerMessage(tt.args.message)
+			got, err := parsePlayerMessage(tt.args.message, gcm)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parsePlayerMessage() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -116,6 +132,18 @@ func Test_parsePlayerMessage(t *testing.T) {
 	type args struct {
 		message string
 	}
+	aesCipher, err := aes.NewCipher([]byte(growAesKey("aaa")))
+	if err != nil {
+		fmt.Println("Failed to create AES cipher, defaulting to no cipher")
+		CipherMessages = false
+		log.Fatal("Failed to create AES cipher", err)
+	}
+	gcm, err := cipher.NewGCM(aesCipher)
+	if err != nil {
+		fmt.Println("Failed to create GCM", err)
+		CipherMessages = false
+		log.Fatal("Failed to create GCM", err)
+	}
 	tests := []struct {
 		name    string
 		args    args
@@ -141,7 +169,7 @@ func Test_parsePlayerMessage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parsePlayerMessage(tt.args.message)
+			got, err := parsePlayerMessage(tt.args.message, gcm)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parsePlayerMessage() error = %v, wantErr %v", err, tt.wantErr)
 				return
