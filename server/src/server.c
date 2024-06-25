@@ -26,6 +26,15 @@
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
 
+void send_quit_server_request(void)
+{
+    if (-1 != pipe_signals[1]) {
+        write(pipe_signals[1], "TERMINATED", 10);
+        close(pipe_signals[1]);
+        pipe_signals[1] = -1;
+    }
+}
+
 /// @brief Function which initializes signal pipe.
 /// @param args The parsed program parameters.
 /// @param server The server structure to initialize.
@@ -146,10 +155,12 @@ static uint8_t server_main_loop(server_t PTR server)
     fd_set rfds;
     fd_set wfds;
     int32_t select_ret;
+    struct timeval select_timeout = {0, 100000};
 
     while (true) {
         init_fdset(&server->current_socks, &rfds, &wfds);
-        select_ret = select(server->max_client + 1, &rfds, &wfds, NULL, NULL);
+        select_ret = select(server->max_client + 1, &rfds, &wfds, NULL,
+            &select_timeout);
         if (-1 == select_ret)
             return select_error();
         update_server(server);

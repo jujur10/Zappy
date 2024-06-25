@@ -23,6 +23,10 @@
 #define AUTH_TIMEOUT_SEC 0
 #define AUTH_TIMEOUT_NS 200000000
 
+// Delay to force to close the server after the end of game event.
+#define END_GAME_TIMEOUT_SEC 0
+#define END_GAME_TIMEOUT_NS 500000000
+
 // GUI team name.
 #define GUI_TEAM "GRAPHIC\n"
 
@@ -73,5 +77,9 @@ typedef struct server_s {
 uint8_t run_server(const argument_t PTR args);
 
 /// @brief Function which is used to handle new connections.
+///
 /// @param server The server structure.
 void on_connection(server_t PTR server);
+
+/// @brief Function used to send a server shutdown request.
+void send_quit_server_request(void);

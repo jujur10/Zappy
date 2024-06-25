@@ -185,8 +185,8 @@ static void send_next_message_from_queue(server_t PTR server,
         return;
     if (false == execute_new_client_event_function(server, client_idx, &msg))
         return;
-    LOGF("Send msg from queue (new client sock %i) : %.*s", client->sock, msg
-    .len, msg.ptr)
+    LOGF("Send msg from queue (new client sock %i) : %.*s",
+        server->clients[client_idx].sock, msg.len, msg.ptr)
     write(server->clients[client_idx].sock, msg.ptr, msg.len);
     destroy_message(&msg);
 }

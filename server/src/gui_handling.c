@@ -127,8 +127,9 @@ static void send_next_message_from_queue(server_t PTR server, uint32_t gui_idx)
         return;
     LOGF("Send msg from queue (GUI sock %i) : %.*s", gui->sock, msg.len,
     msg.ptr)
-    execute_gui_event_function(server, gui_idx, msg.event.gui_event);
+    execute_gui_pre_event_function(server, gui_idx, msg.event.gui_event);
     write(gui->sock, msg.ptr, msg.len);
+    execute_gui_post_event_function(server, gui_idx, msg.event.gui_event);
     destroy_message(&msg);
 }
 

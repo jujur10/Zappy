@@ -45,21 +45,25 @@ add_executable(zappy_server
     src/commands/player/player_take_command.c
     src/coordinates.c
     src/eggs.c
+    src/end_of_the_game.c
     src/events/gui/gui_enw_event.c
     src/events/gui/gui_events.c
     src/events/gui/gui_none_event.c
     src/events/gui/gui_pbc_event.c
+    src/events/gui/gui_pdi_event.c
     src/events/gui/gui_pdr_event.c
     src/events/gui/gui_pex_event.c
     src/events/gui/gui_pfk_event.c
     src/events/gui/gui_pgt_event.c
     src/events/gui/gui_pic_event.c
     src/events/gui/gui_pnw_event.c
+    src/events/gui/gui_seg_event.c
     src/events/gui/gui_update_mct_event.c
     src/events/new_client/new_client_event.c
     src/events/new_client/new_client_new_slot_available_event.c
     src/events/new_client/new_client_none_event.c
     src/events/player/player_death_event.c
+    src/events/player/player_end_of_game_event.c
     src/events/player/player_events.c
     src/events/player/player_events.c
     src/events/player/player_incantation_event.c
@@ -103,10 +107,6 @@ target_include_directories(zappy_server PRIVATE
 target_link_libraries(zappy_server PRIVATE
     build_configs
     m
-)
-
-target_link_options(zappy_server PRIVATE
-    -static
 )
 
 set_target_properties(zappy_server PROPERTIES

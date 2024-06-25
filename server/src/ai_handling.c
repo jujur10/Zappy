@@ -157,10 +157,11 @@ static void send_next_message_from_queue(server_t PTR server,
 
     if (FAILURE == pop_msg(&player->queue, &msg))
         return;
-    LOGF("Send msg from queue (PLAYER sock %hu) : %.*s", player->sock, msg
-    .len, msg.ptr)
+    LOGF("Send msg from queue (PLAYER sock %hu) : %.*s", player->sock, msg.len,
+        msg.ptr)
     write(player->sock, msg.ptr, msg.len);
-    execute_player_event_function(server, player_idx, msg.event.player_event);
+    execute_player_post_event_function(server, player_idx,
+        msg.event.player_event);
     destroy_message(&msg);
 }
 
