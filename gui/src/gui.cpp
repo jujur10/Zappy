@@ -348,7 +348,7 @@ namespace zappy_gui::gui {
 
             uint16_t i = 0;
             pQuery.each([&listViewExList, &i, &selection, &playerIdx](const flecs::entity e, const Vector2 &pos) {
-                if (std::fabs(pos.x - selection->position->x) > 0.1 && std::fabs(pos.y - selection->position->y) > 0.1)
+                if (std::fabs(pos.x - selection->position->x) > 0.1 || std::fabs(pos.y - selection->position->y) > 0.1)
                 {
                     return;
                 }
@@ -358,21 +358,21 @@ namespace zappy_gui::gui {
                 ++i;
             });
 
-            raygui::GuiListViewEx((Rectangle){ position.x + 22 + scroll.x, position.y + 50 + scroll.y, 168, 100 }, reinterpret_cast<char**>(listViewExList), playerCount, &listViewExScrollIndex, &listViewExActive, &listViewExFocus);
+            raygui::GuiListViewEx((Rectangle){ position.x + 22 + scroll.x, position.y + 60 + scroll.y, 162, 100 }, reinterpret_cast<char**>(listViewExList), playerCount, &listViewExScrollIndex, &listViewExActive, &listViewExFocus);
 
             if (listViewExActive != -1)
             {
-                raygui::GuiDrawText("Informations:", (Rectangle){position.x + 32 + scroll.x, position.y + 200 + scroll.y, 100, 35}, TEXT_ALIGN_LEFT, BLACK);
+                raygui::GuiDrawText("Informations:", (Rectangle){position.x + 66 + scroll.x, position.y + 160 + scroll.y, 100, 25}, TEXT_ALIGN_LEFT, BLACK);
 
-                raygui::GuiDrawText("Equipe: ", (Rectangle){position.x + 22 + scroll.x, position.y + 250 + scroll.y, 100, 25}, TEXT_ALIGN_LEFT, BLACK);
+                raygui::GuiDrawText("Equipe: ", (Rectangle){position.x + 22 + scroll.x, position.y + 185 + scroll.y, 100, 25}, TEXT_ALIGN_LEFT, BLACK);
 
-                raygui::GuiDrawText("Niveau: ", (Rectangle){position.x + 122 + scroll.x, position.y + 250 + scroll.y, 100, 25}, TEXT_ALIGN_LEFT, BLACK);
+                raygui::GuiDrawText("Niveau: ", (Rectangle){position.x + 122 + scroll.x, position.y + 185 + scroll.y, 100, 25}, TEXT_ALIGN_LEFT, BLACK);
 
-                for (uint8_t r = 0; i < 7; i++) {
-                    raygui::GuiDrawText(resourceNames[r], (Rectangle){position.x + 22 + scroll.x, position.y + 270 + r * 25 + scroll.y, 100, 25}, TEXT_ALIGN_LEFT, map::resourceColors[r]);
+                for (uint8_t r = 0; r < 7; r++) {
+                    raygui::GuiDrawText(resourceNames[r], (Rectangle){position.x + 22 + scroll.x, position.y + 220 + r * 25 + scroll.y, 100, 25}, TEXT_ALIGN_LEFT, map::resourceColors[r]);
                 }
 
-                if (totalPlayerCount == 0)
+                if (0 == totalPlayerCount)
                 {
                     return;
                 }
@@ -395,7 +395,7 @@ namespace zappy_gui::gui {
                     const auto *teamName = team.name().c_str();
                     if (nullptr != teamName)
                     {
-                        raygui::GuiDrawText(teamName, (Rectangle){position.x + 44 + scroll.x, position.y + 250 + scroll.y, 100, 25}, TEXT_ALIGN_RIGHT, BLACK);
+                        raygui::GuiDrawText(teamName, (Rectangle){position.x + 44 + scroll.x, position.y + 185 + scroll.y, 100, 25}, TEXT_ALIGN_RIGHT, BLACK);
                     }
                 }
 
@@ -403,7 +403,7 @@ namespace zappy_gui::gui {
                 {
                     char levelBuffer[3];
                     std::to_chars(&levelBuffer[0], &levelBuffer[2], *level);
-                    raygui::GuiDrawText(levelBuffer, (Rectangle){position.x + 144 + scroll.x, position.y + 250 + scroll.y, 100, 25}, TEXT_ALIGN_RIGHT, BLACK);
+                    raygui::GuiDrawText(levelBuffer, (Rectangle){position.x + 144 + scroll.x, position.y + 185 + scroll.y, 100, 25}, TEXT_ALIGN_RIGHT, BLACK);
                 }
 
                 if (nullptr != inventory)
@@ -411,7 +411,7 @@ namespace zappy_gui::gui {
                     for (uint8_t r = 0; i < 7; i++) {
                         char resourceBuffer[7];
                         std::to_chars(&resourceBuffer[0], &resourceBuffer[6], inventory->resources[r]);
-                        raygui::GuiDrawText(resourceBuffer, (Rectangle){position.x + 44 + scroll.x, position.y + 270 + r * 25 + scroll.y, 100, 25}, TEXT_ALIGN_RIGHT, map::resourceColors[r]);
+                        raygui::GuiDrawText(resourceBuffer, (Rectangle){position.x + 44 + scroll.x, position.y + 220 + r * 25 + scroll.y, 100, 25}, TEXT_ALIGN_RIGHT, map::resourceColors[r]);
                     }
                 }
             }
