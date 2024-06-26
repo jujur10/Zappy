@@ -49,17 +49,32 @@ static int32_t get_game_status(server_t PTR server)
     return -1;
 }
 
-void check_end_of_the_game(server_t PTR server)
+/// @brief Function which verifies the timeout of the end of the game
+/// (time for every clients to disconnect properly).\n
+/// After this time, the quit server event is raised and the server will
+/// quit properly.
+///
+/// @param server The server structure.
+/// @param game_ended The game ended variable.
+/// @param current_clock The clock containing the time of end of wait time.
+static void check_timeout_and_quit_server(server_t PTR server,
+    bool game_ended, timespec_t current_clock)
 {
-    int32_t team_idx = get_game_status(server);
-    static struct timespec current_clock = {};
-    static bool game_ended = false;
-
     if (true == game_ended) {
         if (-1 != pipe_signals[1] && true == is_timeout_exceed(&server->clock,
         &current_clock))
-            send_quit_server_request() SEMICOLON return;
+            send_quit_server_request();
+        return;
     }
+}
+
+void check_end_of_the_game(server_t PTR server)
+{
+    int32_t team_idx = get_game_status(server);
+    static timespec_t current_clock = {};
+    static bool game_ended = false;
+
+    check_timeout_and_quit_server(server, game_ended, current_clock);
     if (-1 == team_idx)
         return;
     FD_CLR(server->sock, &server->current_socks);

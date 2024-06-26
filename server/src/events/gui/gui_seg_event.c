@@ -22,7 +22,7 @@ void send_seg_to_guis(server_t PTR server, uint32_t winning_team)
         GUI_EVENT_END_OF_GAME, NEW_CLIENT_EVENT_NONE});
     for (uint16_t i = 0; i < server->nb_guis; i++) {
         create_message(string.ptr, string.len, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
+        queue_push(&server->guis[i].queue, &message);
     }
     clear_string(&string);
 }

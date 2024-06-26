@@ -16,7 +16,7 @@ void send_end_of_game_to_players(server_t PTR server)
     set_event_to_message(&message, (event_t){PLAYER_EVENT_END_OF_GAME,
         GUI_EVENT_NONE, NEW_CLIENT_EVENT_NONE});
     for (uint32_t i = 0; i < server->nb_players; i++)
-        add_msg_to_queue(&server->players[i].queue, &message);
+        queue_push(&server->players[i].queue, &message);
 }
 
 void execute_player_end_of_game_event(server_t PTR server, uint32_t player_idx)

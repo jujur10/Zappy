@@ -23,5 +23,5 @@ void execute_player_connect_nbr_command(server_t PTR server,
     write_nb_to_buffer(nb_of_remaining_slot, buffer, &wrote);
     buffer[wrote - 1] = '\n';
     create_message(buffer, wrote, &message);
-    add_msg_to_queue(&player->queue, &message);
+    queue_push(&player->queue, &message);
 }

@@ -11,13 +11,12 @@
 
 #include "coordinates.h"
 #include "inventory.h"
-#include "queue/msg_queue.h"
+#include "utils/queue/queue.h"
 #include "commands/player_commands.h"
 #include "style/macros.h"
 
 /// @brief Defaults parameters.
 #define BEGINNING_LIFE_UNITS 10
-#define FOOD_TO_TIME_UNITS(x) ((x) * 126)
 
 /// @brief Enumeration representing the status of the player.
 ///
@@ -52,7 +51,7 @@ typedef struct player_s {
     double time_to_eat;
     double blocking_time;
     player_command_buffer_t command_buffer;
-    msg_queue_head_t queue;
+    queue_t queue;
 } player_t;
 
 /// @brief Function which returns the index of the player for a given socket.

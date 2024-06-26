@@ -43,8 +43,10 @@ static uint8_t init_sig_pipe(const argument_t PTR args, server_t PTR server)
 {
     if (-1 == pipe(pipe_signals)) {
         ERROR("Signal pipe initialization failed")
-        return free(server->map.tiles), destroy_teams(args, server->teams),
-        close(server->sock), 1;
+        free(server->map.tiles);
+        destroy_teams(args, server->teams);
+        close(server->sock);
+        return 1;
     }
     FD_SET(pipe_signals[0], &server->current_socks);
     fcntl(pipe_signals[0], F_SETFL, O_NONBLOCK);
@@ -188,5 +190,6 @@ uint8_t run_server(const argument_t PTR args)
         .buffers[PRE_MAP_BUFFER]);
     LOG("Server responses pre-generated")
     ret_val = server_main_loop(&server);
-    return destroy_server(args, &server), ret_val;
+    destroy_server(args, &server);
+    return ret_val;
 }

@@ -22,7 +22,7 @@ void send_pbc_to_guis(server_t PTR server,
     (MESSAGE_STR) - 1, message_buffer->len - sizeof(MESSAGE_STR) + 1);
     for (uint16_t i = 0; i < server->nb_guis; i++) {
         create_message(string.ptr, string.len, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
+        queue_push(&server->guis[i].queue, &message);
     }
     clear_string(&string);
 }

@@ -53,7 +53,7 @@ void send_pnw_to_guis(server_t PTR server, const team_t PTR team,
     append_to_string_from_chars(&string, "\n", 1);
     for (uint16_t i = 0; i < server->nb_guis; i++) {
         create_message(string.ptr, string.len, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
+        queue_push(&server->guis[i].queue, &message);
     }
     clear_string(&string);
 }

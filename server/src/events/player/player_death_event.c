@@ -14,7 +14,7 @@ void create_player_death_event(player_t PTR player)
 
     create_message("dead\n", 5, &message);
     message.event.player_event = PLAYER_EVENT_KILL;
-    add_msg_to_queue(&player->queue, &message);
+    queue_push(&player->queue, &message);
 }
 
 void execute_player_death_event(server_t PTR server, uint32_t player_idx)

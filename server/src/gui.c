@@ -27,7 +27,7 @@ static void send_enw_to_gui(server_t PTR server, const egg_t PTR egg,
     write_nb_to_buffer(egg->egg_coordinates.y, msg_content, &count);
     msg_content[count - 1] = '\n';
     create_message(msg_content, count, &message);
-    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    queue_push(&server->guis[gui_idx].queue, &message);
 }
 
 /// @brief Function used to send player information's to the GUI.
@@ -42,15 +42,15 @@ static void send_player_information_to_gui(server_t PTR server,
     for (uint16_t player_idx = 0; player_idx < server->nb_players;
     player_idx++) {
         create_gui_pnw_message(server, &server->players[player_idx], &message);
-        add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+        queue_push(&server->guis[gui_idx].queue, &message);
         message.event.gui_event = GUI_EVENT_NONE;
         create_gui_pin_message(server, server->players[player_idx].sock,
             &message);
-        add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+        queue_push(&server->guis[gui_idx].queue, &message);
         message.event.gui_event = GUI_EVENT_NONE;
         create_gui_plv_message(server, server->players[player_idx].sock,
             &message);
-        add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+        queue_push(&server->guis[gui_idx].queue, &message);
     }
 }
 

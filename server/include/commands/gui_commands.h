@@ -284,9 +284,3 @@ void send_buffer_to_guis(server_t PTR server, buffer_t PTR buffer,
 /// @param server The server structure.
 /// @param gui The gui to send the message to.
 void gui_suc_response(UNUSED const server_t PTR server, gui_t PTR gui);
-
-/// @brief Function which adds to the gui queue the sbp response.
-///
-/// @param server The server structure.
-/// @param gui The gui to send the message to.
-void gui_sbp_response(UNUSED const server_t PTR server, gui_t PTR gui);

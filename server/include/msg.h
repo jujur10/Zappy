@@ -46,3 +46,9 @@ void create_message_from_buffer(const buffer_t PTR buffer, msg_t PTR message);
 ///
 /// @param message The pointer on the message to free.
 void destroy_message(msg_t PTR message);
+
+/// @brief Function used to set an event to a message.
+///
+/// @param message The message structure to add an event to.
+/// @param event The event to add to the message.
+void set_event_to_message(msg_t PTR message, event_t event);

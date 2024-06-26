@@ -6,7 +6,6 @@
 */
 #include "server.h"
 
-#include "queue/msg_queue.h"
 #include "game_settings.h"
 
 /// @brief Function which modify the player's orientation with a rotation.

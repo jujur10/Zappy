@@ -92,7 +92,7 @@ static void broadcast_message_to_player(player_t PTR player,
     create_message(message_buffer->ptr, message_buffer->len,
         &message);
     fast_itoa_u32(direction, message.ptr + 8);
-    add_msg_to_queue(&player->queue, &message);
+    queue_push(&player->queue, &message);
 }
 
 /// @brief Function used to broadcast the message to all the players.

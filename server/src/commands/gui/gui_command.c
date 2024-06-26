@@ -41,7 +41,7 @@ void send_message_to_guis(server_t PTR server, const char PTR ptr,
 
     for (uint16_t i = 0; i < server->nb_guis; i++) {
         create_message(ptr, len, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
+        queue_push(&server->guis[i].queue, &message);
     }
 }
 
@@ -53,7 +53,7 @@ void send_buffer_to_guis(server_t PTR server, buffer_t PTR buffer,
     create_message_from_buffer(buffer, &message);
     message.event.gui_event = gui_event;
     for (uint16_t i = 0; i < server->nb_guis; i++) {
-        add_msg_to_queue(&server->guis[i].queue, &message);
+        queue_push(&server->guis[i].queue, &message);
     }
 }
 

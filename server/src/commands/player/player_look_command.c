@@ -162,6 +162,6 @@ void execute_player_look_command(server_t PTR server, uint16_t player_idx,
     write_vision_to_buffer(buffer, &sorted_resources);
     append_to_buffer_from_chars(buffer, "]\n", 2);
     create_message(buffer->ptr, buffer->len, &message);
-    add_msg_to_queue(&player->queue, &message);
+    queue_push(&player->queue, &message);
     add_time_limit_to_player(server->time_units, PLAYER_LOOK_WAIT, player);
 }

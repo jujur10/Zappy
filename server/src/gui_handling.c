@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "server.h"
-#include "queue/msg_queue.h"
+#include "utils/queue/queue.h"
 #include "logging.h"
 #include "commands/gui_commands.h"
 #include "gui_handling.h"
@@ -21,7 +21,7 @@ int32_t init_gui(server_t PTR server, int sock)
         return -1;
     LOGF("Swapped to GUI %i", server->nb_guis)
     server->guis[server->nb_guis].sock = sock;
-    TAILQ_INIT(&server->guis[server->nb_guis].queue);
+    queue_new(&server->guis[server->nb_guis].queue);
     server->nb_guis++;
     return server->nb_guis - 1;
 }
@@ -31,7 +31,7 @@ void destroy_gui(server_t PTR server, uint32_t gui_idx)
     LOGF("Destroying gui (gui idx: %u)", gui_idx)
     FD_CLR(server->guis[gui_idx].sock, &server->current_socks);
     close(server->guis[gui_idx].sock);
-    clear_msg_queue(&server->guis[gui_idx].queue);
+    queue_destroy(&server->guis[gui_idx].queue);
     server->nb_guis--;
     memmove(&server->guis[gui_idx], &server->guis[server->nb_guis],
     sizeof(gui_t));
@@ -123,7 +123,7 @@ static void send_next_message_from_queue(server_t PTR server, uint32_t gui_idx)
     msg_t msg;
     gui_t *gui = &server->guis[gui_idx];
 
-    if (FAILURE == pop_msg(&gui->queue, &msg))
+    if (FAILURE == queue_pop(&gui->queue, &msg))
         return;
     LOGF("Send msg from queue (GUI sock %i) : %.*s", gui->sock, msg.len,
     msg.ptr)

@@ -56,7 +56,7 @@ static void elevate_player(server_t PTR server, player_t PTR player,
     player->level++;
     send_plv_to_guis(server, player);
     create_message(message->ptr, message->len, &new_message);
-    add_msg_to_queue(&player->queue, &new_message);
+    queue_push(&player->queue, &new_message);
 }
 
 /// @brief Function used to create the current level message.
@@ -100,6 +100,7 @@ static void elevate_players(server_t PTR server, player_t ARRAY players,
         players[i].status = PLAYING;
     }
     elevate_player(server, player, &message);
+    destroy_message(&message);
 }
 
 /// @brief Function which remove the items needed for incantation.

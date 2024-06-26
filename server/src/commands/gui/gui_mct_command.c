@@ -18,5 +18,5 @@ void execute_gui_mct_command(server_t PTR server, uint16_t gui_idx,
     set_event_to_message(&message,
         (event_t){PLAYER_EVENT_NONE, GUI_EVENT_UPDATE_MCT,
         NEW_CLIENT_EVENT_NONE});
-    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    queue_push(&server->guis[gui_idx].queue, &message);
 }
