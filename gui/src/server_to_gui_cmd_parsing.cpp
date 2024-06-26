@@ -60,8 +60,9 @@ void ParseNewPlayerCommand(const std::string_view& line)
 
     paramPos = line.find_first_of(' ', paramPos) + 1;
 
-    auto teamName = std::make_unique<char[]>(line.size() - paramPos);
+    auto teamName = std::make_unique<char[]>(line.size() - paramPos + 1);
     line.copy(teamName.get(), line.size() - paramPos, paramPos);
+    teamName[line.size() - paramPos] = '\0';
 
     ServerToGuiQueue.try_push(NewPlayerCommand{
         .id = id, .x = x, .y = y, .orientation = orientation, .level = level, .teamName = std::move(teamName)});
