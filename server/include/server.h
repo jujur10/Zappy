@@ -33,6 +33,9 @@
 // Set the max client macro based on FD_SETSIZE.
 #define MAX_CLIENTS FD_SETSIZE
 
+// Set the max number of new clients.
+#define MAX_NEW_CLIENTS 200
+
 /// @brief Structure representing server.
 ///
 /// @var sock The server's socket.
