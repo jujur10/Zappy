@@ -32,7 +32,7 @@ func (game *Game) MainLoop() {
 	game.collectCurrentTileResources()
 	var path = Path{path: nil}
 	log.Println("Is frequency command available :", FrequencyCommandAvailable)
-	for getFoodPriority(&game.FoodManager.FoodPriority) > 0 && game.Level < 8 {
+	for getFoodPriority(&game.FoodManager.FoodPriority) > 0 {
 		if FrequencyCommandAvailable { // Unnecessary if frequency command is unavailable
 			game.Socket.SendCommand(network.GetInventory, network.EmptyBody)
 			_ = game.awaitResponseToCommand()
@@ -40,7 +40,7 @@ func (game *Game) MainLoop() {
 		game.updateFrequency()
 		log.Println("Player current position", game.Coordinates.CoordsFromOrigin, "direction", game.Coordinates.Direction)
 		// Leeching is always easier, so it's more important
-		if getFoodPriority(&game.FoodManager.FoodPriority) < 6 && game.isLevelUpLeechAvailable() {
+		if getFoodPriority(&game.FoodManager.FoodPriority) < 5 && game.isLevelUpLeechAvailable() && game.Level < 8 {
 			log.Println("Started leeching")
 			leechIdx := game.getLevelUpLeechIndex()
 			if leechIdx == -1 {
@@ -55,7 +55,7 @@ func (game *Game) MainLoop() {
 				game.followMessageDirection(leechMsg.direction)
 			}
 			// Start leveling up as host
-		} else if getFoodPriority(&game.FoodManager.FoodPriority) < 6 && game.isLevelUpHostAvailable() {
+		} else if getFoodPriority(&game.FoodManager.FoodPriority) < 5 && game.isLevelUpHostAvailable() && game.Level < 8 {
 			log.Println("Started level up host")
 			game.levelUpHostLoop()
 		} else if len(game.Movement.TilesQueue) != 0 && path.path == nil { // If there is no path configured
@@ -100,9 +100,5 @@ func (game *Game) MainLoop() {
 			game.defaultAction()
 		}
 	}
-	if game.Level == 8 { // Status messages on exit
-		log.Println("Reached maximum level, exiting...")
-	} else {
-		log.Println("Died of starvation, exiting...")
-	}
+	log.Println("Died of starvation, exiting...")
 }
