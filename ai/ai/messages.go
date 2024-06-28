@@ -1,8 +1,12 @@
 package ai
 
 import (
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"strconv"
 	"strings"
@@ -11,6 +15,8 @@ import (
 )
 
 type broadcastType int
+
+var CipherMessages = false
 
 const (
 	missingPlayers broadcastType = iota
@@ -59,24 +65,63 @@ func popMessageFromQueue() (broadcastMessageContent, error) {
 	return message, nil
 }
 
+func clearQueue() {
+	messageQueue.lock.Lock()
+	defer messageQueue.lock.Unlock()
+	messageQueue.queue = make([]broadcastMessageContent, 0)
+}
+
+func cipherMessage(message string, gcm cipher.AEAD) string {
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		log.Fatal("Failed to generate nonce", err)
+	}
+	cipherText := gcm.Seal(nonce, nonce, []byte(message), nil)
+	return hex.EncodeToString(cipherText)
+}
+
+func decipherMessage(message string, gcm cipher.AEAD) string {
+	cipherText, err := hex.DecodeString(message)
+	if err != nil {
+		log.Fatal("Failed to decode hex message", err)
+	}
+	decipheredData, err := gcm.Open(nil, cipherText[:gcm.NonceSize()], cipherText[gcm.NonceSize():], nil)
+	if err != nil {
+		log.Fatal("Failed to decrypt message", err)
+	}
+	return string(decipheredData)
+}
+
 // levelUpReadyMissingPlayers sends a formatted missingPlayers message
 func levelUpReadyMissingPlayers(game *Game, targetLevel, playersMissing int) {
 	formatStr := fmt.Sprintf("_Ready_%d,_missing_%d", targetLevel, playersMissing)
-	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	message := game.MessageManager.UUID + formatStr
+	if CipherMessages {
+		message = cipherMessage(message, game.AesCipher)
+	}
+	game.Socket.SendCommand(network.BroadcastText, message)
 	game.MessageManager.waitingForLevelUp = true
 }
 
 // cancelLevelUp sends a formatted cancelLvlUp message
 func cancelLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf("_Cancel_%d", targetLevel)
-	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	message := game.MessageManager.UUID + formatStr
+	if CipherMessages {
+		message = cipherMessage(message, game.AesCipher)
+	}
+	game.Socket.SendCommand(network.BroadcastText, message)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // announcePresenceLevelUp sends a formatted announcePresence message
 func announcePresenceLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf("_Join_%d", targetLevel)
-	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	message := game.MessageManager.UUID + formatStr
+	if CipherMessages {
+		message = cipherMessage(message, game.AesCipher)
+	}
+	game.Socket.SendCommand(network.BroadcastText, message)
 	game.MessageManager.waitingForLevelUpLeech = true
 	game.MessageManager.waitingForLevelUp = false
 }
@@ -84,7 +129,11 @@ func announcePresenceLevelUp(game *Game, targetLevel int) {
 // announceDepartureLevelUp sends a formatted announceDeparture message
 func announceDepartureLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf("_Leave_%d", targetLevel)
-	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	message := game.MessageManager.UUID + formatStr
+	if CipherMessages {
+		message = cipherMessage(message, game.AesCipher)
+	}
+	game.Socket.SendCommand(network.BroadcastText, message)
 	game.MessageManager.waitingForLevelUp = false
 	game.MessageManager.waitingForLevelUpLeech = false
 }
@@ -92,21 +141,33 @@ func announceDepartureLevelUp(game *Game, targetLevel int) {
 // startLevelUp sends a formatted startLvlUp message
 func startLevelUp(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf("_Starting_%d", targetLevel)
-	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	message := game.MessageManager.UUID + formatStr
+	if CipherMessages {
+		message = cipherMessage(message, game.AesCipher)
+	}
+	game.Socket.SendCommand(network.BroadcastText, message)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // levelUpComplete sends a formatted lvlUpComplete message
 func levelUpComplete(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf("_Reached_%d", targetLevel)
-	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	message := game.MessageManager.UUID + formatStr
+	if CipherMessages {
+		message = cipherMessage(message, game.AesCipher)
+	}
+	game.Socket.SendCommand(network.BroadcastText, message)
 	game.MessageManager.waitingForLevelUp = false
 }
 
 // levelUpFailed sends a formatted lvlUpFailed message
 func levelUpFailed(game *Game, targetLevel int) {
 	formatStr := fmt.Sprintf("_Failed_%d", targetLevel)
-	game.Socket.SendCommand(network.BroadcastText, game.MessageManager.UUID+formatStr)
+	message := game.MessageManager.UUID + formatStr
+	if CipherMessages {
+		message = cipherMessage(message, game.AesCipher)
+	}
+	game.Socket.SendCommand(network.BroadcastText, message)
 	game.MessageManager.waitingForLevelUp = false
 }
 
@@ -124,7 +185,10 @@ func parseMessageLevelAndReturn(levelStr string, uuid string, msgType broadcastT
 
 // parsePlayerMessage parses a message coming from another player.
 // It's not that complicated, it's just a lot of duplicated ifs
-func parsePlayerMessage(message string) (broadcastMessageContent, error) {
+func parsePlayerMessage(message string, gcm cipher.AEAD) (broadcastMessageContent, error) {
+	if CipherMessages {
+		message = decipherMessage(message, gcm)
+	}
 	uuid, message, found := strings.Cut(message, "_")
 	if !found {
 		return broadcastMessageContent{}, errors.New("invalid message format")
@@ -193,7 +257,7 @@ func getMessageIndex(content broadcastMessageContent, messageList []broadcastMes
 
 // InterpretPlayerMessage parses the broadcast message and handles its content as necessary
 func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
-	messageContent, err := parsePlayerMessage(message.Text)
+	messageContent, err := parsePlayerMessage(message.Text, game.AesCipher)
 	if err != nil {
 		log.Println("Error parsing player message:", err)
 	}

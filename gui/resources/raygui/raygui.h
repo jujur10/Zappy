@@ -714,7 +714,7 @@ namespace raygui {
                           const char *text);                                             // Line separator control, could contain text
     RAYGUIAPI int GuiPanel(Rectangle bounds,
                            const char *text);                                            // Panel control, useful to group controls
-    RAYGUIAPI int GuiTabBar(Rectangle bounds, const char **text, int count,
+    RAYGUIAPI int GuiTabBar(Rectangle bounds, const char **text, const int *iconIds, int count,
                             int *active);                  // Tab Bar control, returns TAB to be closed or -1
     RAYGUIAPI int GuiScrollPanel(Rectangle bounds, const char *text, Rectangle content, Vector2 *scroll,
                                  Rectangle *view); // Scroll Panel control
@@ -764,7 +764,7 @@ namespace raygui {
 // Advance controls set
     RAYGUIAPI int GuiListView(Rectangle bounds, const char *text, int *scrollIndex,
                               int *active);          // List View control, returns selected list item index
-    RAYGUIAPI int GuiListViewEx(Rectangle bounds, const char **text, int count, int *scrollIndex, int *active,
+    RAYGUIAPI int GuiListViewEx(Rectangle bounds, char **text, int count, int *scrollIndex, int *active,
                                 int *focus); // List View with extended parameters
     RAYGUIAPI int GuiMessageBox(Rectangle bounds, const char *title, const char *message,
                                 const char *buttons); // Message Box control, displays a message
@@ -1743,20 +1743,20 @@ int GuiPanel(Rectangle bounds, const char *text)
 
 // Tab Bar control
 // NOTE: Using GuiToggle() for the TABS
-int GuiTabBar(Rectangle bounds, const char **text, int count, int *active)
+int GuiTabBar(Rectangle bounds, const char **text, const int *iconIds, int count, int *active)
 {
-    #define RAYGUI_TABBAR_ITEM_WIDTH    160
+    // #define RAYGUI_TABBAR_ITEM_WIDTH    160
 
     int result = -1;
     //GuiState state = guiState;
 
-    Rectangle tabBounds = { bounds.x, bounds.y, RAYGUI_TABBAR_ITEM_WIDTH, bounds.height };
+    Rectangle tabBounds = { bounds.x, bounds.y, bounds.width, bounds.height };
 
     if (*active < 0) *active = 0;
     else if (*active > count - 1) *active = count - 1;
 
     int offsetX = 0;    // Required in case tabs go out of screen
-    offsetX = (*active + 2)*RAYGUI_TABBAR_ITEM_WIDTH - GetScreenWidth();
+    offsetX = (*active + 2)*bounds.width - GetScreenWidth();
     if (offsetX < 0) offsetX = 0;
 
     bool toggle = false;    // Required for individual toggles
@@ -1765,7 +1765,7 @@ int GuiTabBar(Rectangle bounds, const char **text, int count, int *active)
     //--------------------------------------------------------------------
     for (int i = 0; i < count; i++)
     {
-        tabBounds.x = bounds.x + (RAYGUI_TABBAR_ITEM_WIDTH + 4)*i - offsetX;
+        tabBounds.x = bounds.x + (bounds.width)*i - offsetX;
 
         if (tabBounds.x < GetScreenWidth())
         {
@@ -1778,31 +1778,17 @@ int GuiTabBar(Rectangle bounds, const char **text, int count, int *active)
             if (i == (*active))
             {
                 toggle = true;
-                GuiToggle(tabBounds, GuiIconText(12, text[i]), &toggle);
+                GuiToggle(tabBounds, GuiIconText(iconIds[i], text[i]), &toggle);
             }
             else
             {
                 toggle = false;
-                GuiToggle(tabBounds, GuiIconText(12, text[i]), &toggle);
+                GuiToggle(tabBounds, GuiIconText(iconIds[i], text[i]), &toggle);
                 if (toggle) *active = i;
             }
 
             GuiSetStyle(TOGGLE, TEXT_PADDING, textPadding);
             GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, textAlignment);
-
-            // Draw tab close button
-            // NOTE: Only draw close button for current tab: if (CheckCollisionPointRec(mousePosition, tabBounds))
-            int tempBorderWidth = GuiGetStyle(BUTTON, BORDER_WIDTH);
-            int tempTextAlignment = GuiGetStyle(BUTTON, TEXT_ALIGNMENT);
-            GuiSetStyle(BUTTON, BORDER_WIDTH, 1);
-            GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
-#if defined(RAYGUI_NO_ICONS)
-            if (GuiButton(RAYGUI_CLITERAL(Rectangle){ tabBounds.x + tabBounds.width - 14 - 5, tabBounds.y + 5, 14, 14 }, "x")) result = i;
-#else
-            if (GuiButton(RAYGUI_CLITERAL(Rectangle){ tabBounds.x + tabBounds.width - 14 - 5, tabBounds.y + 5, 14, 14 }, GuiIconText(ICON_CROSS_SMALL, NULL))) result = i;
-#endif
-            GuiSetStyle(BUTTON, BORDER_WIDTH, tempBorderWidth);
-            GuiSetStyle(BUTTON, TEXT_ALIGNMENT, tempTextAlignment);
         }
     }
 
@@ -3234,9 +3220,9 @@ int GuiListView(Rectangle bounds, const char *text, int *scrollIndex, int *activ
 {
     int result = 0;
     int itemCount = 0;
-    const char **items = NULL;
+    char **items = NULL;
 
-    if (text != NULL) items = GuiTextSplit(text, ';', &itemCount, NULL);
+    if (text != NULL) items = (char**)GuiTextSplit(text, ';', &itemCount, NULL);
 
     result = GuiListViewEx(bounds, items, itemCount, scrollIndex, active, NULL);
 
@@ -3244,7 +3230,7 @@ int GuiListView(Rectangle bounds, const char *text, int *scrollIndex, int *activ
 }
 
 // List View control with extended parameters
-int GuiListViewEx(Rectangle bounds, const char **text, int count, int *scrollIndex, int *active, int *focus)
+int GuiListViewEx(Rectangle bounds, char **text, int count, int *scrollIndex, int *active, int *focus)
 {
     int result = 0;
     GuiState state = guiState;

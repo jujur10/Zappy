@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "queue/msg_queue.h"
+#include "utils/queue/queue.h"
 
 /// @brief Structure representing a new client.
 ///
@@ -19,5 +19,5 @@
 typedef struct new_client_s {
     int sock;
     struct timespec expiration;
-    msg_queue_head_t queue;
+    queue_t queue;
 } new_client_t;

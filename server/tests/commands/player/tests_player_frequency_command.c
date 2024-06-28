@@ -18,10 +18,10 @@ Test(TEST_PLAYER_FREQUENCY_COMMAND, test_player_frequency_command_1)
     msg_t message = {};
     char msg_content[50];
 
-    TAILQ_INIT(&player->queue);
+    queue_new(&player->queue);
     server.frequency = 50;
     execute_player_frequency_command(&server, 0, NULL);
-    pop_msg(&player->queue, &message);
+    queue_pop(&player->queue, &message);
     memcpy(msg_content, message.ptr, message.len);
     msg_content[message.len + 1] = '\0';
     cr_assert_str_eq(msg_content, "frequency: 50\n");

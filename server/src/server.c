@@ -26,6 +26,15 @@
 // Initialization of pipe_signals inside init_sig_pipe function.
 int pipe_signals[2];
 
+void send_quit_server_request(void)
+{
+    if (-1 != pipe_signals[1]) {
+        write(pipe_signals[1], "TERMINATED", 10);
+        close(pipe_signals[1]);
+        pipe_signals[1] = -1;
+    }
+}
+
 /// @brief Function which initializes signal pipe.
 /// @param args The parsed program parameters.
 /// @param server The server structure to initialize.
@@ -34,8 +43,10 @@ static uint8_t init_sig_pipe(const argument_t PTR args, server_t PTR server)
 {
     if (-1 == pipe(pipe_signals)) {
         ERROR("Signal pipe initialization failed")
-        return free(server->map.tiles), destroy_teams(args, server->teams),
-        close(server->sock), 1;
+        free(server->map.tiles);
+        destroy_teams(args, server->teams);
+        close(server->sock);
+        return 1;
     }
     FD_SET(pipe_signals[0], &server->current_socks);
     fcntl(pipe_signals[0], F_SETFL, O_NONBLOCK);
@@ -146,10 +157,12 @@ static uint8_t server_main_loop(server_t PTR server)
     fd_set rfds;
     fd_set wfds;
     int32_t select_ret;
+    struct timeval select_timeout = {0, 100000};
 
     while (true) {
         init_fdset(&server->current_socks, &rfds, &wfds);
-        select_ret = select(server->max_client + 1, &rfds, &wfds, NULL, NULL);
+        select_ret = select(server->max_client + 1, &rfds, &wfds, NULL,
+            &select_timeout);
         if (-1 == select_ret)
             return select_error();
         update_server(server);
@@ -177,5 +190,6 @@ uint8_t run_server(const argument_t PTR args)
         .buffers[PRE_MAP_BUFFER]);
     LOG("Server responses pre-generated")
     ret_val = server_main_loop(&server);
-    return destroy_server(args, &server), ret_val;
+    destroy_server(args, &server);
+    return ret_val;
 }

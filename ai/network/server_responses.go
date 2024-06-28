@@ -57,6 +57,10 @@ const (
 	Nil
 )
 
+var MessageTypesToString = map[MessageType]string{Boolean: "Boolean", Inventory: "Inventory", View: "View", Int: "Int",
+	Broadcast: "Broadcast", Direction: "Direction", Frequency: "Frequency", Elevation: "Elevation", Death: "Death",
+	Nil: "Nil"}
+
 var inventoryIndexes = []string{"food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame"}
 var validObjects = []string{"food", "linemate", "deraumere", "sibur", "mendiane", "phiras", "thystame", "player"}
 var invalidCommandError = fmt.Errorf("Invalid command\n")

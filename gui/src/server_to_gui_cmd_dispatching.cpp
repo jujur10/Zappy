@@ -141,6 +141,22 @@ void ParseGuiCommands(const flecs::iter &it)
                 }
                 break;
             }
+            case 15:
+            {
+                if (auto const *const broadcast = std::get_if<PlayerBroadcastCommand>(&cmd))
+                {
+                    HandlePlayerBroadcastCommand(world, broadcast);
+                }
+                break;
+            }
+            case 16:
+            {
+                if (auto const *const playerIncantation = std::get_if<EndOfGameCommand>(&cmd))
+                {
+                    HandleEndOfGameCommand(world, playerIncantation);
+                }
+                break;
+            }
             // Other command cases to be added here
             default:;
         }

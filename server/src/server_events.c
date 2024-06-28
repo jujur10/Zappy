@@ -21,7 +21,7 @@ void on_connection(server_t PTR server)
 
     if (client_sock == -1)
         return;
-    if (MAX_CLIENTS == server->nb_clients)
+    if (MAX_NEW_CLIENTS == server->nb_clients)
         return (void)close(client_sock);
     server->max_client = client_sock > server->max_client ? client_sock
     : server->max_client;

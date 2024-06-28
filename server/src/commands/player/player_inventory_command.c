@@ -7,7 +7,7 @@
 #include <string.h>
 #include "server.h"
 
-#include "queue/msg_queue.h"
+#include "utils/queue/queue.h"
 #include "commands/command_utils.h"
 #include "utils/itoa/fast_itoa.h"
 #include "game_settings.h"
@@ -86,7 +86,7 @@ void execute_player_inventory_command(server_t PTR server, uint16_t player_idx,
     .linemate, inventory->attr.deraumere, inventory->attr.sibur,
     inventory->attr.mendiane, inventory->attr.phiras, inventory->attr
     .thystame)
-    add_msg_to_queue(&server->players[player_idx].queue, &message);
+    queue_push(&server->players[player_idx].queue, &message);
     add_time_limit_to_player(server->time_units, PLAYER_INVENTORY_WAIT,
         &server->players[player_idx]);
 }

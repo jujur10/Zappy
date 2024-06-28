@@ -45,6 +45,9 @@ func (game *Game) getLevelUpLeechIndex() int {
 
 // isLevelUpLeechAvailable checks if a hosted level up is available to leech from
 func (game *Game) isLevelUpLeechAvailable() bool {
+	if getFoodPriority(&game.FoodManager.FoodPriority) >= 7 {
+		return false
+	}
 	if game.MessageManager.waitingForLevelUp {
 		return false
 	}
@@ -99,6 +102,10 @@ func dropResources(game *Game) {
 
 func (game *Game) collectResourcesOnFailedLevelUp() {
 	log.Println("Clearing resources after failed level up")
+	for resource, amount := range resourcesToDrop[game.Level] {
+		game.TotalResourcesRequired[resource] += amount
+		game.LevelUpResources[game.Level][resource] = amount
+	}
 	game.Socket.SendCommand(network.LookAround, network.EmptyBody) // Ask server for a view map
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
@@ -134,11 +141,10 @@ func (game *Game) startLevelUpHost() {
 	finalResponse := game.awaitResponseToCommand()
 	game.updateFrequency()
 	if finalResponse {
-		levelUpComplete(game, game.Level+1)
+		levelUpComplete(game, game.Level)
 		_ = game.awaitResponseToCommand()
 		game.updateFrequency()
-		log.Println("Successfully leveled up as host, new level", game.Level+1)
-		game.Level += 1
+		log.Println("Successfully leveled up as host, new level", game.Level)
 		game.forkPlayer()
 	} else {
 		levelUpFailed(game, game.Level+1)
@@ -149,18 +155,18 @@ func (game *Game) startLevelUpHost() {
 	}
 }
 
-func awaitLevelUpLeechUpdate(game *Game, uuid string) bool {
+func awaitLevelUpLeechUpdate(game *Game, uuid string) (bool, bool) {
 	for {
 		select {
 		case value, ok := <-game.Socket.ResponseFeedbackChannel:
 			if ok {
-				return value
+				return true, value
 			}
 		default:
 		}
 		message, err := popMessageFromQueue()
 		if err == nil && message.uuid == uuid && (message.msgType == lvlUpComplete || message.msgType == lvlUpFailed) {
-			return message.msgType == lvlUpComplete
+			return false, message.msgType == lvlUpComplete
 		}
 	}
 }
@@ -169,11 +175,12 @@ func awaitLevelUpLeechUpdate(game *Game, uuid string) bool {
 func (game *Game) startLevelUpLeech(uuid string) {
 	log.Println("Starting level up as leech, target level", game.Level+1)
 	game.Socket.LastCommandType = network.LevelUp
-	levelUpStatus := awaitLevelUpLeechUpdate(game, uuid)
-	if levelUpStatus {
-		log.Println("Successfully leveled up as leech, new level", game.Level+1)
-		game.Level += 1
+	fromServer, levelUpStatus := awaitLevelUpLeechUpdate(game, uuid)
+	if fromServer && levelUpStatus {
+		log.Println("Successfully leveled up as leech, new level", game.Level)
 		game.forkPlayer()
+	} else if !fromServer && levelUpStatus {
+		log.Println("Failed to level up as leech, target level", game.Level+1, ": server never notified level up")
 	} else {
 		log.Println("Failed to level up as leech, target level", game.Level+1)
 	}
@@ -187,6 +194,7 @@ func (game *Game) levelUpHostLoop() {
 	targetLevel := game.Level + 1
 	nbMissingPlayers := levelUpResources[game.Level][Player] - 1
 	log.Println("Starting level up host : target level", targetLevel)
+	defer clearQueue()
 	for game.isLevelUpHostAvailable() {
 		if nbMissingPlayers == 0 {
 			game.startLevelUpHost()
@@ -199,6 +207,9 @@ func (game *Game) levelUpHostLoop() {
 				nbMissingPlayers -= 1
 			case announceDeparture:
 				nbMissingPlayers += 1
+				if nbMissingPlayers > levelUpResources[game.Level][Player]-1 {
+					nbMissingPlayers = levelUpResources[game.Level][Player] - 1
+				}
 			default:
 			}
 		}
@@ -219,10 +230,12 @@ func (game *Game) levelUpHostLoop() {
 // or until the food reserves are too low to continue
 func (game *Game) levelUpLeechLoop(uuid string) {
 	targetLevel := game.Level + 1
-	log.Println("Joining level up : target level", targetLevel)
+	clearQueue()
+	log.Println("Joining level up : target level", targetLevel, "host uuid", uuid)
 	announcePresenceLevelUp(game, targetLevel)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
+	defer clearQueue()
 	for game.isLevelUpLeechAvailable() {
 		message, err := popMessageFromQueue()
 		if err == nil {
@@ -245,9 +258,6 @@ func (game *Game) levelUpLeechLoop(uuid string) {
 
 // forkPlayer if there are no slots left in the team, to ensure that the team can reach level 8 eventually
 func (game *Game) forkPlayer() {
-	if game.Level != 2 {
-		return
-	}
 	game.Socket.SendCommand(network.GetUnusedSlots, network.EmptyBody)
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()

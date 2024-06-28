@@ -28,6 +28,8 @@ type Path struct {
 	path        []RelativeCoordinates
 }
 
+var notAloneOnTileCounter = 0
+
 // updatePosition updates a position in a given direction, absolute modulo worldSize
 func updatePosition(position, worldSize RelativeCoordinates, direction network.PlayerDirection) RelativeCoordinates {
 	switch direction {
@@ -400,6 +402,11 @@ func (game *Game) followPath(path Path) Path {
 	_ = game.awaitResponseToCommand()
 	game.updateFrequency()
 	game.updatePrioritiesFromViewMap() // Update the priorities using the viewmap
+	if game.isAloneOnCurrentTile() {
+		notAloneOnTileCounter = 0
+	} else {
+		notAloneOnTileCounter += 1
+	}
 	pqTileItem := GetPriorityQueueItem(&game.Movement.TilesQueue, tile)
 	if pqTileItem != nil { // Remove tile if it was in the queue
 		game.collectTileResources(pqTileItem)
@@ -476,5 +483,10 @@ func (game *Game) followMessageDirection(direction network.EventDirection) {
 		game.updateFrequency()
 		game.updatePrioritiesFromViewMap()
 		game.collectCurrentTileResources()
+		if game.isAloneOnCurrentTile() {
+			notAloneOnTileCounter = 0
+		} else {
+			notAloneOnTileCounter += 1
+		}
 	}
 }

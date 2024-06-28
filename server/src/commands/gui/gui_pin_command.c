@@ -44,5 +44,5 @@ void execute_gui_pin_command(server_t PTR server, uint16_t gui_idx,
     msg_t message = {};
 
     create_gui_pin_message(server, command->args[0], &message);
-    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    queue_push(&server->guis[gui_idx].queue, &message);
 }

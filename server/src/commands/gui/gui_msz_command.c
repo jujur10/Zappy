@@ -19,5 +19,5 @@ void execute_gui_msz_command(server_t PTR server, uint16_t gui_idx,
 
     memcpy(buffer + 4, world_dims_buffer->ptr, world_dims_buffer->len);
     create_message(buffer, 4 + world_dims_buffer->len, &message);
-    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    queue_push(&server->guis[gui_idx].queue, &message);
 }

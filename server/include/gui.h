@@ -10,8 +10,9 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "queue/msg_queue.h"
+#include "utils/queue/queue.h"
 #include "commands/gui_commands.h"
+#include "utils/queue/queue.h"
 
 /// @brief Structure representing GUI.
 ///
@@ -20,6 +21,6 @@
 /// @var command_buffer The GUI's command buffer.
 typedef struct gui_s {
     int sock;
-    msg_queue_head_t queue;
+    queue_t queue;
     gui_command_buffer_t command_buffer;
 } gui_t;

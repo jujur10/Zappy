@@ -10,9 +10,9 @@
 #include "game_settings.h"
 
 /// @brief Function pointer array with every available events for a player.
-static const player_event_handler_t event_functions[PLAYER_NB_EVENT] = {
+static const player_event_handler_t post_event_functions[PLAYER_NB_EVENT] = {
     execute_player_none_event, execute_player_death_event,
-    execute_player_incantation_event
+    execute_player_incantation_event, execute_player_end_of_game_event
 };
 
 /// @brief Function used to handle the player health and kill him if he has
@@ -39,8 +39,8 @@ void handle_player_events(server_t PTR server, uint32_t player_idx)
     handle_player_health(server, player_idx);
 }
 
-void execute_player_event_function(server_t PTR server, uint32_t player_idx,
-    player_event_t player_event)
+void execute_player_post_event_function(server_t PTR server,
+    uint32_t player_idx, player_event_t player_event)
 {
-    return event_functions[player_event](server, player_idx);
+    return post_event_functions[player_event](server, player_idx);
 }

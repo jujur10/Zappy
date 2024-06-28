@@ -21,5 +21,5 @@ void execute_player_direction_command(server_t PTR server, uint16_t player_idx,
     msg_content[sizeof("direction: ") - 1 + wrote] = '\n';
     create_message(msg_content, (uint32_t)(sizeof("direction: ") + wrote),
         &message);
-    add_msg_to_queue(&player->queue, &message);
+    queue_push(&player->queue, &message);
 }

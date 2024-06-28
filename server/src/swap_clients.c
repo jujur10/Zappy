@@ -23,11 +23,11 @@ status_t transform_new_client_to_gui(server_t *server, uint32_t client_idx)
     create_message(buffer, (uint32_t)msg_length + 1, &message);
     gui_index = init_gui(server, server->clients[client_idx].sock);
     if (-1 == gui_index) {
-        add_msg_to_queue(&server->clients[client_idx].queue, &message);
+        queue_push(&server->clients[client_idx].queue, &message);
         return FAILURE;
     }
-    add_msg_to_queue(&server->guis[gui_index].queue, &message);
-    add_buffer_to_queue(&server->guis[gui_index].queue,
+    queue_push(&server->guis[gui_index].queue, &message);
+    queue_push_buffer_to_queue(&server->guis[gui_index].queue,
         &server->generated_buffers.buffers[PRE_WORLD_DIM_BUFFER]);
     send_starting_guis_events(server, (uint16_t)gui_index);
     destroy_new_client(server, client_idx, true);
@@ -49,11 +49,11 @@ status_t transform_new_client_to_ai(server_t *server, uint32_t client_idx,
         (&server->teams[team_index]) + 1, buffer);
     buffer[msg_length] = '\n';
     create_message(buffer, (uint32_t)msg_length + 1, &message);
-    add_msg_to_queue(&server->players[ai_index].queue, &message);
+    queue_push(&server->players[ai_index].queue, &message);
     create_message(server->generated_buffers
         .buffers[PRE_WORLD_DIM_BUFFER].ptr, server->generated_buffers
         .buffers[PRE_WORLD_DIM_BUFFER].len, &message);
-    add_msg_to_queue(&server->players[ai_index].queue, &message);
+    queue_push(&server->players[ai_index].queue, &message);
     destroy_new_client(server, client_idx, true);
     return SUCCESS;
 }

@@ -6,7 +6,7 @@
 */
 #include "server.h"
 
-#include "queue/msg_queue.h"
+#include "utils/queue/queue.h"
 
 void execute_player_none_event(UNUSED server_t PTR server,
     UNUSED uint32_t player_idx)

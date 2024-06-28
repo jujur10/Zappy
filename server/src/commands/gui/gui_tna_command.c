@@ -15,5 +15,5 @@ void execute_gui_tna_command(server_t PTR server, uint16_t gui_idx,
         .buffers[PRE_TNA_RESPONSE];
 
     create_message_from_buffer(tna_buffer, &message);
-    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    queue_push(&server->guis[gui_idx].queue, &message);
 }

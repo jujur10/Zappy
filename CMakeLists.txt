@@ -27,7 +27,7 @@ target_compile_definitions(build_configs INTERFACE
     "SEMICOLON=\;"
     PTR=*
     ARRAY=*
-#    LOG=1
+#    ENABLE_LOG=1
 )
 
 target_link_options(build_configs INTERFACE

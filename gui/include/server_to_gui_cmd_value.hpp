@@ -28,5 +28,8 @@ enum class ServerCommands: uint32_t {
     EGG_LAID = 7827045, // enw
     CONNECTION_ON_EGG = 7299685, // ebo
     EGG_DEATH = 6906981, // edi
+    BROADCAST = 6513264, // pbc
+    EXPULSION = 7890288, // pex
+    GAME_END = 6776179, // seg
 };
 }

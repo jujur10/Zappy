@@ -3,6 +3,7 @@ package ai
 import (
 	"log"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func getFoodPriority(foodPrio *int) int {
 func FoodManagementRoutine(inputFood <-chan int, foodPrio *int, timeStepChan chan time.Duration) {
 	lifeTime := 1260
 	consumptionCounter := 0
-	timeStep := time.Duration(0)
+	nanoTimeStep := syscall.NsecToTimespec(0)
 	if FrequencyCommandAvailable == false {
 		lifeTime -= 5
 		consumptionCounter += 5
@@ -61,7 +62,7 @@ func FoodManagementRoutine(inputFood <-chan int, foodPrio *int, timeStepChan cha
 				log.Fatalln("Food Management : channel closed, exiting..")
 				return
 			}
-			timeStep = ts
+			nanoTimeStep = syscall.NsecToTimespec(ts.Nanoseconds())
 		default:
 
 		}
@@ -76,7 +77,8 @@ func FoodManagementRoutine(inputFood <-chan int, foodPrio *int, timeStepChan cha
 			consumptionCounter = 0
 			setFoodPriority(foodPrio, computeFoodPriority(lifeTime))
 		}
-		time.Sleep(timeStep)
+		//time.Sleep(timeStep)
+		_ = syscall.Nanosleep(&nanoTimeStep, nil)
 	}
 }
 

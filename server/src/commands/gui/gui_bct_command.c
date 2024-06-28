@@ -47,5 +47,5 @@ void execute_gui_bct_command(server_t PTR server, uint16_t gui_idx,
     coordinates_t coordinates = {command->args[0], command->args[1]};
 
     create_gui_bct_message(server, &coordinates, &message);
-    add_msg_to_queue(&server->guis[gui_idx].queue, &message);
+    queue_push(&server->guis[gui_idx].queue, &message);
 }

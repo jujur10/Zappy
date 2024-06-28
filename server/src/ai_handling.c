@@ -12,7 +12,7 @@
 
 #include "server.h"
 #include "clock.h"
-#include "queue/msg_queue.h"
+#include "utils/queue/queue.h"
 #include "logging.h"
 #include "commands/player_commands.h"
 #include "events/player_events.h"
@@ -28,7 +28,7 @@ int32_t init_ai(server_t PTR server, int sock, uint16_t team_idx)
         return -1;
     LOGF("Swapped to AI %i", server->nb_players)
     player->sock = (uint16_t)sock;
-    TAILQ_INIT(&player->queue);
+    queue_new(&player->queue);
     player->inventory.attr.food = BEGINNING_LIFE_UNITS;
     player->team_idx = team_idx;
     player->orientation = (uint8_t)rand() % 4;
@@ -49,7 +49,7 @@ void destroy_ai(server_t PTR server, uint32_t ai_idx)
     close(server->players[ai_idx].sock);
     get_resource_tile_by_coordinates(map, &server->players[ai_idx]
     .coordinates)->attr.players--;
-    clear_msg_queue(&server->players[ai_idx].queue);
+    queue_destroy(&server->players[ai_idx].queue);
     server->nb_players--;
     memmove(&server->players[ai_idx], &server->players[server->nb_players],
     sizeof(player_t));
@@ -115,7 +115,7 @@ static void blocking_time_not_respected(server_t PTR server,
         return execute_player_death_event(server, player_idx);
     }
     create_message("ko\n", 4, &message);
-    add_msg_to_queue(&server->players[player_idx].queue, &message);
+    queue_push(&server->players[player_idx].queue, &message);
     (*select_ret)--;
 }
 
@@ -155,12 +155,13 @@ static void send_next_message_from_queue(server_t PTR server,
     msg_t msg;
     player_t *player = &server->players[player_idx];
 
-    if (FAILURE == pop_msg(&player->queue, &msg))
+    if (FAILURE == queue_pop(&player->queue, &msg))
         return;
-    LOGF("Send msg from queue (PLAYER sock %hu) : %.*s", player->sock, msg
-    .len, msg.ptr)
+    LOGF("Send msg from queue (PLAYER sock %hu) : %.*s", player->sock, msg.len,
+        msg.ptr)
     write(player->sock, msg.ptr, msg.len);
-    execute_player_event_function(server, player_idx, msg.event.player_event);
+    execute_player_post_event_function(server, player_idx,
+        msg.event.player_event);
     destroy_message(&msg);
 }
 

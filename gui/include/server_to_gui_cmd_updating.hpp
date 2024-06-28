@@ -127,4 +127,20 @@ void HandleConnectionOnEggCommand(const flecs::world &world, const ConnectionOnE
  * @param deathOfEgg The received DeathOfEggCommand command
  */
 void HandleDeathOfEggCommand(const flecs::world &world, const DeathOfEggCommand *deathOfEgg);
+
+/**
+ * @brief Process the PlayerBroadcast command
+ * Display the player broadcast message
+ * @param world The ecs world
+ * @param playerBroadcast The received PlayerBroadcastCommand command
+ */
+void HandlePlayerBroadcastCommand(const flecs::world &world, const PlayerBroadcastCommand *playerBroadcast);
+
+/**
+ * @brief Process the EndOfGame command
+ * Display the winning team message
+ * @param world The ecs world
+ * @param endOfGame The received EndOfGameCommand command
+ */
+void HandleEndOfGameCommand(const flecs::world &world, const EndOfGameCommand *endOfGame);
 }  // namespace zappy_gui::net

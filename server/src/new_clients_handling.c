@@ -12,7 +12,7 @@
 #include "server.h"
 #include "clock.h"
 #include "new_clients_handling.h"
-#include "queue/msg_queue.h"
+#include "utils/queue/queue.h"
 #include "swap_clients.h"
 #include "logging.h"
 #include "events/new_client_events.h"
@@ -22,9 +22,9 @@ void init_new_client(server_t PTR server, new_client_t PTR client)
     msg_t message = {};
 
     server->nb_clients++;
-    TAILQ_INIT(&client->queue);
+    queue_new(&client->queue);
     create_message("WELCOME\n", 8, &message);
-    add_msg_to_queue(&client->queue, &message);
+    queue_push(&client->queue, &message);
     client->expiration = server->clock;
     add_to_clock(&client->expiration, AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
 }
@@ -37,7 +37,7 @@ void destroy_new_client(server_t PTR server, uint32_t client_idx,
         FD_CLR(server->clients[client_idx].sock, &server->current_socks);
         close(server->clients[client_idx].sock);
     }
-    clear_msg_queue(&server->clients[client_idx].queue);
+    queue_destroy(&server->clients[client_idx].queue);
     server->nb_clients--;
     memmove(&server->clients[client_idx], &server->clients[server->nb_clients],
     sizeof(new_client_t));
@@ -66,7 +66,7 @@ static bool new_client_is_a_gui(server_t PTR server,
             AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
             create_message((char *)&(int32_t){-1}, sizeof(int32_t), &message);
             message.event.new_client_event = NEW_CLIENT_EVENT_VERIFY_GUI_SLOT;
-            add_msg_to_queue(&server->clients[client_idx].queue, &message);
+            queue_push(&server->clients[client_idx].queue, &message);
         }
         return true;
     }
@@ -96,7 +96,7 @@ static void new_client_is_an_ai(server_t PTR server,
         AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
         create_message((char *)&team_index, sizeof(int32_t), &message);
         message.event.new_client_event = NEW_CLIENT_EVENT_VERIFY_AI_SLOT;
-        add_msg_to_queue(&server->clients[client_idx].queue, &message);
+        queue_push(&server->clients[client_idx].queue, &message);
     }
 }
 
@@ -181,12 +181,12 @@ static void send_next_message_from_queue(server_t PTR server,
 {
     msg_t msg;
 
-    if (FAILURE == pop_msg(&server->clients[client_idx].queue, &msg))
+    if (FAILURE == queue_pop(&server->clients[client_idx].queue, &msg))
         return;
     if (false == execute_new_client_event_function(server, client_idx, &msg))
         return;
-    LOGF("Send msg from queue (new client sock %i) : %.*s", client->sock, msg
-    .len, msg.ptr)
+    LOGF("Send msg from queue (new client sock %i) : %.*s",
+        server->clients[client_idx].sock, msg.len, msg.ptr)
     write(server->clients[client_idx].sock, msg.ptr, msg.len);
     destroy_message(&msg);
 }

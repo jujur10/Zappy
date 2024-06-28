@@ -143,7 +143,7 @@ void execute_player_incantation_command(server_t PTR server,
         send_pic_to_guis(server, player_idx);
         create_message("Elevation underway\n", 19, &message);
         message.event.player_event = PLAYER_EVENT_INCANTATION;
-        add_msg_to_queue(&player->queue, &message);
+        queue_push(&player->queue, &message);
         return add_time_limit_to_player(server->time_units,
             PLAYER_INCANTATION_WAIT, player);
     }

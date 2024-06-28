@@ -53,7 +53,7 @@ void send_pic_to_guis(server_t PTR server, uint32_t player_idx)
     write_ready_players_into_string(server, (uint16_t)player_idx, &string);
     for (uint16_t i = 0; i < server->nb_guis; i++) {
         create_message(string.ptr, string.len, &message);
-        add_msg_to_queue(&server->guis[i].queue, &message);
+        queue_push(&server->guis[i].queue, &message);
     }
     clear_string(&string);
 }

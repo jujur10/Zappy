@@ -10,14 +10,13 @@
 #include "signal_handler.h"
 #include "logging.h"
 #include "style/macros.h"
+#include "server.h"
 
 /// @brief Function that handle signals.
 static void handle_signal(UNUSED int sig)
 {
     if (pipe_signals[1] != -1) {
-        write(pipe_signals[1], "TERMINATED", 10);
-        close(pipe_signals[1]);
-        pipe_signals[1] = -1;
+        send_quit_server_request();
         LOG("Close signal received. Waiting to close ...")
     }
 }

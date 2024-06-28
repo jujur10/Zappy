@@ -118,22 +118,39 @@ void HandleServerCommand(const std::string& line)
             ParseDeathOfEggCommand(static_cast<std::string_view>(line).data() + 4);
             break;
         }
+        case ServerCommands::BROADCAST:
+        {
+            ParseBroadcastCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
+        case ServerCommands::EXPULSION:
+        {
+            break;
+        }
+        case ServerCommands::GAME_END:
+        {
+            ParseEndOfGameCommand(static_cast<std::string_view>(line).data() + 4);
+            break;
+        }
         default:
             std::print("Unknown command: {}\n", line);
-            return;
     }
 }
 
-void NetworkTreadLoop(const std::stop_token& stoken, const Socket& serverSocket)
+void NetworkTreadLoop(const std::stop_token& stoken, const Socket& serverSocket, std::vector<char> handShakeBuffer)
 {
     const FileWriter errWriter(2);
     std::vector<char> responseBuffer;
+    if (!handShakeBuffer.empty())
+    {
+        std::ranges::copy(handShakeBuffer, std::back_inserter(responseBuffer));
+    }
 
+    std::string responseLine;
     while (true)
     {
         HandleGuiCommand(serverSocket);
 
-        std::string responseLine;
         while (!(responseLine = serverSocket.ReadLineFast(responseBuffer)).empty())
         {
             HandleServerCommand(responseLine);

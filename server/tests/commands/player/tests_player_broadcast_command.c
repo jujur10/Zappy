@@ -21,8 +21,8 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_pdf_exemple)
     char msg_content[50];
     msg_t message = {};
 
-    TAILQ_INIT(&server.players[0].queue);
-    TAILQ_INIT(&server.players[1].queue);
+    queue_new(&server.players[0].queue);
+    queue_new(&server.players[1].queue);
     args.width = 8;
     args.height = 8;
     server.args = &args;
@@ -38,7 +38,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_pdf_exemple)
     player2->coordinates.x = 5;
     player2->coordinates.y = 2;
     execute_player_broadcast_command(&server, 0, &cmd);
-    pop_msg(&player2->queue, &message);
+    queue_pop(&player2->queue, &message);
     memcpy(msg_content, message.ptr, message.len);
     msg_content[message.len + 1] = '\0';
     cr_assert_str_eq(msg_content, "message 4, je m'appelle toto\n");
@@ -54,8 +54,8 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_out_of_map)
     char msg_content[50];
     msg_t message = {};
 
-    TAILQ_INIT(&server.players[0].queue);
-    TAILQ_INIT(&server.players[1].queue);
+    queue_new(&server.players[0].queue);
+    queue_new(&server.players[1].queue);
     args.width = 8;
     args.height = 8;
     server.args = &args;
@@ -71,7 +71,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_out_of_map)
     player2->coordinates.x = 7;
     player2->coordinates.y = 7;
     execute_player_broadcast_command(&server, 0, &cmd);
-    pop_msg(&player2->queue, &message);
+    queue_pop(&player2->queue, &message);
     memcpy(msg_content, message.ptr, message.len);
     msg_content[message.len + 1] = '\0';
     cr_assert_str_eq(msg_content, "message 6, je m'appelle toto\n");
@@ -87,8 +87,8 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_same_tile)
     char msg_content[50];
     msg_t message = {};
 
-    TAILQ_INIT(&server.players[0].queue);
-    TAILQ_INIT(&server.players[1].queue);
+    queue_new(&server.players[0].queue);
+    queue_new(&server.players[1].queue);
     args.width = 8;
     args.height = 8;
     server.args = &args;
@@ -104,7 +104,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_same_tile)
     player2->coordinates.x = 1;
     player2->coordinates.y = 1;
     execute_player_broadcast_command(&server, 0, &cmd);
-    pop_msg(&player2->queue, &message);
+    queue_pop(&player2->queue, &message);
     memcpy(msg_content, message.ptr, message.len);
     msg_content[message.len + 1] = '\0';
     cr_assert_str_eq(msg_content, "message 0, je m'appelle toto\n");
@@ -120,8 +120,8 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_left)
     char msg_content[50];
     msg_t message = {};
 
-    TAILQ_INIT(&server.players[0].queue);
-    TAILQ_INIT(&server.players[1].queue);
+    queue_new(&server.players[0].queue);
+    queue_new(&server.players[1].queue);
     args.width = 8;
     args.height = 8;
     server.args = &args;
@@ -137,7 +137,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_left)
     player2->coordinates.x = 0;
     player2->coordinates.y = 1;
     execute_player_broadcast_command(&server, 0, &cmd);
-    pop_msg(&player2->queue, &message);
+    queue_pop(&player2->queue, &message);
     memcpy(msg_content, message.ptr, message.len);
     msg_content[message.len + 1] = '\0';
     cr_assert_str_eq(msg_content, "message 7, je m'appelle toto\n");
@@ -153,8 +153,8 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_right)
     char msg_content[50];
     msg_t message = {};
 
-    TAILQ_INIT(&server.players[0].queue);
-    TAILQ_INIT(&server.players[1].queue);
+    queue_new(&server.players[0].queue);
+    queue_new(&server.players[1].queue);
     args.width = 8;
     args.height = 8;
     server.args = &args;
@@ -170,7 +170,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_right)
     player2->coordinates.x = 2;
     player2->coordinates.y = 1;
     execute_player_broadcast_command(&server, 0, &cmd);
-    pop_msg(&player2->queue, &message);
+    queue_pop(&player2->queue, &message);
     memcpy(msg_content, message.ptr, message.len);
     msg_content[message.len + 1] = '\0';
     cr_assert_str_eq(msg_content, "message 3, je m'appelle toto\n");
@@ -186,8 +186,8 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_top)
     char msg_content[50];
     msg_t message = {};
 
-    TAILQ_INIT(&server.players[0].queue);
-    TAILQ_INIT(&server.players[1].queue);
+    queue_new(&server.players[0].queue);
+    queue_new(&server.players[1].queue);
     args.width = 8;
     args.height = 8;
     server.args = &args;
@@ -203,7 +203,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_top)
     player2->coordinates.x = 1;
     player2->coordinates.y = 1;
     execute_player_broadcast_command(&server, 0, &cmd);
-    pop_msg(&player2->queue, &message);
+    queue_pop(&player2->queue, &message);
     memcpy(msg_content, message.ptr, message.len);
     msg_content[message.len + 1] = '\0';
     cr_assert_str_eq(msg_content, "message 1, je m'appelle toto\n");
@@ -219,8 +219,8 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_bottom)
     char msg_content[50];
     msg_t message = {};
 
-    TAILQ_INIT(&server.players[0].queue);
-    TAILQ_INIT(&server.players[1].queue);
+    queue_new(&server.players[0].queue);
+    queue_new(&server.players[1].queue);
     args.width = 8;
     args.height = 8;
     server.args = &args;
@@ -236,7 +236,7 @@ Test(TEST_PLAYER_BROADCAST_COMMAND, test_player_broadcast_command_bottom)
     player2->coordinates.x = 1;
     player2->coordinates.y = 1;
     execute_player_broadcast_command(&server, 0, &cmd);
-    pop_msg(&player2->queue, &message);
+    queue_pop(&player2->queue, &message);
     memcpy(msg_content, message.ptr, message.len);
     msg_content[message.len + 1] = '\0';
     cr_assert_str_eq(msg_content, "message 5, je m'appelle toto\n");

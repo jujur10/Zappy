@@ -21,7 +21,7 @@ int32_t kMAP_HEIGHT;
 }  // namespace map
 
 
-void Handshake(const Socket &serverSocket)
+std::vector<char> Handshake(const Socket &serverSocket)
 {
     const FileWriter errWriter(2);
     std::vector<char> responseBuffer;
@@ -87,7 +87,7 @@ void Handshake(const Socket &serverSocket)
 
         map::kMAP_WIDTH = mapWidth;
         map::kMAP_HEIGHT = mapHeight;
-        return;
+        return responseBuffer;
     }
     if (!string_utils::convertFromString(responseLine, clientNumber))
     {
@@ -121,5 +121,7 @@ void Handshake(const Socket &serverSocket)
 
     map::kMAP_WIDTH = mapWidth;
     map::kMAP_HEIGHT = mapHeight;
+
+    return responseBuffer;
 }
 }  // namespace zappy_gui

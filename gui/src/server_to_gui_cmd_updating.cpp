@@ -5,6 +5,9 @@
 
 #include <Camera3D.hpp>
 #include <cfloat>
+#include <cstring>
+#include <gui.hpp>
+#include <particle.hpp>
 
 #include "map.hpp"
 #include "map_utils.hpp"
@@ -328,5 +331,36 @@ void HandleDeathOfEggCommand(const flecs::world &world, const DeathOfEggCommand 
         return;
     }
     egg.destruct();
+}
+
+void HandlePlayerBroadcastCommand(const flecs::world &world, const PlayerBroadcastCommand *const playerBroadcast)
+{
+    auto * const chat = world.get_mut<gui::ChatHistory>();
+    if (nullptr == chat)
+    {
+        return;
+    }
+
+    if (chat->messageCount < MAX_MESSAGES) {
+        // Shift existing messages down
+        for (int16_t i = chat->messageCount; i > 0; --i) {
+            std::memcpy(chat->messages[i], chat->messages[i - 1], ::strnlen(chat->messages[i - 1], MAX_MESSAGE_LENGTH));
+        }
+        // Add new message at the top
+        std::memcpy(chat->messages[0], playerBroadcast->message.get(), ::strnlen(playerBroadcast->message.get(), MAX_MESSAGE_LENGTH));
+        ++chat->messageCount;
+    } else {
+        // Shift messages down, discarding the oldest
+        for (int16_t i = MAX_MESSAGES - 1; i > 0; --i) {
+            std::memcpy(chat->messages[i], chat->messages[i - 1], ::strnlen(chat->messages[i - 1], MAX_MESSAGE_LENGTH));
+        }
+        // Add new message at the top
+        std::memcpy(chat->messages[0], playerBroadcast->message.get(), ::strnlen(playerBroadcast->message.get(), MAX_MESSAGE_LENGTH));
+    }
+}
+
+void HandleEndOfGameCommand(const flecs::world &world, const EndOfGameCommand * const endOfGame)
+{
+    world.set<std::unique_ptr<WinningEffect>>(std::make_unique<WinningEffect>(endOfGame->winningTeam.get()));
 }
 }  // namespace zappy_gui::net

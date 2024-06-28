@@ -60,8 +60,9 @@ void ParseNewPlayerCommand(const std::string_view& line)
 
     paramPos = line.find_first_of(' ', paramPos) + 1;
 
-    auto teamName = std::make_unique<char[]>(line.size() - paramPos);
+    auto teamName = std::make_unique<char[]>(line.size() - paramPos + 1);
     line.copy(teamName.get(), line.size() - paramPos, paramPos);
+    teamName[line.size() - paramPos] = '\0';
 
     ServerToGuiQueue.try_push(NewPlayerCommand{
         .id = id, .x = x, .y = y, .orientation = orientation, .level = level, .teamName = std::move(teamName)});
@@ -248,8 +249,9 @@ void ParsePlayerDropCommand(const std::string_view& line)
 
 void ParseTeamNameCommand(const std::string_view& line)
 {
-    auto teamName = std::make_unique<char[]>(line.size());
+    auto teamName = std::make_unique<char[]>(line.size() + 1);
     std::ranges::copy(line, teamName.get());
+    teamName[line.size()] = '\0';
     ServerToGuiQueue.try_push(TeamNameCommand{.teamName = std::move(teamName)});
 }
 
@@ -292,5 +294,32 @@ void ParseDeathOfEggCommand(const std::string_view& line)
     string_utils::convertFromString(line, eggId);
 
     ServerToGuiQueue.try_push(DeathOfEggCommand{.eggId = eggId});
+}
+
+void ParseBroadcastCommand(const std::string_view& line)
+{
+    constexpr char messageStart[] = "Joueur ";
+
+    uint8_t messageSize = line.size() + 7;
+    if (messageSize + 1 >= 128)
+    {
+        messageSize = 127;
+    }
+
+    auto message = std::make_unique<char[]>(messageSize + 1);
+    std::ranges::copy(messageStart, message.get());
+    std::ranges::copy(line, message.get() + 7);
+    message[messageSize] = '\0';
+
+    ServerToGuiQueue.try_push(PlayerBroadcastCommand{.message = std::move(message)});
+}
+
+void ParseEndOfGameCommand(const std::string_view& line)
+{
+    auto teamName = std::make_unique<char[]>(line.size() + 1);
+    std::ranges::copy(line, teamName.get());
+    teamName[line.size()] = '\0';
+
+    ServerToGuiQueue.try_push(EndOfGameCommand{.winningTeam = std::move(teamName)});
 }
 }  // namespace zappy_gui::net

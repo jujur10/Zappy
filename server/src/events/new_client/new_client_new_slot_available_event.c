@@ -22,7 +22,7 @@ bool execute_new_client_verify_ai_slot_available(server_t PTR server,
     }
     client->expiration = server->clock;
     add_to_clock(&client->expiration, AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
-    add_msg_to_queue(&server->clients[new_client_idx].queue, message);
+    queue_push(&server->clients[new_client_idx].queue, message);
     return false;
 }
 
@@ -39,6 +39,6 @@ bool execute_new_client_verify_guis_slot_available(server_t PTR server,
     }
     client->expiration = server->clock;
     add_to_clock(&client->expiration, AUTH_TIMEOUT_SEC, AUTH_TIMEOUT_NS);
-    add_msg_to_queue(&server->clients[new_client_idx].queue, message);
+    queue_push(&server->clients[new_client_idx].queue, message);
     return false;
 }
