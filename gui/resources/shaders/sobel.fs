@@ -12,7 +12,7 @@ uniform vec4 colDiffuse;
 out vec4 finalColor;
 
 // custom variables
-uniform vec2 resolution = vec2(1280, 720);
+uniform vec2 resolution;
 uniform float outlineStrength = 1.0;
 uniform vec3 outlineColor = vec3(255.0, 255.0, 255.0);
 uniform float threshold = 0.99999;

@@ -2,23 +2,23 @@
 #include <thread>
 
 #include "Camera3D.hpp"
-#include "Window.hpp"
 #include "ModelAnimation.hpp"
+#include "Window.hpp"
 #include "flecs.h"
+#include "gui.hpp"
 #include "gui_to_server_cmd_structs.hpp"
 #include "map.hpp"
 #include "my_exit.hpp"
 #include "my_write.hpp"
 #include "networking.hpp"
+#include "player.hpp"
+#include "raygui.h"
 #include "raylib_utils.hpp"
 #include "server_handshake.hpp"
 #include "server_to_gui_cmd_structs.hpp"
 #include "sockets.hpp"
-#include "systems.hpp"
-#include "player.hpp"
-#include "raygui.h"
 #include "style_bluish.h"
-#include "gui.hpp"
+#include "systems.hpp"
 
 namespace zappy_gui
 {
@@ -51,11 +51,12 @@ static void InitializeECS(flecs::world &ecs,
                           raylib::Texture2D &failureIcon,
                           raylib::Model &eggModel,
                           raylib::Shader &sobolShader,
-                          raylib::RenderTexture &selectionRenderTexture,
-                          raylib::Vector3 &selectionPosition,
+                          std::unique_ptr<raylib::RenderTexture> &hoverEffectRenderTexture,
+                          raylib::Vector3 &hoverPosition,
                           raylib::Model &sandCopy,
                           raylib::Model &sandRockCopy,
-                          raylib::Model &sandCactusCopy)
+                          raylib::Model &sandCactusCopy,
+                          zappy_gui::gui::ChatHistory const &chatHistory)
 {
     ecs.set_entity_range(4'269'420, 0);  // Allow flecs to only generate entity ids starting from 4'269'420
 
@@ -79,8 +80,17 @@ static void InitializeECS(flecs::world &ecs,
 
     ecs.set<zappy_gui::player::EggModel>({&eggModel});
 
-    ecs.set<zappy_gui::gui::Selection>({&sobolShader, &selectionRenderTexture, &selectionPosition});
-    ecs.entity<zappy_gui::gui::Selection>().disable();
+    const int resolutionLoc = sobolShader.GetLocation("resolution");
+    constexpr Vector2 resolution = {static_cast<float>(zappy_gui::screenWidth), static_cast<float>(zappy_gui::screenHeight)};
+    sobolShader.SetValue(resolutionLoc, &resolution, SHADER_UNIFORM_VEC2);
+    ecs.set<zappy_gui::gui::HoverEffect>({&sobolShader, std::move(hoverEffectRenderTexture)});
+
+    ecs.set<zappy_gui::gui::Hover>({nullptr, &hoverPosition});
+    ecs.entity<zappy_gui::gui::Hover>().disable();
+
+    ecs.set<zappy_gui::gui::Selection>({0});
+
+    ecs.set<zappy_gui::gui::ChatHistory>(chatHistory);
 
     zappy_gui::systems::registerSystems(ecs);
 
@@ -89,9 +99,9 @@ static void InitializeECS(flecs::world &ecs,
     zappy_gui::gui::createGuiEntities(ecs, zappy_gui::screenWidth, zappy_gui::screenHeight);
 }
 
-//----------------------------------------------------------------------------------
-// Main Enry Point
-//----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+//  Main Enry Point
+// ----------------------------------------------------------------------------------
 int32_t main(const int32_t argc, char *argv[])
 {
     // Parse the command line arguments
@@ -109,14 +119,15 @@ int32_t main(const int32_t argc, char *argv[])
     //--------------------------------------------------------------------------------------
     // Connect to the server and perform the handshake
     const zappy_gui::Socket serverSocket = zappy_gui::ConnectToServer(argv);
-    Handshake(serverSocket);
+    const std::vector<char> handShakeDataBuffer = Handshake(serverSocket);
     //--------------------------------------------------------------------------------------
     // Setup the window with anti-aliasing and a target of 60 FPS
     ::SetConfigFlags(FLAG_MSAA_4X_HINT);
+    ::SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     raylib::Window window(zappy_gui::screenWidth, zappy_gui::screenHeight, "raylib-cpp - basic window");
     window.SetTargetFPS(60);
 #if !defined(DEBUG) || defined(NDEBUG)
-    ::DisableCursor(); // Hides cursor and locks it to the window
+    ::DisableCursor();  // Hides cursor and locks it to the window
 #endif
     raygui::GuiLoadStyleBluish();
     raygui::GuiUnlock();
@@ -142,26 +153,38 @@ int32_t main(const int32_t argc, char *argv[])
     std::vector<raylib::ModelAnimation> playerAnimations = raylib::ModelAnimation::Load("gui/resources/assets/cactoro.m3d");
     auto eggModel = raylib::Model("gui/resources/assets/cactoro_egg.m3d");
     auto sobolShader = raylib::Shader(nullptr, "gui/resources/shaders/sobel.fs");
-    auto selectionRenderTexture = raylib::RenderTexture(zappy_gui::screenWidth, zappy_gui::screenHeight);
-    auto selectionPosition = raylib::Vector3(0.0f, 0.0f, 0.0f);
+    auto selectionRenderTexture = std::make_unique<raylib::RenderTexture>(zappy_gui::screenWidth, zappy_gui::screenHeight);
+    auto hoverPosition = raylib::Vector3(0.0f, 0.0f, 0.0f);
+    auto chatHistory = zappy_gui::gui::ChatHistory{};
+    std::memset(chatHistory.messages, 0, sizeof(chatHistory.messages));
 
     //--------------------------------------------------------------------------------------
     // Create the ECS and initialize it
     flecs::world ecs;
     ::InitializeECS(ecs,
-        camera,
-        sand, sandRock, sandCactus,
-        food, crystal,
-        skybox,
-        playerAnimations,
-        inProgressIcon, successIcon, failureIcon,
-        eggModel,
-        sobolShader, selectionRenderTexture, selectionPosition,
-        sandCopy, sandRockCopy, sandCactusCopy);
+                    camera,
+                    sand,
+                    sandRock,
+                    sandCactus,
+                    food,
+                    crystal,
+                    skybox,
+                    playerAnimations,
+                    inProgressIcon,
+                    successIcon,
+                    failureIcon,
+                    eggModel,
+                    sobolShader,
+                    selectionRenderTexture,
+                    hoverPosition,
+                    sandCopy,
+                    sandRockCopy,
+                    sandCactusCopy,
+                    chatHistory);
 
     //--------------------------------------------------------------------------------------
     // Start the network main loop on another thread
-    std::jthread networkThread(zappy_gui::net::NetworkTreadLoop, serverSocket);
+    std::jthread networkThread(zappy_gui::net::NetworkTreadLoop, serverSocket, handShakeDataBuffer);
 
     //--------------------------------------------------------------------------------------
     // Main game loop
