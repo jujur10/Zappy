@@ -295,4 +295,31 @@ void ParseDeathOfEggCommand(const std::string_view& line)
 
     ServerToGuiQueue.try_push(DeathOfEggCommand{.eggId = eggId});
 }
+
+void ParseBroadcastCommand(const std::string_view& line)
+{
+    constexpr char messageStart[] = "Joueur ";
+
+    uint8_t messageSize = line.size() + 7;
+    if (messageSize + 1 >= 128)
+    {
+        messageSize = 127;
+    }
+
+    auto message = std::make_unique<char[]>(messageSize + 1);
+    std::ranges::copy(messageStart, message.get());
+    std::ranges::copy(line, message.get() + 7);
+    message[messageSize] = '\0';
+
+    ServerToGuiQueue.try_push(PlayerBroadcastCommand{.message = std::move(message)});
+}
+
+void ParseEndOfGameCommand(const std::string_view& line)
+{
+    auto teamName = std::make_unique<char[]>(line.size() + 1);
+    std::ranges::copy(line, teamName.get());
+    teamName[line.size()] = '\0';
+
+    ServerToGuiQueue.try_push(EndOfGameCommand{.winningTeam = std::move(teamName)});
+}
 }  // namespace zappy_gui::net

@@ -107,6 +107,16 @@ struct DeathOfEggCommand
     uint16_t eggId;
 };
 
+struct PlayerBroadcastCommand
+{
+    std::unique_ptr<char[]> message;
+};
+
+struct EndOfGameCommand
+{
+    std::unique_ptr<char[]> winningTeam;
+};
+
 // ... define other command types ...
 
 /// @brief Command variant type that will be used to store the different commands in the queue
@@ -126,7 +136,9 @@ using Command = std::variant<
     PlayerLevelCommand,
     EggLaidCommand,
     ConnectionOnEggCommand,
-    DeathOfEggCommand
+    DeathOfEggCommand,
+    PlayerBroadcastCommand,
+    EndOfGameCommand
 >;
 
 // Command queue server -> gui
@@ -200,4 +212,12 @@ void ParseConnectionOnEggCommand(const std::string_view& line);
 /// @brief Parse the edi command received as text from the server and push the corresponding command in the ServerToGuiQueue
 /// @param line The edi command received from the server
 void ParseDeathOfEggCommand(const std::string_view& line);
+
+/// @brief Parse the pbc command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The pbc command received from the server
+void ParseBroadcastCommand(const std::string_view& line);
+
+/// @brief Parse the seg command received as text from the server and push the corresponding command in the ServerToGuiQueue
+/// @param line The seg command received from the server
+void ParseEndOfGameCommand(const std::string_view& line);
 }  // namespace zappy_gui::net

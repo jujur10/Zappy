@@ -70,6 +70,7 @@ add_executable(zappy_gui
     src/sockets.cpp
     src/systems.cpp
     src/server_handshake.cpp
+    src/particle.cpp
 )
 
 target_include_directories(zappy_gui PRIVATE

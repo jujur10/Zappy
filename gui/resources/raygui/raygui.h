@@ -1765,7 +1765,7 @@ int GuiTabBar(Rectangle bounds, const char **text, const int *iconIds, int count
     //--------------------------------------------------------------------
     for (int i = 0; i < count; i++)
     {
-        tabBounds.x = bounds.x + (bounds.width + 4)*i - offsetX;
+        tabBounds.x = bounds.x + (bounds.width)*i - offsetX;
 
         if (tabBounds.x < GetScreenWidth())
         {
