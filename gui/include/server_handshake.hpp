@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include <vector>
 
 namespace zappy_gui
 {
@@ -29,6 +29,7 @@ class Socket;
  * message to the error writer and exits the program with a status code of 1.
  *
  * @param serverSocket The socket used for communication with the server.
+ * @return The rest of the data read from the server during the handshake.
  */
-void Handshake(const Socket &serverSocket);
+std::vector<char> Handshake(const Socket &serverSocket);
 }  // namespace zappy_gui
