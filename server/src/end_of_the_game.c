@@ -25,8 +25,8 @@ static bool did_the_team_win(server_t PTR server, const team_t PTR team)
 
     for (uint16_t player_idx = 0; player_idx < team->nb_of_players;
     player_idx++) {
-        if (MAX_AI_LVL == server->players[team->players_idx[player_idx]]
-        .level - 1)
+        if (MAX_AI_LVL - 1 == server->players[team->players_idx[player_idx]]
+        .level)
             count++;
     }
     return count >= 6;

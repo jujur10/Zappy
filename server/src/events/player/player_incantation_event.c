@@ -90,7 +90,7 @@ static void elevate_players(server_t PTR server, player_t ARRAY players,
     for (uint16_t i = 0; i < nb_of_players; i++) {
         if (i == player_idx || false == is_coordinates_equal
         (&player->coordinates, &players[i].coordinates) || player->level !=
-        players[i].level)
+        players[i].level || INTO_RITUAL != players[i].status)
             continue;
         if (player_counter <
         elevation_requirements[player->level].attr.players) {
