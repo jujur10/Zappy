@@ -248,7 +248,7 @@ void timeStepSliderAction(float value)
 {
     auto *sstString = new char[17];
 
-    ::memcpy(sstString, GUI_SET_TIME_UNIT, 4);  // NOLINT
+    std::memcpy(sstString, GUI_SET_TIME_UNIT, 4);  // NOLINT
 
     value = std::round(value);
 

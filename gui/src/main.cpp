@@ -163,23 +163,14 @@ int32_t main(const int32_t argc, char *argv[])
     flecs::world ecs;
     ::InitializeECS(ecs,
                     camera,
-                    sand,
-                    sandRock,
-                    sandCactus,
-                    food,
-                    crystal,
+                    sand, sandRock, sandCactus,
+                    food, crystal,
                     skybox,
                     playerAnimations,
-                    inProgressIcon,
-                    successIcon,
-                    failureIcon,
+                    inProgressIcon, successIcon, failureIcon,
                     eggModel,
-                    sobolShader,
-                    selectionRenderTexture,
-                    hoverPosition,
-                    sandCopy,
-                    sandRockCopy,
-                    sandCactusCopy,
+                    sobolShader, selectionRenderTexture, hoverPosition,
+                    sandCopy, sandRockCopy, sandCactusCopy,
                     chatHistory);
 
     //--------------------------------------------------------------------------------------

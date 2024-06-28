@@ -1789,20 +1789,6 @@ int GuiTabBar(Rectangle bounds, const char **text, const int *iconIds, int count
 
             GuiSetStyle(TOGGLE, TEXT_PADDING, textPadding);
             GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, textAlignment);
-
-            // Draw tab close button
-            // NOTE: Only draw close button for current tab: if (CheckCollisionPointRec(mousePosition, tabBounds))
-            // int tempBorderWidth = GuiGetStyle(BUTTON, BORDER_WIDTH);
-            // int tempTextAlignment = GuiGetStyle(BUTTON, TEXT_ALIGNMENT);
-            // GuiSetStyle(BUTTON, BORDER_WIDTH, 1);
-            // GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
-// #if defined(RAYGUI_NO_ICONS)
-//             if (GuiButton(RAYGUI_CLITERAL(Rectangle){ tabBounds.x + tabBounds.width - 14 - 5, tabBounds.y + 5, 14, 14 }, "x")) result = i;
-// #else
-//             if (GuiButton(RAYGUI_CLITERAL(Rectangle){ tabBounds.x + tabBounds.width - 14 - 5, tabBounds.y + 5, 14, 14 }, GuiIconText(ICON_CROSS_SMALL, NULL))) result = i;
-// #endif
-            // GuiSetStyle(BUTTON, BORDER_WIDTH, tempBorderWidth);
-            // GuiSetStyle(BUTTON, TEXT_ALIGNMENT, tempTextAlignment);
         }
     }
 
