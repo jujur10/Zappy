@@ -66,7 +66,9 @@ func switchResponseTypes(msgType network.MessageType, message any, game *Game, f
 		game.View = view
 		feedbackChannel <- viewErr == nil
 	case network.Elevation:
-		feedbackChannel <- true
+		if game.Socket.IsResponseTypeValid(msgType) {
+			feedbackChannel <- true
+		}
 		level := message.(int)
 		if level == 0 {
 			log.Println("Starting level up to level", game.Level+1)
@@ -90,7 +92,8 @@ func serverResponseRoutine(feedbackChannel chan bool, game *Game) {
 				log.Fatal("Got EOF when reading from socket")
 			}
 		}
-		if game.Socket.IsResponseTypeValid(msgType) == false {
+		log.Println("Got response from server of type", network.MessageTypesToString[msgType], "containing", message)
+		if game.Socket.IsResponseTypeValid(msgType) == false && msgType != network.Elevation {
 			log.Println("Invalid response type", msgType, "previous command was", game.Socket.LastCommandType)
 			continue
 		}
