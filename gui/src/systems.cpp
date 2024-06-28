@@ -518,9 +518,22 @@ static void registerOnUpdateSystems(const flecs::world &ecs)
                     playerAnimData->currentFrame = 0;
                     return;
                 }
+
+                float frequency;
+                const auto * const timeUnit = player.world().get<TimeUnit>();
+
+                if (nullptr == timeUnit)
+                {
+                    frequency = 100.f;
+                }
+                else
+                {
+                    frequency = static_cast<float>(timeUnit->frequency);
+                }
+
                 // Calculate the step size per frame
                 const float step =
-                    0.01f * (static_cast<float>(player.world().get<TimeUnit>()->frequency) / 2);  // Fixed step size per frame
+                    0.01f * (frequency / 2);  // Fixed step size per frame
                 if (step > 0.2f)
                 {
                     position = targetInfo.target;
