@@ -16,7 +16,7 @@ import (
 
 type broadcastType int
 
-var CipherMessages = false
+var CipherMessages = true
 
 const (
 	missingPlayers broadcastType = iota
@@ -87,7 +87,7 @@ func decipherMessage(message string, gcm cipher.AEAD) string {
 	}
 	decipheredData, err := gcm.Open(nil, cipherText[:gcm.NonceSize()], cipherText[gcm.NonceSize():], nil)
 	if err != nil {
-		log.Fatal("Failed to decrypt message", err)
+		log.Println("Failed to decrypt message ", err)
 	}
 	return string(decipheredData)
 }
@@ -259,7 +259,7 @@ func getMessageIndex(content broadcastMessageContent, messageList []broadcastMes
 func (game *Game) InterpretPlayerMessage(message network.BroadcastData) {
 	messageContent, err := parsePlayerMessage(message.Text, game.AesCipher)
 	if err != nil {
-		log.Println("Error parsing player message:", err)
+		log.Println("Error parsing player message: ", err)
 	}
 
 	messageContent.direction = message.Direction

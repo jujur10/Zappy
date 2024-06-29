@@ -13,6 +13,7 @@ func Test_interpretMessage(t *testing.T) {
 	type args struct {
 		message string
 	}
+	CipherMessages = false
 	aesCipher, err := aes.NewCipher([]byte(growAesKey("aaa")))
 	if err != nil {
 		fmt.Println("Failed to create AES cipher, defaulting to no cipher")

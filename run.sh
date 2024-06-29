@@ -13,7 +13,13 @@ if [ "$1" == "clean" ]; then
 fi
 
 if [ "$1" == "--help" ]; then
-    echo "Usage: ./run.sh [map_size] [frequency] [nb_teams] [nb_players_per_teams]"
+    echo "Usage: ./run.sh [map_size] [frequency] [nb_teams] [nb_players_per_teams] [players_to_start_per_team]"
+    echo "Optional argument: clean (terminates all executables)"
+    exit 0
+fi
+
+if [ "$#" != "5" ]; then
+    echo "Usage: ./run.sh [map_size] [frequency] [nb_teams] [nb_players_per_teams] [players_to_start_per_team]"
     echo "Optional argument: clean (terminates all executables)"
     exit 0
 fi
@@ -23,13 +29,16 @@ for ((i=1; i<=$3; i++)); do
     teams+=("team$i")
 done
 
+DATE=$(date -Iminutes)
+mkdir -p log
+
 ./zappy_server -p 4242 -x $1 -y $1 -n ${teams[@]} -c $4 -f $2 &
 
-./zappy_gui -p 4242 -h 127.0.0.1 &
+(./zappy_gui -p 4242 -h 127.0.0.1 > /dev/null) &
 
 for ((i=1; i<=$3; i++)); do
-    for ((j=1; j<=$4; j++)); do
-        ./zappy_ai -p 4242 -n team$i -h 127.0.0.1 &
+    for ((j=1; j<=$5; j++)); do
+        (./zappy_ai -p 4242 -n "team$i" -h 127.0.0.1 2> "log/aiLog$j.$DATE.team$i.log") &
     done
 done
 
